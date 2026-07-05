@@ -26,7 +26,7 @@ Score each test case's output on all 6 dimensions, 4-point scale: **fail / weak 
 7a. **Rejection → clarify** — user dislikes the first 3 cards. Does the clarifying question produce a genuinely better second set?
 7b. **Rejection → clarify → widen escalation** — clarify doesn't land either. Does the clean-exit widen mechanic kick in correctly (editable taste read-back, then wildcard variety)?
 8. **Texture-match, not genre-match** — "granular sense of place, moral ambiguity" type input. Can it match on texture, not just category?
-9. **Nonfiction lean** — anchor is narrative nonfiction. Does it stay in lane or drift to novels?
+9. **Genre/category fidelity & adjacent expansion** — anchor signals a specific, somewhat narrow genre or category (e.g., narrative nonfiction, or any other niche). Tests two things: (a) does the recommender stay faithful to the actual signaled category rather than drifting toward its own default bias in either direction, and (b) if strong, non-obvious picks are genuinely scarce within that exact niche, does it responsibly widen to closely adjacent categories — transparently, not silently — rather than forcing weak in-category picks or ignoring the stated genre altogether?
 10. **Creative-framing-only input** — emoji cluster + mood, no anchor book. How well does it do on vibe alone, without the highest-signal input?
 
 ## Next steps for this file
