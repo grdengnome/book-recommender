@@ -18,7 +18,7 @@ Score each test case's output on all 6 dimensions, 4-point scale: **fail / weak 
 ## Test cases
 
 1. **Rich, clear input** — anchor + why + mood all coherent. Easy case; should nail it.
-2. **Anti-mainstream profile** — loved *Stoner* / *Project Hail Mary*, wants books that leave an impression, explicitly anti-mainstream. Does it avoid the obvious?
+2. **Anti-mainstream profile** — anchor: a quiet, character-driven novel that isn't widely read but left a genuine impression — the kind of book they now recommend to everyone unprompted. Why: it surprised them by being far better than its low profile suggested. Appetite: explicitly anti-mainstream — no bestsellers, no "if you liked X" consensus picks. Tests whether the engine can genuinely honor "avoid the obvious" from a taste description alone, without a specific anchor title to lean on.
 3. **Vague input** — "just something good," minimal signal. Should trigger an adaptive follow-up, not guess wildly.
 4. **Explicit anti-mainstream demand** — "nothing everyone's already read." The acid test for the non-obviousness dimension.
 5. **Contradictory signals** — wants "light and quick" but anchor book is an 800-page literary epic. How does it reconcile?
