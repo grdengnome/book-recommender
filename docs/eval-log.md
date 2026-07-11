@@ -4,6 +4,20 @@ Running log of quality findings, known limitations, and decisions made while eva
 
 ---
 
+## 2026-07-08 — Known limitation: prestige/award status treated as "non-obvious"
+
+Observed in the Prompt v2 eval run (docs/eval-results.md): across cases 6, 7b, 8, and 9, non-obviousness scored weak specifically because picks were major literary award winners — Disgrace (Booker Prize, contributed to Coetzee's Nobel), Lincoln in the Bardo (Booker Prize, #1 NYT bestseller), The Sympathizer (Pulitzer Prize, 2024 HBO adaptation), and Black Hawk Down (bestseller, major film adaptation).
+
+This is a distinct failure mode from the repeated-titles finding above (same day) — not the model drawing from too small a pool, but the model's working definition of "non-obvious" being too narrow. The system prompt instructs against bestseller/bandwagon picks, and the model appears to interpret that as specifically "not on a commercial bestseller list" — while treating major literary prizes (Booker, Pulitzer, Nobel) as evidence of genuine, uncommon quality rather than as their own, equally well-known form of "safe, expected" recommendation. A prize winner is just as much an institutionally-endorsed, widely-known pick as a bestseller — swapping commercial fame for critical fame still isn't the surprising, personal-friend-recommendation quality the prompt is aiming for.
+
+Distinguishing the fix from the repeated-titles issue matters: a broader external book dataset (the Section 5 grounding question) would likely help reduce repeated titles by giving the model more real candidates to draw from, but would NOT fix this issue on its own — a bigger dataset still contains Booker and Pulitzer winners, so the model could just as easily pull from a larger set of famous-but-prestigious books. This is a definition problem in the prompt's instructions, not a breadth problem in the data.
+
+Likely fix: a targeted SYSTEM_PROMPT addition, addressable now, independent of the Section 5 architecture decision — explicitly instruct the model that major literary awards (Booker, Pulitzer, Nobel, National Book Award, etc.) are not, on their own, evidence of a non-obvious pick. Fame is fame regardless of whether it comes from sales charts or prize committees; a pick should be judged non-obvious based on how surprising and specific it is to the reader's actual stated taste, not on which kind of institution made it famous.
+
+Status: documented, not yet fixed. Good candidate for the next SYSTEM_PROMPT revision — smaller, more targeted change than the Section 5 grounding question, and can be tested independently.
+
+---
+
 ## 2026-07-08 — Known limitation: repeated picks across structurally distinct inputs
 
 Observed in the Prompt v2 eval run (docs/eval-results.md): several titles recur across multiple, meaningfully different test cases rather than being confined to one:
