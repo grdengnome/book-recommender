@@ -100,16 +100,54 @@ Build a set of **20–30 test inputs** (taste descriptions) with notes on what a
 
 ---
 
-## 5. Data & sources — the research bucket
+## 5. Data & sources — RESOLVED
 
-**The open question:** where should recommendations come from, and how do we get breadth without repetition? Candidate sources named in early planning: Goodreads, libraries, NYT bestseller list, YouTube, TikTok, Reddit.
+**The open question — resolved.** Does v0 need grounding, or can a well-prompted model carry it alone? **Answer: grounding is needed.** Two separate eval findings (documented in `docs/eval-log.md`, 2026-07-08) showed the model repeatedly draws from a narrow internal "go-to" pool for common taste profiles (e.g., "So Long, See You Tomorrow," "Convenience Store Woman," "Independent People," "Piranesi" recurring across structurally distinct inputs) regardless of prompt wording changes. This is a real, evidenced limitation, not a hypothetical one — prompt tuning alone (Prompt v2, v3) did not resolve it.
 
-Sub-questions still to resolve:
-- Which book-metadata sources are actually accessible to a solo dev (Open Library, Google Books) and on what terms? **[FACT]**
-- Does v0 need retrieval/grounding against a dataset, or can a well-prompted model carry it? **[FACT/SYNTH]** — this is the biggest remaining architecture call, tied directly to Section 4b.
-- How do we operationalize "avoid stagnant/repetitive recs"? Partly prompt design, partly grounding — see Flag A.
+### 5a. Architecture — tool-based retrieval, not prompt-embedded logic
 
-Cover images are resolved (Section 4c) — this open question is now scoped to recommendation-engine grounding only.
+The retrieval logic does **not** live in `SYSTEM_PROMPT` as inline instructions. It's implemented as a **tool** the model can call via the Anthropic API's tool-use (function-calling) feature — the same general mechanism used for any external capability a model needs mid-reasoning, not something custom-built for this one case.
+
+**Why tool-use over stuffing logic into the prompt:** keeps `SYSTEM_PROMPT` focused on taste judgment (what makes a good recommendation) rather than mixed with retrieval mechanics (how to query an external API). It also means the model itself decides *when* and *how many times* to call the tool — including retrying with broader search terms if an initial pool comes back thin — rather than requiring hand-coded retry logic in the application.
+
+**This project should adopt a general "tools" pattern, not a single hardcoded integration** — built so that future capabilities (e.g., a cover-image lookup tool, an author-fact-pool lookup, anything else identified later) can be added the same way, without re-architecting. Concretely:
+- A `lib/tools/` directory, one file per tool (e.g., `lib/tools/searchBooks.ts`).
+- Each tool file exports: (1) its Anthropic tool-definition schema (name, description, input parameters), and (2) the actual implementation function the code runs when the model calls it.
+- A central tool registry (e.g., `lib/tools/index.ts`) that assembles the list of available tool definitions to pass to the API, and dispatches incoming tool-call requests to the right implementation.
+- `SYSTEM_PROMPT` references available tools by name and intent only ("you have access to a search_books tool — use it to ground recommendations in real candidates") — never by embedding a tool's internal logic as prompt text.
+
+**Convention for adding tools going forward:** each new tool gets its own numbered subsection (5b, 5c, 5d...) following this same template — purpose, mechanics, any bias/quality mitigations specific to it. Section 5a's architecture pattern (the `lib/tools/` structure, registry, prompt-reference-only rule) does not need to be re-explained or re-decided for each new tool — only referenced.
+
+### 5b. First tool — `search_books`
+
+**Two underlying API calls, merged into one candidate pool:**
+1. **Open Library Search API** (`/search.json?q=...`) — free-text, relevance-ranked search. Model-generated natural-language-ish search terms (e.g., "quiet character study morally ambiguous") work here; matching is lenient (terms are boosted, not all required to match).
+2. **Open Library Subjects API** (`/subjects/{subject}.json`) — exact controlled-vocabulary genre/subject tags (e.g., `psychological_fiction`). Model-generated stricter subject guesses go here.
+
+Both are free, require no API key, and are called once per tool invocation — no meaningful cost or rate-limit concern at this scale.
+
+**Merge and pool-building logic (in code, not the model):**
+- Combine results from both calls.
+- Deduplicate by title + author (or Open Library's internal work ID where available).
+- **No hard cap on pool size, and this is a deliberate choice, not an oversight.** The two real risks of a large candidate pool are (1) token cost and (2) relevance dilution. (1) is a non-issue at this scale — even 150–200 candidates is roughly 3,000–4,000 tokens, small change against Claude's context window. (2) is real, but it's addressed directly by the shuffle and explicit "don't favor earlier entries" instruction below — those solve dilution without needing to artificially throttle breadth, which is the actual goal here. If pool size later proves to be a genuine problem in practice (not just a theoretical one), revisit with real data rather than pre-emptively capping it now.
+- **If the merged pool is thin (under ~15–20 candidates):** this is a signal for the *model* to recognize and act on — it can call `search_books` again with broader or different terms, rather than the application silently proceeding with a weak pool. Only if repeated tool calls still return too little should the model fall back to its own trained knowledge, and it should do so transparently (e.g., reflected honestly in its reasoning, not hidden).
+
+**Bias mitigation — critical, non-negotiable requirements:**
+- **Shuffle the merged candidate list before returning it to the model.** Language models exhibit measurable position bias — favoring earlier list items regardless of actual merit. Randomizing order in code, every time, before the tool result is returned neutralizes this entirely.
+- **Strip relevance scores, rank position, and any other ranking metadata** before returning results to the model. Only title, author, and a subject tag or two should be visible — the model must never see which API result was "ranked first."
+- **`SYSTEM_PROMPT` must explicitly state** that the candidate list is unordered and that earlier entries should not be favored — reinforcing the shuffle in code with an explicit instruction, belt-and-suspenders.
+
+### 5c. What `SYSTEM_PROMPT` actually needs to say about this (kept short, by design)
+
+Only a few sentences — the mechanics live in code and the tool definition, not here:
+- That a `search_books` tool exists and should be used to ground recommendations in real, retrieved candidates rather than relying solely on trained knowledge.
+- That the tool may be called more than once if results feel too narrow.
+- That the returned candidate list is unordered — no positional favoritism.
+- That the final picks should still be judged against the existing taste-fit rules (impression over popularity, resist the bandwagon, awards ≠ non-obviousness) — grounding changes *where candidates come from*, not the *judgment* applied to them.
+
+### 5d. Cover images — unchanged, already resolved (Section 4c)
+
+No change here; this section's resolution is scoped to the recommendation-engine grounding question only.
 
 ---
 
