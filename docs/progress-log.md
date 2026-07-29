@@ -76,10 +76,16 @@ Everything else — relevance, traceability, real-and-correct — scored excelle
 
 ---
 
-## [Next entry goes here]
+## July 29, 2026 — `search_books` tool built
 
-**Status:**
+**Status:** The `search_books` tool from spec.md Section 5 exists and its core mechanics are verified against live data. Not yet wired into the live recommendation call.
 
-**What happened:**
+**What happened:** Built `lib/tools/searchBooks.ts` and `lib/tools/index.ts`, following the `lib/tools/` pattern from spec 5a — `searchBooks.ts` exports the Anthropic tool-definition schema and the implementation function, `index.ts` is a central registry (`toolDefinitions`, `callTool`) so a future second tool only needs a new file. Both Open Library API calls (free-text `/search.json` and controlled-vocabulary `/subjects/{subject}.json`) are called and merged every invocation, not just one or the other. Verified the merge/dedupe by work ID (or title+author) is byte-for-byte clean: one test run came back 101 candidates in, 101 unique keys out. No hard cap on pool size, per spec. Verified the Fisher-Yates shuffle is real, not cosmetic, by diffing the tool's output order against the raw, unshuffled Subjects API order — completely different sequences. Confirmed ranking metadata is stripped before the model ever sees a candidate: only title, author, and up to two subject tags survive. Updated `SYSTEM_PROMPT` in `route.ts` per spec 5c to reference the tool by name and intent only ("you have a search_books tool, use it to ground recommendations...") — no retrieval mechanics re-explained as prompt text.
 
-**Next:**
+**Real-world finding, not a code bug:** Open Library's free-text search is stricter than spec 5b assumed. Confirmed directly against the live API: a long, descriptive query returned zero hits, while short queries returned results but could be off-topic (one short query's only `/search.json` hit was a philosophy textbook, not fiction). Adjusted the tool's `query` field description to nudge toward short keyword phrasing rather than full sentences, since that's what the live API actually rewards. Left as a description-level nudge, not app-code query rewriting — query construction stays the model's judgment call, per spec 5a.
+
+**Also caught:** a real personal email had been hardcoded into the `USER_AGENT` string in `searchBooks.ts`. Searched the repo for other occurrences (none found) and replaced it before committing.
+
+**Deliberately not done:** `route.ts`'s actual API call still doesn't pass `tools` or handle a `tool_use` round-trip — the tool exists and was verified standalone, but isn't wired into the live recommendation flow yet.
+
+**Next:** Wire `search_books` into `route.ts` — add `tools` to the API call, handle the `tool_use`/`tool_result` loop, let the model call it (possibly more than once) before returning final recommendations. Then re-run the eval set with real grounding active.
