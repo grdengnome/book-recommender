@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
+import { toolDefinitions, callTool } from "@/lib/tools";
 
 const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
 const MODEL = "claude-sonnet-5";
+
+// Bounds the search_books retry loop (spec.md 5b leaves the retry judgment call
+// to the model, but the code still needs a hard ceiling). The Nth+1 call below
+// omits `tools`, which structurally forces a final answer rather than relying
+// on an instruction the model could ignore.
+const MAX_TOOL_ROUNDS = 3;
 
 // Encodes spec.md Section 4d ("What 'good' means") as explicit model instructions.
 const SYSTEM_PROMPT = `You are a book recommendation engine. Your entire value proposition is taste, not popularity — you recommend books based on genuine fit and quality, actively resisting the pull toward safe, over-recommended picks. Popularity itself is never a mark against a book — only defaulting to a pick because it's popular, rather than because it genuinely fits, is a failure.
@@ -45,28 +52,66 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const anthropicResponse = await fetch(ANTHROPIC_API_URL, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: 4000,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: "user", content: tasteDescription }],
-    }),
-  });
+  const messages: Array<{ role: "user" | "assistant"; content: unknown }> = [
+    { role: "user", content: tasteDescription },
+  ];
 
-  const data = await anthropicResponse.json();
+  let data;
+  for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
+    const allowToolUse = round < MAX_TOOL_ROUNDS;
 
-  if (!anthropicResponse.ok) {
-    return NextResponse.json(
-      { error: "Anthropic API error", detail: data },
-      { status: anthropicResponse.status },
+    const anthropicResponse = await fetch(ANTHROPIC_API_URL, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: 4000,
+        system: SYSTEM_PROMPT,
+        messages,
+        ...(allowToolUse ? { tools: toolDefinitions } : {}),
+      }),
+    });
+
+    data = await anthropicResponse.json();
+
+    if (!anthropicResponse.ok) {
+      return NextResponse.json(
+        { error: "Anthropic API error", detail: data },
+        { status: anthropicResponse.status },
+      );
+    }
+
+    if (data.stop_reason !== "tool_use") break;
+
+    const toolUseBlocks = (
+      data.content as Array<{ type: string; id: string; name: string; input: unknown }>
+    ).filter((block) => block.type === "tool_use");
+
+    messages.push({ role: "assistant", content: data.content });
+
+    const toolResults = await Promise.all(
+      toolUseBlocks.map(async (block) => {
+        let result: unknown;
+        try {
+          result = await callTool(block.name, block.input);
+        } catch (err) {
+          result = {
+            error: err instanceof Error ? err.message : "Tool call failed",
+          };
+        }
+        return {
+          type: "tool_result",
+          tool_use_id: block.id,
+          content: JSON.stringify(result),
+        };
+      }),
     );
+
+    messages.push({ role: "user", content: toolResults });
   }
 
   const textBlock = data?.content?.find(
