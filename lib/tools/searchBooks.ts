@@ -4,7 +4,7 @@
 
 const OPEN_LIBRARY_SEARCH_URL = "https://openlibrary.org/search.json";
 const OPEN_LIBRARY_SUBJECTS_URL = "https://openlibrary.org/subjects";
-const USER_AGENT = "book-recommender/0.1 (contact: p48414815@gmail.com)";
+const USER_AGENT = "book-recommender/0.1 (https://github.com/grdengnome/book-recommender)";
 const RESULTS_PER_CALL = 100;
 
 export const searchBooksToolDefinition = {
