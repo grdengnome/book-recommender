@@ -4,6 +4,22 @@ Running log of quality findings, known limitations, and decisions made while eva
 
 ---
 
+## 2026-08-01 — Grounding reduced repetition but didn't eliminate it: same pattern, new title
+
+First full eval run (docs/eval-results.md, 2026-08-01) since `search_books` was wired into the live recommend call. Checked directly against the three titles named in the 2026-07-08 "repeated picks across structurally distinct inputs" finding below:
+
+- "So Long, See You Tomorrow" (Maxwell) — does not appear anywhere in this 11-case run. Previously recurred in 3 cases (1, 2, 6).
+- "Independent People" (Laxness) — does not appear anywhere. Previously recurred in 2 cases (1, 6).
+- "Convenience Store Woman" (Murata) — appears once, in case 7b — the same case it recurred in before. Previously recurred in 3 cases (3, 5, 7b).
+
+That's a real reduction, not noise: all three previously-flagged titles either disappeared entirely or dropped from multiple cases down to one. Grounding via `search_books` appears to be doing real work against the narrow-internal-pool problem.
+
+**But the underlying pattern wasn't eliminated — it just resurfaced on a different title.** "Satantango" / "Sátántangó" (László Krasznahorkai) appears in *both* case 3 ("just something good to read" — vague input) and case 8 (granular sense of place + moral ambiguity — texture-match input) in this same run. These are structurally distinct inputs, not near-duplicates of each other, which is exactly the criterion used to rule out a test-design artifact in the original finding below. This is a new instance of the exact failure mode Section 5's grounding architecture was built to fix — not a recurrence of the same three titles, but the same shape of problem: the model still has *some* narrow "go-to" pool it reaches for across varied inputs, grounding just changed which titles are in it.
+
+Status: documented, not yet investigated further. Full 6-dimension rubric scoring for this run is still outstanding (deferred to next session — see docs/progress-log.md, 2026-08-01 entry). Worth watching whether this is a one-off coincidence across 11 cases or a real residual pattern once more cases are scored and more runs accumulate.
+
+---
+
 ## 2026-07-08 — Known limitation: prestige/award status treated as "non-obvious"
 
 Observed in the Prompt v2 eval run (docs/eval-results.md): across cases 6, 7b, 8, and 9, non-obviousness scored weak specifically because picks were major literary award winners — Disgrace (Booker Prize, contributed to Coetzee's Nobel), Lincoln in the Bardo (Booker Prize, #1 NYT bestseller), The Sympathizer (Pulitzer Prize, 2024 HBO adaptation), and Black Hawk Down (bestseller, major film adaptation).

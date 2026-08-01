@@ -89,3 +89,23 @@ Everything else — relevance, traceability, real-and-correct — scored excelle
 **Deliberately not done:** `route.ts`'s actual API call still doesn't pass `tools` or handle a `tool_use` round-trip — the tool exists and was verified standalone, but isn't wired into the live recommendation flow yet.
 
 **Next:** Wire `search_books` into `route.ts` — add `tools` to the API call, handle the `tool_use`/`tool_result` loop, let the model call it (possibly more than once) before returning final recommendations. Then re-run the eval set with real grounding active.
+
+---
+
+## August 1, 2026 — `search_books` live in the recommend call; full eval re-run
+
+**Status:** Grounding is no longer standalone-only — `search_books` is wired into the actual `/api/recommend` request path and confirmed working against live traffic. Full 11-case eval set re-run against it; raw output captured, rubric scoring deliberately deferred.
+
+**What happened:** First, fixed the hardcoded personal email flagged in the July 29 entry above — replaced the literal address in `searchBooks.ts`'s `USER_AGENT` string with a repo URL, confirmed the fix against the current line before committing, committed it on its own. Then wired `search_books` into `app/api/recommend/route.ts`: added `tools: toolDefinitions` to the request, and a loop that handles `tool_use` responses by dispatching to `callTool`, appending `tool_result` messages, and re-calling the API. Capped the loop at 3 `search_books` rounds — the 4th call omits `tools` entirely, which structurally forces a final text response rather than relying on an instruction the model could ignore. A failed or malformed tool call is caught and turned into a `tool_result` error rather than crashing the request, so the model can react instead of the request 500ing. `SYSTEM_PROMPT` text itself is unchanged — the tool-reference paragraph added back in the `search_books`-build session already covers what spec 5c asks for.
+
+Smoke-tested live before the full eval run: one taste description came back with real, grounded picks and ~19k input tokens, consistent with a real shuffled candidate pool actually being returned by the tool (not just the tool existing unused).
+
+**Full eval run:** all 11 cases from `docs/eval-set.md` (1 through 10, including 7a/7b) run against the now-live tool-wired endpoint, using the same literal input text as the Prompt v2/v3 runs. All 11 came back `stop_reason: end_turn`, no errors, no truncation. Input token counts ranged 6,140–25,343 per case — again consistent with the tool actually firing on every case, not intermittently. Raw output (every title, author, `why`, and `nonObvious`) saved to `docs/eval-results.md` under a new entry explicitly labeled as **raw output, not yet scored against the rubric**.
+
+**Checked directly against the July 10 "narrow internal pool" finding:** of the three titles named there, "So Long, See You Tomorrow" and "Independent People" don't appear anywhere in this 11-case run (previously in 3 and 2 cases respectively), and "Convenience Store Woman" appears only once, in the same case (7b) it recurred in before (previously in 3 cases). Real reduction, not noise — grounding appears to be doing genuine work against that specific problem.
+
+**New finding, logged separately in `docs/eval-log.md`:** the underlying pattern wasn't eliminated, just relocated. "Satantango" / "Sátántangó" (Krasznahorkai) shows up in both case 3 (vague "just something good" input) and case 8 (granular-place/moral-ambiguity input) — two structurally distinct prompts, in the same run. Same shape of failure as the original finding, different title. Next thing to investigate, not yet acted on.
+
+**Deliberately not done:** full 6-dimension rubric scoring of this run. That takes real per-case reading time and external grounding (same as the July 10 scoring session), and there wasn't room for it tonight — explicitly deferred to next session rather than rushed.
+
+**Next:** Score all 11 cases from this run against the 6-dimension rubric in `docs/eval-set.md`. While doing that, keep an eye on whether "Satantango" recurring across cases 3 and 8 is a one-off or a real residual narrow-pool pattern — may need more eval cases or more runs to tell the difference from noise.

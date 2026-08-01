@@ -393,3 +393,196 @@ _Change: inserted a new rule (point 3) in `SYSTEM_PROMPT` stating that major lit
 3. **The Little Stranger** — Sarah Waters
    - why: A decaying English manor, flickering lamplight, and a dread that creeps in through implication and atmosphere rather than explicit scares — patient, unsettling, never full horror.
    - nonObvious: Waters is usually shelved as 'literary fiction with lesbian romance,' so this slow-burn haunted-house novel of hers gets skipped by readers hunting specifically for eerie atmosphere.
+
+---
+
+## search_books wired into the live recommend call — RAW OUTPUT, NOT YET SCORED AGAINST THE RUBRIC (2026-08-01)
+
+_Change: `app/api/recommend/route.ts` now passes `tools` and runs a real `tool_use`/`tool_result` loop (capped at 3 `search_books` rounds before a final call omits `tools` to force a text response). `SYSTEM_PROMPT` text is unchanged from Prompt v3 — same rules 1–4, same `max_tokens: 4000`. This is the first run where `search_books` is actually live rather than standalone-tested. All 11 cases returned `stop_reason: end_turn` with no errors; input token counts (6,140–25,343 per case) are consistent with a real shuffled candidate pool being returned by the tool on every case, not just some. **These outputs have not been scored against the 6-dimension rubric yet — that's deferred to next session, when there's time to read each case carefully. This entry is the raw record only.**_
+
+### Case 1 — Rich, clear input
+
+**Input:**
+> My favorite book is 'The Remains of the Day' by Kazuo Ishiguro — I loved how restrained and heartbreaking it was, the way so much emotion stayed unspoken beneath the surface. I'm in the mood for something similarly quiet and melancholic, character-driven rather than plot-heavy. I have plenty of time and want to sit with a slow, immersive book.
+
+**Output:**
+
+1. **Stoner** — John Williams
+   - why: Like 'The Remains of the Day,' this is a quiet, devastating portrait of a man who never voices his deepest disappointments and loves, told in plain, unadorned prose that makes the buried emotion hit harder.
+   - nonObvious: It's often praised in literary circles, but it's chosen here because its slow, interior tragedy of a life half-lived mirrors Stevens's suppressed regret almost beat for beat — not because it's a trendy 'rediscovered classic.'
+2. **The Stone Diaries** — Carol Shields
+   - why: A character-driven, meditative chronicle of one woman's ordinary life, where the biggest emotional truths are left unsaid or only gestured at between the lines — ideal for sitting slowly with a life rather than racing through a plot.
+   - nonObvious: It won the Pulitzer, but that's incidental — its real fit is the fragmented, restrained interiority of its narrator, whose quiet self-effacement echoes Stevens's own inability to claim his feelings.
+3. **Kokoro** — Natsume Sōseki
+   - why: A spare, melancholic novel about guilt, loneliness, and the things people can't bring themselves to say to those they love most — the same aching restraint that made Stevens's unspoken devotion so heartbreaking.
+   - nonObvious: Rarely reached for as a comfort-read companion to Ishiguro despite being a clear spiritual ancestor of his reticent, emotionally coiled style — a genuine lineage pick rather than a default one.
+
+### Case 2 — Anti-mainstream profile
+
+**Input:**
+> There's a novel I read a few years back — quiet, character-driven, nothing anyone around me had heard of — and it turned out to be one of the best books I've ever read. It completely surprised me, because nothing about its low profile suggested it would hit that hard. I've been recommending it to people unprompted ever since. I want more like that: no bestsellers, no 'if you liked X' consensus picks — just books that are genuinely great regardless of how well-known they are.
+
+**Output:**
+
+1. **The Door** — Magda Szabó
+   - why: A slow-burning, devastating character study of the decades-long relationship between a writer and her fiercely private housekeeper — it's the kind of book that seems small and domestic on the surface and then quietly wrecks you by the end, exactly the 'didn't see it coming' impact you described.
+   - nonObvious: Hugely respected among literary-translation readers and NYRB Classics devotees, but almost never shows up on general 'best books' lists or bestseller charts, so it rarely gets pushed as a default rec.
+2. **A Month in the Country** — J. L. Carr
+   - why: Barely 130 pages about a shell-shocked WWI veteran restoring a church mural over one English summer — nothing dramatic happens, and yet the accumulated tenderness and restraint make it land harder than novels three times its length, the same 'quietly devastating' effect you're chasing.
+   - nonObvious: It was Booker-shortlisted decades ago but has drifted almost entirely out of public awareness; it survives mostly through word-of-mouth passing between readers who stumbled onto it, not through prize-list momentum.
+3. **The Summer Book** — Tove Jansson
+   - why: A grandmother and her young granddaughter spend a summer on a tiny Finnish island, and through plain, unadorned scenes of daily life the book builds an emotional weight about aging, grief, and companionship that sneaks up on you — very much the 'low-key surface, huge impact' pattern you loved.
+   - nonObvious: Jansson is world-famous for the Moomin books, so this quiet adult novel for grown-ups gets completely overshadowed by her children's work and almost never appears in 'if you liked X' literary-fiction rotations.
+
+### Case 3 — Vague input
+
+**Input:**
+> Just something good to read.
+
+**Output:**
+
+1. **The Heart Is a Lonely Hunter** — Carson McCullers
+   - why: A deeply humane novel about loneliness and the ache to be understood, written with a clarity and emotional precision that makes ordinary lives feel enormous — the kind of book that quietly rearranges how you see people.
+   - nonObvious: It's a canonical American novel, but it's chosen here for its unmatched tenderness and structural craft rather than because it's the 'safe' classic pick — many readers know McCullers by name but haven't actually read this.
+2. **Del amor y otros demonios** — Gabriel García Márquez
+   - why: A shorter, lesser-read Márquez novel steeped in colonial Cartagena, mixing lush sensory prose with a genuinely strange, haunting plot — good if you want a vivid, immersive read without committing to a doorstop.
+   - nonObvious: Skips the reflexive 'One Hundred Years of Solitude' recommendation in favor of a tighter, stranger, equally beautiful Márquez that fewer people have already read.
+3. **Sátántangó** — László Krasznahorkai
+   - why: A hypnotic, darkly comic novel about a doomed rural Hungarian village, told in long unbroken sentences that pull you into its bleak, rain-soaked atmosphere — a genuinely unforgettable reading experience for anyone open to something formally daring.
+   - nonObvious: Krasznahorkai is acclaimed but rarely a default pick; this novel rewards readers open to slower, stranger pacing with one of the most singular reading experiences in contemporary translated fiction.
+
+### Case 4 — Explicit anti-mainstream demand
+
+**Input:**
+> I want book recommendations, but nothing everyone's already read. I'm tired of every list recommending the same five books.
+
+**Output:**
+
+1. **İnce Memed (Memed, My Hawk)** — Yaşar Kemal
+   - why: A sweeping, propulsive epic about a young outlaw in rural Anatolia — the kind of big, immersive, morally complex story that rewards readers tired of the same handful of 'important novels' circulating in English-language lists.
+   - nonObvious: Kemal was a perennial Nobel contender and towering figure in Turkish literature, yet this novel almost never appears on Western recommendation lists, making it a genuine discovery rather than a prestige name-check.
+2. **My Family's Role in the World Revolution** — Bora Ćosić
+   - why: A darkly funny, formally inventive novel narrated by a child in postwar Yugoslavia, satirizing ideology and family life with a fractured, playful structure — great if you want something that feels genuinely different in voice and shape, not just plot.
+   - nonObvious: It's a cult classic of Serbian literature with almost no footprint in mainstream English-language 'best of' lists, despite being formally as daring as more famous postmodern touchstones.
+3. **Paris Trout** — Pete Dexter
+   - why: A stark, unflinching National Book Award-winning novel about racial violence and moral rot in a small Georgia town in the 1950s — intense, character-driven, and quietly devastating rather than showy.
+   - nonObvious: It won a major award decades ago but has largely fallen out of contemporary conversation, so it delivers the payoff of a 'best of its era' book without being a recycled staple of current lists.
+
+### Case 5 — Contradictory signals
+
+**Input:**
+> My favorite book of all time is 'War and Peace' — I loved the sprawling scope and how deeply it got into every character's inner life. But right now I want something light and quick to read, nothing heavy or slow.
+
+**Output:**
+
+1. **Three Men in a Boat (to say nothing of the dog)** — Jerome K. Jerome
+   - why: It's a short, wonderfully funny romp built almost entirely on character quirks and voice — the same delight in individual personality that made you love Tolstoy's characters, just compressed into a breezy afternoon read instead of a thousand pages.
+   - nonObvious: It's a beloved classic but rarely the first 'light read' recommendation that comes to mind, so it still feels like a discovery rather than a reflex pick.
+2. **The Unlikely Pilgrimage of Harold Fry** — Rachel Joyce
+   - why: A gentle, quick novel that still spends real time inside one man's inner life and memories as he walks across England — giving you that intimate psychological depth you loved in War and Peace, but at a fraction of the length and weight.
+   - nonObvious: It's popular but often overlooked as a 'palate cleanser' pick between heavier classics, which is exactly the gap it fills here.
+3. **Cause Celeb** — Helen Fielding
+   - why: A sharp, fast-moving comic novel about a woman running a refugee camp who gets entangled with London celebrities trying to help — full of vividly drawn, flawed characters and social satire, read in a couple of sittings.
+   - nonObvious: Overshadowed by Fielding's own Bridget Jones's Diary, it's a genuinely funnier, more socially observant book that rarely gets recommended on its own merits.
+
+### Case 6 — Hard turn-off
+
+**Input:**
+> I love literary fiction — character studies, beautiful prose, morally complicated people. I will not read fantasy under any circumstances: no magic systems, no invented worlds.
+
+**Output:**
+
+1. **Disgrace** — J. M. Coetzee
+   - why: A morally compromised protagonist rendered with unflinching, spare prose — exactly the kind of character study where you're never sure whether to condemn or understand him.
+   - nonObvious: Its Booker win doesn't make it a safe pick here; it's chosen because Coetzee's refusal to soften or explain his characters is a rarer, harder-edged version of moral complexity than most 'complicated character' novels attempt.
+2. **Sula** — Toni Morrison
+   - why: Centers on a genuinely unclassifiable woman — neither villain nor heroine — and Morrison's prose is dense, musical, and precise in a way that rewards close reading.
+   - nonObvious: Overshadowed by Morrison's more frequently assigned novels (Beloved, Song of Solomon), Sula is tighter and stranger — a less reflexive entry point into her work for this taste.
+3. **The Assistant** — Bernard Malamud
+   - why: A quiet, grinding character study of a small-time thief trying to redeem himself while working in a failing grocery — morally messy people rendered with plain, devastating sentences.
+   - nonObvious: Malamud gets less reflexive airtime than his contemporaries (Roth, Bellow), making this a genuine discovery rather than a default 'great American postwar novel' pick.
+
+### Case 7a — Rejection → clarify
+
+**Input:**
+> I asked for recommendations similar to quiet, literary character studies, but the three you gave me last time were all too dark and bleak for what I wanted. I'd like something in a similar literary vein, but warmer and more hopeful in tone.
+
+**Output:**
+
+1. **My Ántonia** — Willa Cather
+   - why: A quiet, deeply interior character study of pioneer life on the Nebraska prairie — reflective and elegiac, but its warmth toward resilience, memory, and human connection gives it a fundamentally hopeful glow rather than a bleak one.
+   - nonObvious: Cather gets cited for prairie fiction generally, but this particular book is often overlooked in favor of louder 'great American novel' picks — it's a genuine fit for warm introspection, not a reflexive canon grab.
+2. **The Chosen** — Chaim Potok
+   - why: A gentle, closely observed study of two boys' friendship and their relationships with their fathers within Orthodox and Hasidic Jewish communities — its tone is contemplative and tender, culminating in reconciliation and mutual understanding rather than tragedy.
+   - nonObvious: It's well-regarded but rarely surfaces in 'quiet character study' recommendation lists, which tend to loop back to more secular literary fiction — this one offers real thematic and cultural range.
+3. **A Jest of God** — Margaret Laurence
+   - why: An intimate, restrained portrait of a repressed small-town schoolteacher's inner life — melancholic in places, but it builds toward genuine self-liberation and quiet hope by its close, matching a warmer register than typical psychological fiction.
+   - nonObvious: Laurence is a major Canadian writer but this novel is far less reflexively recommended than her 'The Stone Angel,' making it a genuine rather than default choice for this specific warmer tone.
+
+### Case 7b — Rejection → clarify → widen escalation
+
+**Input:**
+> I've now rejected two rounds of recommendations for quiet literary character studies — the first round was too dark, and the second round (aiming for warmer and more hopeful) still didn't land, they felt flat and forgettable. At this point just show me your best editable read on what you think I'm actually after, and feel free to widen out and take some real chances rather than staying narrowly in that same lane.
+
+**Output:**
+
+1. **Memento Mori** — Muriel Spark
+   - why: A quiet character study of a circle of elderly Londoners each receiving anonymous calls reminding them they must die — it's exactly the kind of understated psychological portraiture you're after, but delivered with such precise, mordant wit that it never risks going flat or merely 'nice.'
+   - nonObvious: Spark is famous mainly for Jean Brodie, so this sharper, stranger later novel gets skipped even though it's arguably her most piercing character work — a way to hit 'quiet and literary' without the reflexive pick.
+2. **Convenience Store Woman** — Sayaka Murata
+   - why: An intensely interior study of a woman who has built her entire selfhood around the rhythms of a convenience store — it's quiet, character-driven, and odd in a way that keeps it vivid rather than forgettable, with warmth that's earned through specificity, not sentiment.
+   - nonObvious: It's popular enough to know, but it's usually shelved as 'quirky Japanese fiction' rather than recognized for what it actually is: a rigorous, deadpan character study — a genuine fit rather than a trend pick.
+3. **The Informers** — Juan Gabriel Vásquez
+   - why: A son investigating his father's past uncovers a buried betrayal from Colombia's WWII-era blacklists — it's a slow-burning, morally intricate character study with real emotional weight, but its clarity and restraint keep it from tipping into the oppressive darkness you already ruled out.
+   - nonObvious: Vásquez is well-regarded in Latin American letters but rarely surfaces in English-language 'quiet character study' recommendation lists, which tend to default to Anglophone or Japanese names — a genuine widening of the lane rather than a safe swap.
+
+### Case 8 — Texture-match, not genre-match
+
+**Input:**
+> I'm looking for something with a really granular, immersive sense of place — I want to feel like I'm actually there — and characters who are morally ambiguous, not clearly good or bad. Genre doesn't matter much to me as long as it has that texture.
+
+**Output:**
+
+1. **Satantango** — László Krasznahorkai
+   - why: You want to feel like you're actually there — this novel drowns you in a decaying, rain-soaked Hungarian village so thoroughly that the mud and despair become characters themselves, while the villagers plotting around a possibly-resurrected con man are neither victims nor villains, just desperate people making compromised choices.
+   - nonObvious: It's acclaimed among writers and cinephiles (via Béla Tarr's film) but rarely surfaces in mainstream book-recommendation lists, so it delivers prestige-level craft without being a reflexive pick.
+2. **The Garden of Evening Mists** — Tan Twan Eng
+   - why: Set in the Malaysian highlands after WWII, the novel renders the tea plantations, mist, and gardens with such sensory precision you can feel the humidity — and its central relationship between a former POW-camp survivor and the Japanese emperor's ex-gardener refuses easy judgments about complicity and forgiveness.
+   - nonObvious: It won prizes but remains under-read outside Southeast Asian literary circles, and its moral ambiguity is structural rather than decorative — the whole plot hinges on not knowing who to trust.
+3. **The Yiddish Policemen's Union** — Michael Chabon
+   - why: A noir mystery built entirely out of place — a fictional Yiddish-speaking Jewish settlement in Sitka, Alaska, rendered in dense, specific, almost tactile detail — populated by a washed-up alcoholic detective and criminals-slash-victims whose loyalties shift constantly.
+   - nonObvious: Genre-blending speculative noir gets overlooked by literary-fiction readers, making this a genuine left-turn pick rather than a safe default, even though Chabon is a known name.
+
+### Case 9 — Genre/category fidelity & adjacent expansion
+
+**Input:**
+> I love narrative nonfiction — real events told with the pacing and craft of a novel. Specifically deep-dive investigative journalism or historical accounts that read like thrillers. That's exactly what I'm looking for right now.
+
+**Output:**
+
+1. **Say Nothing: A True Story of Murder and Memory in Northern Ireland** — Patrick Radden Keefe
+   - why: This is deep-dive investigative journalism at its finest — years of reporting on the Troubles woven into a propulsive narrative with the tension of a political thriller, exactly the blend of real events and novelistic pacing you're after.
+   - nonObvious: It's well-regarded but often gets overshadowed by flashier true-crime picks; chosen here because its structural craft (interlocking mysteries, slow-burn reveals) is a near-perfect technical match for 'reads like a thriller,' not because it's a famous title.
+2. **Billion Dollar Whale** — Tom Wright and Bradley Hope
+   - why: A globe-spanning financial fraud investigation — Malaysian politics, Hollywood, Wall Street — told with the momentum of a heist novel, satisfying the appetite for real events with thriller-grade plotting.
+   - nonObvious: Financial-crime nonfiction rarely gets recommended alongside true-crime staples, but its pacing and scope make it a sharper fit for 'reads like a novel' than more predictable murder-focused picks.
+3. **Frozen in Time: The Fate of the Franklin Expedition** — Owen Beattie and John Geiger
+   - why: A forensic investigation into a 19th-century Arctic disaster, combining historical detective work, exhumed bodies, and scientific sleuthing into a slow-mounting dread that reads like a mystery novel.
+   - nonObvious: It sidesteps the usual true-crime/journalism default entirely, using polar exploration history instead, which broadens the genre range while still delivering the investigative, thriller-like structure you're drawn to.
+
+### Case 10 — Creative-framing-only input
+
+**Input:**
+> 🌊🏚️👻🕯️ — moody, atmospheric, a little unsettling but not full horror. That's the vibe I want.
+
+**Output:**
+
+1. **We Have Always Lived in the Castle** — Shirley Jackson
+   - why: A crumbling house, a family isolated behind hedges and superstition, and a slow-burning dread that never tips into gore — pure moody, unsettling atmosphere rather than horror set pieces.
+   - nonObvious: Reaching for Jackson isn't lazy here because this is her quieter, stranger book — not the haunted-house one everyone defaults to — built on domestic menace rather than ghosts.
+2. **The Little Stranger** — Sarah Waters
+   - why: A decaying English manor, a family unraveling, and a haunting that's ambiguous enough to be psychological or real — exactly the candlelit, water-damaged-wallpaper dread the mood calls for.
+   - nonObvious: Waters is known for lesbian historical fiction, so her one true gothic ghost story tends to get overlooked in favor of Victorian staples — it's a genuinely literary slow-burn, not a jump-scare book.
+3. **Kit's Wilderness** — David Almond
+   - why: Set in a fog-bound former mining town on the English coast, it's soaked in grief, old ghosts, and childhood games that edge into the uncanny — eerie and tender rather than frightening.
+   - nonObvious: Almond is usually filed as children's/YA fantasy, so this quietly haunting, ghost-inflected literary novel rarely makes 'atmospheric horror-adjacent' lists, despite fitting the brief precisely.
