@@ -628,3 +628,323 @@ This mirrors the shape of the eval-log's grounding finding from the same run: no
 ### Everything else
 
 Relevance, Range, Real & correct, and Traceability are strong across the board — no hallucinated titles or misattributed authors in any of the 33 picks (all verified real), and traceability is excellent everywhere the input actually carries signal to trace to. This matches the July 10 pattern where these three dimensions were already solid; the open problems remain concentrated in non-obviousness and the residual narrow-pool issue.
+
+---
+
+## Prompt v4 — non-obviousness rule reframed around "expected answer," nonObvious field tightened for factual accuracy (2026-08-02)
+
+_Change: `app/api/recommend/route.ts` (commit a5ff6ab) — rule 3 in `SYSTEM_PROMPT` rewritten from "major literary awards aren't evidence of non-obviousness" to "a pick fails on non-obviousness if it's the answer a well-read reader would already expect for this request, independent of decoration." The `nonObvious` field instructions gained a sentence barring reception/fame claims the model isn't confident are accurate. Rules 1, 2, 4, the tool-reference paragraph, the input-parsing paragraph, and the JSON output instructions are unchanged. Same `max_tokens: 4000`, same live `search_books` tool-use loop as the prior run. All 11 cases returned `stop_reason: end_turn`, no errors; input tokens ranged 10,469–26,482 per case, consistent with the tool firing on every case._
+
+### Case 1 — Rich, clear input
+
+1. **Stoner** — John Williams
+   - why: Like Stevens in 'The Remains of the Day', William Stoner lives a life of quiet endurance and suppressed longing, narrated with the same devastating restraint — the emotion is almost entirely between the lines.
+   - nonObvious: It's a slow-burn academic tragedy rather than a dramatic one, so it satisfies the craving for stillness without being the first title most 'quiet literary fiction' lists reach for outside dedicated fans.
+2. **Oblomov** — Ivan Goncharov
+   - why: A masterclass in interiority and inertia — Oblomov's paralysis and unlived life mirror the melancholy of Stevens's missed chances, told through patient, immersive prose that rewards sitting with it.
+   - nonObvious: As a 19th-century Russian novel, it sits outside the usual 'if you liked Ishiguro' recommendation set, even though its themes of wasted devotion and self-deception are strikingly close.
+3. **A Jest of God** — Margaret Laurence
+   - why: A repressed, unmarried schoolteacher's inner life unfolds with the same aching gap between what she feels and what she allows herself to show — restrained, interior, and quietly heartbreaking.
+   - nonObvious: Laurence's Canadian prairie fiction rarely appears on Ishiguro comparison lists, but its close psychological focus on a woman's unspoken yearning makes it a genuinely close cousin to Stevens's story.
+
+### Case 2 — Anti-mainstream profile
+
+1. **Oblomov** — Ivan Goncharov
+   - why: You describe a book that seemed unassuming on the surface and then quietly devastated you — Oblomov does exactly that: a slow, interior character study of a man paralyzed by his own inertia that ends up saying more about human nature than novels twice as eventful.
+   - nonObvious: It's a canonical Russian novel in academic circles, but it rarely appears on general 'quiet literary fiction' lists outside that context, so most readers come to it cold and are unprepared for how sharply it lands.
+2. **The Assistant** — Bernard Malamud
+   - why: A spare, morally serious story about a struggling grocer and the drifter who starts working for him — it builds its power entirely through small, accumulating character detail rather than plot, which matches the 'quiet but hits hard' quality you're after.
+   - nonObvious: Malamud is known mainly for The Natural or The Fixer; this earlier, quieter novel gets passed over even by people familiar with his name, making it a genuine sleeper rather than a default pick.
+3. **The Memory of Love** — Aminatta Forna
+   - why: A patient, character-driven novel set in Sierra Leone that reveals its emotional weight gradually through the interwoven inner lives of its characters rather than dramatic incident — the kind of book you finish and immediately want to press on someone.
+   - nonObvious: Forna's work sits outside the usual war-fiction or bestseller circuits despite its literary prizes, so it tends to surprise readers who expect a louder book given its subject matter.
+
+### Case 3 — Vague input
+
+1. **Hunger** — Knut Hamsun
+   - why: A gripping, hallucinatory portrait of a starving writer's mind in 1890s Oslo — for a reader who just wants 'something good,' this is a case study in how a novel can be both deeply readable and psychologically unsettling in under 250 pages.
+   - nonObvious: It's a foundational modernist novel that quietly influenced Kafka and Bukowski, but it rarely tops general 'good book' lists the way its literary descendants do.
+2. **The Memory of Love** — Aminatta Forna
+   - why: A sweeping, emotionally precise story of love and trauma across generations in Sierra Leone — satisfying as pure narrative while leaving a real emotional mark, which is exactly what 'something good to read' usually means.
+   - nonObvious: It has the scope and heart of a big literary bestseller without being one of the handful of titles that reflexively get handed to every reader looking for 'a great novel.'
+3. **CivilWarLand in Bad Decline** — George Saunders
+   - why: A darkly funny, formally inventive short story collection set in decaying theme parks and corporate dystopias — great for a reader who wants something good but doesn't want the safest, most predictable choice.
+   - nonObvious: Saunders is well-regarded, but this earlier, rawer collection is less reached-for than his more famous later work, and it hits just as hard.
+
+### Case 4 — Explicit anti-mainstream demand
+
+1. **Memento Mori** — Muriel Spark
+   - why: A darkly comic novel about a group of elderly Londoners who each start receiving anonymous phone calls saying 'Remember you must die' — it's sharp, unsettling, and finds real wit in mortality rather than melodrama, which suits a reader craving something with bite rather than the usual gentle literary-fiction comfort read.
+   - nonObvious: Spark is often reduced to 'the Jean Brodie author,' so this leaner, stranger, funnier book about aging and death rarely makes the standard recommendation lists.
+2. **Too Close to the Edge** — Pascal Garnier
+   - why: A slim, pitch-black French noir about a widow whose quiet countryside routine curdles into paranoia and violence — perfect if the appeal is atmosphere and psychological unraveling over plot mechanics, delivered in under 150 pages.
+   - nonObvious: Garnier's noir is closer to Simenon filtered through absurdist dread than to typical crime-shelf fare, and his work tends to get skipped over in favor of bigger-name Euro-noir writers.
+3. **Los informantes** — Juan Gabriel Vásquez
+   - why: A Colombian novel that unspools a family's buried WWII-era betrayal through a journalist's investigation — it's got the moral complexity and slow-burn tension of a great literary thriller without leaning on genre tropes.
+   - nonObvious: Vásquez writes in the shadow of García Márquez's reputation, so this quieter, more contemporary, more politically pointed novel gets overlooked despite being arguably his sharpest work.
+
+### Case 5 — Contradictory signals
+
+1. **Three Men in a Boat** — Jerome K. Jerome
+   - why: You loved War and Peace for how richly it inhabited each character's inner voice — this Victorian comic classic does the same in miniature, spending its whole quick, breezy length inside the bickering, self-deluding minds of three friends on a river trip.
+   - nonObvious: It's often filed as 'classic comedy' rather than reached for by Tolstoy fans, but its close, affectionate psychological comedy of small egos is a genuine cousin to Tolstoy's interest in ordinary human folly, just compressed and played for laughs.
+2. **Trouble for Lucia** — E. F. Benson
+   - why: War and Peace's pleasure in a whole social world of vain, striving, self-important people finds a light, fast echo here — a small English village run by two rival social climbers, each convinced they're the heroine of the story.
+   - nonObvious: Benson's Lucia books get less airtime than Austen or Wodehouse as comfort reads, but they deliver the same dense social interiority Tolstoy fans respond to — just shrunk to village-gossip scale and read in an afternoon.
+3. **Haroun and the Sea of Stories** — Salman Rushdie
+   - why: It swaps War and Peace's historical sweep for a compact, dreamlike quest, but keeps the sense of a whole vivid world glimpsed through one person's inner journey — light, funny, and finished in a sitting or two.
+   - nonObvious: Rushdie is usually approached through his dense, difficult novels, so this slim, buoyant fable — written for his son — is easy to overlook as a 'quick read' pick despite fitting that brief perfectly.
+
+### Case 6 — Hard turn-off
+
+1. **Hunger** — Knut Hamsun
+   - why: A ferociously intimate character study of a narrator whose pride, self-deception, and erratic cruelty toward those who try to help him make him morally slippery in exactly the way you're describing — and the prose, even in translation, has a jittery, hallucinatory beauty that gets under your skin.
+   - nonObvious: It's the quiet ancestor behind a century of unreliable-narrator fiction, but it rarely tops 'if you loved X' lists the way its literary descendants do, so it tends to land as a genuine discovery rather than a rehash.
+2. **The Memory of Love** — Aminatta Forna
+   - why: Set in postwar Sierra Leone, it braids together an aging academic, a traumatized surgeon, and a woman haunted by an old betrayal — each morally compromised in believable, unshowy ways, and the sentence-level writing is patient and devastating rather than flashy.
+   - nonObvious: It gets less air time than the big diaspora-literature staples, but its slow-burn structure and refusal to resolve its characters' guilt cleanly make it a richer character study than many more frequently cited peers.
+3. **Play It as It Lays** — Joan Didion
+   - why: A stripped-down, glittering-cold portrait of a woman drifting through a collapsing marriage and a vacant Hollywood, whose passivity and complicity make her fascinatingly hard to fully absolve or condemn — precisely the kind of morally complicated interiority you're after.
+   - nonObvious: Didion's essays get recommended constantly, but this novel — arguably her sharpest character work — sits comparatively overlooked next to her nonfiction reputation.
+
+### Case 7a — Rejection → clarify
+
+1. **My Ántonia** — Willa Cather
+   - why: It's a quiet, deeply interior character study of a life observed over decades, but its emotional register is nostalgic and tender rather than grim — the hardships of prairie life are always held up against wonder, friendship, and gratitude.
+   - nonObvious: Cather gets cited for pastoral Americana more than for 'warm hopeful character study,' so it tends to get overlooked next to the usual quiet-literary-fiction suspects, even though its patient, affectionate narration is exactly that.
+2. **The Chosen** — Chaim Potok
+   - why: A slow-burning, closely observed character study of two boys and their fathers in 1940s Brooklyn — full of interiority and moral seriousness, but its core is friendship, faith, and reconciliation rather than despair.
+   - nonObvious: It's often shelved as 'Jewish-American coming-of-age' rather than considered alongside literary character studies, so it rarely surfaces on generic 'quiet lit fic' lists despite fitting the mold closely.
+3. **The Unlikely Pilgrimage of Harold Fry** — Rachel Joyce
+   - why: A retired man's solitary walk across England unspools his whole interior life — regret, marriage, fatherhood — in the kind of patient, close-focus character study you're after, but it builds toward grace and connection rather than bleakness.
+   - nonObvious: Its premise (an old man walking to visit a dying friend) sounds like it's setting up for tragedy, so readers often brace for heaviness that never fully arrives — it's warmer and more forgiving than the setup suggests.
+
+### Case 7b — Rejection → clarify → widen escalation
+
+1. **Pnin** — Vladimir Nabokov
+   - why: It's a quiet character study of an émigré professor bumbling through a life he can't quite fit into, but Nabokov's ironic tenderness gives it a wry, aching texture that keeps it from ever going flat — warmth and sorrow held in the same sentence.
+   - nonObvious: It gets overshadowed by Nabokov's more famous novels, so it rarely surfaces on 'quiet character study' lists even though it's arguably his gentlest, most human book.
+2. **Convenience Store Woman** — Sayaka Murata
+   - why: A deadpan, closely observed portrait of a woman who finds meaning in a life everyone else finds strange — it has the interiority you're after, but its flat comic delivery and quiet defiance make it feel alive rather than merely somber or merely cozy.
+   - nonObvious: It sidesteps both traps you named: it's too odd and funny to read as 'dark,' and too spiky and unsentimental to read as soft, hopeful uplift.
+3. **A Month in the Country** — J. L. Carr
+   - why: A shell-shocked WWI veteran spends a summer restoring a church mural in a small English village — it's restrained, humane, and genuinely warm, but it earns that warmth through precise, unsentimental prose and a devastating quiet ending rather than easy comfort.
+   - nonObvious: It's a short, unassuming novel that's easy to overlook next to bigger 'healing after war' books, yet it does the quiet-hopeful register with far more control and less schmaltz than most.
+
+### Case 8 — Texture-match, not genre-match
+
+1. **The Garden of Evening Mists** — Tan Twan Eng
+   - why: Set in the misty highlands of post-war Malaya, the novel builds its garden and jungle setting with such sensory precision that you can smell the wet stone and hear the insects, while its central relationship between a former POW and a Japanese gardener with an unclear wartime past refuses to resolve into hero or villain.
+   - nonObvious: It's often shelved as historical romance, but its real engine is unresolved moral culpability rendered through painstaking, almost horticultural detail about place.
+2. **Drive Your Plow Over the Bones of the Dead** — Olga Tokarczuk
+   - why: A snowbound Polish village on the Czech border is rendered in granular, almost obsessive detail — the cold, the animals, the isolated houses — and the narrator, an eccentric older woman implicated in a string of deaths, is never clearly righteous avenger or unreliable fanatic.
+   - nonObvious: It wears the costume of a village murder mystery but is really an interior study of a narrator whose moral logic you're never sure to trust.
+3. **The Memory of Love** — Aminatta Forna
+   - why: Freetown, Sierra Leone, before and after its civil war is built up street by street, hospital ward by hospital ward, and the men at its center — a British psychologist, an aging academic, a young surgeon — all carry complicities and self-deceptions that keep shifting under you.
+   - nonObvious: It's frequently framed as a straightforward war novel, but its real interest is in ordinary, sympathetic people's slow compromises rather than any clear victim/perpetrator line.
+
+### Case 9 — Genre/category fidelity & adjacent expansion
+
+1. **ZeroZeroZero** — Roberto Saviano
+   - why: A relentless, globe-spanning investigation into the cocaine trade that moves like a thriller — Saviano embeds himself in the material the way a novelist would, tracing money and violence across continents with real narrative propulsion.
+   - nonObvious: It sits outside the usual American true-crime canon, using Saviano's own journalistic risk (he's lived under police protection for years because of this reporting) as part of the story's tension rather than as backstory.
+2. **Furious Hours** — Casey Cep
+   - why: A deep-dive account of a real Alabama murder case and the true-crime book Harper Lee tried and failed to write about it — meticulously reported but paced and structured like a novel, with courtroom drama and literary mystery woven together.
+   - nonObvious: It's less a straight crime story than a book about the seduction and difficulty of writing narrative nonfiction itself, which gives it a self-aware layer most 'thriller-paced true crime' picks don't have.
+3. **Billion Dollar Whale** — Tom Wright and Bradley Hope
+   - why: Wall Street Journal reporters reconstruct one of the largest financial frauds in history — a young Malaysian financier siphoning billions through Hollywood, celebrities, and shell companies — with the twists and reveals of a heist novel.
+   - nonObvious: It swaps the familiar true-crime/murder framing for high-finance fraud, giving the same investigative-thriller pacing in a genre (financial journalism) readers rarely expect to grip like fiction.
+
+### Case 10 — Creative-framing-only input
+
+1. **Aura** — Carlos Fuentes
+   - why: A young man is drawn into a crumbling old house lit only by candles, where an aging widow and her mysterious niece blur past and present — it's steeped in the exact mix of decay, flickering light, and quiet dread you're describing, without tipping into horror.
+   - nonObvious: A Mexican gothic novella (told in eerie second person) that rarely comes up in English-language 'haunted house' recommendation lists, despite being a masterclass in unsettling atmosphere over shock.
+2. **The Ocean at the End of the Lane** — Neil Gaiman
+   - why: A pond that might be an ocean, an old farmhouse, half-remembered childhood terror resurfacing as an adult — it's moody and melancholic with real menace lurking at the edges, but the horror stays oblique and dreamlike rather than graphic.
+   - nonObvious: Its fairy-tale surface makes it easy to underrate as 'just' whimsical Gaiman, but it's genuinely one of his darkest, most atmospheric books — a better fit for this specific mood than the obvious haunted-house classics.
+3. **Kit's Wilderness** — David Almond
+   - why: Set in a decaying English mining town built over flooded pits, with ghosts of dead children and a game that blurs the living and the lost, it's quietly haunting rather than frightening — atmosphere and grief over gore.
+   - nonObvious: Shelved as YA/crossover fiction, it's often overlooked by readers hunting 'literary gothic' despite matching that register almost exactly, making it a genuine find rather than a default pick.
+
+---
+
+## Rubric scoring — Prompt v4 run, scored 2026-08-02
+
+| Case | Relevance | Non-obviousness | Range | Real & correct | Traceability | Variety across sessions |
+|---|---|---|---|---|---|---|
+| **1** Rich, clear input | excellent | good* | excellent | excellent | excellent | weak† |
+| **2** Anti-mainstream profile | excellent | good | excellent | excellent | excellent | weak† |
+| **3** Vague input | good | good | excellent | excellent | weak‡ | weak† |
+| **4** Explicit anti-mainstream | excellent | excellent | excellent | excellent | excellent | excellent |
+| **5** Contradictory signals | excellent | good | good | excellent | excellent | excellent |
+| **6** Hard turn-off | excellent | excellent | excellent | excellent | excellent | weak† |
+| **7a** Rejection→clarify | excellent | good | good | excellent | excellent | excellent |
+| **7b** Rejection→clarify→widen | good | good | excellent | excellent | good | excellent |
+| **8** Texture-match | excellent | good | excellent | excellent | excellent | weak† |
+| **9** Genre fidelity/expansion | excellent | excellent | excellent | excellent | excellent | excellent |
+| **10** Creative-framing-only | excellent | good | good | excellent | excellent | excellent |
+
+\* *Stoner* is now case 1's top pick across three separate prompt versions in this eval's history (Prompt v2 as case 3, the tool-wired run as case 1, and this run as case 1 again). It's a genuinely strong fit each time, but a pick that keeps surfacing as *the* answer to this specific brief is drifting toward becoming its own reflexive default — worth watching, not yet a fail.
+
+† Flagged wherever a case shares a title with another case in this same 11-case run — see the narrow-pool finding in `docs/eval-log.md` (2026-08-02).
+
+‡ Same structural caveat as every prior run: "just something good to read" carries no case-specific signal for the *why*s to trace to in this stateless, no-follow-up version.
+
+### Non-obviousness: did the Prompt v4 reframe fix cases 6, 8, 9, 10, and did it move 7b?
+
+Yes, substantially. Every title flagged as the specific offender in the prior scoring pass is gone, and the replacements hold up under the corrected "would a well-read reader already expect this" test, not just the letter of an award-naming rule:
+
+- **Case 6 — fixed.** *Disgrace* is gone. New picks (*Hunger*, *The Memory of Love*, *Play It as It Lays*) are not reflexive answers to "literary fiction, morally complicated people, no fantasy." *Play It as It Lays* in particular is a clean example of the rule working as intended: the model compares the novel's obscurity to Didion's own more-famous nonfiction rather than leaning on an award claim.
+- **Case 8 — improved, not fully fixed.** *Satantango* is gone, resolving the specific cross-case repeat with case 3 from the prior run. *The Garden of Evening Mists* persists unchanged from the prior run's case 8, though under the corrected non-obviousness test it's a defensible pick (decorated, but not the first-guess answer to "granular place + moral ambiguity"). *Drive Your Plow Over the Bones of the Dead* is a genuinely non-obvious addition despite its author being a Nobel laureate — another clean example of decoration not being penalized on its own.
+- **Case 9 — fixed.** *Say Nothing* is gone. All three new picks are less-reflexive answers to the brief, and none makes an unconfident reception claim on spot-check (checked *Furious Hours*' bestseller/award status directly — accurate as stated).
+- **Case 10 — fixed.** Both *We Have Always Lived in the Castle* and *The Little Stranger* are gone. *Kit's Wilderness* persists, which is expected and fine — it already held up as genuinely non-obvious under the reframe.
+- **Case 7b — essentially unchanged.** *Convenience Store Woman* is now in its third consecutive run in this exact case slot. The genuine-widen problem also persists: 2 of 3 picks (*Pnin*, *Convenience Store Woman*) stay in the same quiet-literary register the input explicitly said didn't land twice already.
+
+### New finding: a narrow-pool problem, confirmed and reframed
+
+*The Memory of Love* (Aminatta Forna) appears in four of this run's 11 cases — 2, 3, 6, and 8 — all structurally distinct inputs. *Oblomov* and *Hunger* each appear in two cases. Five of 11 cases now share a title with another case in the same run, versus two of 11 in the prior run (the Satantango finding). A second rerun (below, same prompt, no changes) confirmed this is a repeatable pattern rather than a one-off — see `docs/eval-log.md` (2026-08-02) for the full analysis and the reframed conclusion: this is a general clustering tendency, not a fixed set of offender titles.
+
+### Everything else
+
+Relevance, Range, Real & correct, and Traceability remain strong. All 33 picks checked against real sources (Goodreads, publisher records, prize databases) — no hallucinated titles or misattributed authors.
+
+---
+
+## Prompt v4 — confirmation rerun, identical prompt, no changes (2026-08-02)
+
+_Purpose: re-ran the same 11 `eval-set.md` cases a second time against the exact same Prompt v4 `SYSTEM_PROMPT` (no edits between runs) specifically to check whether the previous run's "Memory of Love" clustering was a one-off artifact of a single `search_books` call or a repeatable pattern. Not rescored against the full rubric — this run exists to answer that one question. See the narrow-pool finding in `docs/eval-log.md` (2026-08-02) for the analysis._
+
+_Note: case 5's first API call in this run returned `stop_reason: end_turn` with an empty final text block — the model spent 312 of 314 output tokens on the `thinking` block and produced no answer, well under the 4000-token cap. Retried once with the same input; the output below is from that successful retry. See the dedicated `docs/eval-log.md` entry for this incident._
+
+### Case 1
+
+1. **Stoner** — John Williams
+   - why: Like 'Remains of the Day', this follows an unassuming man whose entire emotional life is lived beneath a placid, dutiful surface — regret, love, and disappointment are all felt but almost never spoken, and the prose stays as restrained as the protagonist himself.
+   - nonObvious: It doesn't rely on twists or incident; the quiet accumulation of a whole unremarkable-seeming life is the entire point, rewarding exactly the slow, immersive attention you're asking for rather than any dramatic hook.
+2. **A Jest of God** — Margaret Laurence
+   - why: A repressed small-town schoolteacher narrates her own stifled longing with the same excruciating self-control and unspoken ache that made Stevens's narration so heartbreaking — the gap between what she feels and what she allows herself to say is the whole novel.
+   - nonObvious: It's a Canadian prairie novel rather than an English country-house one, so it gives you the same emotional restraint and interiority in a setting and voice you're less likely to have already encountered.
+3. **Oblomov** — Ivan Goncharov
+   - why: A slow, immersive character study of a man whose inner life is vast but who is constitutionally unable to act on his feelings or desires — the melancholy comes not from tragedy but from watching a whole life quietly slip away through inertia and reticence.
+   - nonObvious: It's a 19th-century Russian novel, not the British or Japanese-diaspora literary fiction that usually gets paired with Ishiguro, so it broadens the tradition you're pulling from while matching the same slow, character-first pacing.
+
+### Case 2
+
+1. **So Long, See You Tomorrow** — William Maxwell
+   - why: You described a quiet, character-driven novel whose emotional force snuck up on you — this one does exactly that: a spare, elegiac reconstruction of a childhood friendship shattered by a murder in rural Illinois, told with such restraint that its final gut-punch feels earned rather than engineered.
+   - nonObvious: It's a slim, unassuming book about memory and guilt rather than plot — the kind that rewards patience instead of announcing its own importance, so it rarely surfaces on 'best novels' shortlists despite being extraordinarily well-made.
+2. **Ties** — Domenico Starnone
+   - why: Like the book that surprised you, this is deceptively small in scope — a marriage, an affair, decades of quiet fallout — and it builds to an ending that recasts everything you thought you understood about the characters, which is exactly the kind of sneaky, hits-hard-on-reflection payoff you're after.
+   - nonObvious: Its English translation is fairly recent and its author isn't a household name outside Italian-lit circles, so it tends to get skipped even by readers actively hunting for translated fiction, despite being tighter and more devastating than many higher-profile domestic dramas.
+3. **The Joys of Motherhood** — Buchi Emecheta
+   - why: This traces one woman's life in colonial-era Lagos with the same unshowy, cumulative character focus you loved — no dramatic set pieces, just a life rendered so precisely that its quiet tragedy lands harder than most novels that try much louder.
+   - nonObvious: It's a landmark of Nigerian literature that's genuinely underread outside African-literature courses, so it rarely appears on general 'hidden gem' lists even though it's as accomplished as any postcolonial classic you'd name.
+
+### Case 3
+
+1. **The Garden of Evening Mists** — Tan Twan Eng
+   - why: A rich, immersive story about memory, grief, and an unlikely apprenticeship in a Malayan garden after WWII — the kind of slow-burn, beautifully written novel that rewards someone who just wants to sink into a good book for a while.
+   - nonObvious: It's a decorated novel, but it rarely shows up on generic 'best books' lists, so it still feels like a discovery rather than a default pick.
+2. **A Fine Balance** — Rohinton Mistry
+   - why: A sweeping, deeply humane novel following four strangers thrown together during India's Emergency — big-hearted, emotionally devastating, and absorbing in the way great character-driven fiction is meant to be.
+   - nonObvious: It's often overshadowed by flashier Booker-era titles despite being one of the most fully realized character novels of its period, so it satisfies without being the reflexive answer.
+3. **Hunger** — Knut Hamsun
+   - why: A short, feverish, darkly funny portrait of a starving writer's unraveling mind in 19th-century Oslo — for a reader who wants something genuinely good rather than merely comfortable, this delivers intensity and strangeness in under 250 pages.
+   - nonObvious: It predates and quietly influenced much of modernist psychological fiction, but it's rarely the book people reach for when asked for 'something good to read,' making it a fresher entry point than its more famous descendants.
+
+### Case 4
+
+1. **The Memory of Love** — Aminatta Forna
+   - why: A slow-burning, emotionally devastating novel about memory, trauma, and love set in postwar Sierra Leone — the kind of book that rewards patience with real depth rather than easy catharsis.
+   - nonObvious: It rarely appears on generic 'best novels' lists despite being as accomplished as many Booker-adjacent books, likely because its setting and quiet pacing don't fit the usual buzz-book mold.
+2. **The Melancholy of Resistance** — László Krasznahorkai
+   - why: For a reader wanting something that leaves a mark rather than just entertains — this is a hypnotic, unsettling allegory about a town's slow unraveling, built from long, cascading sentences that pull you into a genuinely strange headspace.
+   - nonObvious: Krasznahorkai has real critical weight, but this particular novel is less reached-for than his more filmed/adapted work, and its density means it rarely lands on quick 'if you liked X' lists.
+3. **The Informers** — Juan Gabriel Vásquez
+   - why: A tightly constructed Colombian novel about a hidden wartime betrayal resurfacing decades later — it has the moral complexity and slow-reveal tension of a book that sticks with you and demands to be talked about.
+   - nonObvious: Vásquez is a serious, prize-recognized writer, yet this early novel gets overshadowed by louder Latin American 'boom' names, making it a fresher entry point into the region's literature.
+
+### Case 5
+
+1. **The Warden** — Anthony Trollope
+   - why: It gives you the same close, sympathetic attention to a character's inner moral struggle that you loved in War and Peace, but wrapped in a novella-length, gently comic story about small-town church politics rather than a continent-spanning epic.
+   - nonObvious: Trollope is often recommended for his multi-volume Barchester saga as a whole, but The Warden alone is short, warm, and complete in itself — a way to get his psychological insight without committing to the sprawling series.
+2. **Memento Mori** — Muriel Spark
+   - why: Spark builds a whole ensemble cast of elderly characters, each with a distinct inner life and history, the way Tolstoy does — but she does it in under 200 pages with dry, mordant wit instead of weighty narration.
+   - nonObvious: People new to Spark usually reach for The Prime of Miss Jean Brodie; this earlier, darker comedy about mortality and vanity is a sharper fit for someone who wants dense characterization delivered fast.
+3. **Sweet Thursday** — John Steinbeck
+   - why: Like War and Peace's community of vividly drawn lives, this gives you a whole cast of Monterey misfits and dreamers, each sketched with real affection and depth, but the tone is sunny, funny, and the pace breezes along.
+   - nonObvious: Steinbeck's 'light' reputation usually points readers to Cannery Row or Of Mice and Men (which is anything but light); this sequel is his purest shot of warmth and comedy, and it's easy to miss because it lives in Cannery Row's shadow.
+
+### Case 6
+
+1. **The Informers (Los informantes)** — Juan Gabriel Vásquez
+   - why: A slow-burn character study about a father and son unraveling a decades-old betrayal in Colombia — the prose is precise and restrained, and every character's moral position shifts the deeper you go, which fits your love of morally complicated people rendered with real craft.
+   - nonObvious: Vásquez is a major voice in contemporary Latin American fiction but this particular novel rarely tops 'best of' lists in English-language circles, so it avoids being the reflexive pick a well-read reader would already have on their shelf.
+2. **Play It as It Lays** — Joan Didion
+   - why: A spare, devastating portrait of a woman drifting through a hollowed-out Hollywood existence — Didion's sentences are famously exact and cold, and the protagonist is neither sympathetic nor villainous, just achingly human, which suits a taste for beautiful prose over easy moral resolution.
+   - nonObvious: Didion's nonfiction gets recommended constantly, but this early novel — arguably her sharpest character work — tends to get passed over in favor of her essays, making it a less predictable route into her writing.
+3. **The Memory of Love** — Aminatta Forna
+   - why: Set in post-civil-war Sierra Leone, this novel weaves together an aging professor's guilt-ridden past with a young surgeon's present, building complicated, compromised characters through prose that's lyrical without ever tipping into sentimentality.
+   - nonObvious: It has real literary weight and craft but sits outside the usual rotation of book-club staples, so it offers genuine surprise rather than a familiar 'if you liked X' suggestion.
+
+### Case 7a
+
+1. **My Ántonia** — Willa Cather
+   - why: A quiet, deeply observed character study of pioneer life on the Nebraska prairie, carried by warm, elegiac prose rather than plot tension — it dwells on resilience, friendship, and the dignity of ordinary lives instead of tragedy for its own sake.
+   - nonObvious: Cather's prairie novels get cited for 'American classics' lists generally, but she's rarely the reflex answer for 'warm literary character study' requests, which tend to skew contemporary.
+2. **The Chosen** — Chaim Potok
+   - why: An intimate, slow-burning study of two boys and their fathers in 1940s Brooklyn — full of intellectual and emotional depth but grounded in mutual respect, faith, and reconciliation rather than despair.
+   - nonObvious: It's substantial and character-driven like the darker literary fiction often recommended for 'quiet character study' fans, but its emotional center is deliberately generous and hopeful, which keeps it off most bleak-lit adjacent lists.
+3. **Eleanor Oliphant is Completely Fine** — Gail Honeyman
+   - why: A closely observed, interior character study of a woman rebuilding herself after isolation and old trauma — it doesn't shy from hard material but resolves toward genuine warmth, connection, and hard-won hope rather than bleakness.
+   - nonObvious: It's often shelved as upmarket commercial fiction rather than 'literary character study,' so readers coming from a Stoner-adjacent frame of reference tend to overlook it despite the fit.
+
+### Case 7b
+
+1. **The Summer Book** — Tove Jansson
+   - why: A grandmother and her granddaughter spend summers on a tiny Finnish island, trading barbs and observations about death, art, and boredom — it's a character study built entirely from small moments, but it has real teeth and dry wit rather than the soft-focus warmth that left you cold last round.
+   - nonObvious: Jansson's adult fiction is often eclipsed by her Moomin books, so it rarely shows up on 'quiet literary fiction' lists despite being sharper and stranger than most books sold as cozy or hopeful.
+2. **A Month in the Country** — J.L. Carr
+   - why: A shell-shocked WWI veteran spends a summer restoring a medieval mural in a Yorkshire church — it's restorative and gentle without ever tipping into saccharine, giving you the hopeful register you asked for but earned through restraint and specificity rather than sentiment.
+   - nonObvious: It's a short, unshowy novel that does its emotional work through craft and understatement rather than incident, so it tends to get passed over even though it delivers exactly the texture that 'warm but not flat' recommendations usually fail to.
+3. **Convenience Store Woman** — Sayaka Murata
+   - why: Keiko has worked the same convenience store for eighteen years and finds in its rules and rhythms a kind of peace the world keeps telling her to be ashamed of — it's a deadpan, deeply interior character study that's funny and unsettling in equal measure, never sliding into either misery or false uplift.
+   - nonObvious: Its flatness of affect is the point, not a flaw — it uses the same quiet, understated register as more conventional 'gentle' character studies but toward a much odder, more clear-eyed end, which is why it tends to surprise readers who expect a tidy redemption arc.
+
+### Case 8
+
+1. **The Garden of Evening Mists** — Tan Twan Eng
+   - why: The Malayan highlands—the mist, the tea plantations, the Japanese garden being built stroke by stroke—are rendered so precisely you can feel the humidity, and at its center is a former Imperial gardener whose wartime past keeps you guessing whether he's a war criminal, a grieving artist, or both.
+   - nonObvious: It's often filed under historical romance, but its moral murkiness and sensory density make it a sharper fit for this request than the more frequently cited WWII-Pacific novels.
+2. **Paris Trout** — Pete Dexter
+   - why: Small-town 1950s Georgia is built in exacting, oppressive detail—the store, the courthouse, the red dirt roads—and the title character is a genuinely disturbing study in how a community can protect a man everyone half-knows is monstrous, without letting you settle into easy judgment of anyone around him.
+   - nonObvious: It won the National Book Award decades ago but has faded from the default 'morally gray Southern fiction' conversation, so it lands as a discovery rather than a repeat suggestion.
+3. **The Memory of Love** — Aminatta Forna
+   - why: Freetown, Sierra Leone, before and after the civil war is drawn with such granular texture—hospital wards, dust, heat, the weight of unspoken history—that place becomes almost a character, while the three intertwined men at its core each carry complicities that resist clean moral sorting.
+   - nonObvious: It's frequently overshadowed by more famous West African war novels, but its psychological ambiguity and slow-built atmosphere are arguably a closer match to this specific request.
+
+### Case 9
+
+1. **Billion Dollar Whale** — Tom Wright and Bradley Hope
+   - why: This is investigative journalism at its most propulsive — Wall Street Journal reporters unraveling the 1MDB fraud, tracing stolen billions through shell companies, Hollywood parties, and international cover-ups with the pacing of a heist thriller.
+   - nonObvious: Financial-crime journalism rarely gets recommended alongside true crime, but the scale of the con and the reporters' relentless digging make it every bit as tense as a novel — a genuinely under-tapped vein for thriller-pace nonfiction.
+2. **Furious Hours** — Casey Cep
+   - why: A deep-dive into a string of Alabama insurance murders and Harper Lee's failed attempt to write her own true-crime book — meticulously reported, novelistic in structure, with real suspense about who did what and why.
+   - nonObvious: It sits adjacent to the genre's most famous title without being it — Cep uses the specter of 'In Cold Blood' as a subject rather than a template, making it a fresher entry point into literary true crime.
+3. **Frozen in Time** — Owen Beattie and John Geiger
+   - why: A historical account — the doomed 1845 Franklin Arctic expedition — reconstructed through forensic exhumation and detective work, unfolding with the dread and reveal-by-reveal momentum of a thriller rather than a dry history text.
+   - nonObvious: Most 'true story as thriller' lists default to crime or war reporting; this pick shows the same craft applied to a 19th-century polar mystery solved through modern forensic science, a different flavor of deep-dive nonfiction entirely.
+
+### Case 10
+
+1. **Kit's Wilderness** — David Almond
+   - why: Set in a crumbling English mining town threaded with old flooded pits and a haunting children's game, it captures exactly the waterlogged, decaying, ghost-adjacent mood you're after without tipping into outright horror.
+   - nonObvious: It's shelved as YA/literary crossover, so it rarely appears on 'atmospheric gothic' lists even though its slow-burn dread and lyrical prose earn a place there.
+2. **The Death of Jane Lawrence** — Caitlin Starling
+   - why: A marriage of convenience unravels inside a decaying manor with a locked wing and something wrong in the walls — candlelit, unsettling, and steeped in dread rather than gore.
+   - nonObvious: A recent gothic that reworks Bluebeard/Jane Eyre tropes into something stranger and more clinical, so it dodges the reflexive 'read Rebecca again' answer.
+3. **Farewell Miss Julie Logan** — J. M. Barrie
+   - why: A minister in an isolated, snowbound Scottish glen becomes entangled with a woman who may not be entirely of the living world — quiet, melancholy, and eerie rather than frightening.
+   - nonObvious: Written by the author of Peter Pan late in his career, it's a genuinely haunting ghost novella that almost never surfaces on genre recommendation lists.

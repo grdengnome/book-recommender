@@ -4,6 +4,33 @@ Running log of quality findings, known limitations, and decisions made while eva
 
 ---
 
+## 2026-08-02 — Narrow-pool finding reframed: a general clustering tendency, not a fixed offender list
+
+While rescoring the Prompt v4 run (docs/eval-results.md), found *The Memory of Love* (Aminatta Forna) clustering across 4 of 11 cases. Ran the same 11 `eval-set.md` cases a second time, back to back, against the identical Prompt v4 SYSTEM_PROMPT (no prompt changes between the two runs) specifically to check whether that clustering was a one-off artifact of a single `search_books` call or a repeatable pattern.
+
+It's repeatable, but the specific title isn't fixed:
+
+- **Run 1:** *The Memory of Love* in 4 of 11 cases (2, 3, 6, 8); *Oblomov* in 2 (1, 2); *Hunger* in 2 (3, 6). 5 of 11 cases shared a title with another case in the same run.
+- **Run 2 (identical prompt, immediate rerun):** *The Memory of Love* in 3 of 11 cases (4, 6, 8); *The Garden of Evening Mists* in 2 (3, 8); *The Informers* in 2 (4, 6). 4 of 11 cases shared a title with another case in the same run.
+
+*The Memory of Love* clustered in both runs, and specifically landed in cases 6 (hard turn-off) and 8 (texture-match) both times — the same two taste profiles, independently, twice. But *Oblomov* and *Hunger* (Run 1's other clustering titles) didn't recur in Run 2, and *The Garden of Evening Mists* / *The Informers* (Run 2's other clustering titles) weren't part of Run 1's cluster. So the magnitude of the problem is stable (4-5 of 11 cases per run share membership with another case), but which titles fill that role shifts between otherwise-identical calls.
+
+This is a reframing of the existing finding, not a new problem. It's the same underlying issue first observed 2026-07-08 (*So Long, See You Tomorrow* / *Convenience Store Woman* / *Independent People* recurring 2-3x each) and confirmed to persist after grounding on 2026-08-01 (*Satantango* recurring 2x). What tonight's two-rerun comparison adds: the specific "offender" titles were never really the problem — they're symptoms of a general tendency for the model (even grounded against a real, shuffled `search_books` candidate pool) to converge on a small number of go-to answers per run, and that tendency is stable in magnitude even though its specific targets rotate call to call. Chasing individual titles (as the July 8 and August 1 entries implicitly did) will keep finding new instances rather than resolving the underlying cause.
+
+Status: documented, not fixed. This looks more like an architecture question than a prompt-wording one — worth weighing whether it's the same shape of problem Section 5's grounding decision was meant to solve and didn't fully, or a genuinely different mechanism (e.g., `search_books` query construction itself converging on similar candidate pools across different taste inputs). Needs more reruns to characterize before deciding.
+
+---
+
+## 2026-08-02 — Case 5 empty-response incident (single occurrence, not yet investigated)
+
+During the second of tonight's two Prompt v4 reruns, case 5's first API call returned a valid HTTP 200 with `stop_reason: end_turn`, but the final text block was empty — no recommendations, no error. `usage` showed `output_tokens: 314`, of which 312 were `thinking_tokens`: the model spent nearly its entire output allocation on the `thinking` block and returned effectively nothing for the actual response, despite `max_tokens: 4000` leaving plenty of headroom unused. This is not the same root cause as the 2026-07-07 truncation bug (that was `max_tokens: 1500` being exhausted by thinking; here the model stopped well under the 4000 cap on its own).
+
+A same-input retry immediately after produced a clean, normal response (*The Warden*, *Memento Mori*, *Sweet Thursday*). Single occurrence — not reproduced deliberately, not investigated further tonight.
+
+Status: flagged, not investigated. Worth watching for recurrence in future runs; if it happens again, worth capturing the full `thinking` block content to see whether there's a pattern before treating it as a code-level issue.
+
+---
+
 ## 2026-08-02 — Case 9 (Say Nothing): factually inaccurate non-obviousness justification, a reliability problem not a taste call
 
 Found while scoring the 2026-08-01 run against the full rubric (docs/eval-results.md). Distinct from the broader non-obviousness pattern documented in the entry below — this one isn't a judgment call about where the "obvious" line sits, it's a factual claim in the model's own output that doesn't hold up.
