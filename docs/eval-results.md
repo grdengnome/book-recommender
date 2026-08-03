@@ -586,3 +586,45 @@ _Change: `app/api/recommend/route.ts` now passes `tools` and runs a real `tool_u
 3. **Kit's Wilderness** — David Almond
    - why: Set in a fog-bound former mining town on the English coast, it's soaked in grief, old ghosts, and childhood games that edge into the uncanny — eerie and tender rather than frightening.
    - nonObvious: Almond is usually filed as children's/YA fantasy, so this quietly haunting, ghost-inflected literary novel rarely makes 'atmospheric horror-adjacent' lists, despite fitting the brief precisely.
+
+---
+
+## Rubric scoring — 2026-08-01 run, scored 2026-08-02
+
+Full 6-dimension scoring of the 11-case run above, against the rubric in `docs/eval-set.md`, using the same 4-point scale (fail/weak/good/excellent) and the same standard of external grounding (Goodreads, award records, general reception) as the July 10 scoring session — not gut-feel, particularly for Real & correct and Non-obviousness. Award/reception claims were checked against real sources rather than assumed.
+
+| Case | Relevance | Non-obviousness | Range | Real & correct | Traceability | Variety across sessions |
+|---|---|---|---|---|---|---|
+| **1** Rich, clear input | excellent | good | excellent | excellent | excellent | excellent |
+| **2** Anti-mainstream profile | excellent | good | excellent | excellent | excellent | excellent |
+| **3** Vague input | good | good | excellent | excellent | weak* | weak† |
+| **4** Explicit anti-mainstream | excellent | good | excellent | excellent | excellent | excellent |
+| **5** Contradictory signals | excellent | good | good | excellent | excellent | excellent |
+| **6** Hard turn-off | excellent | weak‡ | good | excellent | excellent | excellent |
+| **7a** Rejection→clarify | excellent | good | good | excellent | excellent | excellent |
+| **7b** Rejection→clarify→widen | good* | good‡ | excellent | excellent | good | excellent |
+| **8** Texture-match | excellent | weak‡ | excellent | excellent | excellent | weak† |
+| **9** Genre fidelity/expansion | excellent | fail‡ | excellent | excellent | excellent | excellent |
+| **10** Creative-framing-only | excellent | weak | good | excellent | excellent | excellent |
+
+\* Case 3's low Traceability isn't a recommendation-quality failure — with zero real signal in "just something good to read" and no adaptive follow-up mechanic in this stateless single-call version (per CLAUDE.md, deliberately not built yet), there's nothing case-specific for the *why*s to trace to. They're generically well-written, not input-grounded. The same structural caveat applies to 7a/7b (simulated single-message stand-ins for a rejection/clarify/widen mechanic that doesn't exist yet), but those two didn't show the same degradation — the simulated messages carry enough explicit content (dark/warm/flat/widen) for the model to trace against, so they weren't discounted on that basis. 7b's Relevance is "good" rather than "excellent" for an unrelated reason: only 1 of 3 picks (*The Informers*) genuinely widens out as asked — *Memento Mori* and *Convenience Store Woman* stay in the same quiet-literary lane the user explicitly said didn't land twice already.
+
+† Expected, not a surprise — this is the Satantango finding already logged in `docs/eval-log.md` (2026-08-01 entry). It appears in both case 3 and case 8, structurally distinct inputs, so both score weak on this dimension specifically for that reason.
+
+‡ See the Prompt v3 comparison below.
+
+### Non-obviousness: is Prompt v3's award-bias fix holding for cases 6, 7b, 8, 9?
+
+Partially — the letter of the rule is holding, the underlying pattern isn't. Where the model names a major literary award explicitly (Booker/Pulitzer/Nobel/NBA), it now correctly declines to treat the award as evidence of non-obviousness and argues from other grounds instead — real, measurable progress from the 2026-07-08 finding in `docs/eval-log.md`. But the same shape of failure (reach for a famous/decorated title, frame it as overlooked) keeps resurfacing through gaps the rule's specific wording doesn't cover:
+
+- **Case 6 — regression, same title.** *Disgrace* is the exact book flagged in the July 10 finding. The reasoning genuinely improved ("Its Booker win doesn't make it a safe pick here...") but the pick itself is unchanged — still one of the most canonical, frequently-assigned answers to "morally complicated literary fiction" you could name.
+- **Case 7b — real fix.** The July 10 offender here (*Lincoln in the Bardo*, Booker + #1 NYT bestseller) is gone, replaced by *Memento Mori* and *The Informers*, both genuine deeper cuts. This one actually holds.
+- **Case 8 — fix evaded, not applied.** *The Sympathizer* (Pulitzer) is gone, but *The Garden of Evening Mists* (Walter Scott Prize winner, Booker-shortlisted, Man Asian Prize winner) and *The Yiddish Policemen's Union* (Hugo/Nebula/Locus/Sidewise sweep) fill the same slot. Neither is a Booker/Pulitzer/Nobel/NBA winner by name, so the rule's literal wording doesn't trigger — but both are as decorated and famous as the books the rule was written to stop.
+- **Case 9 — worse than before, and factually shaky.** *Black Hawk Down* (bestseller/film) is gone, but *Say Nothing* replaces it with a claim that doesn't survive fact-checking (see the dedicated 2026-08-02 entry in `docs/eval-log.md`) — it's actually one of the most garlanded and widely-cited narrative nonfiction books of the last decade, not an overshadowed pick.
+- **Case 10 — same pattern, different flavor (not one of the four originally flagged, but worth noting).** *We Have Always Lived in the Castle* is Jackson's other most-canonical novel, and *The Little Stranger* was Booker-shortlisted (undisclosed in its `nonObvious` text) — same prestige-substitution move, via reputation/undisclosed-award rather than a named literary prize.
+
+This mirrors the shape of the eval-log's grounding finding from the same run: not eliminated, relocated. See the 2026-08-02 entries in `docs/eval-log.md` for a clarifying note on what the actual non-obviousness bar should be (it's not "avoid awards/fame" — see that entry for the corrected read on cases 6, 8, and 10 specifically) and for the *Say Nothing* factual-accuracy issue logged as its own distinct finding.
+
+### Everything else
+
+Relevance, Range, Real & correct, and Traceability are strong across the board — no hallucinated titles or misattributed authors in any of the 33 picks (all verified real), and traceability is excellent everywhere the input actually carries signal to trace to. This matches the July 10 pattern where these three dimensions were already solid; the open problems remain concentrated in non-obviousness and the residual narrow-pool issue.
