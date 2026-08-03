@@ -4,6 +4,36 @@ Running log of quality findings, known limitations, and decisions made while eva
 
 ---
 
+## 2026-08-02 — Case 9 (Say Nothing): factually inaccurate non-obviousness justification, a reliability problem not a taste call
+
+Found while scoring the 2026-08-01 run against the full rubric (docs/eval-results.md). Distinct from the broader non-obviousness pattern documented in the entry below — this one isn't a judgment call about where the "obvious" line sits, it's a factual claim in the model's own output that doesn't hold up.
+
+Case 9's top pick, *Say Nothing* (Patrick Radden Keefe), justifies its `nonObvious` field with: "it's well-regarded but often gets overshadowed by flashier true-crime picks." Checked against actual reception: it won the National Book Critics Circle Award for Nonfiction, the Orwell Prize for Political Writing, and the Arthur Ross Gold Medal; it was named to the New York Times's 20 Best Books of the 21st Century and a Kirkus Best Nonfiction Book of the Century; it was a Barack Obama favorite book of the year; and it was adapted into a 2024 FX/Hulu series. It is not overshadowed by anything in this genre — it's one of the most decorated and widely-cited narrative nonfiction titles of the last decade.
+
+This pick also happens to be the single most obvious answer to case 9's brief ("investigative journalism/historical accounts that read like thrillers") under the "first-guess" test described in the entry above — so it fails on non-obviousness twice over. But it's logged here separately because of the specific claim itself: the model asserted something checkably false about a real book's reception in order to justify the pick, rather than just picking something that's arguably too famous. That's a different category of failure than a judgment call about non-obviousness — it's the model fabricating a specific factual claim, apparently under pressure from the Prompt v3 award-bias rule to explain away exactly this kind of fame.
+
+Worth watching for elsewhere: if the award-bias rule is inadvertently teaching the model to write confident-sounding but false disclaimers about a book's reception, that's a bigger reliability concern than the underlying pick-selection bias it was meant to fix.
+
+Status: documented, not yet fixed. Good candidate to check for recurrence in future runs — specifically whether the model fabricates "actually it's less famous than you'd think" claims to satisfy the award-bias rule when the true answer is "yes, this is actually the famous/obvious pick."
+
+---
+
+## 2026-08-02 — Non-obviousness bar clarified: the test is "first-guess answer to the brief," not "won an award"
+
+Scoring the 2026-08-01 run against the full rubric (docs/eval-results.md) surfaced weak non-obviousness scores in cases 6, 8, and 10. Worth being precise about the actual failure mode here, since it's easy to over-apply the Prompt v3 fix in the wrong direction: **the bar isn't "avoid decorated or famous books."** A Booker winner or a Hugo/Nebula sweep can still be a genuinely non-obvious pick for a specific brief. The real test is narrower — would a reasonably well-read person already have this exact book on their radar as *the* answer to this exact ask, the kind of thing a quick search or a "best of [genre/mood]" list would surface first? Fame and decoration correlate with that failure mode; they aren't the same thing as it, and a pick shouldn't be downgraded just for being decorated if it still wouldn't be most people's first guess.
+
+Reframing cases 6, 8, and 10 through that lens specifically:
+
+- **Case 6 — still weak, for the correct reason.** *Disgrace* isn't a weak pick because it won the Booker. It's weak because it's arguably the single most commonly-cited answer to "literary fiction, character studies, morally complicated people" that exists — the reflexive answer, prize or no prize.
+- **Case 8 — reassess.** Neither *The Garden of Evening Mists* nor *The Yiddish Policemen's Union* is the obvious first-guess answer to "granular sense of place + morally ambiguous characters, genre doesn't matter." Both are decorated (Walter Scott Prize / Man Asian Prize / Booker shortlist for the former; Hugo/Nebula/Locus/Sidewise for the latter), but neither is what most well-read people would name first for this specific brief — a search for "immersive sense of place, moral ambiguity" surfaces things like *The English Patient*, *Blood Meridian*, or *All the Light We Cannot See* long before either of these. Under the first-guess test rather than the was-it-decorated test, this case reads closer to good than weak — worth revisiting if this case is rescored.
+- **Case 10 — still weak, but for a specific and different reason than originally scored.** *We Have Always Lived in the Castle* and *The Little Stranger* aren't weak because of an undisclosed Booker shortlist (*Little Stranger*) or because Jackson is famous generally — they're weak because both are genuine staples of exactly the "atmospheric, moody, unsettling-not-horror" list this brief describes. They're the first-guess answer to this specific emoji-coded vibe, not a discovery. *Kit's Wilderness* holds up fine under this test — genuinely off the radar for this brief despite its own award (Printz), because that award sits in a different genre bucket (YA) this specific ask wouldn't surface it from.
+
+Net: cases 6 and 10 hold up as weak under the corrected test; case 8 likely doesn't, and may be worth rescoring on a future pass. Flagging rather than silently changing the already-reviewed scoring table in docs/eval-results.md.
+
+Status: documented. Good candidate to fold into a future SYSTEM_PROMPT revision alongside the award-bias rule — the instruction should probably target "is this the reflexive/first-guess answer to the specific brief" rather than naming specific award bodies, since the award-naming approach is exactly what let cases 8 and 10 slip through un-triggered.
+
+---
+
 ## 2026-08-01 — Grounding reduced repetition but didn't eliminate it: same pattern, new title
 
 First full eval run (docs/eval-results.md, 2026-08-01) since `search_books` was wired into the live recommend call. Checked directly against the three titles named in the 2026-07-08 "repeated picks across structurally distinct inputs" finding below:
