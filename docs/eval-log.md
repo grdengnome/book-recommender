@@ -4,6 +4,23 @@ Running log of quality findings, known limitations, and decisions made while eva
 
 ---
 
+## 2026-08-04 — Query-construction hypothesis tested and weakened
+
+Added temporary diagnostic logging to `search_books` (query, subject, poolSize, tagged by eval case — see `lib/tools/searchBooks.ts`, `lib/tools/index.ts`, `app/api/recommend/route.ts`) to test the leading hypothesis for the narrow-pool clustering documented below: that structurally different taste inputs were converging on similar `search_books` queries, and that similarity in query text was driving the repeated-title pattern. Ran the same 11 `eval-set.md` cases once against the current prompt with logging active. Raw output: `scratchpad/query-log.json` (36 logged calls) and `scratchpad/eval-run-results.json` (full recommendations per case).
+
+Two findings:
+
+- **The specific pairing that clustered twice last session (cases 6 and 8, both landing on *The Memory of Love*) didn't repeat this run.** Case 6 → *Hunger*, *The Informers*, *The Assistant*; case 8 → *Sátántangó*, *Paris Trout*, *The Garden of Evening Mists* — no overlap between them, and *The Memory of Love* didn't appear in either (it turned up in case 4 instead). Their queries still overlap in subject/theme this run (both hit `literary_fiction` + `psychological_fiction`, both orbit "morally ambiguous/complicated character") even without matching vocabulary — so the two cases remain structurally close in query space, they just didn't land on the same title this time.
+- **More significant: the one title that did repeat this run — *Sátántangó* (Krasznahorkai), cases 4 and 8 — came from queries with no meaningful overlap.** Different subjects (`translated_literature`/`magical_realism`/`literary_fiction` vs. `literary_fiction`/`psychological_fiction`), different vocabulary, no shared free-text terms. Two genuinely dissimilar queries still converged on the same title.
+
+That second finding weakens the query-construction hypothesis: the clustering doesn't clearly track query similarity. Case 4 and case 8 prove a repeated title can happen without similar search terms, which means query-text convergence isn't a necessary condition for the pattern — even if it may still be a contributing factor in cases like 6/8 where the queries *are* close.
+
+**Natural next step, flagged not yet done:** extend the logging to capture full pool contents per call (not just `poolSize`), so a repeated title can be checked against whether it was actually present in both cases' retrieved pools. Two different root causes look the same from title-overlap alone but require different fixes: (a) genuinely overlapping Open Library results across dissimilar queries (a retrieval-breadth problem — same books keep surfacing regardless of query wording), vs. (b) the model converging on a title it wasn't even shown in one of the two pools (a model-selection problem — trained-knowledge bias overriding the grounded candidates). Pool-content logging would distinguish these directly instead of continuing to infer from query text alone.
+
+Status: hypothesis tested and weakened. Root cause still open — needs the pool-content logging above before it can be narrowed further. Diagnostic logging left in place (not removed) for that follow-up run.
+
+---
+
 ## 2026-08-02 — Narrow-pool finding reframed: a general clustering tendency, not a fixed offender list
 
 While rescoring the Prompt v4 run (docs/eval-results.md), found *The Memory of Love* (Aminatta Forna) clustering across 4 of 11 cases. Ran the same 11 `eval-set.md` cases a second time, back to back, against the identical Prompt v4 SYSTEM_PROMPT (no prompt changes between the two runs) specifically to check whether that clustering was a one-off artifact of a single `search_books` call or a repeatable pattern.

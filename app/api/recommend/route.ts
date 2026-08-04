@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { toolDefinitions, callTool } from "@/lib/tools";
+import { toolDefinitions, callTool, setSearchBooksLogTag } from "@/lib/tools";
 
 const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
 const MODEL = "claude-sonnet-5";
@@ -51,6 +51,12 @@ export async function POST(request: NextRequest) {
       { status: 400 },
     );
   }
+
+  // TEMPORARY (query-tracing session, 2026-08-04): optional eval-case tag, only
+  // ever set by the eval driver script. Absent in normal use, where this is a
+  // no-op passthrough — does not affect retrieval, dedupe, or shuffle behavior.
+  const evalTag = typeof body?.evalTag === "string" ? body.evalTag : null;
+  setSearchBooksLogTag(evalTag);
 
   const messages: Array<{ role: "user" | "assistant"; content: unknown }> = [
     { role: "user", content: tasteDescription },
