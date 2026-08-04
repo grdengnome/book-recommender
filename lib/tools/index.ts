@@ -6,6 +6,7 @@
 import {
   searchBooksToolDefinition,
   searchBooks,
+  setSearchBooksLogTag,
   type SearchBooksInput,
 } from "./searchBooks";
 
@@ -24,3 +25,6 @@ export async function callTool(name: string, input: unknown): Promise<unknown> {
 }
 
 export type { SearchBooksInput };
+// TEMPORARY (query-tracing session, 2026-08-04) — re-exported so route.ts can tag
+// search_books calls with the eval case that triggered them. See searchBooks.ts.
+export { setSearchBooksLogTag };

@@ -2,6 +2,45 @@
 // candidates instead of the model's own narrow "go-to" pool (see docs/eval-log.md,
 // 2026-07-08, for the evidence that motivated this).
 
+// --- TEMPORARY DIAGNOSTIC LOGGING (2026-08-04 query-tracing session) ---
+// Traces what query/subject pairs the model actually generates per eval case, to
+// check whether structurally different taste inputs converge on similar search
+// terms. Observation only — does not touch retrieval, dedupe, or shuffle logic
+// below. Remove once the query-log.json results have been reviewed.
+import { appendFileSync, mkdirSync } from "fs";
+import path from "path";
+
+let currentLogTag: string | null = null;
+
+// Called by the eval driver (via route.ts's optional evalTag passthrough) before
+// each case, so every search_books call made during that case's tool loop is
+// tagged. Never called in normal (non-eval) request handling, where it stays null.
+export function setSearchBooksLogTag(tag: string | null): void {
+  currentLogTag = tag;
+}
+
+const QUERY_LOG_PATH = path.join(process.cwd(), "scratchpad", "query-log.json");
+
+// Newline-delimited JSON, not a single JSON array — search_books calls within a
+// round can run concurrently (route.ts fires tool_use blocks via Promise.all), and
+// synchronous line-appends avoid a read-modify-write race across those calls.
+function logSearchBooksCall(input: SearchBooksInput, poolSize: number): void {
+  try {
+    mkdirSync(path.dirname(QUERY_LOG_PATH), { recursive: true });
+    const entry = {
+      tag: currentLogTag,
+      timestamp: new Date().toISOString(),
+      query: input.query,
+      subject: input.subject,
+      poolSize,
+    };
+    appendFileSync(QUERY_LOG_PATH, JSON.stringify(entry) + "\n");
+  } catch {
+    // Diagnostic logging must never break the actual tool call.
+  }
+}
+// --- END TEMPORARY DIAGNOSTIC LOGGING ---
+
 const OPEN_LIBRARY_SEARCH_URL = "https://openlibrary.org/search.json";
 const OPEN_LIBRARY_SUBJECTS_URL = "https://openlibrary.org/subjects";
 const USER_AGENT = "book-recommender/0.1 (https://github.com/grdengnome/book-recommender)";
@@ -159,6 +198,8 @@ export async function searchBooks(
     author: c.author,
     subjects: c.subjects.slice(0, 2),
   }));
+
+  logSearchBooksCall(input, pool.length);
 
   return { pool, poolSize: pool.length };
 }
