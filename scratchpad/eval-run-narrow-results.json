@@ -1,0 +1,82 @@
+[
+  {
+    "id": "case-3",
+    "label": "Vague input",
+    "tasteDescription": "Just something good to read.",
+    "recommendations": "```json\n[\n  {\n    \"title\": \"A Fine Balance\",\n    \"author\": \"Rohinton Mistry\",\n    \"why\": \"When someone just wants 'something good' with no other constraints, this is the kind of novel that rewards the leap: a sprawling, deeply humane story of four strangers thrown together in 1970s India, written with the patience and emotional precision of the great 19th-century novels but set in a world rarely centered in that tradition.\",\n    \"nonObvious\": \"It has the scope and craft to satisfy a reader who loves classic doorstop novels, but it's not the reflexive 'give me a masterpiece' answer the way Dickens or Tolstoy would be.\"\n  },\n  {\n    \"title\": \"Hunger\",\n    \"author\": \"Knut Hamsun\",\n    \"why\": \"A short, feverish, wildly interior novel about a starving writer wandering Oslo — for a reader open to being surprised, it's a fast, intense read that still feels startlingly modern over a century later.\",\n    \"nonObvious\": \"It's a foundational book for stream-of-consciousness fiction, yet it rarely shows up on general 'good books' lists the way its literary descendants do.\"\n  },\n  {\n    \"title\": \"The Memory of Love\",\n    \"author\": \"Aminatta Forna\",\n    \"why\": \"A quietly devastating story of love, memory, and the long aftermath of civil war in Sierra Leone, told through interwoven perspectives — the kind of book that lingers and that you end up pressing into other people's hands.\",\n    \"nonObvious\": \"It has the emotional weight of celebrated war-and-memory novels without being the title that immediately comes up when people ask for one.\"\n  }\n]\n```",
+    "titles": [
+      {
+        "title": "A Fine Balance",
+        "author": "Rohinton Mistry"
+      },
+      {
+        "title": "Hunger",
+        "author": "Knut Hamsun"
+      },
+      {
+        "title": "The Memory of Love",
+        "author": "Aminatta Forna"
+      }
+    ]
+  },
+  {
+    "id": "case-4",
+    "label": "Explicit anti-mainstream demand",
+    "tasteDescription": "I want book recommendations, but nothing everyone's already read. I'm tired of every list recommending the same five books.",
+    "recommendations": "```json\n[\n  {\n    \"title\": \"İnce Memed (Memed, My Hawk)\",\n    \"author\": \"Yaşar Kemal\",\n    \"why\": \"A sweeping, lyrical story of a young man who becomes a bandit-folk-hero in the Anatolian countryside — for a reader tired of the same five lists, this delivers big, mythic storytelling and gorgeous prose about landscape and injustice without being an assigned-reading classic in English-language circles.\",\n    \"nonObvious\": \"Kemal is a towering figure in Turkish literature and was repeatedly floated for the Nobel, yet his work rarely appears on Anglophone 'best books' roundups, so it lands as genuinely new territory rather than a rediscovered classic.\"\n  },\n  {\n    \"title\": \"My Family's Role in the World Revolution\",\n    \"author\": \"Bora Ćosić\",\n    \"why\": \"A biting, formally inventive novel about a chaotic Yugoslav family living through the aftermath of WWII and the rise of communism, narrated with a child's skewed logic — sharp, funny, and strange in a way that rewards readers looking for something structurally unexpected.\",\n    \"nonObvious\": \"Ćosić is a major postwar Yugoslav writer whose work has only sporadically been translated into English, so this sidesteps both the usual Western-European translated-fiction picks and the usual Cold War-literature suspects.\"\n  },\n  {\n    \"title\": \"Diary of a Void\",\n    \"author\": \"Emi Yagi\",\n    \"why\": \"A woman fakes a pregnancy to escape sexist office drudgery in this deadpan, quietly absurd contemporary Japanese novel — sharp social satire in a compact, fast read, offering something fresher than the default Murakami/Kawabata recommendations.\",\n    \"nonObvious\": \"It's recent enough and specific enough in its premise that it hasn't calcified into a 'best of translated fiction' staple yet, making it a genuine discovery rather than the expected pick for 'Japanese literature.'\"\n  }\n]\n```",
+    "titles": [
+      {
+        "title": "İnce Memed (Memed, My Hawk)",
+        "author": "Yaşar Kemal"
+      },
+      {
+        "title": "My Family's Role in the World Revolution",
+        "author": "Bora Ćosić"
+      },
+      {
+        "title": "Diary of a Void",
+        "author": "Emi Yagi"
+      }
+    ]
+  },
+  {
+    "id": "case-6",
+    "label": "Hard turn-off",
+    "tasteDescription": "I love literary fiction — character studies, beautiful prose, morally complicated people. I will not read fantasy under any circumstances: no magic systems, no invented worlds.",
+    "recommendations": "```json\n[\n  {\n    \"title\": \"Sula\",\n    \"author\": \"Toni Morrison\",\n    \"why\": \"A fierce, morally ambiguous friendship between two women who each embody different kinds of transgression — exactly the 'morally complicated people' territory, rendered in Morrison's dense, incantatory prose.\",\n    \"nonObvious\": \"Readers reaching for Morrison usually land on Beloved or Song of Solomon first; this slimmer, stranger book is just as richly written but less reflexively cited.\"\n  },\n  {\n    \"title\": \"Oblomov\",\n    \"author\": \"Ivan Goncharov\",\n    \"why\": \"A masterclass in interior character study — a man whose passivity becomes a whole moral and philosophical stance, examined with patient, often darkly funny prose that never judges him simply.\",\n    \"nonObvious\": \"When readers want '19th-century Russian psychological depth' they usually default to Dostoevsky or Tolstoy; Goncharov's quieter, comic-tragic portrait is just as penetrating and far less trodden.\"\n  },\n  {\n    \"title\": \"Brighton Rock\",\n    \"author\": \"Graham Greene\",\n    \"why\": \"Pinkie Brown is about as morally compromised a protagonist as literary fiction offers, yet Greene's controlled, atmospheric prose makes his damnation feel intimate rather than lurid.\",\n    \"nonObvious\": \"Greene is well known, but this book tends to get filed under 'thriller' rather than 'literary character study,' so it's often overlooked by readers specifically hunting for the latter.\"\n  }\n]\n```",
+    "titles": [
+      {
+        "title": "Sula",
+        "author": "Toni Morrison"
+      },
+      {
+        "title": "Oblomov",
+        "author": "Ivan Goncharov"
+      },
+      {
+        "title": "Brighton Rock",
+        "author": "Graham Greene"
+      }
+    ]
+  },
+  {
+    "id": "case-8",
+    "label": "Texture-match, not genre-match",
+    "tasteDescription": "I'm looking for something with a really granular, immersive sense of place — I want to feel like I'm actually there — and characters who are morally ambiguous, not clearly good or bad. Genre doesn't matter much to me as long as it has that texture.",
+    "recommendations": "[\n  {\n    \"title\": \"The Garden of Evening Mists\",\n    \"author\": \"Tan Twan Eng\",\n    \"why\": \"Set in the Cameron Highlands of Malaysia in the aftermath of WWII, the novel renders the jungle, tea plantations, and a Japanese garden with such tactile detail that the landscape becomes a character itself. Its central relationship between a former POW camp survivor and the emperor's ex-gardener refuses easy moral verdicts on either side.\",\n    \"nonObvious\": \"It's often shelved as historical romance, but the ambiguity here is structural — you're never sure how much of the gardener's kindness is penance, strategy, or genuine feeling, which makes it a sharper fit than the more frequently cited war-atrocity novels covering similar ground.\"\n  },\n  {\n    \"title\": \"Drive Your Plow Over the Bones of the Dead\",\n    \"author\": \"Olga Tokarczuk\",\n    \"why\": \"An isolated Polish village on the Czech border in deep winter is rendered so specifically — the snow, the wildlife, the crumbling houses — that you can feel the cold coming off the page. The narrator, an eccentric older woman convinced animals are exacting revenge on local hunters, is sympathetic and unsettling in equal measure, and the book never tells you whether to trust her.\",\n    \"nonObvious\": \"It's frequently marketed as a mystery/eco-thriller hybrid, which undersells how genuinely destabilizing its narrator's morality is — she's framed as both a righteous avenger and possibly a murderer, and the book withholds judgment to the very end.\"\n  },\n  {\n    \"title\": \"The Master of Ballantrae\",\n    \"author\": \"Robert Louis Stevenson\",\n    \"why\": \"Stevenson tracks two brothers — one a charming rogue, one a dutiful stay-at-home — across the Scottish Highlands, the American frontier, and India, and the prose is dense with the physical grain of each place. Neither brother is a hero; the 'good' one curdles into resentment and the 'bad' one keeps earning grudging admiration.\",\n    \"nonObvious\": \"It's overshadowed by Stevenson's more famous adventure tales, but it's actually his most morally knotty book — a family tragedy disguised as swashbuckling fiction, without the tidy villain the genre usually promises.\"\n  }\n]",
+    "titles": [
+      {
+        "title": "The Garden of Evening Mists",
+        "author": "Tan Twan Eng"
+      },
+      {
+        "title": "Drive Your Plow Over the Bones of the Dead",
+        "author": "Olga Tokarczuk"
+      },
+      {
+        "title": "The Master of Ballantrae",
+        "author": "Robert Louis Stevenson"
+      }
+    ]
+  }
+]

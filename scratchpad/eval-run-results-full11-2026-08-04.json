@@ -1,0 +1,222 @@
+[
+  {
+    "id": "case-1",
+    "label": "Rich, clear input",
+    "tasteDescription": "My favorite book is 'The Remains of the Day' by Kazuo Ishiguro — I loved how restrained and heartbreaking it was, the way so much emotion stayed unspoken beneath the surface. I'm in the mood for something similarly quiet and melancholic, character-driven rather than plot-heavy. I have plenty of time and want to sit with a slow, immersive book.",
+    "recommendations": "```json\n[\n  {\n    \"title\": \"So Long, See You Tomorrow\",\n    \"author\": \"William Maxwell\",\n    \"why\": \"Like 'The Remains of the Day,' this is a short, spare novel built entirely around what a narrator cannot bring himself to say — a lifetime of guilt over a childhood betrayal, told in prose so restrained it almost aches with the weight of what's withheld.\",\n    \"nonObvious\": \"It's a quiet, interior American novel about memory and unspoken guilt that gets less reflexive attention than the British 'repressed narrator' classics, despite matching that exact emotional register.\"\n  },\n  {\n    \"title\": \"The Blue Flower\",\n    \"author\": \"Penelope Fitzgerald\",\n    \"why\": \"A slow, immersive character study (based on the real life of the poet Novalis) where enormous feeling is conveyed through gesture, silence, and social restraint rather than declaration — the same submerged-iceberg emotional technique that makes Stevens's narration so devastating.\",\n    \"nonObvious\": \"Fitzgerald's late-career historical novels rarely top 'if you liked Ishiguro' lists, but her control of understatement and her interest in feeling that can't be spoken aloud make this a closer cousin to Ishiguro's method than more commonly cited comparisons.\"\n  },\n  {\n    \"title\": \"The Sound of the Mountain\",\n    \"author\": \"Yasunari Kawabata\",\n    \"why\": \"An elderly man's quiet, elegiac observation of his fraying family, told through small domestic moments and unspoken tensions rather than plot — melancholic, contemplative, and built for slow, patient reading exactly like the taste described.\",\n    \"nonObvious\": \"Kawabata's late novels are often overshadowed by 'Snow Country' in English-language discussion, but this one's meditative pacing and emphasis on emotion sensed rather than stated is arguably the more precise match for Ishiguro's restraint.\"\n  }\n]\n```",
+    "titles": [
+      {
+        "title": "So Long, See You Tomorrow",
+        "author": "William Maxwell"
+      },
+      {
+        "title": "The Blue Flower",
+        "author": "Penelope Fitzgerald"
+      },
+      {
+        "title": "The Sound of the Mountain",
+        "author": "Yasunari Kawabata"
+      }
+    ]
+  },
+  {
+    "id": "case-2",
+    "label": "Anti-mainstream profile",
+    "tasteDescription": "There's a novel I read a few years back — quiet, character-driven, nothing anyone around me had heard of — and it turned out to be one of the best books I've ever read. It completely surprised me, because nothing about its low profile suggested it would hit that hard. I've been recommending it to people unprompted ever since. I want more like that: no bestsellers, no 'if you liked X' consensus picks — just books that are genuinely great regardless of how well-known they are.",
+    "recommendations": "```json\n[\n  {\n    \"title\": \"A Jest of God\",\n    \"author\": \"Margaret Laurence\",\n    \"why\": \"It's the same species of book you're describing: nothing flashy happens on the surface — a repressed, unmarried schoolteacher in a small prairie town navigates loneliness and a tentative affair — but the interiority is so exact and unsparing that it lands like a gut-punch by the final pages.\",\n    \"nonObvious\": \"Laurence is a towering figure in Canadian letters but rarely surfaces on international 'quiet literary fiction' lists, so it retains the surprise of a book you stumbled into rather than one you were steered toward.\"\n  },\n  {\n    \"title\": \"The Life Before Us\",\n    \"author\": \"Romain Gary (writing as Émile Ajar)\",\n    \"why\": \"A former prostitute raising the orphaned son of sex workers in a Paris tenement — it's tender, funny, and unbearably sad in a way that sneaks up on you exactly like the book you're describing, character over plot, emotional payoff over spectacle.\",\n    \"nonObvious\": \"Gary published it under a fake identity and won a major French prize twice under two names as a literary prank — it's critically vaulted in France but stays largely under the radar for English-language readers, so it doesn't come up on the usual recommendation circuits.\"\n  },\n  {\n    \"title\": \"Yonnondio: From the Thirties\",\n    \"author\": \"Tillie Olsen\",\n    \"why\": \"An unfinished novel about a poor Midwestern family scraping by during the Depression, told in fragments of aching, closely observed domestic detail — it has the same low-key, character-first intensity that makes a book impossible to shake once you've read it.\",\n    \"nonObvious\": \"Olsen abandoned it for decades and it was only assembled and published later from her drafts, so it's never had the marketing machine or canonical slot that would make it a predictable pick — most readers haven't heard of it even if they know her story collection.\"\n  }\n]\n```",
+    "titles": [
+      {
+        "title": "A Jest of God",
+        "author": "Margaret Laurence"
+      },
+      {
+        "title": "The Life Before Us",
+        "author": "Romain Gary (writing as Émile Ajar)"
+      },
+      {
+        "title": "Yonnondio: From the Thirties",
+        "author": "Tillie Olsen"
+      }
+    ]
+  },
+  {
+    "id": "case-3",
+    "label": "Vague input",
+    "tasteDescription": "Just something good to read.",
+    "recommendations": "[\n  {\n    \"title\": \"A Fine Balance\",\n    \"author\": \"Rohinton Mistry\",\n    \"why\": \"A sprawling, deeply human novel about four strangers whose lives intertwine in 1970s India — the kind of immersive, richly plotted story that rewards a reader who just wants to fall into a book completely.\",\n    \"nonObvious\": \"It's a towering achievement of character and plot, but it's often overshadowed by flashier 'big Indian novel' picks like Midnight's Children, making it a fresher choice for the same craving.\"\n  },\n  {\n    \"title\": \"Memento Mori\",\n    \"author\": \"Muriel Spark\",\n    \"why\": \"A darkly funny, precisely written novel about a group of elderly Londoners who each start receiving anonymous calls reminding them 'Remember you must die' — sharp, surprising, and genuinely good on a sentence level.\",\n    \"nonObvious\": \"Spark's wit and control rival more commonly cited British satirists, but she rarely tops general 'just give me something good' lists despite being a master stylist.\"\n  },\n  {\n    \"title\": \"Human Acts\",\n    \"author\": \"Han Kang\",\n    \"why\": \"A haunting, fragmented novel built around the 1980 Gwangju uprising, told through shifting voices including the dead — for a reader open to something that lingers rather than something merely pleasant.\",\n    \"nonObvious\": \"Han Kang is known to many through The Vegetarian, so this quieter, formally daring book about collective trauma offers the same caliber of writing without being the predictable entry point.\"\n  }\n]",
+    "titles": [
+      {
+        "title": "A Fine Balance",
+        "author": "Rohinton Mistry"
+      },
+      {
+        "title": "Memento Mori",
+        "author": "Muriel Spark"
+      },
+      {
+        "title": "Human Acts",
+        "author": "Han Kang"
+      }
+    ]
+  },
+  {
+    "id": "case-4",
+    "label": "Explicit anti-mainstream demand",
+    "tasteDescription": "I want book recommendations, but nothing everyone's already read. I'm tired of every list recommending the same five books.",
+    "recommendations": "[\n  {\n    \"title\": \"Sátántangó\",\n    \"author\": \"László Krasznahorkai\",\n    \"why\": \"A slow-motion, darkly comic vision of a collapsing rural commune, told in hypnotic, page-long sentences — the kind of book that rewires how you think a novel can move, without leaning on any of the usual plot machinery.\",\n    \"nonObvious\": \"It's revered among serious readers of European fiction but rarely surfaces on general 'best books' lists, since its demanding, immersive style resists easy recommendation.\"\n  },\n  {\n    \"title\": \"Cursed Bunny\",\n    \"author\": \"Bora Chung\",\n    \"why\": \"A collection of eerie, genre-bending short stories — part horror, part fable, part social critique — that gives you something genuinely unsettling and inventive rather than another quiet domestic drama.\",\n    \"nonObvious\": \"Translated Korean fiction gets attention mostly through a handful of repeat names; this one sidesteps that well-worn path with stories that are stranger and sharper than most 'best of translated fiction' picks.\"\n  },\n  {\n    \"title\": \"The Memory of Love\",\n    \"author\": \"Aminatta Forna\",\n    \"why\": \"A richly observed, emotionally devastating novel about memory, trauma, and love in postwar Sierra Leone, told through interlocking lives across generations — literary fiction with real weight and craft.\",\n    \"nonObvious\": \"Forna writes with the same ambition and precision as more frequently cited postcolonial novelists, but her work tends to get passed over on default reading lists in favor of a smaller set of famous names.\"\n  }\n]",
+    "titles": [
+      {
+        "title": "Sátántangó",
+        "author": "László Krasznahorkai"
+      },
+      {
+        "title": "Cursed Bunny",
+        "author": "Bora Chung"
+      },
+      {
+        "title": "The Memory of Love",
+        "author": "Aminatta Forna"
+      }
+    ]
+  },
+  {
+    "id": "case-5",
+    "label": "Contradictory signals",
+    "tasteDescription": "My favorite book of all time is 'War and Peace' — I loved the sprawling scope and how deeply it got into every character's inner life. But right now I want something light and quick to read, nothing heavy or slow.",
+    "recommendations": "[\n  {\n    \"title\": \"Carry On, Jeeves\",\n    \"author\": \"P. G. Wodehouse\",\n    \"why\": \"You loved how Tolstoy built rich, distinct inner lives across a huge cast — Wodehouse does something similar in miniature, giving every fussy aunt, blundering chum, and imperturbable valet a fully realized comic psychology, but wrapped in featherlight plots you can finish in an afternoon.\",\n    \"nonObvious\": \"It's easy to file Wodehouse under 'silly comfort read,' but the precision of his characterization is the same skill that makes War and Peace's ensemble sing — just aimed at farce instead of philosophy.\"\n  },\n  {\n    \"title\": \"Cold Comfort Farm\",\n    \"author\": \"Stella Gibbons\",\n    \"why\": \"This is a quick, sharply funny novel built entirely around a large, eccentric family and how a clear-eyed outsider reads each of their inner dramas — the kind of character-driven ensemble you liked in War and Peace, minus the war, the length, and the melancholy.\",\n    \"nonObvious\": \"It reads as a deliberate parody of the brooding rural saga (the genre War and Peace's family plots sometimes get lumped with), so it delivers ensemble-character pleasure while actively undercutting heaviness rather than just being 'light' by default.\"\n  },\n  {\n    \"title\": \"Convenience Store Woman\",\n    \"author\": \"Sayaka Murata\",\n    \"why\": \"A short, propulsive novel almost entirely devoted to the inner logic of one unusual mind — the same fascination with interiority that hooked you in War and Peace, just compressed into a single sharply drawn consciousness instead of a sprawling cast, and readable in a sitting or two.\",\n    \"nonObvious\": \"Its deadpan, almost anthropological voice makes it feel more like a psychological character study than the 'quirky Japanese novel' shelf it often gets placed on, so it rewards the same attention to inner life without any of the weight.\"\n  }\n]",
+    "titles": [
+      {
+        "title": "Carry On, Jeeves",
+        "author": "P. G. Wodehouse"
+      },
+      {
+        "title": "Cold Comfort Farm",
+        "author": "Stella Gibbons"
+      },
+      {
+        "title": "Convenience Store Woman",
+        "author": "Sayaka Murata"
+      }
+    ]
+  },
+  {
+    "id": "case-6",
+    "label": "Hard turn-off",
+    "tasteDescription": "I love literary fiction — character studies, beautiful prose, morally complicated people. I will not read fantasy under any circumstances: no magic systems, no invented worlds.",
+    "recommendations": "[\n  {\n    \"title\": \"Hunger\",\n    \"author\": \"Knut Hamsun\",\n    \"why\": \"A claustrophobic, first-person portrait of a starving writer whose pride, self-deception, and flashes of cruelty make him one of literature's great morally messy narrators — pure psychological character study, sentence by sentence.\",\n    \"nonObvious\": \"It's a foundational text of literary modernism, but it rarely comes up in casual 'character study' recommendation lists the way its descendants (Kafka, Dostoevsky) do, despite being just as unsettling and beautifully written.\"\n  },\n  {\n    \"title\": \"The Informers\",\n    \"author\": \"Juan Gabriel Vásquez\",\n    \"why\": \"A son investigates his father's role in denouncing a family friend during WWII-era Colombia, unraveling how ordinary people rationalize betrayal — exactly the kind of morally complicated, prose-driven excavation of character you're describing.\",\n    \"nonObvious\": \"Vásquez writes in the tradition of Sebald and Bolaño but is far less reflexively cited than either, and this novel's quiet moral reckoning earns its weight without any genre trapping.\"\n  },\n  {\n    \"title\": \"The Assistant\",\n    \"author\": \"Bernard Malamud\",\n    \"why\": \"A drifter who robs a failing grocer ends up working for him out of guilt, and the novel becomes a slow, unsparing study of shame, obligation, and the limits of redemption — restrained prose carrying enormous moral weight.\",\n    \"nonObvious\": \"Malamud gets overshadowed by his contemporaries Bellow and Roth, but this novel's tight focus and moral austerity make it arguably the purer character study of the three.\"\n  }\n]",
+    "titles": [
+      {
+        "title": "Hunger",
+        "author": "Knut Hamsun"
+      },
+      {
+        "title": "The Informers",
+        "author": "Juan Gabriel Vásquez"
+      },
+      {
+        "title": "The Assistant",
+        "author": "Bernard Malamud"
+      }
+    ]
+  },
+  {
+    "id": "case-7a",
+    "label": "Rejection → clarify",
+    "tasteDescription": "I asked for recommendations similar to quiet, literary character studies, but the three you gave me last time were all too dark and bleak for what I wanted. I'd like something in a similar literary vein, but warmer and more hopeful in tone.",
+    "recommendations": "[\n  {\n    \"title\": \"Sweet Thursday\",\n    \"author\": \"John Steinbeck\",\n    \"why\": \"Steinbeck's own warmer companion to Cannery Row, this is a quiet, character-driven portrait of a ragtag community in Monterey — full of the same close observation of ordinary people you'd want from a literary character study, but built around tenderness, comic affection, and a genuinely hopeful romance rather than tragedy.\",\n    \"nonObvious\": \"Steinbeck's name usually triggers thoughts of Grapes of Wrath or East of Eden's bleakness; this lighter, sunnier late novel is easy to overlook precisely because of that reputation.\"\n  },\n  {\n    \"title\": \"The Chosen\",\n    \"author\": \"Chaim Potok\",\n    \"why\": \"A slow, interior novel about two boys' friendship across a religious divide in 1940s Brooklyn — it's built almost entirely on quiet conversation and inner change, and it earns real warmth through mutual respect and reconciliation rather than conflict left unresolved.\",\n    \"nonObvious\": \"It's often shelved as YA or 'Jewish-American coming-of-age' rather than mentioned alongside literary character studies, but its patient, dialogue-driven interiority fits that mode closely while staying fundamentally gentle.\"\n  },\n  {\n    \"title\": \"My Ántonia\",\n    \"author\": \"Willa Cather\",\n    \"why\": \"A lyrical, memory-soaked character study of a woman's life on the Nebraska prairie, narrated with real tenderness — it has hardship in it, but the prevailing mood is elegiac warmth and quiet admiration rather than despair, ending on resilience and continuity.\",\n    \"nonObvious\": \"Cather gets filed under 'prairie/pioneer classics' more than 'quiet literary character study,' so she's easy to miss even though the book is exactly that, minus the bleakness.\"\n  }\n]",
+    "titles": [
+      {
+        "title": "Sweet Thursday",
+        "author": "John Steinbeck"
+      },
+      {
+        "title": "The Chosen",
+        "author": "Chaim Potok"
+      },
+      {
+        "title": "My Ántonia",
+        "author": "Willa Cather"
+      }
+    ]
+  },
+  {
+    "id": "case-7b",
+    "label": "Rejection → clarify → widen escalation",
+    "tasteDescription": "I've now rejected two rounds of recommendations for quiet literary character studies — the first round was too dark, and the second round (aiming for warmer and more hopeful) still didn't land, they felt flat and forgettable. At this point just show me your best editable read on what you think I'm actually after, and feel free to widen out and take some real chances rather than staying narrowly in that same lane.",
+    "recommendations": "```json\n[\n  {\n    \"title\": \"A Manual for Cleaning Women\",\n    \"author\": \"Lucia Berlin\",\n    \"why\": \"You want quiet character study that doesn't go dark but also doesn't go flat — Berlin's autobiographical stories are about hard lives (laundromats, ER wards, alcoholism) but told with such wit, precision, and warmth toward her characters that they crackle with life instead of despair or blandness.\",\n    \"nonObvious\": \"Berlin's voice is so specific and funny that it sidesteps the 'misery memoir' trap dark picks fall into and the 'gentle and forgettable' trap warm picks fall into — it's vivid rather than either.\"\n  },\n  {\n    \"title\": \"The Summer Book\",\n    \"author\": \"Tove Jansson\",\n    \"why\": \"A grandmother and granddaughter spend a summer on a tiny Finnish island — nothing dramatic happens, but the dry humor, prickly affection, and exact observation of two very different people give it real texture, avoiding the saccharine flatness of typical 'warm and hopeful' picks.\",\n    \"nonObvious\": \"It reads as plotless and cozy on the surface, but Jansson's clear-eyed, unsentimental handling of aging and childhood keeps it from ever tipping into the pat comfort-read register.\"\n  },\n  {\n    \"title\": \"A Month in the Country\",\n    \"author\": \"J. L. Carr\",\n    \"why\": \"A shell-shocked WWI veteran spends a summer restoring a church mural in a quiet English village — it's a healing, hopeful story, but one built on restraint and unresolved longing rather than tidy uplift, which is likely what made the last 'warm' batch feel hollow by comparison.\",\n    \"nonObvious\": \"It's often shelved as pastoral nostalgia, but its ache comes from what's deliberately left unsaid and undone, giving it more staying power than its gentle premise suggests.\"\n  }\n]\n```",
+    "titles": [
+      {
+        "title": "A Manual for Cleaning Women",
+        "author": "Lucia Berlin"
+      },
+      {
+        "title": "The Summer Book",
+        "author": "Tove Jansson"
+      },
+      {
+        "title": "A Month in the Country",
+        "author": "J. L. Carr"
+      }
+    ]
+  },
+  {
+    "id": "case-8",
+    "label": "Texture-match, not genre-match",
+    "tasteDescription": "I'm looking for something with a really granular, immersive sense of place — I want to feel like I'm actually there — and characters who are morally ambiguous, not clearly good or bad. Genre doesn't matter much to me as long as it has that texture.",
+    "recommendations": "[\n  {\n    \"title\": \"Sátántangó\",\n    \"author\": \"László Krasznahorkai\",\n    \"why\": \"Set in a decaying, rain-soaked Hungarian collective farm, the novel builds its village so granularly — mud, weather, rot, the sound of an accordion in the distance — that you feel trapped in the place alongside the characters. Everyone here is compromised: swindlers, drunks, informants, and dreamers, none clearly heroic or villainous.\",\n    \"nonObvious\": \"It's a slow, circling, atmosphere-first novel rather than a plot-driven one, so it rewards exactly the kind of reader chasing texture over genre conventions, but it rarely tops general 'morally gray characters' lists.\"\n  },\n  {\n    \"title\": \"Paris Trout\",\n    \"author\": \"Pete Dexter\",\n    \"why\": \"The small Georgia town of Cotton Point in the late 1940s is rendered with such specific, unglamorous detail — the store, the courthouse, the heat — that the setting becomes almost a character itself, and the moral rot underneath small-town civility never resolves into simple villainy or heroism, even for its most disturbing figures.\",\n    \"nonObvious\": \"Its unflinching, matter-of-fact prose about ugly small-town violence makes it a strong sense-of-place pick that doesn't reach for the usual Southern Gothic touchstones.\"\n  },\n  {\n    \"title\": \"The Garden of Evening Mists\",\n    \"author\": \"Tan Twan Eng\",\n    \"why\": \"Set in the misty highlands of postwar Malaya, the novel lingers over garden design, tea plantations, and the physical work of memory and reconstruction with an almost tactile precision, while its central relationship — a former POW camp survivor apprenticing herself to a Japanese gardener — refuses any easy verdict on complicity, guilt, or forgiveness.\",\n    \"nonObvious\": \"It's often filed under historical or war fiction, but its real engine is landscape-as-memory and unresolved moral ambiguity, making it a better fit here than the more frequently cited WWII-Asia novels.\"\n  }\n]",
+    "titles": [
+      {
+        "title": "Sátántangó",
+        "author": "László Krasznahorkai"
+      },
+      {
+        "title": "Paris Trout",
+        "author": "Pete Dexter"
+      },
+      {
+        "title": "The Garden of Evening Mists",
+        "author": "Tan Twan Eng"
+      }
+    ]
+  },
+  {
+    "id": "case-9",
+    "label": "Genre/category fidelity & adjacent expansion",
+    "tasteDescription": "I love narrative nonfiction — real events told with the pacing and craft of a novel. Specifically deep-dive investigative journalism or historical accounts that read like thrillers. That's exactly what I'm looking for right now.",
+    "recommendations": "[\n  {\n    \"title\": \"The Nuclear Jihadist\",\n    \"author\": \"Douglas Frantz\",\n    \"why\": \"It's investigative journalism at its most cinematic — the real-life story of A.Q. Khan's nuclear black market, built with the tension, double-crosses, and pacing of a spy thriller, but every beat is sourced and true.\",\n    \"nonObvious\": \"It sits outside the usual true-crime/journalism canon most readers reach for, delivering geopolitical stakes and thriller mechanics rather than the courtroom or serial-killer framing that dominates the genre.\"\n  },\n  {\n    \"title\": \"El Narco\",\n    \"author\": \"Ioan Grillo\",\n    \"why\": \"A ground-level, deeply reported dive into Mexico's drug war that reads with the propulsion of a thriller while never losing the rigor of on-the-scene journalism — exactly the 'real events, novel pacing' combination you're after.\",\n    \"nonObvious\": \"Grillo's reporting from inside the conflict, rather than a distanced true-crime retelling, gives it an immediacy and moral complexity that keeps it from being a predictable pick in this space.\"\n  },\n  {\n    \"title\": \"Furious Hours\",\n    \"author\": \"Casey Cep\",\n    \"why\": \"A meticulously reported true story — a serial-killing reverend, a courtroom drama, and Harper Lee's unfinished book about it all — structured with the suspense and character work of a novel.\",\n    \"nonObvious\": \"It braids together true crime and literary biography in a way that's stranger and more layered than a straightforward murder narrative, avoiding the well-trodden 'chilling killer' formula.\"\n  }\n]",
+    "titles": [
+      {
+        "title": "The Nuclear Jihadist",
+        "author": "Douglas Frantz"
+      },
+      {
+        "title": "El Narco",
+        "author": "Ioan Grillo"
+      },
+      {
+        "title": "Furious Hours",
+        "author": "Casey Cep"
+      }
+    ]
+  },
+  {
+    "id": "case-10",
+    "label": "Creative-framing-only input",
+    "tasteDescription": "🌊🏚️👻🕯️ — moody, atmospheric, a little unsettling but not full horror. That's the vibe I want.",
+    "recommendations": "[\n  {\n    \"title\": \"A Fine and Private Place\",\n    \"author\": \"Peter S. Beagle\",\n    \"why\": \"It's built almost entirely on ghosts and atmosphere — a walled cemetery, a raven, two lingering spirits falling in love — with a melancholy, candlelit quietness that's eerie without ever tipping into horror.\",\n    \"nonObvious\": \"It's a genre-blending literary fantasy rather than a horror or thriller shelf pick, so it rarely comes up on standard 'spooky atmospheric read' lists despite fitting the mood exactly.\"\n  },\n  {\n    \"title\": \"Kit's Wilderness\",\n    \"author\": \"David Almond\",\n    \"why\": \"Set in a decaying former mining village with abandoned pits standing in for the haunted house, it's steeped in fog, old ghosts, and a slow-building unease that stays lyrical rather than frightening.\",\n    \"nonObvious\": \"Almond is usually filed as YA/crossover fiction, so this rarely surfaces on adult 'atmospheric ghost story' recommendation lists even though its tone and craft hold up for any reader.\"\n  },\n  {\n    \"title\": \"Rebecca's Tale\",\n    \"author\": \"Sally Beauman\",\n    \"why\": \"A coastal English house, a woman's presence that won't leave, fog and tide and old secrets pressing in — it channels the exact wet, gothic, quietly unsettling mood without becoming a horror novel.\",\n    \"nonObvious\": \"As an authorized companion/response to a famous classic, it's often overlooked on its own merits, but it stands as a moody, self-sufficient gothic in its own right rather than a mere retelling.\"\n  }\n]",
+    "titles": [
+      {
+        "title": "A Fine and Private Place",
+        "author": "Peter S. Beagle"
+      },
+      {
+        "title": "Kit's Wilderness",
+        "author": "David Almond"
+      },
+      {
+        "title": "Rebecca's Tale",
+        "author": "Sally Beauman"
+      }
+    ]
+  }
+]

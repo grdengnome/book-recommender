@@ -2,7 +2,7 @@
 // candidates instead of the model's own narrow "go-to" pool (see docs/eval-log.md,
 // 2026-07-08, for the evidence that motivated this).
 
-// --- TEMPORARY DIAGNOSTIC LOGGING (2026-08-04 query-tracing session) ---
+// --- TEMPORARY DIAGNOSTIC LOGGING (2026-08-03 query-tracing session) ---
 // Traces what query/subject pairs the model actually generates per eval case, to
 // check whether structurally different taste inputs converge on similar search
 // terms. Observation only — does not touch retrieval, dedupe, or shuffle logic
@@ -24,7 +24,9 @@ const QUERY_LOG_PATH = path.join(process.cwd(), "scratchpad", "query-log.json");
 // Newline-delimited JSON, not a single JSON array — search_books calls within a
 // round can run concurrently (route.ts fires tool_use blocks via Promise.all), and
 // synchronous line-appends avoid a read-modify-write race across those calls.
-function logSearchBooksCall(input: SearchBooksInput, poolSize: number): void {
+// `pool` is logged in full (title + author) so cross-case title repeats can be
+// checked against the actual raw candidates each call saw, not just the count.
+function logSearchBooksCall(input: SearchBooksInput, pool: BookCandidate[]): void {
   try {
     mkdirSync(path.dirname(QUERY_LOG_PATH), { recursive: true });
     const entry = {
@@ -32,7 +34,8 @@ function logSearchBooksCall(input: SearchBooksInput, poolSize: number): void {
       timestamp: new Date().toISOString(),
       query: input.query,
       subject: input.subject,
-      poolSize,
+      poolSize: pool.length,
+      pool: pool.map((c) => ({ title: c.title, author: c.author })),
     };
     appendFileSync(QUERY_LOG_PATH, JSON.stringify(entry) + "\n");
   } catch {
@@ -199,7 +202,7 @@ export async function searchBooks(
     subjects: c.subjects.slice(0, 2),
   }));
 
-  logSearchBooksCall(input, pool.length);
+  logSearchBooksCall(input, pool);
 
   return { pool, poolSize: pool.length };
 }
