@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // TEMPORARY (query-tracing session, 2026-08-04): optional eval-case tag, only
+  // TEMPORARY (query-tracing session, 2026-08-03): optional eval-case tag, only
   // ever set by the eval driver script. Absent in normal use, where this is a
   // no-op passthrough — does not affect retrieval, dedupe, or shuffle behavior.
   const evalTag = typeof body?.evalTag === "string" ? body.evalTag : null;

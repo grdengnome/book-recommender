@@ -32,6 +32,9 @@ yarn-error.log*
 
 # scratchpad run output (regenerated per eval run — the driver script itself is
 # tracked, its output isn't)
+# Note: some files here (query-log.json, pool-source-attribution.json, etc.)
+# have been force-added (git add -f) despite this rule anyway, because they
+# captured real diagnostic findings worth preserving in git history.
 /scratchpad/*.json
 
 # typescript
