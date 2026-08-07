@@ -23,6 +23,18 @@ Do not build the question-architecture UI, card-flip UI, or cover-image lookup u
 
 Any change to the recommendation prompt/logic should be checked against the test cases in `docs/eval-set.md` using the rubric there (6 dimensions, 4-point scale: fail/weak/good/excellent). If you change prompt logic, note what you changed and why in a comment or commit message — traceability matters here as much as it does in the recommendations themselves.
 
+## Progress log conciseness
+
+Entries in `docs/progress-log.md` have been getting too verbose, undermining their purpose as a quick-scan reference. Going forward:
+- Lead with the conclusion/decision, not the investigation narrative
+- Compress test methodology to one line where possible ("tested X via Y, found Z") rather than walking through the reasoning step by step
+- Cut illustrative examples down to 1, not 3-4
+- Skip restating context/status that's already in the previous entry unless it changed
+- The "Next steps" section stays as a clear numbered list — that part is working well and should stay as-is
+- Target: a reader should be able to skim an entry in under a minute and know what happened, what was decided, and what's next. Full technical detail can live in scratchpad files (already referenced/linked) rather than the log itself.
+
+This applies starting with the next entry, not retroactively to past entries.
+
 ## Things that look like bugs but aren't
 
 - No fixed question count / no "always ask 5 questions" logic — this was deliberately removed in favor of a confidence-based stopping rule. See spec Section 4a.
