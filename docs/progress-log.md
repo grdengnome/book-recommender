@@ -216,3 +216,17 @@ Ran the identical `cult novel` query against Open Library side by side for direc
 2. Build a light case/quote-insensitive dedup pass for the tag vocabulary.
 3. Build the taste-vocabulary-to-Hardcover-tag mapping using only the cleaned vocabulary (genres, moods, romance-style tropes), connecting it to the question architecture's facets (anchor/why/appetite).
 4. Then move to the actual merge/integration logic with Open Library — parallel API calls, decide supplement-vs-filter architecture. This was deferred from tonight since it depends on having a working, clean tag vocabulary first.
+
+---
+
+## August 9, 2026 — Full Tag-category scan closed out; exclusion list confirmed exhaustive; exclusion module built
+
+**Conclusion:** Extended the August 6 forced-choice scan to the full remaining Tag-category vocabulary (177 tags, all non-cluster tags at count>100). No new clusters found — the ~13-tag exclusion list from August 6 is confirmed exhaustive at this threshold. Built `lib/hardcover/tagExclusions.ts` to encode it. Also fixed a scratchpad-persistence gap from last session.
+
+**Cluster scan:** Tested 5 additional same-axis candidate pairs (Male MC/Female MC, POV person, POV count, MF/m-m, author gender). Male MC/Female MC ruled out as organic — per-user data showed real multi-select on the same book. The two POV pairs are inconclusive: zero co-occurrence, but also zero overlapping cases to run per-user decomposition on, so they're flagged unproven rather than confirmed either way. MF/m-m and author gender turned out to fall inside the already-scanned top-100 tier, not new territory.
+
+**Exclusion module:** `lib/hardcover/tagExclusions.ts` exports `RATING_WIDGET_TAGS` (the 13 confirmed tags, exact-match) and `SHELF_NOISE_PATTERNS` (pattern-based — named platforms plus structural patterns for likely variants), combined via `isExcludedTag()`. Verified against the full 190-tag list: 32 excluded, 158 kept, zero false positives on manual review. Testing surfaced one additional noise family the original pattern set missed — `Shelf: NN <name>` personal custom-shelf labels (plus a malformed bracketed duplicate of one) — added as `/^\[?"?shelf:/i`.
+
+**Process fix:** August 6's scratchpad files (data + scripts) didn't survive between sessions — gitignored/untracked, lost on environment reset. Force-added this session's key evidence files (tag list, analysis output, deep-pull data) to prevent recurrence.
+
+**Next:** Build the taste-vocabulary-to-Hardcover-tag mapping using the 158 cleaned tags, connecting it to the question architecture's facets (anchor/why/appetite). Unlike the last two sessions, this is a design/judgment task, not a data-verification task.
