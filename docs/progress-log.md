@@ -230,3 +230,26 @@ Ran the identical `cult novel` query against Open Library side by side for direc
 **Process fix:** August 6's scratchpad files (data + scripts) didn't survive between sessions — gitignored/untracked, lost on environment reset. Force-added this session's key evidence files (tag list, analysis output, deep-pull data) to prevent recurrence.
 
 **Next:** Build the taste-vocabulary-to-Hardcover-tag mapping using the 158 cleaned tags, connecting it to the question architecture's facets (anchor/why/appetite). Unlike the last two sessions, this is a design/judgment task, not a data-verification task.
+
+---
+
+## August 13, 2026 — Facet-to-tag mapping drafted; real gaps confirmed; reviews explored as a partial fix; reframed toward overdue eval test
+
+**Correction:** Last entry's "158 cleaned tags" was stale — logged before the `Shelf: NN` pattern was added in that same session. Re-running `isExcludedTag` against the current module gives **153 kept, 37 excluded**, of 190 total. 153 is the real number going forward.
+
+**Conclusion:** Drafted a facet-to-tag mapping (anchor / why→writing,world,characters,ideas,feeling / appetite / mood / commitment / turn-off) against the 153 cleaned tags. Good coverage on ideas, feeling, and mood; partial on world/genre. Five real gaps, confirmed by manually eyeballing the full raw tag list (not just the categorized summary) at the user's request:
+
+- **Writing/voice** — no prose-style or craft vocabulary exists in the tag set at all.
+- **Characters** — the tags that would directly answer this (`Loveable/Unloveable Characters`, `Strong/Weak Character Development`, etc.) are exactly the ones excluded as forced-choice rating-widget artifacts on Aug 6/9. Two independently-correct decisions in real tension.
+- **Appetite** — needs tag rarity/co-occurrence frequency, not facet-to-tag lookup — a different mechanism entirely.
+- **Commitment** — the direct tags (`fast/medium/slow-paced`) are excluded rating-widget noise; page-count metadata is likely the better source.
+- **Turn-off** — current candidates are romance-spice-specific, not general content warnings. Hardcover's actual `Content Warning` tag category is unpulled and is likely the right source.
+
+**Reviews investigated as a fix for the writing/voice gap.** Reviews live on `user_books` (`review`, `review_markdown`, `review_length`, etc.), not a standalone `Review` type — confirmed via introspection. Pulled samples for 8 literary-prose titles (Lolita, Blood Meridian, Beloved, Mrs Dalloway, The Sound and the Fury, Gilead, Stoner, Housekeeping). Real craft language shows up — "stream of consciousness," "form is content," "fragmented and circular by design" — vocabulary the tags never surfaced. Not building on this now: sparse relative to plot-summary/rating text, multilingual noise in the longest reviews, requires an LLM extraction step per book rather than a lookup (different mechanism than tag-matching), and likely thin on exactly the obscure titles this project cares about most — same popularity-correlation pattern found with tags on Aug 5. Documenting as a deliberate v1 candidate. Also hit the same edition-fragmentation problem tag/co-occurrence data had: "Blood Meridian" splits across 4+ `book_id`s with wildly different review counts per edition (0 vs. 117) depending on exact title string.
+
+**Reframe:** No eval-case testing has happened since Aug 5 — every session since Aug 6 has been coverage/data-quality analysis on Hardcover, not a test of whether a combined Open Library + Hardcover pool actually resolves the original problem (the Satantango/*Memory of Love* repeats). That test is step 3 from the Aug 5 plan and is still undone. It's the real priority, ahead of further vocabulary auditing.
+
+**Next:**
+1. Build a rough Open Library + Hardcover merge and run it directly against the eval cases that previously produced repeated titles (*Satantango*, *The Memory of Love*) — the real test of whether the architecture works, gaps included.
+2. Resolve the four flagged gaps (writing/voice, appetite, commitment, turn-off) with the user before building the mapping into code — none should be resolved unilaterally.
+3. If turn-off needs it, pull and vet Hardcover's `Content Warning` tag category (unpulled so far).
