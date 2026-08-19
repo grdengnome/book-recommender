@@ -8,7 +8,9 @@
 // Both input pools arrive already ranked and shuffled by their own pipelines
 // (searchBooks.ts for Open Library, preparePool.ts's prepareHardcoverPool for
 // Hardcover) — this module does no sorting or filtering of its own, only dedup +
-// metadata merge + source tracking.
+// metadata merge + source tracking. The one exception is a final cross-source
+// shuffle (step 4 below), which exists purely to prevent source-clustering bias,
+// not to rank or filter anything.
 import type { BookCandidate } from "../tools/searchBooks";
 import type { HardcoverBookCandidate } from "../hardcover/preparePool";
 
@@ -101,7 +103,24 @@ function computeStats(
   };
 }
 
-// Step 4: lightweight, reusable per-call log — not a one-off diagnostic. Composition
+// Step 4: bias mitigation, not a ranking decision. Without this, the merged pool
+// is always "all Open Library records, then all Hardcover-only records" in
+// sequence (see step 2's indexing order above) — if the model gives any weight to
+// candidate position, Open Library would get a structural advantage on every call
+// regardless of actual relevance. Fisher-Yates shuffle over the whole merged pool
+// so source order carries no signal. Does not touch which books qualified or their
+// per-source ranking — that already happened upstream in each source's own
+// pipeline; this only mixes the two finished blocks together.
+function shuffleMergedPool(pool: MergedBookCandidate[]): MergedBookCandidate[] {
+  const shuffled = [...pool];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+// Step 5: lightweight, reusable per-call log — not a one-off diagnostic. Composition
 // is expected to shift call to call as Open Library's retrieval varies, so this
 // prints every time rather than only when something looks off.
 function logMergeStats(stats: MergeStats): void {
@@ -120,7 +139,8 @@ export function mergeCandidatePools(
   // both sources on a match rather than discarding either record. Building the index
   // from the Open Library pass first, then folding Hardcover in, preserves each
   // source's own already-shuffled relative order — Hardcover-only additions land
-  // after the Open Library entries; no new ordering is introduced (step 3).
+  // after the Open Library entries. That positional split is corrected below
+  // (step 4), not here.
   const byKey = new Map<string, MergeEntry>();
 
   for (const c of openLibraryPool) {
@@ -155,9 +175,11 @@ export function mergeCandidatePools(
     }
   }
 
-  const pool = [...byKey.values()].map((v) => v.record);
-  const stats = computeStats(openLibraryPool.length, hardcoverPool.length, pool);
+  const combinedPool = [...byKey.values()].map((v) => v.record);
+  const stats = computeStats(openLibraryPool.length, hardcoverPool.length, combinedPool);
   logMergeStats(stats);
+
+  const pool = shuffleMergedPool(combinedPool);
 
   return { pool, stats };
 }

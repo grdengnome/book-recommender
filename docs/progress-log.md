@@ -300,3 +300,28 @@ Ran the identical `cult novel` query against Open Library side by side for direc
 6. Open, untested hypothesis to check once the merge runs: roughly 75-80% of the merged pool from Open Library, ~20-25% from Hardcover. Source-tracking stats are already built to measure this directly.
 7. Carry forward from Aug 15: resolve the four flagged taste-facet gaps (writing/voice, appetite, commitment, turn-off) with the user before building the mapping into code.
 8. Carry forward from Aug 13: pull and vet Hardcover's `Content Warning` tag category if needed for turn-off.
+
+---
+
+## August 19, 2026 — Pagination-vs-multi-subject test resolved; Hardcover locked in as fixed pre-fetch
+
+**Conclusion:** Ran the pagination-vs-multi-subject isolation test blocked since Aug 16. Pagination works within a subject but doesn't touch cross-case convergence; multi-subject fan-out grows pool size but doesn't fix overlap either. Decided to build multi-subject fan-out anyway, for pool richness rather than as an overlap fix — cross-case OL overlap on structurally different inputs is expected when genuinely relevant, per eval rubric dimension 6. Separately, resolved a real architecture fork: Hardcover will be a fixed pre-fetch, not a model-invoked tool.
+
+**Pagination vs. multi-subject test:** pagination works cleanly within a subject but doesn't fix cross-case convergence, since case-3 and case-8 already share a subject. Multi-subject fan-out grows each case's pool (+96%) but didn't fix cross-case overlap either — 56.6% overlap even after expansion. Flag: `translated_literature` subject returns 0 works at any offset — likely dead/misnamed on Open Library's side.
+
+**Built:** final full-pool shuffle in `lib/merge/mergeCandidatePools.ts` (after dedup/combine) — fixes source-clustering (OL candidates were always listed before Hardcover-only ones). Multi-subject fan-out itself is still not built into `searchBooks.ts` — needed before further merge testing.
+
+**Architecture decision:** Hardcover stays a fixed pre-fetch, not a model-invoked tool. `route.ts` will derive tags upfront, fetch Hardcover deterministically, call `mergeCandidatePools` once both pools exist. Intentionally asymmetric with Open Library's adaptive/model-invoked search.
+
+**New gap:** no function exists yet to convert a taste description into Hardcover tag IDs. Needed regardless of the above, and needs to work in one shot since there's no adaptive correction under a fixed pre-fetch.
+
+**Discussed, not tested:** widening Hardcover's tag list (currently ~2-3 tags) to increase retrieval reach — distinct from `WORKING_POOL_SIZE` (already tested, stays at 15). Widening tags doesn't increase Hardcover's share of the merged pool on its own; test in isolation next session, not bundled with a pool-size change.
+
+**Next:**
+1. Build multi-subject fan-out into `searchBooks.ts`.
+2. Build the taste-to-Hardcover-tag mapping function.
+3. Wire Hardcover into `route.ts` as fixed pre-fetch; call the merge there.
+4. Test widening Hardcover's tag list in isolation.
+5. Run the real merge for case-3/case-8; check the merged pool and source-tracking stats.
+6. Carry forward from Aug 15: resolve the four flagged taste-facet gaps with the user before building the mapping into code.
+7. Carry forward from Aug 13: pull and vet Hardcover's `Content Warning` tag category if needed for turn-off.
