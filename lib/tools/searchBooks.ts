@@ -33,7 +33,7 @@ function logSearchBooksCall(input: SearchBooksInput, pool: BookCandidate[]): voi
       tag: currentLogTag,
       timestamp: new Date().toISOString(),
       query: input.query,
-      subject: input.subject,
+      subjects: input.subjects,
       poolSize: pool.length,
       pool: pool.map((c) => ({ title: c.title, author: c.author })),
     };
@@ -52,7 +52,7 @@ const RESULTS_PER_CALL = 100;
 export const searchBooksToolDefinition = {
   name: "search_books",
   description:
-    "Search for real, existing books to ground recommendations in actual candidates rather than relying solely on trained knowledge. Runs a free-text relevance search and a controlled-vocabulary subject search in parallel and merges them into one deduplicated, shuffled, unordered candidate pool — order carries no meaning and must not influence which picks you favor. Call it again with broader or different terms if the pool comes back thin (under ~15-20 candidates) before falling back to trained knowledge.",
+    "Search for real, existing books to ground recommendations in actual candidates rather than relying solely on trained knowledge. Runs a free-text relevance search plus a controlled-vocabulary subject search against every subject you list, then merges everything into one deduplicated, shuffled, unordered candidate pool — order carries no meaning and must not influence which picks you favor. Call it again with broader or different terms if the pool comes back thin (under ~15-20 candidates) before falling back to trained knowledge.",
   input_schema: {
     type: "object" as const,
     properties: {
@@ -61,13 +61,14 @@ export const searchBooksToolDefinition = {
         description:
           "Free-text search terms describing the kind of book to find, e.g. \"quiet character study morally ambiguous\". Passed to Open Library's relevance-ranked search. Keep it short — 2-5 keywords, not a full descriptive sentence: Open Library's matching is stricter than a general web search, and longer, more sentence-like phrases tend to return zero results.",
       },
-      subject: {
-        type: "string",
+      subjects: {
+        type: "array",
+        items: { type: "string" },
         description:
-          "A genre/subject guess in Open Library's controlled vocabulary, e.g. \"psychological_fiction\" or \"translated_literature\". Lowercase, underscores instead of spaces. Passed to a separate, stricter subject-tag search — give your best guess even if uncertain.",
+          "One or more genre/subject guesses in Open Library's controlled vocabulary, e.g. [\"psychological_fiction\", \"translated_literature\"]. Lowercase, underscores instead of spaces. Each is queried separately and merged into the pool — list a few different angles on the taste input (2-3 is usually enough) rather than just one, since a single subject guess tends to produce a narrower, more repetitive pool. Give your best guesses even if uncertain.",
       },
     },
-    required: ["query", "subject"],
+    required: ["query", "subjects"],
   },
 };
 
@@ -91,7 +92,7 @@ export interface SearchBooksResult {
 
 export interface SearchBooksInput {
   query: string;
-  subject: string;
+  subjects: string[];
 }
 
 async function fetchSearchResults(query: string): Promise<RawCandidate[]> {
@@ -163,9 +164,9 @@ function dedupeKey(c: RawCandidate): string {
   return `${c.title.trim().toLowerCase()}::${c.author.trim().toLowerCase()}`;
 }
 
-function mergeAndDedupe(a: RawCandidate[], b: RawCandidate[]): RawCandidate[] {
+function mergeAndDedupe(groups: RawCandidate[][]): RawCandidate[] {
   const merged = new Map<string, RawCandidate>();
-  for (const candidate of [...a, ...b]) {
+  for (const candidate of groups.flat()) {
     const key = dedupeKey(candidate);
     if (!merged.has(key)) merged.set(key, candidate);
   }
@@ -186,12 +187,12 @@ function shuffle<T>(items: T[]): T[] {
 export async function searchBooks(
   input: SearchBooksInput,
 ): Promise<SearchBooksResult> {
-  const [searchResults, subjectResults] = await Promise.all([
+  const [searchResults, ...subjectResultGroups] = await Promise.all([
     fetchSearchResults(input.query),
-    fetchSubjectResults(input.subject),
+    ...input.subjects.map(fetchSubjectResults),
   ]);
 
-  const merged = mergeAndDedupe(searchResults, subjectResults);
+  const merged = mergeAndDedupe([searchResults, ...subjectResultGroups]);
   const shuffled = shuffle(merged);
 
   // Strip work IDs and any other ranking/origin metadata — the model sees
