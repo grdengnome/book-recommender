@@ -17,10 +17,21 @@
 const HARDCOVER_ENDPOINT = "https://api.hardcover.app/v1/graphql";
 const RAW_FETCH_LIMIT = 100; // taggable_counts rows pulled before summing/dedup — matches the depth used in the ordering test
 
-// PROVISIONAL — only top-15 raw results were verified junk-free in the Aug 16
-// ordering test (scratchpad/hardcover-order-candidates-raw.json). Revisit once
-// top-30 is verified junk-free, or once eval output shows thin variety.
-const WORKING_POOL_SIZE = 15;
+// PROVISIONAL — widened from 15 (2026-08-20) after scratchpad/hardcover-diag-ranks16-30.mjs
+// confirmed ranks 16-30 are junk-free at the same depth RAW_FETCH_LIMIT already pulls.
+// Ranks 16-30 carry the same mainstream lean as the top 15, so this doesn't improve
+// obscurity on its own — it widens the pool available to shuffle within for a given
+// tag combination, for session-to-session variety when the same tags get reselected.
+const WORKING_POOL_SIZE = 30;
+
+// A hard rank cutoff (old behavior) let low-relevance candidates through once a tag
+// combination ran thin on strong matches. scratchpad/step3b-relevance-distribution.mts
+// (2026-08-20, all 4 Step 2 tag sets) showed relevance=1 is where composition breaks:
+// candidates matched through a single thinly-applied tag lose genre coherence (case-1's
+// `Emotional`-only tail was Grisham/Sanderson/Follett against a literary-classics brief;
+// case-8's `reflective`-only tail was much the same). relevance>=2 is where every case's
+// own data showed the shift back to on-theme results — not a guessed number.
+const RELEVANCE_FLOOR = 2;
 
 interface TaggableCountRow {
   count: number;
@@ -153,7 +164,10 @@ function shuffle<T>(items: T[]): T[] {
 export async function prepareHardcoverPool(tagIds: number[]): Promise<PreparePoolResult> {
   const rows = await fetchTaggableCounts(tagIds); // 1: retrieve
   const ranked = rankByTagRelevance(rows); // 2: rank by tag-match relevance
-  const truncated = ranked.slice(0, WORKING_POOL_SIZE); // 3: truncate to working pool size
+  // 3: fill up to WORKING_POOL_SIZE with candidates clearing RELEVANCE_FLOOR, in ranked
+  // order — `ranked` is already sorted descending, so filter-then-slice stops early
+  // rather than padding with subthreshold candidates once the floor runs out.
+  const truncated = ranked.filter((b) => b.tagRelevanceSum >= RELEVANCE_FLOOR).slice(0, WORKING_POOL_SIZE);
   const shuffled = shuffle(truncated); // 4: shuffle within the truncated pool
 
   // 5+6: normalize to BookCandidate-compatible shape; strip ranking metadata

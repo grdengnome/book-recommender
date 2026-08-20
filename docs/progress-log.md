@@ -317,6 +317,30 @@ Ran the identical `cult novel` query against Open Library side by side for direc
 
 **Discussed, not tested:** widening Hardcover's tag list (currently ~2-3 tags) to increase retrieval reach — distinct from `WORKING_POOL_SIZE` (already tested, stays at 15). Widening tags doesn't increase Hardcover's share of the merged pool on its own; test in isolation next session, not bundled with a pool-size change.
 
+---
+
+## August 20, 2026 — OL fan-out, Hardcover tag-mapping, and the first real merge all built and run; route.ts still OL-only
+
+**Conclusion:** Closed out the five carried-over build items from Aug 19 (OL fan-out, tag-mapping function, pool-size widen, real merge run, source-stat check), added a relevance floor to Hardcover's truncation after the pool-size widen surfaced a real quality problem, and ran the actual end-to-end `/api/recommend` route against case-3/case-8 to check the "Memory of Love" cross-case question directly rather than reasoning about it. **`route.ts` is not wired to the Hardcover pre-fetch/merge — tonight's end-to-end test was Open Library only.** That wiring is next session's first task.
+
+**Built:**
+- **OL multi-subject fan-out** (`lib/tools/searchBooks.ts`): `subject: string` → `subjects: string[]`, fetched in parallel and merged. Verified against case-3/case-8's real subject sets — pool growth matched the Aug 19 investigation's prediction almost exactly (+96%/+98%). `translated_literature`'s earlier flagged 0-works concern did not reproduce (94 works on spot-check) — not confirmed broken, but also not conclusively resolved either way.
+- **Taste → Hardcover tag-mapping** (`lib/hardcover/mapTasteToTags.ts`, `lib/hardcover/tagVocabulary.ts`): one-shot LLM call over the 153-tag cleaned vocabulary (checked in as a snapshot, since it only lives in scratchpad otherwise). Count-bias is prevented structurally, not just by instruction — the model sees tag names only, shuffled, never counts. Tested against 4 structurally different eval cases: no full tag-set collapse, `Literature` recurred across 3/4 (a real vocabulary-gap symptom, not the selector defaulting to popularity). **Bug found and fixed during the Step 4 live run:** the model prefixed its JSON with stray reasoning text on case-8, breaking the parser — `parseSelectedTags` now extracts the first `[...]` span instead of assuming the whole response is valid JSON.
+- **Relevance floor** (`lib/hardcover/preparePool.ts`): `WORKING_POOL_SIZE` 15→30 (ranks 16-30 confirmed junk-free per Aug 16 diagnostic), but the widen itself surfaced a new problem — ranks 16-30 on case-8's tags were dominated by a single loose tag match (`reflective`) pulling in genre-scrambled commercial thrillers. Investigated the relevance-score distribution across all 4 Step 2 tag sets before touching code: broad *mood* tags (`Emotional`, `reflective`) lose genre coherence entirely at relevance=1, while broad *category* tags (`nonfiction`) stay roughly on-genre even at relevance=1, just looser. Added `RELEVANCE_FLOOR = 2` — filter-then-slice, so the pool stops early rather than padding with subthreshold candidates once a tag set runs out of matches above the floor.
+- **First real `mergeCandidatePools.ts` run** (previously built Aug 16, never run against real data): case-3 → OL 196 / HC 30 / 8 dupes / merged 218 (OL 86.7%, HC 13.8%); case-8 → OL 197 / HC 16 / 5 dupes / merged 208 (OL 92.8%, HC 7.7%). Both below the 75-80/20-25 estimate — **user confirmed that split was an estimate going in, not a target, and is comfortable with Hardcover landing lower as long as what it contributes stays relevant.** Read: the shortfall is mostly structural (OL's ~200-candidate fan-out vs. Hardcover's 30-candidate cap puts a ~13% ceiling on HC% before the floor does anything), not a floor malfunction — case-3 hit the 30-cap fully (floor cost it nothing this run), case-8 landed under cap at 16 (floor genuinely trimmed a thin set). Not treating the percentage as something to fix by loosening the floor or widening tags.
+- **End-to-end test, OL-only:** ran the real `/api/recommend` route for case-3 and case-8. *The Memory of Love* — the original Aug 4 convergence title, which had resurfaced in both cases' raw merged candidate *pools* — did not appear in either case's actual output, and the two cases shared zero final picks. Resolves clean per rubric dimension 6: pool-level co-occurrence didn't translate into output-level convergence.
+
+**New open item:** case-8's output tonight (*Sátántangó*, *The Garden of Evening Mists*, *The Informers*) shares 2 of 3 titles with the Aug 3 2026 log's case-8 run (*Sátántangó*, *Paris Trout*, *The Garden of Evening Mists*) — same-case, cross-*session* repetition, not cross-case convergence. One data point; could be a genuinely stable best-answer set for a narrow brief, or an early staleness signal. Unresolved, flagged not judged.
+
+**Carried over, still open:**
+1. Hardcover tag-list widening (currently 2-4 tags via the mapping function) as a separate lever from pool size — discussed Aug 19, still not tested in isolation.
+2. `rankByTagRelevance`'s "dropped N row(s) with no author" behavior — fired for real tonight (9 rows on case-3, 2 on case-8) but wasn't investigated; unclear whether it's dropping real taggable candidates.
+3. `translated_literature`'s 0-works flag — not reproduced tonight, not conclusively cleared either.
+4. `Need to Tag` (id 34115) sitting in the 153-tag cleaned vocabulary — reads like a Hardcover platform placeholder, not a taste tag. Never selected in testing so far, but not excluded either; flagged for a decision, not acted on unilaterally.
+
+**Next:**
+1. Wire Hardcover's pre-fetch + `mergeCandidatePools` into `route.ts` for real (currently OL-only) and rerun the end-to-end test against case-3/case-8 — tonight's end-to-end result doesn't yet reflect the full architecture this session just built and verified in isolation.
+
 **Next:**
 1. Build multi-subject fan-out into `searchBooks.ts`.
 2. Build the taste-to-Hardcover-tag mapping function.
