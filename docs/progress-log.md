@@ -372,3 +372,23 @@ Ran the identical `cult novel` query against Open Library side by side for direc
 1. Fix `hcGraphql()`'s error-shape handling.
 2. Fix `parseSelectedTags`'s parsing robustness.
 3. Re-run case-3/case-8 (and ideally more cases) once both are fixed, for a second clean read on the OL/HC split and whether Hardcover ever makes the final 3.
+
+---
+
+## September 2, 2026 — Both open Hardcover bugs fixed and merged; case-8 verified clean
+
+**Conclusion:** Fixed both bugs carried from Aug 27: `hcGraphql()`'s non-GraphQL error detection (PR #1) and `parseSelectedTags()`'s fragile JSON extraction (PR #3). Merged all three open PRs to `main` in dependency order — #1, then #3, then #2 (Hardcover route wiring) — so the live route never ran with the buggy tag parser. Re-ran case-8 against current `main`: `mapTasteToHardcoverTags` succeeded, and Hardcover candidates genuinely reached the merged pool.
+
+**Built:**
+- **`hcGraphql()` hardening** (`lib/hardcover/preparePool.ts`): checks `res.ok`/status before assuming a valid GraphQL body, wraps `res.json()` in try/catch for non-JSON responses, and checks both the standard `errors` array and top-level `error`/`message` fields.
+- **`parseSelectedTags()` fix** (`lib/hardcover/mapTasteToTags.ts`): replaced the greedy `/\[[\s\S]*\]/` regex with `extractJsonArraySpan()` — scans forward from each `[`, tracks bracket depth to find its balanced `]`, and requires the candidate span to actually `JSON.parse` as an array before accepting it, retrying from the next `[` on failure. Needed because a balanced pair isn't necessarily the *right* one — stray bracket text before the real array (e.g. "themes like [betrayal, memory]") is itself self-contained and balanced.
+
+**Merge:** #1 → #3 → #2, all clean/mergeable, no conflicts. `tsc --noEmit` re-run after each merge — only pre-existing scratchpad-only errors (confirmed identical on pre-PR `main`), nothing new. Merged branches deleted, local and origin.
+
+**Case-8 verification** (`scratchpad/step4-real-merge.mts`, against current `main`): tags selected `["mysterious","Tense","dark","reflective"]`, Hardcover raw pool 16, merged pool 211 (92.9% OL / 7.6% HC) — 15 `[hardcover]`-only entries plus 1 deduped cross-source entry (*The Bell Jar*). No fallback to OL-only; Hardcover's presence in the pool is real, not nominal.
+
+**Open, not yet done:** this only confirms Hardcover candidates reach the merged *pool*, not that any survive to the model's final 3 picks. No end-to-end run through the live `/api/recommend` route was attempted for case-8 this session.
+
+**Next:**
+1. Run case-8 end-to-end through the live route; check whether any Hardcover-sourced candidate makes the final 3.
+2. Extend beyond case-3/case-8 now that both bugs are fixed.
