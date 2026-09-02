@@ -349,3 +349,26 @@ Ran the identical `cult novel` query against Open Library side by side for direc
 5. Run the real merge for case-3/case-8; check the merged pool and source-tracking stats.
 6. Carry forward from Aug 15: resolve the four flagged taste-facet gaps with the user before building the mapping into code.
 7. Carry forward from Aug 13: pull and vet Hardcover's `Content Warning` tag category if needed for turn-off.
+
+---
+
+## August 27, 2026 — Hardcover wired into route.ts for real; first live OL+HC merge test; two new bugs found
+
+**Conclusion:** Wired Hardcover as a parallel pre-fetch in `route.ts` — concurrent with the OL adaptive tool loop, merged via `mergeCandidatePools` inside the tool-result handler on each `search_books` call rather than once up front, per the Aug 19 decision. Added backend-only failure tracking, rotated the Hardcover token, then ran the first live end-to-end test of the full pipeline — surfaced two new bugs in the process.
+
+**Built:**
+- **Hardcover wiring** (`route.ts`): pre-fetch starts concurrently with the OL loop; merge happens per `search_books` resolution, not as a single upfront pool combine, since no OL pool value exists outside an individual tool call.
+- **Hardcover failure tracking** (`scratchpad/hardcover-failure-log.json`): NDJSON-append, same convention as `query-log.json`. Four categories — `missing_token`, `hardcover_api_error`, `empty_tag_mapping`, `tag_mapping_error`. Never surfaced to the client; any Hardcover failure silently degrades to OL-only.
+
+**Token rotated:** old `HARDCOVER_API_TOKEN` was invalid/expired (confirmed via a standalone 401 diagnostic). New token scoped narrowly to `read:catalog:data` + `read:catalog:search`.
+
+**First live end-to-end test (case-3, case-8):** case-3 — genuine working OL+Hardcover merge, ~87/13% split; all 3 final picks traced back to OL's own pool (Hardcover candidates present but passed over, not absent). case-8 — hit a second, distinct Hardcover bug: `parseSelectedTags` threw a `SyntaxError` parsing `mapTasteToHardcoverTags`'s output for this input; caught correctly, logged as `tag_mapping_error`, degraded to OL-only.
+
+**New bugs, not fixed tonight:**
+1. `hcGraphql()` doesn't detect non-GraphQL-shaped error responses (surfaced by the invalid-token diagnostic — a 401 with no `data`/`errors` field crashed downstream instead of failing cleanly).
+2. `parseSelectedTags`'s bracket-extraction JSON parsing isn't robust to all model output shapes (surfaced by case-8).
+
+**Next:**
+1. Fix `hcGraphql()`'s error-shape handling.
+2. Fix `parseSelectedTags`'s parsing robustness.
+3. Re-run case-3/case-8 (and ideally more cases) once both are fixed, for a second clean read on the OL/HC split and whether Hardcover ever makes the final 3.
