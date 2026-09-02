@@ -77,8 +77,28 @@ async function hcGraphql<T>(query: string, variables: Record<string, unknown>): 
     headers: { "Content-Type": "application/json", Authorization: auth },
     body: JSON.stringify({ query, variables }),
   });
-  const json = await res.json();
+
+  const bodyText = await res.text();
+  let json: any;
+  try {
+    json = JSON.parse(bodyText);
+  } catch {
+    throw new Error(
+      `Hardcover API returned non-JSON response (status ${res.status}): ${bodyText.slice(0, 200)}`
+    );
+  }
+
+  if (!res.ok) {
+    const detail = json?.errors ? JSON.stringify(json.errors) : json?.error || json?.message || bodyText.slice(0, 200);
+    throw new Error(`Hardcover API request failed (status ${res.status}): ${detail}`);
+  }
+
+  // Standard GraphQL errors array — request reached execution but resolvers failed.
   if (json.errors) throw new Error(JSON.stringify(json.errors));
+  // Non-standard top-level error shape — some auth failures short-circuit before
+  // reaching GraphQL execution and return { error: "..." } / { message: "..." } instead.
+  if (json.error || json.message) throw new Error(String(json.error || json.message));
+
   return json.data as T;
 }
 
