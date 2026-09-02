@@ -47,16 +47,64 @@ Many of these tags are broad, generic descriptors ("dark", "mysterious", "fictio
 Respond with ONLY a JSON array of the tag strings you picked, copied exactly as they appear in the list above — no prose before or after it.`;
 }
 
+// Scan forward from a `[`, tracking bracket depth, to find the `]` that actually
+// closes it — rather than just grabbing the last `]` in the whole string (the old
+// /\[[\s\S]*\]/ bug: greedy, so leading prose containing its own bracket, e.g.
+// "themes like [betrayal, memory]", got captured from that stray `[` through the
+// real array's closing `]` as one invalid blob).
+//
+// A balanced pair isn't automatically the *right* pair, though: stray bracket text
+// before the real array (e.g. "Themes like [x] suggest: [...]") is itself a
+// self-contained balanced span, so scanning only the first `[` would isolate `[x]`
+// — balanced, but not valid JSON. So this tries each `[` in turn, taking its
+// balanced span as a candidate and requiring it to actually JSON.parse as an array;
+// on failure it resumes scanning from the next `[` rather than stopping.
+function extractJsonArraySpan(responseText: string): string {
+  let searchFrom = 0;
+  while (true) {
+    const start = responseText.indexOf("[", searchFrom);
+    if (start === -1) break;
+
+    let depth = 0;
+    for (let i = start; i < responseText.length; i++) {
+      const ch = responseText[i];
+      if (ch === "[") depth++;
+      else if (ch === "]") {
+        depth--;
+        if (depth === 0) {
+          const candidate = responseText.slice(start, i + 1);
+          try {
+            const parsed = JSON.parse(candidate);
+            if (Array.isArray(parsed)) return candidate;
+          } catch {
+            // Balanced but not valid JSON (e.g. "[x]") — keep scanning from the next `[`.
+          }
+          break;
+        }
+      }
+    }
+    searchFrom = start + 1;
+  }
+  throw new Error(`No JSON array found in response: ${responseText}`);
+}
+
+// Manual checks (no test suite exists in this project yet):
+//   extractJsonArraySpan('["dark", "atmospheric"]')
+//     -> '["dark", "atmospheric"]'
+//   extractJsonArraySpan('Themes like [x] suggest: ["dark", "atmospheric"]')
+//     -> '["dark", "atmospheric"]'   (old regex grabbed '[x] suggest: ["dark", "atmospheric"]' and threw)
+//   extractJsonArraySpan('["dark", "atmospheric"] — these felt like the strongest fit.')
+//     -> '["dark", "atmospheric"]'
+
 function parseSelectedTags(responseText: string): string[] {
   // The "no prose before or after" instruction isn't always followed — seen in
   // practice with leading reasoning text ahead of the array (2026-08-20, Step 4
-  // real-merge run). Extract the first [...] span rather than assuming the whole
-  // trimmed response is valid JSON, same tolerance route.ts already applies to the
-  // main recommendation response (strips code fences there; this goes one step
+  // real-merge run). Extract the first balanced [...] span rather than assuming the
+  // whole trimmed response is valid JSON, same tolerance route.ts already applies to
+  // the main recommendation response (strips code fences there; this goes one step
   // further since a bare fence strip isn't enough for leading prose).
-  const match = responseText.match(/\[[\s\S]*\]/);
-  if (!match) throw new Error(`No JSON array found in response: ${responseText}`);
-  const parsed = JSON.parse(match[0]);
+  const span = extractJsonArraySpan(responseText);
+  const parsed = JSON.parse(span);
   if (!Array.isArray(parsed)) throw new Error("Expected a JSON array of tag strings");
   return parsed.filter((t): t is string => typeof t === "string");
 }
