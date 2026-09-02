@@ -1,5 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
+import { appendFileSync, mkdirSync } from "fs";
+import path from "path";
 import { toolDefinitions, callTool, setSearchBooksLogTag } from "@/lib/tools";
+import type { SearchBooksResult } from "@/lib/tools/searchBooks";
+import { mapTasteToHardcoverTags } from "@/lib/hardcover/mapTasteToTags";
+import {
+  prepareHardcoverPool,
+  type HardcoverBookCandidate,
+} from "@/lib/hardcover/preparePool";
+import { mergeCandidatePools } from "@/lib/merge/mergeCandidatePools";
 
 const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
 const MODEL = "claude-sonnet-5";
@@ -9,6 +18,93 @@ const MODEL = "claude-sonnet-5";
 // omits `tools`, which structurally forces a final answer rather than relying
 // on an instruction the model could ignore.
 const MAX_TOOL_ROUNDS = 3;
+
+// Hardcover pre-fetch — spec.md 5b, architecture decided 2026-08-19 (docs/progress-log.md):
+// fixed pre-fetch derived from the taste description up front, intentionally asymmetric
+// with Open Library's adaptive/model-invoked search. Runs once per request, concurrently
+// with the OL tool-use loop below; merged into each search_books result as it resolves
+// (see the tool-result loop), not merged once before the conversation starts, since no
+// single OL pool value exists outside an individual tool call.
+//
+// Error-handling decision point (flagged, not silently picked): on any failure —
+// Hardcover API error, missing token, or an empty tag mapping — this degrades to an
+// empty pool rather than failing the whole request. mergeCandidatePools with an empty
+// Hardcover side is a no-op that just passes the OL pool through, so the user still gets
+// OL-only recommendations instead of a hard failure. This matches the existing convention
+// in searchBooks.ts (fetchSearchResults/fetchSubjectResults already catch-and-return-[]
+// rather than throwing) — reconsider if silent degradation here should instead surface to
+// the caller (e.g. a response field noting Hardcover was unavailable).
+//
+// Failure tracking: silent to the client, but not silent to us — same NDJSON-append
+// pattern as searchBooks.ts's query-log.json (tagged, append-only, logging failure can
+// never break the actual request). Categorized rather than lumped into one bucket, since
+// "token misconfigured" and "Hardcover API had a bad day" point to different fixes.
+type HardcoverFailureCategory =
+  | "missing_token"
+  | "hardcover_api_error"
+  | "empty_tag_mapping"
+  | "tag_mapping_error";
+
+const HARDCOVER_FAILURE_LOG_PATH = path.join(
+  process.cwd(),
+  "scratchpad",
+  "hardcover-failure-log.json",
+);
+
+function logHardcoverFailure(
+  tag: string | null,
+  category: HardcoverFailureCategory,
+  err: unknown,
+): void {
+  try {
+    mkdirSync(path.dirname(HARDCOVER_FAILURE_LOG_PATH), { recursive: true });
+    const entry = {
+      tag,
+      timestamp: new Date().toISOString(),
+      category,
+      detail:
+        err instanceof Error
+          ? err.message
+          : "mapTasteToHardcoverTags matched zero tags",
+    };
+    appendFileSync(HARDCOVER_FAILURE_LOG_PATH, JSON.stringify(entry) + "\n");
+  } catch {
+    // Diagnostic logging must never break the actual Hardcover pre-fetch.
+  }
+}
+
+async function fetchHardcoverPool(
+  tasteDescription: string,
+  evalTag: string | null,
+): Promise<HardcoverBookCandidate[]> {
+  let tagIds: number[];
+  try {
+    tagIds = (await mapTasteToHardcoverTags(tasteDescription)).tagIds;
+  } catch (err) {
+    console.error("Hardcover tag mapping failed, degrading to Open-Library-only:", err);
+    logHardcoverFailure(evalTag, "tag_mapping_error", err);
+    return [];
+  }
+
+  if (tagIds.length === 0) {
+    console.error("Hardcover tag mapping matched zero tags, degrading to Open-Library-only");
+    logHardcoverFailure(evalTag, "empty_tag_mapping", null);
+    return [];
+  }
+
+  try {
+    const { pool } = await prepareHardcoverPool(tagIds);
+    return pool;
+  } catch (err) {
+    console.error("Hardcover pre-fetch failed, degrading to Open-Library-only:", err);
+    logHardcoverFailure(
+      evalTag,
+      process.env.HARDCOVER_API_TOKEN ? "hardcover_api_error" : "missing_token",
+      err,
+    );
+    return [];
+  }
+}
 
 // Encodes spec.md Section 4d ("What 'good' means") as explicit model instructions.
 const SYSTEM_PROMPT = `You are a book recommendation engine. Your entire value proposition is taste, not popularity — you recommend books based on genuine fit and quality, actively resisting the pull toward safe, over-recommended picks. Popularity itself is never a mark against a book — only defaulting to a pick because it's popular, rather than because it genuinely fits, is a failure.
@@ -58,6 +154,10 @@ export async function POST(request: NextRequest) {
   const evalTag = typeof body?.evalTag === "string" ? body.evalTag : null;
   setSearchBooksLogTag(evalTag);
 
+  // Branch 2 (Hardcover) starts now, concurrently with branch 1 (the OL tool-use loop
+  // below) — both start from tasteDescription and don't depend on each other's output.
+  const hardcoverPoolPromise = fetchHardcoverPool(tasteDescription, evalTag);
+
   const messages: Array<{ role: "user" | "assistant"; content: unknown }> = [
     { role: "user", content: tasteDescription },
   ];
@@ -104,6 +204,14 @@ export async function POST(request: NextRequest) {
         let result: unknown;
         try {
           result = await callTool(block.name, block.input);
+          // Merge Hardcover in here, not once before the loop: this is the point
+          // where an OL pool from this specific call actually exists to merge against.
+          if (block.name === "search_books") {
+            const olResult = result as SearchBooksResult;
+            const hardcoverPool = await hardcoverPoolPromise;
+            const { pool } = mergeCandidatePools(olResult.pool, hardcoverPool);
+            result = { pool, poolSize: pool.length };
+          }
         } catch (err) {
           result = {
             error: err instanceof Error ? err.message : "Tool call failed",
