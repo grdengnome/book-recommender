@@ -8,11 +8,14 @@ import {
   prepareHardcoverPool,
   type HardcoverBookCandidate,
 } from "@/lib/hardcover/preparePool";
+import { mergeCandidatePools } from "@/lib/merge/mergeCandidatePools";
 import {
-  mergeCandidatePools,
-  dedupKey,
-  type PoolSource,
-} from "@/lib/merge/mergeCandidatePools";
+  checkPickGrounding,
+  formatPickSources,
+  recordPoolSources,
+  type GroundingResult,
+  type SeenSources,
+} from "@/lib/merge/pickGrounding";
 
 const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
 const MODEL = "claude-sonnet-5";
@@ -22,6 +25,16 @@ const MODEL = "claude-sonnet-5";
 // omits `tools`, which structurally forces a final answer rather than relying
 // on an instruction the model could ignore.
 const MAX_TOOL_ROUNDS = 3;
+
+// Grounding enforcement (2026-09-20): every final pick must be found in a retrieved
+// candidate pool — no trained-knowledge fallback, including for thin pools. The prompt
+// asks for this, but a prompt alone isn't a guarantee (a same-day test returned two
+// picks absent from both pools), so each generation is checked in code
+// (lib/merge/pickGrounding.ts) and a failed check re-runs the whole generation rather
+// than returning an ungrounded pick. Bounded so a persistent failure ends in a clean
+// error, never in an unverified answer. Deliberately no thin-pool recovery path beyond
+// this retry — that edge case is flagged for its own investigation, not designed here.
+const MAX_GENERATION_ATTEMPTS = 3;
 
 // Hardcover pre-fetch — spec.md 5b, architecture decided 2026-08-19 (docs/progress-log.md):
 // fixed pre-fetch derived from the taste description up front, intentionally asymmetric
@@ -110,36 +123,6 @@ async function fetchHardcoverPool(
   }
 }
 
-// Dev-console visibility into which source (Open Library / Hardcover) each final pick
-// came from — same per-call console.log convention as logMergeStats in
-// mergeCandidatePools.ts. Transient only: nothing is stored, and nothing here touches
-// merge, selection, or the response. `seenSources` accumulates across every
-// search_books round (keyed by the merge's own dedupKey, sources unioned), since the
-// model may pick from any round's pool. A pick with no match wasn't in any retrieved
-// pool (model's own knowledge, or a title/author the merge key doesn't normalize to).
-// Failure here must never break the actual request.
-function logPickSources(
-  recommendationsText: string,
-  seenSources: Map<string, Set<PoolSource>>,
-): void {
-  try {
-    const start = recommendationsText.indexOf("[");
-    const end = recommendationsText.lastIndexOf("]");
-    const picks = JSON.parse(recommendationsText.slice(start, end + 1)) as Array<{
-      title?: string;
-      author?: string;
-    }>;
-    const lines = picks.map((p) => {
-      const sources = seenSources.get(dedupKey(p.title ?? "", p.author ?? ""));
-      const label = sources ? [...sources].join("+") : "none (not in any retrieved pool)";
-      return `  "${p.title}" — ${p.author}: ${label}`;
-    });
-    console.log(`recommend: pick sources\n${lines.join("\n")}`);
-  } catch {
-    console.log("recommend: pick sources unavailable (could not parse recommendations)");
-  }
-}
-
 // Encodes spec.md Section 4d ("What 'good' means") as explicit model instructions.
 const SYSTEM_PROMPT = `You are a book recommendation engine. Your entire value proposition is taste, not popularity — you recommend books based on genuine fit and quality, actively resisting the pull toward safe, over-recommended picks. Popularity itself is never a mark against a book — only defaulting to a pick because it's popular, rather than because it genuinely fits, is a failure.
 
@@ -150,7 +133,7 @@ Apply these rules to every recommendation:
 3. A pick fails on non-obviousness if it's the answer a well-read reader would already expect for this specific request — the one they'd land on after a five-minute search or find atop a "books like this" list. This has nothing to do with whether the book is decorated: a Booker winner can be a genuinely surprising, well-earned pick, and an award-free book can still be the most predictable possible answer. Before finalizing a pick, ask: would someone who already knows this territory shrug and say "well, obviously" — regardless of whether it happens to have won a prize?
 4. Multi-source, not single-source. Draw from many corners of literature — different decades, countries, presses, and traditions. Never lean on a single canon (mainstream or "counter-canon") as if it were the only source worth considering.
 
-You have access to a search_books tool — use it to ground recommendations in real, retrieved candidates rather than relying solely on trained knowledge. You may call it more than once if a pool feels too narrow. The candidate list it returns is unordered — an accident of API response order, not a ranking — so never favor earlier entries over later ones. Grounding changes where candidates come from, not the judgment applied to them: still weigh every candidate against the taste-fit rules above.
+You have access to a search_books tool, and you MUST call it before answering. All 3 recommendations MUST be selected from the candidate pools that search_books returned in this conversation. Do not recommend any book that is not present in a retrieved pool, under any circumstance — even if the pool is small, and even if you know of a better fit from your own knowledge. If a pool feels too narrow, call search_books again with different terms; never fill the gap from memory. Copy each pick's title and author exactly as they appear in the pool. Your final answer is checked in code against the retrieved pools, and any pick not found in them is rejected. The candidate list it returns is unordered — an accident of API response order, not a ranking — so never favor earlier entries over later ones. Restricting picks to the pool changes where candidates come from, not the judgment applied to them: still weigh every candidate against the taste-fit rules above.
 
 The user's taste description will typically include three categories of signal: an anchor (a book they loved), why it stuck with them, and their appetite (comfort vs. surprise) — these three are always present, though the exact wording of how each was asked may vary. It may also include mood, how much time/commitment they want, and specific turn-offs — genres or themes to avoid — when present. Treat a stated turn-off as a hard boundary, not a soft preference: never recommend against it. Focus on the substance of each answer, not the phrasing of the question that produced it. If the input is freeform or unlabeled, use your best judgment to identify these signals from context.
 
@@ -192,11 +175,64 @@ export async function POST(request: NextRequest) {
   // below) — both start from tasteDescription and don't depend on each other's output.
   const hardcoverPoolPromise = fetchHardcoverPool(tasteDescription, evalTag);
 
+  // Each attempt is a full fresh generation (new conversation, new search_books calls);
+  // the Hardcover pre-fetch is shared since it depends only on tasteDescription.
+  for (let attempt = 1; attempt <= MAX_GENERATION_ATTEMPTS; attempt++) {
+    const generation = await generateOnce(apiKey, tasteDescription, hardcoverPoolPromise);
+    if (!generation.ok) return generation.response;
+
+    const { grounding } = generation;
+    if (grounding.status === "grounded") {
+      console.log(
+        `recommend: pick sources (attempt ${attempt}/${MAX_GENERATION_ATTEMPTS})\n${formatPickSources(grounding.picks)}`,
+      );
+      return NextResponse.json({
+        recommendations: generation.recommendations,
+        raw: generation.data,
+      });
+    }
+
+    const detail =
+      grounding.status === "unparseable"
+        ? "response could not be parsed into a pick list"
+        : `ungrounded picks:\n${formatPickSources(grounding.picks)}`;
+    console.error(
+      `recommend: GROUNDING CHECK FAILED (attempt ${attempt}/${MAX_GENERATION_ATTEMPTS}) — ${detail}` +
+        (attempt < MAX_GENERATION_ATTEMPTS ? "\nrecommend: retrying" : ""),
+    );
+  }
+
+  console.error(
+    `recommend: grounding check failed on all ${MAX_GENERATION_ATTEMPTS} attempts — returning error, no picks returned`,
+  );
+  return NextResponse.json(
+    {
+      error: "Could not produce recommendations grounded in the retrieved candidate pool",
+      attempts: MAX_GENERATION_ATTEMPTS,
+    },
+    { status: 502 },
+  );
+}
+
+type GenerationResult =
+  | { ok: true; data: unknown; recommendations: string; grounding: GroundingResult }
+  | { ok: false; response: NextResponse };
+
+// One full generation: the OL tool-use loop (with Hardcover merged into each
+// search_books result) followed by the grounding check on the final answer. Returns the
+// Anthropic API error response as-is if a call fails — API failures are not retried here.
+async function generateOnce(
+  apiKey: string,
+  tasteDescription: string,
+  hardcoverPoolPromise: Promise<HardcoverBookCandidate[]>,
+): Promise<GenerationResult> {
   const messages: Array<{ role: "user" | "assistant"; content: unknown }> = [
     { role: "user", content: tasteDescription },
   ];
 
-  const seenSources = new Map<string, Set<PoolSource>>();
+  // Sources of every candidate the model was shown this generation, keyed by the
+  // merge's own dedupKey — the reference set the final picks are checked against.
+  const seenSources: SeenSources = new Map();
 
   let data;
   for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
@@ -221,10 +257,13 @@ export async function POST(request: NextRequest) {
     data = await anthropicResponse.json();
 
     if (!anthropicResponse.ok) {
-      return NextResponse.json(
-        { error: "Anthropic API error", detail: data },
-        { status: anthropicResponse.status },
-      );
+      return {
+        ok: false,
+        response: NextResponse.json(
+          { error: "Anthropic API error", detail: data },
+          { status: anthropicResponse.status },
+        ),
+      };
     }
 
     if (data.stop_reason !== "tool_use") break;
@@ -246,12 +285,7 @@ export async function POST(request: NextRequest) {
             const olResult = result as SearchBooksResult;
             const hardcoverPool = await hardcoverPoolPromise;
             const { pool } = mergeCandidatePools(olResult.pool, hardcoverPool);
-            for (const c of pool) {
-              const key = dedupKey(c.title, c.author);
-              const set = seenSources.get(key) ?? new Set<PoolSource>();
-              c.sources.forEach((s) => set.add(s));
-              seenSources.set(key, set);
-            }
+            recordPoolSources(seenSources, pool);
             result = { pool, poolSize: pool.length };
           }
         } catch (err) {
@@ -274,7 +308,11 @@ export async function POST(request: NextRequest) {
     (block: { type: string }) => block.type === "text",
   );
   const recommendations = textBlock?.text ?? "";
-  logPickSources(recommendations, seenSources);
 
-  return NextResponse.json({ recommendations, raw: data });
+  return {
+    ok: true,
+    data,
+    recommendations,
+    grounding: checkPickGrounding(recommendations, seenSources),
+  };
 }

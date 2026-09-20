@@ -130,7 +130,7 @@ Both are free, require no API key, and are called once per tool invocation — n
 - Combine results from both calls.
 - Deduplicate by title + author (or Open Library's internal work ID where available).
 - **No hard cap on pool size, and this is a deliberate choice, not an oversight.** The two real risks of a large candidate pool are (1) token cost and (2) relevance dilution. (1) is a non-issue at this scale — even 150–200 candidates is roughly 3,000–4,000 tokens, small change against Claude's context window. (2) is real, but it's addressed directly by the shuffle and explicit "don't favor earlier entries" instruction below — those solve dilution without needing to artificially throttle breadth, which is the actual goal here. If pool size later proves to be a genuine problem in practice (not just a theoretical one), revisit with real data rather than pre-emptively capping it now.
-- **If the merged pool is thin (under ~15–20 candidates):** this is a signal for the *model* to recognize and act on — it can call `search_books` again with broader or different terms, rather than the application silently proceeding with a weak pool. Only if repeated tool calls still return too little should the model fall back to its own trained knowledge, and it should do so transparently (e.g., reflected honestly in its reasoning, not hidden).
+- **If the merged pool is thin (under ~15–20 candidates):** this is a signal for the *model* to recognize and act on — it can call `search_books` again with broader or different terms, rather than the application silently proceeding with a weak pool. **There is no fallback to trained knowledge (decided 2026-09-20):** all 3 picks must come from a retrieved pool, even a small one. A pool too small to support 3 valid picks is a known, unresolved edge case — deliberately not designed for yet (flagged for its own investigation); today it surfaces as a failed grounding check (see 5c) and the bounded retry.
 
 **Bias mitigation — critical, non-negotiable requirements:**
 - **Shuffle the merged candidate list before returning it to the model.** Language models exhibit measurable position bias — favoring earlier list items regardless of actual merit. Randomizing order in code, every time, before the tool result is returned neutralizes this entirely.
@@ -140,10 +140,12 @@ Both are free, require no API key, and are called once per tool invocation — n
 ### 5c. What `SYSTEM_PROMPT` actually needs to say about this (kept short, by design)
 
 Only a few sentences — the mechanics live in code and the tool definition, not here:
-- That a `search_books` tool exists and should be used to ground recommendations in real, retrieved candidates rather than relying solely on trained knowledge.
+- That a `search_books` tool exists, must be called, and that all 3 picks MUST be selected from the retrieved candidate pools — no book outside a pool, under any circumstance, even if the pool is small (changed 2026-09-20 from "ground ... rather than relying solely on trained knowledge", which allowed ungrounded picks: a test request returned 2 of 3 picks absent from both pools).
 - That the tool may be called more than once if results feel too narrow.
 - That the returned candidate list is unordered — no positional favoritism.
 - That the final picks should still be judged against the existing taste-fit rules (impression over popularity, resist the bandwagon, awards ≠ non-obviousness) — grounding changes *where candidates come from*, not the *judgment* applied to them.
+
+**Enforced in code, not just prompted (2026-09-20):** after the model answers, `lib/merge/pickGrounding.ts` checks every pick against the merged pools it was shown, using its own tolerant key (title up to the first colon/parenthesis + author last name, Unicode-folded; an empty title or author never matches) — deliberately looser than the merge's `dedupKey`, which falsely rejected accented titles and subtitled titles in the 2026-09-20 eval. Any pick not found — or an answer that can't be parsed — is a failed generation: logged, and the whole generation is retried (bounded at 3 attempts; then a clean 502, never an ungrounded pick).
 
 ### 5d. Cover images — unchanged, already resolved (Section 4c)
 

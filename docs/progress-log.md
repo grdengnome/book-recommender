@@ -424,3 +424,31 @@ Ran the identical `cult novel` query against Open Library side by side for direc
 2. Repo cleanup, before other work — goal is navigability for a resume/portfolio reviewer, not just function. Likely targets: `scratchpad/` (already flagged disorganized), pruning diagnostic JSON logs, confirming `docs/` reads cleanly top-to-bottom.
 3. Build a decision log separate from this file — short, narrative-style record of key product decisions and notable rejected paths (e.g. tag-example enrichment, tag-widening), meant to be speakable in an interview/portfolio context.
 4. Define next-steps/categories for post-engine work — most likely the question-flow UI (adaptive trio, phrasing pools, rejection path) as the next major phase, plus where remaining engine polish/known limitations fit relative to it.
+
+---
+
+## September 20, 2026 — Ungrounded picks found; fallback removed and code-enforced; eval re-run clean on grounding, validator bug found and fixed
+
+**Conclusion:** The model was recommending from its own knowledge despite a grounded candidate pool. Fixed by removing the Spec 5b trained-knowledge fallback and enforcing "all 3 picks from the pool" in code, not just in the prompt. A full eval-set re-run found zero truly ungrounded picks but exposed a bug in the new validator (false rejections), now fixed. **PR #5 is ready for review and not merged — the merge decision is still open.** (Also shipped earlier today: OL/HC source-tracking in dev logs, PR #4, merged — the first part of the Sept 18 wrap-up item 1.)
+
+**Finding:** 2 of 3 picks in a test request (*So Long, See You Tomorrow*, *A Month in the Country*) were absent from every retrieved pool — confirmed by fuzzy-searching the logged OL pools and checking Hardcover's spelling and replaying its pipeline, not assumed. The prompt only said to ground picks "rather than relying *solely* on trained knowledge," and Spec 5b explicitly allowed a fallback — the constraint had only ever been implicit.
+
+**Fix (PR #5):**
+- Prompt + tool description: fallback removed; `search_books` required; all 3 picks MUST come from the retrieved pools, even a small one.
+- `lib/merge/pickGrounding.ts` + `route.ts`: picks are checked against the pools the model was shown; a miss (or unparseable answer) retries the whole generation, max 3 attempts, then a clean 502 with no picks.
+- No thin-pool recovery path built, by design — a too-small pool now ends in that 502.
+
+**Full eval re-run (11 cases):** 14 attempts, 42 picks, **zero truly ungrounded**; 10/11 cases delivered; the 30 returned picks were 27 OL / 3 HC. Per-case table and rubric scores in `docs/eval-log.md`.
+
+**Validator bug, found by that run and fixed (`860975e`):** the check reused the merge's `dedupKey` and falsely rejected all 5 picks it rejected — every one was legitimately in the pool. Example: *Sátántangó* — Open Library stores accents decomposed, the model writes them precomposed, so identical-looking titles keyed apart (also: dropped subtitles, and an empty author key that matched as a wildcard). It caused case 3's 502 and a wasted retry in case 4. Fix: a tolerant key inside `pickGrounding.ts` only (merge untouched). Verified by 22 unit checks on the real failing strings plus a live re-run of cases 3/4/1/8 — all HTTP 200 on attempt 1, all OL-sourced (the first attempt at that re-run was invalid: Open Library was down, every pool empty; re-run after it recovered). **The full 11-case set has not been re-run since the fix.**
+
+**Separately flagged, pre-existing (not caused by this work):** case 10 returns the same two staple titles (*We Have Always Lived in the Castle*, *The Little Stranger*) it has across Prompt v3, the Aug 1 run, v4, and today — the cross-session variety issue already noted in `docs/eval-log.md`, still open.
+
+**Status:** PR #5 open and mergeable, ready for review. **Not merged; the merge decision is unresolved.**
+
+**Next:**
+1. Decide whether to merge PR #5.
+2. After merge, run one clean full 11-case eval — today's full run predates the validator fix — and record it as the dated v0 baseline (Sept 18 wrap-up item 1).
+3. Investigate the thin/empty-pool case on its own — it now fails closed (502), e.g. during an Open Library outage, where it used to return ungrounded picks.
+4. Watch for remaining false-rejection risk in the author key ("Last, First" pool entries, transliterated names); not observed so far.
+5. Case 10's repeated staple titles remain an open item.
