@@ -8,7 +8,11 @@ import {
   prepareHardcoverPool,
   type HardcoverBookCandidate,
 } from "@/lib/hardcover/preparePool";
-import { mergeCandidatePools } from "@/lib/merge/mergeCandidatePools";
+import {
+  mergeCandidatePools,
+  dedupKey,
+  type PoolSource,
+} from "@/lib/merge/mergeCandidatePools";
 
 const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
 const MODEL = "claude-sonnet-5";
@@ -106,6 +110,36 @@ async function fetchHardcoverPool(
   }
 }
 
+// Dev-console visibility into which source (Open Library / Hardcover) each final pick
+// came from — same per-call console.log convention as logMergeStats in
+// mergeCandidatePools.ts. Transient only: nothing is stored, and nothing here touches
+// merge, selection, or the response. `seenSources` accumulates across every
+// search_books round (keyed by the merge's own dedupKey, sources unioned), since the
+// model may pick from any round's pool. A pick with no match wasn't in any retrieved
+// pool (model's own knowledge, or a title/author the merge key doesn't normalize to).
+// Failure here must never break the actual request.
+function logPickSources(
+  recommendationsText: string,
+  seenSources: Map<string, Set<PoolSource>>,
+): void {
+  try {
+    const start = recommendationsText.indexOf("[");
+    const end = recommendationsText.lastIndexOf("]");
+    const picks = JSON.parse(recommendationsText.slice(start, end + 1)) as Array<{
+      title?: string;
+      author?: string;
+    }>;
+    const lines = picks.map((p) => {
+      const sources = seenSources.get(dedupKey(p.title ?? "", p.author ?? ""));
+      const label = sources ? [...sources].join("+") : "none (not in any retrieved pool)";
+      return `  "${p.title}" — ${p.author}: ${label}`;
+    });
+    console.log(`recommend: pick sources\n${lines.join("\n")}`);
+  } catch {
+    console.log("recommend: pick sources unavailable (could not parse recommendations)");
+  }
+}
+
 // Encodes spec.md Section 4d ("What 'good' means") as explicit model instructions.
 const SYSTEM_PROMPT = `You are a book recommendation engine. Your entire value proposition is taste, not popularity — you recommend books based on genuine fit and quality, actively resisting the pull toward safe, over-recommended picks. Popularity itself is never a mark against a book — only defaulting to a pick because it's popular, rather than because it genuinely fits, is a failure.
 
@@ -162,6 +196,8 @@ export async function POST(request: NextRequest) {
     { role: "user", content: tasteDescription },
   ];
 
+  const seenSources = new Map<string, Set<PoolSource>>();
+
   let data;
   for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
     const allowToolUse = round < MAX_TOOL_ROUNDS;
@@ -210,6 +246,12 @@ export async function POST(request: NextRequest) {
             const olResult = result as SearchBooksResult;
             const hardcoverPool = await hardcoverPoolPromise;
             const { pool } = mergeCandidatePools(olResult.pool, hardcoverPool);
+            for (const c of pool) {
+              const key = dedupKey(c.title, c.author);
+              const set = seenSources.get(key) ?? new Set<PoolSource>();
+              c.sources.forEach((s) => set.add(s));
+              seenSources.set(key, set);
+            }
             result = { pool, poolSize: pool.length };
           }
         } catch (err) {
@@ -232,6 +274,7 @@ export async function POST(request: NextRequest) {
     (block: { type: string }) => block.type === "text",
   );
   const recommendations = textBlock?.text ?? "";
+  logPickSources(recommendations, seenSources);
 
   return NextResponse.json({ recommendations, raw: data });
 }

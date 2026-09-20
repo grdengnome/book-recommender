@@ -60,7 +60,9 @@ function normAuthorLastName(name: string): string {
   return parts[parts.length - 1].toLowerCase().replace(/[^\w]/g, "");
 }
 
-function dedupKey(title: string, author: string): string {
+// Exported so route.ts can attribute final picks back to their pool source with the
+// exact same matching rule the merge used (dev-log visibility only).
+export function dedupKey(title: string, author: string): string {
   return `${normTitle(title)}|${normAuthorLastName(author)}`;
 }
 
