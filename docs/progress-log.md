@@ -372,3 +372,55 @@ Ran the identical `cult novel` query against Open Library side by side for direc
 1. Fix `hcGraphql()`'s error-shape handling.
 2. Fix `parseSelectedTags`'s parsing robustness.
 3. Re-run case-3/case-8 (and ideally more cases) once both are fixed, for a second clean read on the OL/HC split and whether Hardcover ever makes the final 3.
+
+---
+
+## September 2, 2026 — Both open Hardcover bugs fixed and merged; case-8 verified clean
+
+**Conclusion:** Fixed both bugs carried from Aug 27: `hcGraphql()`'s non-GraphQL error detection (PR #1) and `parseSelectedTags()`'s fragile JSON extraction (PR #3). Merged all three open PRs to `main` in dependency order — #1, then #3, then #2 (Hardcover route wiring) — so the live route never ran with the buggy tag parser. Re-ran case-8 against current `main`: `mapTasteToHardcoverTags` succeeded, and Hardcover candidates genuinely reached the merged pool.
+
+**Built:**
+- **`hcGraphql()` hardening** (`lib/hardcover/preparePool.ts`): checks `res.ok`/status before assuming a valid GraphQL body, wraps `res.json()` in try/catch for non-JSON responses, and checks both the standard `errors` array and top-level `error`/`message` fields.
+- **`parseSelectedTags()` fix** (`lib/hardcover/mapTasteToTags.ts`): replaced the greedy `/\[[\s\S]*\]/` regex with `extractJsonArraySpan()` — scans forward from each `[`, tracks bracket depth to find its balanced `]`, and requires the candidate span to actually `JSON.parse` as an array before accepting it, retrying from the next `[` on failure. Needed because a balanced pair isn't necessarily the *right* one — stray bracket text before the real array (e.g. "themes like [betrayal, memory]") is itself self-contained and balanced.
+
+**Merge:** #1 → #3 → #2, all clean/mergeable, no conflicts. `tsc --noEmit` re-run after each merge — only pre-existing scratchpad-only errors (confirmed identical on pre-PR `main`), nothing new. Merged branches deleted, local and origin.
+
+**Case-8 verification** (`scratchpad/step4-real-merge.mts`, against current `main`): tags selected `["mysterious","Tense","dark","reflective"]`, Hardcover raw pool 16, merged pool 211 (92.9% OL / 7.6% HC) — 15 `[hardcover]`-only entries plus 1 deduped cross-source entry (*The Bell Jar*). No fallback to OL-only; Hardcover's presence in the pool is real, not nominal.
+
+**Open, not yet done:** this only confirms Hardcover candidates reach the merged *pool*, not that any survive to the model's final 3 picks. No end-to-end run through the live `/api/recommend` route was attempted for case-8 this session.
+
+**Next:**
+1. Run case-8 end-to-end through the live route; check whether any Hardcover-sourced candidate makes the final 3.
+2. Extend beyond case-3/case-8 now that both bugs are fixed.
+
+---
+
+## September 17, 2026 — Hardcover reachability confirmed proportional not structural; tag-widening closed as non-viable; slow-burn tag collision found
+
+**Conclusion:** Diagnostic-only session (merge-cap check, ground-truth + inflated-share stress test, empty-API-response repro check, tag-widening blind test, slow-burn root-cause check) — no production code changed. Hardcover's low final-pick rate is proportional rarity, not a structural cap or bias; the empty-response bug seen in a throwaway stress-test script didn't reproduce through the real route; tag-widening doesn't improve pick quality; a real tag-vocabulary bug was found causing "slow burn" (a romance-trope tag) to collide with "slow, immersive" taste language.
+
+**Findings:**
+- **Reachability confirmed, no fix needed:** `mergeCandidatePools.ts` has no cap after combine (read-only verified, no slice/truncate). Organic runs (cases 1/3/6/9/10) produced zero Hardcover final picks; an inflated-share stress test (~45% HC) got Hardcover picks selected (2/3 in case-3) — rarity is proportional to Hardcover's small merged-pool share, not a structural block.
+- **Empty-API-response bug: not reproducible via production path.** Throwaway `scratchpad/hc-stress-test.mjs` hit it deterministically (3/3 attempts, same 3 cases); the identical 3 inputs passed cleanly (3/3) through the live `/api/recommend` route. Root cause still unknown — treated as a stress-test-script artifact, not a production risk. No action unless it recurs in production.
+- **Aug 16 mainstream-correlation finding: still open, blocked on missing instrumentation.** `preparePool.ts` strips `tagRelevanceSum` before the pool leaves the module — no relevance-score data exists in any log to check the hypothesis against. Not pursued further this session.
+- **Tag-widening tested and closed — not a viable lever.** Blind-judged fit rate (case-1, real Hardcover data): baseline 6.3% Fits / 31.3% Fits+Unsure (n=16 scored) vs. widened 7.1% Fits / 21.4% Fits+Unsure (n=14 scored) — statistically the same. Widening adds raw volume, not quality.
+- **New bug found: "slow burn" tag collision, root cause confirmed.** It's a romance-trope tag (Aug 6 audit — same cluster as "enemies to lovers"/"forced proximity"), not a pacing tag (a separate fast/medium/slow-paced cluster exists and excludes it). `mapTasteToTags.ts`'s `buildPrompt()` shows the model only bare tag strings with no category context, so case-1's "slow, immersive" phrasing can literally string-match "slow burn" — likely a real contributor to both groups' low fit rates above.
+
+**Next:**
+1. Scope and build a fix for the slow-burn/tag-category-collision bug — likely tag-category context in the mapping prompt, or excluding known romance-trope tags from general taste-matching.
+2. If the Aug 16 mainstream-correlation question still matters, add relevance-score logging before re-testing it — current instrumentation can't answer it.
+3. No action needed on merge-cap, empty-response bug, or tag-widening — closed for now per this session.
+
+---
+
+## September 18, 2026 — Slow-burn tag collision closed as accepted limitation; v0 wrap-up plan set
+
+**Conclusion:** Sept 17's "slow burn" tag-collision finding was investigated further and deliberately closed, not fixed — two fix approaches considered and rejected. Engine is now considered functionally complete for v0; a prioritized wrap-up plan is set below before moving to the next phase.
+
+**Slow-burn tag fix — investigated, deferred:** No category/cluster metadata exists anywhere for Hardcover's 153 tags — `tag_category_id` is uniform across all 190 raw pulled tags, giving zero discriminating signal (e.g. between romance-trope and pacing tags). Two fixes considered and rejected: (1) a manual category-labeling pass, rejected as disproportionate complexity/judgment-calls for one confirmed instance; (2) attaching 2-3 sample titles per tag so the model infers meaning from real examples, rejected on bias-risk grounds — sample titles would skew toward the most popular/heavily-tagged books, reimporting the mainstream-correlation problem flagged Aug 16. **Decision:** leave as a documented, accepted limitation — only one real collision confirmed (case-1), found only because it was specifically tested for, not evidence of a broad active problem. Revisit only if it demonstrably affects recommendation quality in a future eval run.
+
+**Next (v0 wrap-up, priority order):**
+1. Low-hanging fruit: surface OL/HC source-tracking in dev/debug output; run one full 10-case eval as a dated "v0 baseline" score; document known limitations (tag-collision above, Aug 16 correlation question, cases 3/7a/7b being UI-dependent) as part of shipping v0.
+2. Repo cleanup, before other work — goal is navigability for a resume/portfolio reviewer, not just function. Likely targets: `scratchpad/` (already flagged disorganized), pruning diagnostic JSON logs, confirming `docs/` reads cleanly top-to-bottom.
+3. Build a decision log separate from this file — short, narrative-style record of key product decisions and notable rejected paths (e.g. tag-example enrichment, tag-widening), meant to be speakable in an interview/portfolio context.
+4. Define next-steps/categories for post-engine work — most likely the question-flow UI (adaptive trio, phrasing pools, rejection path) as the next major phase, plus where remaining engine polish/known limitations fit relative to it.
