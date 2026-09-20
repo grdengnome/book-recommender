@@ -52,7 +52,7 @@ const RESULTS_PER_CALL = 100;
 export const searchBooksToolDefinition = {
   name: "search_books",
   description:
-    "Search for real, existing books to ground recommendations in actual candidates rather than relying solely on trained knowledge. Runs a free-text relevance search plus a controlled-vocabulary subject search against every subject you list, then merges everything into one deduplicated, shuffled, unordered candidate pool — order carries no meaning and must not influence which picks you favor. Call it again with broader or different terms if the pool comes back thin (under ~15-20 candidates) before falling back to trained knowledge.",
+    "Search for real, existing books and get back a candidate pool. Every recommendation you make must be selected from a pool returned by this tool — a book that is not in a returned pool cannot be recommended. Runs a free-text relevance search plus a controlled-vocabulary subject search against every subject you list, then merges everything into one deduplicated, shuffled, unordered candidate pool — order carries no meaning and must not influence which picks you favor. Call it again with broader or different terms if the pool comes back thin (under ~15-20 candidates); never fill a thin pool from trained knowledge.",
   input_schema: {
     type: "object" as const,
     properties: {
