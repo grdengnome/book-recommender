@@ -1,0 +1,828 @@
+[
+  {
+    "id": "case-1",
+    "label": "Rich, clear input",
+    "tasteDescription": "My favorite book is 'The Remains of the Day' by Kazuo Ishiguro — I loved how restrained and heartbreaking it was, the way so much emotion stayed unspoken beneath the surface. I'm in the mood for something similarly quiet and melancholic, character-driven rather than plot-heavy. I have plenty of time and want to sit with a slow, immersive book.",
+    "httpStatus": 200,
+    "seconds": 31,
+    "fetchError": null,
+    "attemptCount": 1,
+    "attempts": [
+      {
+        "attempt": 1,
+        "outcome": "grounded",
+        "picks": [
+          {
+            "title": "Kokoro",
+            "author": "夏目漱石",
+            "source": "openlibrary"
+          },
+          {
+            "title": "Our Souls at Night",
+            "author": "Kent Haruf",
+            "source": "openlibrary"
+          },
+          {
+            "title": "The Stone Diaries",
+            "author": "Carol Shields",
+            "source": "openlibrary"
+          }
+        ],
+        "searchRounds": 2,
+        "mergedPoolSizes": [
+          286,
+          307
+        ]
+      }
+    ],
+    "finalOutcome": "returned",
+    "recommendations": "```json\n[\n  {\n    \"title\": \"Kokoro\",\n    \"author\": \"夏目漱石\",\n    \"why\": \"A meditation on guilt, isolation, and the impossibility of confessing what most needs saying — the same suffocating gap between inner feeling and outer composure that makes 'Remains of the Day' so devastating, filtered through Meiji-era Japan's own code of restraint.\",\n    \"nonObvious\": \"It's a foundational work of modern Japanese literature, but it rarely surfaces on 'if you liked Ishiguro' lists, which tend to stay within English-language fiction.\"\n  },\n  {\n    \"title\": \"Our Souls at Night\",\n    \"author\": \"Kent Haruf\",\n    \"why\": \"Spare, unhurried prose about two aging neighbors slowly, tentatively opening up to each other after lifetimes of loneliness — all the emotional weight carried in silences, pauses, and what's left unsaid rather than declared.\",\n    \"nonObvious\": \"Its plotlessness and plain-spoken minimalism make it easy to overlook next to showier 'quiet novel' picks, but it delivers the same devastating restraint through dialogue rather than internal monologue.\"\n  },\n  {\n    \"title\": \"The Stone Diaries\",\n    \"author\": \"Carol Shields\",\n    \"why\": \"A woman's entire life told with a curious emotional distance, as if she can't quite claim her own interiority — a slow, immersive character study where the biggest griefs and joys are noted almost in passing, never dwelt on.\",\n    \"nonObvious\": \"It won major prizes decades ago but has faded from 'readalike' conversations, even though its narrative reticence is a near-perfect structural cousin to Stevens's own self-effacing narration.\"\n  }\n]\n```",
+    "finalRoundUsage": {
+      "input_tokens": 34206,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 1393,
+      "output_tokens_details": {
+        "thinking_tokens": 814
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    },
+    "errorBody": null,
+    "logLines": [
+      "mergeCandidatePools: OL raw=275, HC raw=17, duplicates removed=6, merged total=286, OL%=94.1%, HC%=5.9%",
+      "mergeCandidatePools: OL raw=299, HC raw=17, duplicates removed=9, merged total=307, OL%=94.5%, HC%=5.5%",
+      "recommend: pick sources (attempt 1/3)",
+      "  \"Kokoro\" — 夏目漱石: openlibrary",
+      "  \"Our Souls at Night\" — Kent Haruf: openlibrary",
+      "  \"The Stone Diaries\" — Carol Shields: openlibrary",
+      " POST /api/recommend 200 in 30.9s (next.js: 471ms, application-code: 30.4s)"
+    ]
+  },
+  {
+    "id": "case-2",
+    "label": "Anti-mainstream profile",
+    "tasteDescription": "There's a novel I read a few years back — quiet, character-driven, nothing anyone around me had heard of — and it turned out to be one of the best books I've ever read. It completely surprised me, because nothing about its low profile suggested it would hit that hard. I've been recommending it to people unprompted ever since. I want more like that: no bestsellers, no 'if you liked X' consensus picks — just books that are genuinely great regardless of how well-known they are.",
+    "httpStatus": 200,
+    "seconds": 51,
+    "fetchError": null,
+    "attemptCount": 1,
+    "attempts": [
+      {
+        "attempt": 1,
+        "outcome": "grounded",
+        "picks": [
+          {
+            "title": "A Jest of God",
+            "author": "Margaret Laurence",
+            "source": "openlibrary"
+          },
+          {
+            "title": "The Memory of Love",
+            "author": "Aminatta Forna",
+            "source": "openlibrary"
+          },
+          {
+            "title": "Los informantes",
+            "author": "Juan Gabriel Vásquez",
+            "source": "openlibrary"
+          }
+        ],
+        "searchRounds": 5,
+        "mergedPoolSizes": [
+          6,
+          6,
+          195,
+          104,
+          105
+        ]
+      }
+    ],
+    "finalOutcome": "returned",
+    "recommendations": "```json\n[\n  {\n    \"title\": \"A Jest of God\",\n    \"author\": \"Margaret Laurence\",\n    \"why\": \"It's exactly the kind of quiet, interior character study you describe — a lonely small-town teacher's inner life rendered with devastating precision, no plot fireworks, just accumulated emotional truth that sneaks up on you.\",\n    \"nonObvious\": \"Laurence is a towering figure in Canadian letters but this particular novel rarely surfaces outside that context, so it retains the low-profile, word-of-mouth quality you're after rather than being a reflexive 'if you liked X' answer.\"\n  },\n  {\n    \"title\": \"The Memory of Love\",\n    \"author\": \"Aminatta Forna\",\n    \"why\": \"A patient, character-driven novel about memory, love, and the long aftermath of trauma in Sierra Leone — it builds its power slowly through character rather than incident, which matches the 'quiet but hits hard' effect you're chasing.\",\n    \"nonObvious\": \"It's critically respected but doesn't have the cultural saturation of the usual literary-fiction recommendations, so it's genuinely likely to be new territory rather than a book already on everyone's radar.\"\n  },\n  {\n    \"title\": \"Los informantes\",\n    \"author\": \"Juan Gabriel Vásquez\",\n    \"why\": \"A slow-burn family and historical-secrets novel from Colombia, told through restrained, close character work rather than drama — the kind of book that lingers because of what it reveals gradually, not because of a twist.\",\n    \"nonObvious\": \"Vásquez is acclaimed in Latin American literary circles but this earlier novel is far less likely to have crossed your radar than his more anthologized later work, keeping it a genuine discovery rather than a default pick.\"\n  }\n]\n```",
+    "finalRoundUsage": {
+      "input_tokens": 26615,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 1748,
+      "output_tokens_details": {
+        "thinking_tokens": 1161
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    },
+    "errorBody": null,
+    "logLines": [
+      "prepareHardcoverPool: dropped 2 row(s) with no author",
+      "mergeCandidatePools: OL raw=0, HC raw=6, duplicates removed=0, merged total=6, OL%=0%, HC%=100%",
+      "mergeCandidatePools: OL raw=0, HC raw=6, duplicates removed=0, merged total=6, OL%=0%, HC%=100%",
+      "mergeCandidatePools: OL raw=193, HC raw=6, duplicates removed=4, merged total=195, OL%=96.9%, HC%=3.1%",
+      "mergeCandidatePools: OL raw=100, HC raw=6, duplicates removed=2, merged total=104, OL%=94.2%, HC%=5.8%",
+      "mergeCandidatePools: OL raw=100, HC raw=6, duplicates removed=1, merged total=105, OL%=94.3%, HC%=5.7%",
+      "recommend: pick sources (attempt 1/3)",
+      "  \"A Jest of God\" — Margaret Laurence: openlibrary",
+      "  \"The Memory of Love\" — Aminatta Forna: openlibrary",
+      "  \"Los informantes\" — Juan Gabriel Vásquez: openlibrary",
+      " POST /api/recommend 200 in 51s (next.js: 4ms, application-code: 51s)"
+    ]
+  },
+  {
+    "id": "case-3",
+    "label": "Vague input",
+    "tasteDescription": "Just something good to read.",
+    "httpStatus": 502,
+    "seconds": 92,
+    "fetchError": null,
+    "attemptCount": 3,
+    "attempts": [
+      {
+        "attempt": 1,
+        "outcome": "ungrounded",
+        "picks": [
+          {
+            "title": "Sula",
+            "author": "Toni Morrison",
+            "source": "openlibrary"
+          },
+          {
+            "title": "Sátántangó",
+            "author": "László Krasznahorkai",
+            "source": "NONE (not in any retrieved pool)"
+          },
+          {
+            "title": "A Fine Balance",
+            "author": "Rohinton Mistry",
+            "source": "openlibrary"
+          }
+        ],
+        "searchRounds": 2,
+        "mergedPoolSizes": [
+          128,
+          30
+        ]
+      },
+      {
+        "attempt": 2,
+        "outcome": "ungrounded",
+        "picks": [
+          {
+            "title": "Sátántangó",
+            "author": "László Krasznahorkai",
+            "source": "NONE (not in any retrieved pool)"
+          },
+          {
+            "title": "What It Means When A Man Falls From The Sky",
+            "author": "Lesley Nneka Arimah",
+            "source": "NONE (not in any retrieved pool)"
+          },
+          {
+            "title": "Trust",
+            "author": "Hernán Díaz",
+            "source": "openlibrary"
+          }
+        ],
+        "searchRounds": 3,
+        "mergedPoolSizes": [
+          30,
+          30,
+          153
+        ]
+      },
+      {
+        "attempt": 3,
+        "outcome": "ungrounded",
+        "picks": [
+          {
+            "title": "The People in the Trees",
+            "author": "Hanya Yanagihara",
+            "source": "openlibrary"
+          },
+          {
+            "title": "What It Means When A Man Falls From The Sky",
+            "author": "Lesley Nneka Arimah",
+            "source": "NONE (not in any retrieved pool)"
+          },
+          {
+            "title": "The Snow Child",
+            "author": "Eowyn Ivey",
+            "source": "openlibrary"
+          }
+        ],
+        "searchRounds": 3,
+        "mergedPoolSizes": [
+          30,
+          57,
+          51
+        ]
+      }
+    ],
+    "finalOutcome": "clean-502",
+    "recommendations": null,
+    "finalRoundUsage": null,
+    "errorBody": {
+      "error": "Could not produce recommendations grounded in the retrieved candidate pool",
+      "attempts": 3
+    },
+    "logLines": [
+      "mergeCandidatePools: OL raw=100, HC raw=30, duplicates removed=2, merged total=128, OL%=76.6%, HC%=23.4%",
+      "mergeCandidatePools: OL raw=0, HC raw=30, duplicates removed=0, merged total=30, OL%=0%, HC%=100%",
+      "recommend: GROUNDING CHECK FAILED (attempt 1/3) — ungrounded picks:",
+      "  \"Sula\" — Toni Morrison: openlibrary",
+      "  \"Sátántangó\" — László Krasznahorkai: NONE (not in any retrieved pool)",
+      "  \"A Fine Balance\" — Rohinton Mistry: openlibrary",
+      "recommend: retrying",
+      "mergeCandidatePools: OL raw=0, HC raw=30, duplicates removed=0, merged total=30, OL%=0%, HC%=100%",
+      "mergeCandidatePools: OL raw=0, HC raw=30, duplicates removed=0, merged total=30, OL%=0%, HC%=100%",
+      "mergeCandidatePools: OL raw=126, HC raw=30, duplicates removed=3, merged total=153, OL%=80.4%, HC%=19.6%",
+      "recommend: GROUNDING CHECK FAILED (attempt 2/3) — ungrounded picks:",
+      "  \"Sátántangó\" — László Krasznahorkai: NONE (not in any retrieved pool)",
+      "  \"What It Means When A Man Falls From The Sky\" — Lesley Nneka Arimah: NONE (not in any retrieved pool)",
+      "  \"Trust\" — Hernán Díaz: openlibrary",
+      "recommend: retrying",
+      "mergeCandidatePools: OL raw=0, HC raw=30, duplicates removed=0, merged total=30, OL%=0%, HC%=100%",
+      "mergeCandidatePools: OL raw=27, HC raw=30, duplicates removed=0, merged total=57, OL%=47.4%, HC%=52.6%",
+      "mergeCandidatePools: OL raw=21, HC raw=30, duplicates removed=0, merged total=51, OL%=41.2%, HC%=58.8%",
+      "recommend: GROUNDING CHECK FAILED (attempt 3/3) — ungrounded picks:",
+      "  \"The People in the Trees\" — Hanya Yanagihara: openlibrary",
+      "  \"What It Means When A Man Falls From The Sky\" — Lesley Nneka Arimah: NONE (not in any retrieved pool)",
+      "  \"The Snow Child\" — Eowyn Ivey: openlibrary",
+      "recommend: grounding check failed on all 3 attempts — returning error, no picks returned",
+      " POST /api/recommend 502 in 92s (next.js: 2ms, application-code: 92s)"
+    ]
+  },
+  {
+    "id": "case-4",
+    "label": "Explicit anti-mainstream demand",
+    "tasteDescription": "I want book recommendations, but nothing everyone's already read. I'm tired of every list recommending the same five books.",
+    "httpStatus": 200,
+    "seconds": 116,
+    "fetchError": null,
+    "attemptCount": 2,
+    "attempts": [
+      {
+        "attempt": 1,
+        "outcome": "ungrounded",
+        "picks": [
+          {
+            "title": "Sátántangó",
+            "author": "László Krasznahorkai",
+            "source": "NONE (not in any retrieved pool)"
+          },
+          {
+            "title": "Ghostroots",
+            "author": "'Pemi Aguda",
+            "source": "openlibrary"
+          },
+          {
+            "title": "Los informantes",
+            "author": "Juan Gabriel Vásquez",
+            "source": "openlibrary"
+          }
+        ],
+        "searchRounds": 4,
+        "mergedPoolSizes": [
+          98,
+          8,
+          0,
+          254
+        ]
+      },
+      {
+        "attempt": 2,
+        "outcome": "grounded",
+        "picks": [
+          {
+            "title": "Diary of a Void",
+            "author": "Emi Yagi",
+            "source": "openlibrary"
+          },
+          {
+            "title": "Wizard of the Crow",
+            "author": "Ngũgĩ wa Thiongʼo",
+            "source": "openlibrary"
+          },
+          {
+            "title": "El llano en llamas",
+            "author": "Juan Rulfo",
+            "source": "openlibrary"
+          }
+        ],
+        "searchRounds": 6,
+        "mergedPoolSizes": [
+          0,
+          99,
+          0,
+          0,
+          353,
+          114
+        ]
+      }
+    ],
+    "finalOutcome": "returned",
+    "recommendations": "```json\n[\n  {\n    \"title\": \"Diary of a Void\",\n    \"author\": \"Emi Yagi\",\n    \"why\": \"A sharp, darkly funny contemporary Japanese novel about a woman who fakes a pregnancy to escape workplace sexism — it's inventive and unsettling in a way that rewards someone bored of predictable 'best of' lists.\",\n    \"nonObvious\": \"It's a recent translated title that hasn't yet calcified into a default pick, with a premise strange enough to avoid feeling like a algorithm-safe suggestion.\"\n  },\n  {\n    \"title\": \"Wizard of the Crow\",\n    \"author\": \"Ngũgĩ wa Thiongʼo\",\n    \"why\": \"A sprawling, satirical epic about a fictional African dictatorship that blends folklore, political farce, and magical realism — big, ambitious, and unlike the tidy realist novels that dominate most recommendation lists.\",\n    \"nonObvious\": \"Ngũgĩ's name is respected in postcolonial studies but this particular satirical epic is rarely the book people reach for, unlike the more commonly assigned 'Things Fall Apart'-type African novel.\"\n  },\n  {\n    \"title\": \"El llano en llamas\",\n    \"author\": \"Juan Rulfo\",\n    \"why\": \"A slim, haunting collection of stories about rural Mexico — spare, elliptical prose that influenced the entire Latin American boom, but rarely gets the spotlight that 'Cien años de soledad' does.\",\n    \"nonObvious\": \"Rulfo is foundational to Latin American literature yet this collection is consistently overshadowed by the more famous novels it quietly made possible, making it a genuinely surprising rather than reflexive pick.\"\n  }\n]\n```",
+    "finalRoundUsage": {
+      "input_tokens": 35422,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 1558,
+      "output_tokens_details": {
+        "thinking_tokens": 980
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    },
+    "errorBody": null,
+    "logLines": [
+      "Hardcover tag mapping matched zero tags, degrading to Open-Library-only",
+      "mergeCandidatePools: OL raw=100, HC raw=0, duplicates removed=2, merged total=98, OL%=100%, HC%=0%",
+      "mergeCandidatePools: OL raw=8, HC raw=0, duplicates removed=0, merged total=8, OL%=100%, HC%=0%",
+      "mergeCandidatePools: OL raw=0, HC raw=0, duplicates removed=0, merged total=0, OL%=0%, HC%=0%",
+      "mergeCandidatePools: OL raw=257, HC raw=0, duplicates removed=3, merged total=254, OL%=100%, HC%=0%",
+      "recommend: GROUNDING CHECK FAILED (attempt 1/3) — ungrounded picks:",
+      "  \"Sátántangó\" — László Krasznahorkai: NONE (not in any retrieved pool)",
+      "  \"Ghostroots\" — 'Pemi Aguda: openlibrary",
+      "  \"Los informantes\" — Juan Gabriel Vásquez: openlibrary",
+      "recommend: retrying",
+      "mergeCandidatePools: OL raw=0, HC raw=0, duplicates removed=0, merged total=0, OL%=0%, HC%=0%",
+      "mergeCandidatePools: OL raw=100, HC raw=0, duplicates removed=1, merged total=99, OL%=100%, HC%=0%",
+      "mergeCandidatePools: OL raw=0, HC raw=0, duplicates removed=0, merged total=0, OL%=0%, HC%=0%",
+      "mergeCandidatePools: OL raw=0, HC raw=0, duplicates removed=0, merged total=0, OL%=0%, HC%=0%",
+      "mergeCandidatePools: OL raw=356, HC raw=0, duplicates removed=3, merged total=353, OL%=100%, HC%=0%",
+      "mergeCandidatePools: OL raw=120, HC raw=0, duplicates removed=6, merged total=114, OL%=100%, HC%=0%",
+      "recommend: pick sources (attempt 2/3)",
+      "  \"Diary of a Void\" — Emi Yagi: openlibrary",
+      "  \"Wizard of the Crow\" — Ngũgĩ wa Thiongʼo: openlibrary",
+      "  \"El llano en llamas\" — Juan Rulfo: openlibrary",
+      " POST /api/recommend 200 in 116s (next.js: 3ms, application-code: 116s)"
+    ]
+  },
+  {
+    "id": "case-5",
+    "label": "Contradictory signals",
+    "tasteDescription": "My favorite book of all time is 'War and Peace' — I loved the sprawling scope and how deeply it got into every character's inner life. But right now I want something light and quick to read, nothing heavy or slow.",
+    "httpStatus": 200,
+    "seconds": 36,
+    "fetchError": null,
+    "attemptCount": 1,
+    "attempts": [
+      {
+        "attempt": 1,
+        "outcome": "grounded",
+        "picks": [
+          {
+            "title": "Gigi",
+            "author": "Colette",
+            "source": "openlibrary"
+          },
+          {
+            "title": "All Systems Red",
+            "author": "Martha Wells",
+            "source": "hardcover"
+          },
+          {
+            "title": "Nettle & Bone",
+            "author": "T. Kingfisher",
+            "source": "hardcover"
+          }
+        ],
+        "searchRounds": 2,
+        "mergedPoolSizes": [
+          24,
+          122
+        ]
+      }
+    ],
+    "finalOutcome": "returned",
+    "recommendations": "[\n  {\n    \"title\": \"Gigi\",\n    \"author\": \"Colette\",\n    \"why\": \"You loved the deep inner life Tolstoy gave his characters — Colette does something similar in miniature, tracing a young woman's inner awakening with sharp psychological precision, but wraps it in a witty, warm, fast-moving Parisian comedy of manners you can finish in an afternoon.\",\n    \"nonObvious\": \"It's a slender, sparkling novella rather than the doorstopper reflex a 'War and Peace' fan might expect, proving character depth doesn't require length.\"\n  },\n  {\n    \"title\": \"All Systems Red\",\n    \"author\": \"Martha Wells\",\n    \"why\": \"The narrator's anxious, richly interior voice gives you the same close psychological access you loved in Tolstoy's characters, just compressed into a breezy, plot-driven novella you can read in one sitting.\",\n    \"nonObvious\": \"A security-android narrator sounds like pure genre fun, but its introspective, socially awkward inner monologue delivers real character depth without any of the weight of a sprawling epic.\"\n  },\n  {\n    \"title\": \"Nettle & Bone\",\n    \"author\": \"T. Kingfisher\",\n    \"why\": \"It still centers on a fully realized, emotionally complex protagonist making hard choices, echoing the character-first instinct that drew you to War and Peace, but the fairy-tale structure and dry humor keep it light and quick.\",\n    \"nonObvious\": \"It reads like a cozy fable on the surface, but its clear-eyed handling of grief and quiet courage gives it more substance than a typical light fantasy pick.\"\n  }\n]",
+    "finalRoundUsage": {
+      "input_tokens": 9824,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 1270,
+      "output_tokens_details": {
+        "thinking_tokens": 729
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    },
+    "errorBody": null,
+    "logLines": [
+      "prepareHardcoverPool: dropped 7 row(s) with no author",
+      "mergeCandidatePools: OL raw=1, HC raw=23, duplicates removed=0, merged total=24, OL%=4.2%, HC%=95.8%",
+      "mergeCandidatePools: OL raw=100, HC raw=23, duplicates removed=1, merged total=122, OL%=81.1%, HC%=18.9%",
+      "recommend: pick sources (attempt 1/3)",
+      "  \"Gigi\" — Colette: openlibrary",
+      "  \"All Systems Red\" — Martha Wells: hardcover",
+      "  \"Nettle & Bone\" — T. Kingfisher: hardcover",
+      " POST /api/recommend 200 in 35.8s (next.js: 2ms, application-code: 35.8s)"
+    ]
+  },
+  {
+    "id": "case-6",
+    "label": "Hard turn-off",
+    "tasteDescription": "I love literary fiction — character studies, beautiful prose, morally complicated people. I will not read fantasy under any circumstances: no magic systems, no invented worlds.",
+    "httpStatus": 200,
+    "seconds": 41,
+    "fetchError": null,
+    "attemptCount": 1,
+    "attempts": [
+      {
+        "attempt": 1,
+        "outcome": "grounded",
+        "picks": [
+          {
+            "title": "Sult",
+            "author": "Knut Hamsun",
+            "source": "openlibrary"
+          },
+          {
+            "title": "Paris Trout",
+            "author": "Pete Dexter",
+            "source": "openlibrary"
+          },
+          {
+            "title": "Los informantes",
+            "author": "Juan Gabriel Vásquez",
+            "source": "openlibrary"
+          }
+        ],
+        "searchRounds": 2,
+        "mergedPoolSizes": [
+          123,
+          123
+        ]
+      }
+    ],
+    "finalOutcome": "returned",
+    "recommendations": "[\n  {\n    \"title\": \"Sult\",\n    \"author\": \"Knut Hamsun\",\n    \"why\": \"This is a claustrophobic, first-person plunge into the mind of a starving, prideful, self-sabotaging young writer in Kristiania — exactly the kind of morally slippery, psychologically dense character study you're describing, rendered in prose so sharp and hallucinatory it practically vibrates on the page.\",\n    \"nonObvious\": \"It's the ur-text behind a century of unreliable-narrator fiction, but it rarely comes up in casual 'literary fiction' recommendation lists the way its descendants do, so it reads as startlingly fresh rather than like homework.\"\n  },\n  {\n    \"title\": \"Paris Trout\",\n    \"author\": \"Pete Dexter\",\n    \"why\": \"A small-town Georgia store owner commits a murder he genuinely believes is justified, and the novel refuses to let you resolve him into simple villain or victim — it's a slow, merciless character study built on precise, unshowy prose that earns every ounce of its dread.\",\n    \"nonObvious\": \"It won major recognition decades ago but has faded from the default 'moral complexity' recommendation circuit, making it a pick that feels discovered rather than assigned.\"\n  },\n  {\n    \"title\": \"Los informantes\",\n    \"author\": \"Juan Gabriel Vásquez\",\n    \"why\": \"A son's biography of his father unravels a hidden history of wartime betrayal among German immigrants in Colombia, and the book is less interested in verdicts than in how guilt, loyalty, and self-justification tangle inside ordinary people — quiet, morally knotty, and beautifully controlled prose throughout.\",\n    \"nonObvious\": \"Vásquez writes in a very different register than the usual Latin American 'magical realism' expectation — this is grounded, investigative, character-driven fiction, so it surprises readers who assume that label means fantasy elements.\"\n  }\n]",
+    "finalRoundUsage": {
+      "input_tokens": 16595,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 1747,
+      "output_tokens_details": {
+        "thinking_tokens": 1109
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    },
+    "errorBody": null,
+    "logLines": [
+      "prepareHardcoverPool: dropped 12 row(s) with no author",
+      "mergeCandidatePools: OL raw=101, HC raw=24, duplicates removed=2, merged total=123, OL%=80.5%, HC%=19.5%",
+      "mergeCandidatePools: OL raw=101, HC raw=24, duplicates removed=2, merged total=123, OL%=80.5%, HC%=19.5%",
+      "recommend: pick sources (attempt 1/3)",
+      "  \"Sult\" — Knut Hamsun: openlibrary",
+      "  \"Paris Trout\" — Pete Dexter: openlibrary",
+      "  \"Los informantes\" — Juan Gabriel Vásquez: openlibrary",
+      " POST /api/recommend 200 in 41s (next.js: 2ms, application-code: 41s)"
+    ]
+  },
+  {
+    "id": "case-7a",
+    "label": "Rejection → clarify",
+    "tasteDescription": "I asked for recommendations similar to quiet, literary character studies, but the three you gave me last time were all too dark and bleak for what I wanted. I'd like something in a similar literary vein, but warmer and more hopeful in tone.",
+    "httpStatus": 200,
+    "seconds": 46,
+    "fetchError": null,
+    "attemptCount": 1,
+    "attempts": [
+      {
+        "attempt": 1,
+        "outcome": "grounded",
+        "picks": [
+          {
+            "title": "Sweet Thursday",
+            "author": "John Steinbeck",
+            "source": "openlibrary"
+          },
+          {
+            "title": "The Chosen",
+            "author": "Chaim Potok",
+            "source": "openlibrary"
+          },
+          {
+            "title": "O Pioneers!",
+            "author": "Willa Cather",
+            "source": "openlibrary"
+          }
+        ],
+        "searchRounds": 2,
+        "mergedPoolSizes": [
+          9,
+          276
+        ]
+      }
+    ],
+    "finalOutcome": "returned",
+    "recommendations": "```json\n[\n  {\n    \"title\": \"Sweet Thursday\",\n    \"author\": \"John Steinbeck\",\n    \"why\": \"It keeps the intimate, character-driven texture you loved in your anchor book but trades bleakness for warmth—Steinbeck's Cannery Row misfits are drawn with real tenderness, and the book moves toward connection and small-scale redemption rather than tragedy.\",\n    \"nonObvious\": \"Overshadowed by its darker sibling Cannery Row and by Steinbeck's heavier social novels, this one is often skipped even by his fans, despite being his most purely warm-hearted character piece.\"\n  },\n  {\n    \"title\": \"The Chosen\",\n    \"author\": \"Chaim Potok\",\n    \"why\": \"A quiet, deeply interior study of two boys and their fathers, built almost entirely on conversation and inner life rather than plot—exactly the kind of patient character work you're after, but resolving in friendship and hard-won understanding instead of despair.\",\n    \"nonObvious\": \"It's frequently shelved as YA or 'Jewish interest' fiction and overlooked by literary-fiction readers, even though its psychological depth and moral seriousness rival any adult literary character study.\"\n  },\n  {\n    \"title\": \"O Pioneers!\",\n    \"author\": \"Willa Cather\",\n    \"why\": \"Cather's prose is spare and observant in the same register as classic quiet literary fiction, but the novel's core is Alexandra Bergson's steady, hopeful endurance and eventual flourishing—hardship rendered with dignity rather than bleakness.\",\n    \"nonObvious\": \"Cather's reputation rests more on My Ántonia, so this earlier, tighter character study of a woman's quiet triumph tends to get passed over even by readers who already admire her.\"\n  }\n]\n```",
+    "finalRoundUsage": {
+      "input_tokens": 17994,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 1663,
+      "output_tokens_details": {
+        "thinking_tokens": 1068
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    },
+    "errorBody": null,
+    "logLines": [
+      "prepareHardcoverPool: dropped 9 row(s) with no author",
+      "mergeCandidatePools: OL raw=2, HC raw=7, duplicates removed=0, merged total=9, OL%=22.2%, HC%=77.8%",
+      "mergeCandidatePools: OL raw=275, HC raw=7, duplicates removed=6, merged total=276, OL%=97.5%, HC%=2.5%",
+      "recommend: pick sources (attempt 1/3)",
+      "  \"Sweet Thursday\" — John Steinbeck: openlibrary",
+      "  \"The Chosen\" — Chaim Potok: openlibrary",
+      "  \"O Pioneers!\" — Willa Cather: openlibrary",
+      " POST /api/recommend 200 in 46s (next.js: 3ms, application-code: 46s)"
+    ]
+  },
+  {
+    "id": "case-7b",
+    "label": "Rejection → clarify → widen escalation",
+    "tasteDescription": "I've now rejected two rounds of recommendations for quiet literary character studies — the first round was too dark, and the second round (aiming for warmer and more hopeful) still didn't land, they felt flat and forgettable. At this point just show me your best editable read on what you think I'm actually after, and feel free to widen out and take some real chances rather than staying narrowly in that same lane.",
+    "httpStatus": 200,
+    "seconds": 37,
+    "fetchError": null,
+    "attemptCount": 1,
+    "attempts": [
+      {
+        "attempt": 1,
+        "outcome": "grounded",
+        "picks": [
+          {
+            "title": "Hotel du Lac",
+            "author": "Anita Brookner",
+            "source": "openlibrary"
+          },
+          {
+            "title": "All Passion Spent",
+            "author": "Vita Sackville-West",
+            "source": "openlibrary"
+          },
+          {
+            "title": "Elizabeth Costello",
+            "author": "J. M. Coetzee",
+            "source": "openlibrary"
+          }
+        ],
+        "searchRounds": 3,
+        "mergedPoolSizes": [
+          109,
+          7,
+          104
+        ]
+      }
+    ],
+    "finalOutcome": "returned",
+    "recommendations": "[\n  {\n    \"title\": \"Hotel du Lac\",\n    \"author\": \"Anita Brookner\",\n    \"why\": \"A precise, interior character study of a woman recalibrating her life after humiliation — quiet in incident but sharp and unsentimental in observation, which sidesteps both the grimness of your first round and the flatness of the second.\",\n    \"nonObvious\": \"It's often shelved as 'romance' or 'women's fiction' by casual browsers, which means it gets skipped by readers hunting for serious character studies, even though its irony and restraint put it closer to Muriel Spark than to comfort reading.\"\n  },\n  {\n    \"title\": \"All Passion Spent\",\n    \"author\": \"Vita Sackville-West\",\n    \"why\": \"An elderly widow quietly dismantles everyone's expectations of her in old age — warm in the sense of being humane, but wry and unsparing enough that it never tips into the soft, forgettable register your second round hit.\",\n    \"nonObvious\": \"It reads as a hopeful book about a woman finally living for herself, but the hopefulness is earned through irony and quiet defiance rather than sentiment, so it doesn't collapse into the 'warm and flat' territory you already rejected.\"\n  },\n  {\n    \"title\": \"Elizabeth Costello\",\n    \"author\": \"J. M. Coetzee\",\n    \"why\": \"A character study built almost entirely out of one woman's arguments and hesitations rather than plot — cerebral and quiet, with an unease that gives it weight without pushing into the darkness you ruled out.\",\n    \"nonObvious\": \"Its lecture-and-response structure makes it feel more like an essay collection than a novel, so it rarely turns up on standard 'quiet character study' lists even though it's one of the more formally daring entries in that mode.\"\n  }\n]",
+    "finalRoundUsage": {
+      "input_tokens": 14484,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 1673,
+      "output_tokens_details": {
+        "thinking_tokens": 1086
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    },
+    "errorBody": null,
+    "logLines": [
+      "prepareHardcoverPool: dropped 9 row(s) with no author",
+      "mergeCandidatePools: OL raw=104, HC raw=5, duplicates removed=0, merged total=109, OL%=95.4%, HC%=4.6%",
+      "mergeCandidatePools: OL raw=2, HC raw=5, duplicates removed=0, merged total=7, OL%=28.6%, HC%=71.4%",
+      "mergeCandidatePools: OL raw=100, HC raw=5, duplicates removed=1, merged total=104, OL%=95.2%, HC%=4.8%",
+      "recommend: pick sources (attempt 1/3)",
+      "  \"Hotel du Lac\" — Anita Brookner: openlibrary",
+      "  \"All Passion Spent\" — Vita Sackville-West: openlibrary",
+      "  \"Elizabeth Costello\" — J. M. Coetzee: openlibrary",
+      " POST /api/recommend 200 in 37.0s (next.js: 1701µs, application-code: 37.0s)"
+    ]
+  },
+  {
+    "id": "case-8",
+    "label": "Texture-match, not genre-match",
+    "tasteDescription": "I'm looking for something with a really granular, immersive sense of place — I want to feel like I'm actually there — and characters who are morally ambiguous, not clearly good or bad. Genre doesn't matter much to me as long as it has that texture.",
+    "httpStatus": 200,
+    "seconds": 42,
+    "fetchError": null,
+    "attemptCount": 1,
+    "attempts": [
+      {
+        "attempt": 1,
+        "outcome": "grounded",
+        "picks": [
+          {
+            "title": "Garlic, Mint & Sweet Basil",
+            "author": "Jean-Claude Izzo",
+            "source": "openlibrary"
+          },
+          {
+            "title": "Tar Baby",
+            "author": "Toni Morrison",
+            "source": "openlibrary"
+          },
+          {
+            "title": "Black Wings Has My Angel",
+            "author": "Elliott Chaze",
+            "source": "openlibrary"
+          }
+        ],
+        "searchRounds": 2,
+        "mergedPoolSizes": [
+          116,
+          309
+        ]
+      }
+    ],
+    "finalOutcome": "returned",
+    "recommendations": "[\n  {\n    \"title\": \"Garlic, Mint & Sweet Basil\",\n    \"author\": \"Jean-Claude Izzo\",\n    \"why\": \"Izzo's Marseille is rendered in almost tactile detail — the smell of the port, the light on the Mediterranean, the crumbling working-class neighborhoods — and his disillusioned ex-cop protagonist operates in a moral gray zone of loyalty, corruption, and grief rather than clean heroism.\",\n    \"nonObvious\": \"Mediterranean noir gets eclipsed by the American and Scandinavian varieties in most 'atmospheric crime' recommendations, so this tends to get overlooked despite matching the brief almost exactly.\"\n  },\n  {\n    \"title\": \"Tar Baby\",\n    \"author\": \"Toni Morrison\",\n    \"why\": \"The novel's Caribbean island setting — its heat, its isolation, its colonial history pressing into the present — is rendered with obsessive sensory precision, and every character, from the wealthy white patriarch to the drifting Black protagonist, resists easy moral categorization.\",\n    \"nonObvious\": \"Morrison's name usually triggers 'Beloved' as the reflex answer; this less-discussed novel is actually the one built most explicitly around a richly imagined single location and characters whose motives stay genuinely unresolved.\"\n  },\n  {\n    \"title\": \"Black Wings Has My Angel\",\n    \"author\": \"Elliott Chaze\",\n    \"why\": \"This is pure sensory immersion — the oil fields, the diners, the snowbound Colorado hideout — paired with two leads whose criminal partnership is driven by obsession and self-interest rather than any clear villainy or virtue.\",\n    \"nonObvious\": \"It's a mid-century pulp noir that rarely surfaces on 'literary' recommendation lists, yet its prose and psychological texture rival much more decorated novels in the genre.\"\n  }\n]",
+    "finalRoundUsage": {
+      "input_tokens": 25200,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 2456,
+      "output_tokens_details": {
+        "thinking_tokens": 1820
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    },
+    "errorBody": null,
+    "logLines": [
+      "prepareHardcoverPool: dropped 2 row(s) with no author",
+      "mergeCandidatePools: OL raw=101, HC raw=17, duplicates removed=2, merged total=116, OL%=86.2%, HC%=14.7%",
+      "mergeCandidatePools: OL raw=297, HC raw=17, duplicates removed=5, merged total=309, OL%=94.5%, HC%=5.5%",
+      "recommend: pick sources (attempt 1/3)",
+      "  \"Garlic, Mint & Sweet Basil\" — Jean-Claude Izzo: openlibrary",
+      "  \"Tar Baby\" — Toni Morrison: openlibrary",
+      "  \"Black Wings Has My Angel\" — Elliott Chaze: openlibrary",
+      " POST /api/recommend 200 in 42s (next.js: 3ms, application-code: 42s)"
+    ]
+  },
+  {
+    "id": "case-9",
+    "label": "Genre/category fidelity & adjacent expansion",
+    "tasteDescription": "I love narrative nonfiction — real events told with the pacing and craft of a novel. Specifically deep-dive investigative journalism or historical accounts that read like thrillers. That's exactly what I'm looking for right now.",
+    "httpStatus": 200,
+    "seconds": 26,
+    "fetchError": null,
+    "attemptCount": 1,
+    "attempts": [
+      {
+        "attempt": 1,
+        "outcome": "grounded",
+        "picks": [
+          {
+            "title": "Furious Hours",
+            "author": "Casey Cep",
+            "source": "openlibrary"
+          },
+          {
+            "title": "ZeroZeroZero",
+            "author": "Roberto Saviano",
+            "source": "openlibrary"
+          },
+          {
+            "title": "The Radium Girls: The Dark Story of America's Shining Women",
+            "author": "Kate Moore",
+            "source": "hardcover"
+          }
+        ],
+        "searchRounds": 2,
+        "mergedPoolSizes": [
+          30,
+          130
+        ]
+      }
+    ],
+    "finalOutcome": "returned",
+    "recommendations": "[\n  {\n    \"title\": \"Furious Hours\",\n    \"author\": \"Casey Cep\",\n    \"why\": \"It's investigative journalism at its best — a real unsolved murder case entwined with Harper Lee's failed attempt to write her own true-crime book, told with novelistic tension and a literary detective's patience.\",\n    \"nonObvious\": \"Rather than reaching for the usual true-crime blockbuster, this pick rewards readers with a layered dual narrative (the crime itself and the story of the author who tried and failed to tell it) that most 'best investigative nonfiction' lists overlook.\"\n  },\n  {\n    \"title\": \"ZeroZeroZero\",\n    \"author\": \"Roberto Saviano\",\n    \"why\": \"A sprawling, immersive deep-dive into the global cocaine trade written with the propulsive pacing and moral urgency of a thriller — real events reported at great personal risk to the author.\",\n    \"nonObvious\": \"It shifts the genre outside the usual American true-crime canon into a transnational, journalistic epic, giving range beyond the familiar U.S.-centric investigative nonfiction picks.\"\n  },\n  {\n    \"title\": \"The Radium Girls: The Dark Story of America's Shining Women\",\n    \"author\": \"Kate Moore\",\n    \"why\": \"A meticulously researched historical account of factory workers poisoned by radium that unfolds with courtroom-drama suspense and genuine emotional stakes — narrative nonfiction that reads like a thriller.\",\n    \"nonObvious\": \"It swaps out the crime-scene focus typical of this genre for a slow-building industrial-injustice story, offering the same page-turning craft from an entirely different corner of history.\"\n  }\n]",
+    "finalRoundUsage": {
+      "input_tokens": 11087,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 999,
+      "output_tokens_details": {
+        "thinking_tokens": 440
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    },
+    "errorBody": null,
+    "logLines": [
+      "prepareHardcoverPool: dropped 66 row(s) with no author",
+      "mergeCandidatePools: OL raw=0, HC raw=30, duplicates removed=0, merged total=30, OL%=0%, HC%=100%",
+      "mergeCandidatePools: OL raw=100, HC raw=30, duplicates removed=0, merged total=130, OL%=76.9%, HC%=23.1%",
+      "recommend: pick sources (attempt 1/3)",
+      "  \"Furious Hours\" — Casey Cep: openlibrary",
+      "  \"ZeroZeroZero\" — Roberto Saviano: openlibrary",
+      "  \"The Radium Girls: The Dark Story of America's Shining Women\" — Kate Moore: hardcover",
+      " POST /api/recommend 200 in 25.8s (next.js: 2ms, application-code: 25.8s)"
+    ]
+  },
+  {
+    "id": "case-10",
+    "label": "Creative-framing-only input",
+    "tasteDescription": "🌊🏚️👻🕯️ — moody, atmospheric, a little unsettling but not full horror. That's the vibe I want.",
+    "httpStatus": 200,
+    "seconds": 36,
+    "fetchError": null,
+    "attemptCount": 1,
+    "attempts": [
+      {
+        "attempt": 1,
+        "outcome": "grounded",
+        "picks": [
+          {
+            "title": "We Have Always Lived in the Castle",
+            "author": "Shirley Jackson",
+            "source": "openlibrary"
+          },
+          {
+            "title": "The Little Stranger",
+            "author": "Sarah Waters",
+            "source": "openlibrary"
+          },
+          {
+            "title": "Lolly Willowes",
+            "author": "Sylvia Townsend Warner",
+            "source": "openlibrary"
+          }
+        ],
+        "searchRounds": 2,
+        "mergedPoolSizes": [
+          314,
+          122
+        ]
+      }
+    ],
+    "finalOutcome": "returned",
+    "recommendations": "[\n  {\n    \"title\": \"We Have Always Lived in the Castle\",\n    \"author\": \"Shirley Jackson\",\n    \"why\": \"It nails that 🌊🏚️👻🕯️ mood exactly — a decaying house, a fog of dread hanging over everyday routines, and a creeping unease that never tips into gore or jump-scares.\",\n    \"nonObvious\": \"It's often filed as 'the other Shirley Jackson' next to Hill House, but its quiet, domestic menace and unreliable narration make it the stranger, more haunting read of the two rather than the reflexive pick.\"\n  },\n  {\n    \"title\": \"The Little Stranger\",\n    \"author\": \"Sarah Waters\",\n    \"why\": \"A crumbling English manor after the war, a slow accumulation of odd occurrences, and a narrator you're never quite sure to trust — atmosphere and dread built through suggestion, not spectacle.\",\n    \"nonObvious\": \"It wears the trappings of a classic haunted-house tale but keeps its supernatural elements so ambiguous that it reads more like a psychological character study wrapped in gothic fog.\"\n  },\n  {\n    \"title\": \"Lolly Willowes\",\n    \"author\": \"Sylvia Townsend Warner\",\n    \"why\": \"A spinster's quiet rebellion into rural witchcraft, told with dry wit and pastoral melancholy — eerie and strange in a hushed, candlelit way rather than anything monstrous.\",\n    \"nonObvious\": \"It's a 1920s novel that predates most 'cozy witch' or gothic-horror trends, offering unsettling atmosphere through loneliness and liberation instead of any conventional scare.\"\n  }\n]",
+    "finalRoundUsage": {
+      "input_tokens": 27007,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 991,
+      "output_tokens_details": {
+        "thinking_tokens": 435
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    },
+    "errorBody": null,
+    "logLines": [
+      "prepareHardcoverPool: dropped 2 row(s) with no author",
+      "mergeCandidatePools: OL raw=296, HC raw=22, duplicates removed=4, merged total=314, OL%=93.3%, HC%=7%",
+      "mergeCandidatePools: OL raw=100, HC raw=22, duplicates removed=0, merged total=122, OL%=82%, HC%=18%",
+      "recommend: pick sources (attempt 1/3)",
+      "  \"We Have Always Lived in the Castle\" — Shirley Jackson: openlibrary",
+      "  \"The Little Stranger\" — Sarah Waters: openlibrary",
+      "  \"Lolly Willowes\" — Sylvia Townsend Warner: openlibrary",
+      " POST /api/recommend 200 in 35.7s (next.js: 1688µs, application-code: 35.7s)"
+    ]
+  }
+]

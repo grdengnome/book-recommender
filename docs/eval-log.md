@@ -4,6 +4,55 @@ Running log of quality findings, known limitations, and decisions made while eva
 
 ---
 
+## 2026-09-20 — Grounded-picks enforcement — full eval-set re-run: 10/11 delivered, but the new validation falsely rejected legitimately grounded picks (accents, subtitles) — one case returned a 502
+
+Full 11-case re-run of `docs/eval-set.md` (same inputs, same sequential method as the 2026-08-04 run) against branch `feat/enforce-grounded-picks` (PR #5, commit cd5da06): prompt now requires all 3 picks to come from the retrieved pools, and `lib/merge/pickGrounding.ts` checks every pick with the merge's own `dedupKey`, retrying up to 3 attempts, then a clean 502. Every pick's source (OL/HC) comes from the route's per-attempt console log, parsed per case by `scratchpad/run-eval-grounded.mjs`. Raw output: `scratchpad/eval-run-grounded-2026-09-20.json`; rejection classification: `scratchpad/classify-grounding-rejections.cjs`.
+
+**Headline: the prompt change worked; the validation check is the problem.** Across all 14 generation attempts (42 picks) there were **0 truly ungrounded picks** — the model kept to the candidate pool. But the check rejected **5 picks, all 5 of which were legitimately in that attempt's pool** (false rejections). That cost one retry in case 4 and produced a **502 in case 3 with a fully grounded answer withheld**.
+
+| Case | Delivery | Attempts | Sources (picks 1/2/3) | Relevance | Non-obv. | Range | Real & correct | Traceability | Variety across sessions |
+|---|---|---|---|---|---|---|---|---|---|
+| **1** Rich, clear | pass | 1 | OL / OL / OL | excellent | good | excellent | excellent | excellent | excellent |
+| **2** Anti-mainstream profile | pass | 1 | OL / OL / OL | excellent | good | excellent | excellent | excellent | weak† |
+| **3** Vague input | **FAIL — clean 502** | 3 | — (no picks returned) | not scored | not scored | not scored | not scored | not scored | not scored |
+| **4** Explicit anti-mainstream | pass | **2** | OL / OL / OL | excellent | good | excellent | excellent | good | excellent |
+| **5** Contradictory signals | pass | 1 | OL / **HC / HC** | good | good | excellent | excellent | excellent | excellent |
+| **6** Hard turn-off | pass | 1 | OL / OL / OL | excellent | good | excellent | excellent | excellent | weak† |
+| **7a** Rejection→clarify | pass | 1 | OL / OL / OL | excellent | good | good | excellent | excellent | good |
+| **7b** Rejection→clarify→widen | pass | 1 | OL / OL / OL | good | good | good | excellent | good | excellent |
+| **8** Texture-match | pass | 1 | OL / OL / OL | excellent | excellent | good | excellent | excellent | excellent |
+| **9** Genre fidelity/expansion | pass | 1 | OL / OL / **HC** | excellent | good | excellent | excellent | excellent | excellent |
+| **10** Creative-framing-only | pass | 1 | OL / OL / OL | excellent | weak | good | excellent | excellent | weak† |
+
+Delivery pass rate **10/11 (90.9%)**. Final-pick sources across the 10 delivered cases: **27 OL, 3 HC** (HC picks in cases 5 and 9 only; no OL+HC overlaps among final picks). Same 4-point scale and dimensions as the 2026-08-02 scoring (fail/weak/good/excellent).
+
+† Variety, same standard as the 2026-08-02 scoring: weak = a title recurring across structurally distinct cases in the same run, or a staple pair recurring across prompt versions. *Los informantes* (Vásquez) appears in both case 2 and case 6; case 10 again returned *We Have Always Lived in the Castle* + *The Little Stranger*, the same pair flagged in the Prompt v3, 2026-08-01 and Prompt v4 results. (Case 7a is "good," not weak: 2 of 3 picks repeat the 2026-08-04 run for the identical input, but that's relevant repetition, not a cross-case cluster.)
+
+### The false rejections (the important finding)
+
+Every rejected pick was checked against the OL pools actually logged for that attempt (`scratchpad/query-log.json`, tagged `grounded-<case>`), matching tolerantly. Two distinct mechanisms, both artifacts of exact-key matching, not model behavior:
+
+- **Unicode normalization — *Sátántangó* (Krasznahorkai), cases 3 (attempts 1 and 2) and 4 (attempt 1).** Open Library stores the title decomposed (`a` + U+0301); the model emits the composed form (`á`, U+00E1). `normTitle`'s `[^\w\s]` strip removes composed accented letters outright (`"stntang"`) but keeps the base letter of decomposed ones (`"satantango"`) — identical on screen, different keys. Not a new bug: it's the merge's existing normalizer, now load-bearing because the check reuses it. It also means OL/HC dedup silently misses accented duplicates (not investigated).
+- **Long OL subtitle — *What It Means When A Man Falls From The Sky* (Arimah), case 3 (attempts 2 and 3).** The pool title is "…Sky: The most acclaimed short story collection of the year"; the model dropped the subtitle despite the "copy exactly" instruction, so the keys differ.
+
+Case 3 ("Just something good to read.") hit one of these in every attempt, so all 3 attempts failed and the request ended in a 502 even though every book the model chose was in the pools it had been shown. Case 4 lost ~1 min to one wasted attempt. Roughly 150s of the 554s total went to attempts that were false rejections.
+
+Minor related weakness (not triggered as a failure): the author half of the key is the last whitespace token with non-`\w` stripped, so a non-Latin author (case 1's *Kokoro*, author shown as 夏目漱石) yields an empty author key — the check would accept any pick titled "Kokoro" regardless of author.
+
+The earlier verification run (case 10, same session) did produce one **true** catch — *El Príncipe de la Niebla* was not in that attempt's pools and was correctly rejected and replaced — so the check is doing real work; it just also needs to stop rejecting real matches.
+
+### Other findings
+
+- **Thin/empty pools are common, and the model mostly recovers.** 15 of the run's merged pools were ≤30 candidates: cases 2 (6), 3 (30×4 — OL returned nothing, HC only), 4 (8, and an empty pool of **0** four times), 5 (24), 7a (9), 7b (7), 9 (30). Cases with thin first rounds generally re-searched and delivered. Case 3 is the only case where thinness plausibly mattered, and its failure was the false-rejection bug above, not an empty pool — but it's the case most likely to hit a *true* too-small-pool problem, so the separate thin-pool investigation is still warranted.
+- **Non-obviousness looks better than the 2026-08-02 baseline in cases 6, 8, 9** (case 6 avoided *Disgrace*; case 9 avoided *Say Nothing*; case 8 no longer leans on the decorated picks) and is unchanged for case 10. This run doesn't isolate why — the non-obviousness prompt rules weren't touched, and picks vary run to run — so treat as a single-sample observation, not an effect of this change.
+- **Cases 3, 7a, 7b remain single-message stand-ins** for follow-up/rejection/widen mechanics that aren't built (per CLAUDE.md); same caveat as prior scoring. Case 3 is unscored: no picks were returned.
+- **Scoring caveat:** rubric scores above are the assistant's own judgment. "Real & correct" was checked against the assistant's knowledge of each book (all 30 returned picks are real titles by the stated authors; no invented claims noticed), **not** re-verified against external sources as the July/August scorings were — worth a spot-check before treating them as final. *Hotel du Lac* and *The Little Stranger* are Booker winner/shortlisted books whose `nonObvious` text doesn't mention it (same pattern as the 2026-08-02 case 10 note); no false reception claim.
+- **Time/cost:** driver wall time 561s (sum of per-case 554s; 26–116s per case, 92s for the 502); 14 generation attempts. Cost is not tracked — the route discards usage from retried attempts and doesn't sum rounds; the final round alone averaged ~22k input / ~1.5k output tokens per delivered case (a lower bound, not a total).
+
+Status: **not ready to merge as-is.** The grounding constraint itself is effective, but the validation's false rejections turned a fully grounded answer into a user-facing 502. Proposed fix (not applied — needs a decision): make the check tolerant of (a) Unicode form/diacritics (NFKD + strip combining marks on both sides) and (b) subtitles (compare the title up to the first colon/parenthesis), and treat an empty author key as unmatched. Do it inside `pickGrounding.ts` only, leaving `mergeCandidatePools.ts` untouched; whether the merge's own dedup should get the same normalization is a separate call. Then re-run cases 3 and 4 (and spot-check a couple of passing cases) to confirm no true ungrounded picks slip through the looser match.
+
+---
+
 ## 2026-08-04 — Narrow-pool clustering traced to subject-endpoint determinism; free-text search investigated and abandoned
 
 Followed up on the 2026-08-03 entry's flagged next step: extended `search_books`'s temporary diagnostic logging (`lib/tools/searchBooks.ts`) to record each call's full pool contents (title + author per candidate), not just `poolSize`. Ran a narrowed eval — cases 3, 4, 6, and 8 only, the ones that had shown clustering or near-clustering in the prior two runs — via a new `scratchpad/run-eval-narrow.mjs` driver, to get pool-content evidence fast without a full 11-case run.
