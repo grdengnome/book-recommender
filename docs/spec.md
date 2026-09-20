@@ -145,7 +145,7 @@ Only a few sentences — the mechanics live in code and the tool definition, not
 - That the returned candidate list is unordered — no positional favoritism.
 - That the final picks should still be judged against the existing taste-fit rules (impression over popularity, resist the bandwagon, awards ≠ non-obviousness) — grounding changes *where candidates come from*, not the *judgment* applied to them.
 
-**Enforced in code, not just prompted (2026-09-20):** after the model answers, `lib/merge/pickGrounding.ts` checks every pick against the merged pools it was shown, using the merge's own `dedupKey` (normalized title + author last name). Any pick not found — or an answer that can't be parsed — is a failed generation: logged, and the whole generation is retried (bounded at 3 attempts; then a clean 502, never an ungrounded pick).
+**Enforced in code, not just prompted (2026-09-20):** after the model answers, `lib/merge/pickGrounding.ts` checks every pick against the merged pools it was shown, using its own tolerant key (title up to the first colon/parenthesis + author last name, Unicode-folded; an empty title or author never matches) — deliberately looser than the merge's `dedupKey`, which falsely rejected accented titles and subtitled titles in the 2026-09-20 eval. Any pick not found — or an answer that can't be parsed — is a failed generation: logged, and the whole generation is retried (bounded at 3 attempts; then a clean 502, never an ungrounded pick).
 
 ### 5d. Cover images — unchanged, already resolved (Section 4c)
 

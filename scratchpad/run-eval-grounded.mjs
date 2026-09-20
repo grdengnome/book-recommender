@@ -9,6 +9,9 @@
 //
 // Usage: dev server must be running with its stdout redirected to DEV_LOG.
 //   DEV_LOG=/path/to/dev.log node scratchpad/run-eval-grounded.mjs
+// Optional: CASE_IDS=case-3,case-4 (subset, run in that order), TAG_PREFIX=groundedfix
+// (evalTag prefix, keeps query-log entries separable from other runs), OUT=<file name in
+// scratchpad/> (results file; default eval-run-grounded-2026-09-20.json).
 import fs from "fs";
 
 const PORT = process.env.PORT || 3000;
@@ -19,6 +22,9 @@ if (!DEV_LOG) throw new Error("DEV_LOG (path to the dev server's redirected stdo
 const src = fs.readFileSync(new URL("./run-eval.mjs", import.meta.url), "utf8");
 const CASES = eval(src.match(/const CASES = (\[[\s\S]*?\n\]);/)[1]);
 if (CASES.length !== 11) throw new Error(`expected 11 cases, got ${CASES.length}`);
+const CASE_IDS = process.env.CASE_IDS ? process.env.CASE_IDS.split(",") : CASES.map((c) => c.id);
+const RUN_CASES = CASE_IDS.map((id) => CASES.find((c) => c.id === id) ?? (() => { throw new Error(`unknown case ${id}`); })());
+const TAG_PREFIX = process.env.TAG_PREFIX || "grounded";
 
 const PICK_LINE = /^  "(.*)" — (.*): (openlibrary\+hardcover|hardcover\+openlibrary|openlibrary|hardcover|NONE \(not in any retrieved pool\))$/;
 
@@ -46,11 +52,11 @@ function parseAttempts(lines) {
   return attempts;
 }
 
-const outPath = new URL("./eval-run-grounded-2026-09-20.json", import.meta.url);
+const outPath = new URL(`./${process.env.OUT || "eval-run-grounded-2026-09-20.json"}`, import.meta.url);
 const results = [];
 const runStart = Date.now();
 
-for (const c of CASES) {
+for (const c of RUN_CASES) {
   const before = fs.readFileSync(DEV_LOG, "utf8").split("\n").length;
   const t0 = Date.now();
   let status, body, fetchError;
@@ -58,7 +64,7 @@ for (const c of CASES) {
     const res = await fetch(API_URL, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ tasteDescription: c.tasteDescription, evalTag: `grounded-${c.id}` }),
+      body: JSON.stringify({ tasteDescription: c.tasteDescription, evalTag: `${TAG_PREFIX}-${c.id}` }),
     });
     status = res.status;
     body = await res.json();
@@ -90,4 +96,4 @@ for (const c of CASES) {
     (last ? last.picks.map((p) => `${p.title} <${p.source}>`).join(" | ") : "(no attempt records parsed)"));
 }
 
-console.log(`\nDONE total ${Math.round((Date.now() - runStart) / 1000)}s — wrote scratchpad/eval-run-grounded-2026-09-20.json`);
+console.log(`\nDONE total ${Math.round((Date.now() - runStart) / 1000)}s — wrote scratchpad/${process.env.OUT || "eval-run-grounded-2026-09-20.json"}`);
