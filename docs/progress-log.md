@@ -446,6 +446,8 @@ Ran the identical `cult novel` query against Open Library side by side for direc
 
 **Status:** PR #5 open and mergeable, ready for review. **Not merged; the merge decision is unresolved.**
 
+**Update:** PR #5 was merged into `main` as `cb3f827` later the same day (2026-09-20).
+
 **Next:**
 1. Decide whether to merge PR #5.
 2. After merge, run one clean full 11-case eval — today's full run predates the validator fix — and record it as the dated v0 baseline (Sept 18 wrap-up item 1).
