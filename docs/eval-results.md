@@ -948,3 +948,244 @@ _Note: case 5's first API call in this run returned `stop_reason: end_turn` with
 3. **Farewell Miss Julie Logan** — J. M. Barrie
    - why: A minister in an isolated, snowbound Scottish glen becomes entangled with a woman who may not be entirely of the living world — quiet, melancholy, and eerie rather than frightening.
    - nonObvious: Written by the author of Peter Pan late in his career, it's a genuinely haunting ghost novella that almost never surfaces on genre recommendation lists.
+
+
+## v0 baseline — Sept 23, 2026 — post grounding fix (PR #5)
+
+_Full 11-case eval re-run against the live `/api/recommend` route on `main` (cb3f827, PR #5 merged), via `scratchpad/run-eval-grounded.mjs` with the dev server log captured for pick-source and merge-pool attribution. **Raw output only — not scored against the 6-dimension rubric.** All 11 cases returned HTTP 200 on attempt 1/3, i.e. the grounding validator (`lib/merge/pickGrounding.ts`) accepted every generation on the first pass — zero rejections/retries this run. All 33 final picks were attributed to `openlibrary`; none came from `hardcover` or an `openlibrary+hardcover` overlap, despite Hardcover contributing a nonzero share of most merged pools (up to 37% on case-8's first search_books round). Flagging that pattern here, not explaining it — no scoring or diagnosis in this entry._
+
+### Case 1 — Rich, clear input
+
+**Input:**
+> My favorite book is 'The Remains of the Day' by Kazuo Ishiguro — I loved how restrained and heartbreaking it was, the way so much emotion stayed unspoken beneath the surface. I'm in the mood for something similarly quiet and melancholic, character-driven rather than plot-heavy. I have plenty of time and want to sit with a slow, immersive book.
+
+**Retrieval:** attempt 1/3, outcome: grounded (no grounding-validator rejections this case). Merge rounds (one per `search_books` call this generation):
+1. `OL raw=299, HC raw=30, duplicates removed=11, merged total=318, OL%=91.2%, HC%=9.4%`
+2. `OL raw=275, HC raw=30, duplicates removed=10, merged total=295, OL%=91.2%, HC%=10.2%`
+
+**Output:**
+
+1. **Kokoro** — 夏目漱石 `[openlibrary]`
+   - why: A classic of Japanese literature built almost entirely on what its characters cannot bring themselves to say — guilt, loyalty, and love all suppressed beneath formal, controlled prose, much like Stevens's buried feelings in The Remains of the Day.
+   - nonObvious: It's a canonical Japanese novel, but it's rarely the reflexive recommendation for Ishiguro fans, who usually get pointed to his other novels rather than the Japanese tradition he draws restraint from.
+2. **Our Souls at Night** — Kent Haruf `[openlibrary]`
+   - why: Spare, unadorned sentences carry enormous emotional weight as two lonely older people slowly, tentatively open up to each other — the same slow-burn intimacy and dignified restraint that made Stevens's story so quietly devastating.
+   - nonObvious: Haruf's minimalism is a very different register from Ishiguro's — plain Colorado prose instead of formal English butler-speak — so it rewards the reader without simply echoing the same voice.
+3. **Strangers** — Anita Brookner `[openlibrary]`
+   - why: Brookner specializes in exactly this kind of interior, melancholic character study — a solitary person examining a life of missed chances and unspoken longing with painful clarity and total emotional control.
+   - nonObvious: Brookner's quiet, unfussy novels of loneliness don't get the reflexive 'if you liked Ishiguro' nod that more famous comfort picks do, despite being an almost perfect tonal match.
+
+### Case 2 — Anti-mainstream profile
+
+**Input:**
+> There's a novel I read a few years back — quiet, character-driven, nothing anyone around me had heard of — and it turned out to be one of the best books I've ever read. It completely surprised me, because nothing about its low profile suggested it would hit that hard. I've been recommending it to people unprompted ever since. I want more like that: no bestsellers, no 'if you liked X' consensus picks — just books that are genuinely great regardless of how well-known they are.
+
+**Retrieval:** attempt 1/3, outcome: grounded (no grounding-validator rejections this case). Merge rounds (one per `search_books` call this generation):
+1. `OL raw=102, HC raw=6, duplicates removed=0, merged total=108, OL%=94.4%, HC%=5.6%`
+2. `OL raw=201, HC raw=6, duplicates removed=5, merged total=202, OL%=97%, HC%=3%`
+3. `OL raw=276, HC raw=6, duplicates removed=6, merged total=276, OL%=97.8%, HC%=2.2%`
+
+**Output:**
+
+1. **A Jest of God** — Margaret Laurence `[openlibrary]`
+   - why: It's the kind of book your reading experience describes exactly: a small-town Canadian schoolteacher's interior life rendered with such precision and restraint that the quiet accumulates into something devastating rather than dull — a slow-burn character study, not a plot-driven page-turner.
+   - nonObvious: Laurence is revered in Canadian letters but rarely surfaces on international 'hidden gem' lists, so it arrives without the baggage of being anyone's go-to recommendation.
+2. **Los informantes** — Juan Gabriel Vásquez `[openlibrary]`
+   - why: A patient, character-driven unraveling of a family's buried history under Colombia's WWII-era blacklist politics — the kind of book that works through implication and interiority rather than incident, matching your appetite for something that sneaks up on you.
+   - nonObvious: Vásquez is acclaimed in Spanish-language and translated-fiction circles but this particular novel rarely appears on mainstream 'best of' rundowns, so it's not the reflexive pick even among people who know the territory.
+3. **The Memory of Love** — Aminatta Forna `[openlibrary]`
+   - why: A deliberately unhurried, deeply character-focused novel about memory, guilt, and love after Sierra Leone's civil war — it earns its emotional weight through patient observation of people rather than dramatic incident, the same quality that made your anchor book hit so hard.
+   - nonObvious: Forna's work gets serious critical respect but almost never comes up in casual book-club or bestseller conversation, making it a genuine discovery rather than a consensus suggestion.
+
+### Case 3 — Vague input
+
+**Input:**
+> Just something good to read.
+
+**Retrieval:** attempt 1/3, outcome: grounded (no grounding-validator rejections this case). Merge rounds (one per `search_books` call this generation):
+1. `OL raw=196, HC raw=30, duplicates removed=7, merged total=219, OL%=87.7%, HC%=13.7%`
+2. `OL raw=306, HC raw=30, duplicates removed=3, merged total=333, OL%=91%, HC%=9%`
+
+**Output:**
+
+1. **A Fine Balance** — Rohinton Mistry `[openlibrary]`
+   - why: A sweeping, deeply humane novel about four strangers thrown together during India's Emergency — for a reader who just wants something 'good,' this delivers emotional weight, unforgettable characters, and prose that never shows off.
+   - nonObvious: It's a towering work of literary fiction that rarely gets reflexively name-dropped the way more famous 'big novel' picks do, despite being as accomplished as any of them.
+2. **The Garden of Evening Mists** — Tan Twan Eng `[openlibrary]`
+   - why: A lush, quietly devastating story of memory, war, and a Japanese garden built in the Malaysian highlands — the kind of book that lingers because of its atmosphere as much as its plot.
+   - nonObvious: Set in a rarely fictionalized corner of WWII history (Malaya under Japanese occupation), it offers the payoff of a 'great novel' recommendation without being the default answer to that request.
+3. **CivilWarLand in Bad Decline** — George Saunders `[openlibrary]`
+   - why: For a change of register — a wickedly funny, unsettling short story collection about theme-park employees and corporate absurdity that still manages real pathos underneath the satire.
+   - nonObvious: Short story collections get passed over for 'just something good' requests in favor of novels, but this one is tightly built, strange, and rewards a reader wanting genuine surprise in form as well as content.
+
+### Case 4 — Explicit anti-mainstream demand
+
+**Input:**
+> I want book recommendations, but nothing everyone's already read. I'm tired of every list recommending the same five books.
+
+**Retrieval:** attempt 1/3, outcome: grounded (no grounding-validator rejections this case). Merge rounds (one per `search_books` call this generation):
+1. `OL raw=171, HC raw=0, duplicates removed=4, merged total=167, OL%=100%, HC%=0%`
+2. `OL raw=221, HC raw=0, duplicates removed=4, merged total=217, OL%=100%, HC%=0%`
+3. `OL raw=284, HC raw=0, duplicates removed=4, merged total=280, OL%=100%, HC%=0%`
+
+**Output:**
+
+1. **Morvern Callar** — Alan Warner `[openlibrary]`
+   - why: You said you're tired of the same five books turning up everywhere — this is a raw, hypnotic, voice-driven Scottish novel about a supermarket worker who takes over her dead boyfriend's novel manuscript, and it never gets funneled into the standard 'best of' lists despite being genuinely unforgettable.
+   - nonObvious: It's cult rather than canonical — beloved by readers who stumble onto it, but rarely the default answer anyone reaches for.
+2. **Niebla** — Miguel de Unamuno `[openlibrary]`
+   - why: For a reader wanting something that leaves a mark rather than a comfort read, this early-1900s Spanish 'nivola' has a character who confronts his own author mid-novel — a genuinely strange, philosophically sharp piece of metafiction decades ahead of its time.
+   - nonObvious: Unamuno gets eclipsed by his more famous countrymen and by later postmodernists who borrowed his trick, so this originator rarely makes anyone's list.
+3. **My family's role in the world revolution and other prose** — Bora Ćosić `[openlibrary]`
+   - why: If you want range beyond the usual Anglo-American and Western European canon, this satirical, fragmented autobiographical novel of a childhood under Tito's Yugoslavia is inventive and darkly funny in a way that rewards readers hungry for something structurally different.
+   - nonObvious: Ćosić is a major figure in former-Yugoslav letters but almost never appears on English-language 'must read' lists, making this a genuine expansion rather than a rehash.
+
+### Case 5 — Contradictory signals
+
+**Input:**
+> My favorite book of all time is 'War and Peace' — I loved the sprawling scope and how deeply it got into every character's inner life. But right now I want something light and quick to read, nothing heavy or slow.
+
+**Retrieval:** attempt 1/3, outcome: grounded (no grounding-validator rejections this case). Merge rounds (one per `search_books` call this generation):
+1. `OL raw=203, HC raw=23, duplicates removed=2, merged total=224, OL%=89.7%, HC%=10.3%`
+2. `OL raw=277, HC raw=23, duplicates removed=6, merged total=294, OL%=92.2%, HC%=7.8%`
+
+**Output:**
+
+1. **Three Men in a Boat (to say nothing of the dog)** — Jerome Klapka Jérôme `[openlibrary]`
+   - why: You loved how Tolstoy got inside every character's head — this swaps epic scale for a tiny cast of three bumbling friends (plus a dog) whose bickering, digressions, and inner monologues are rendered with the same loving specificity, just played entirely for laughs.
+   - nonObvious: It's often filed as a 'classic comic novel' but rarely surfaces on serious 'War and Peace readalike' lists, since it looks like a slight travelogue rather than a character study — yet its digressive, deeply interior narration is exactly that in miniature.
+2. **The Mouse on the Moon** — Leonard Wibberley `[openlibrary]`
+   - why: This keeps the ensemble-cast, geopolitics-and-ordinary-people texture you liked in War and Peace — a tiny nation stumbling into a space race with the superpowers — but compresses it into a fast, farcical romp instead of a saga.
+   - nonObvious: It's a genuinely obscure mid-century satire rather than the expected Wodehouse or Vonnegut pick, so it delivers the political-comedy-of-errors itch without being anyone's default 'light read' suggestion.
+3. **Miss Mapp** — E. F. Benson `[openlibrary]`
+   - why: Benson gives a whole small English town the same minute attention to petty rivalries, vanities, and inner scheming that Tolstoy gave the Russian aristocracy — just shrunk to teacups and garden fences, so the psychological detail stays but the stakes and length don't.
+   - nonObvious: It's frequently overshadowed by its own sequel (Mapp and Lucia) and by Wodehouse in 'English social comedy' recommendations, making it a sharper, less-reflexive choice for someone who wants char­acter-driven wit without the usual go-to name.
+
+### Case 6 — Hard turn-off
+
+**Input:**
+> I love literary fiction — character studies, beautiful prose, morally complicated people. I will not read fantasy under any circumstances: no magic systems, no invented worlds.
+
+**Retrieval:** attempt 1/3, outcome: grounded (no grounding-validator rejections this case). Merge rounds (one per `search_books` call this generation):
+1. `OL raw=200, HC raw=10, duplicates removed=5, merged total=205, OL%=95.1%, HC%=4.9%`
+2. `OL raw=276, HC raw=10, duplicates removed=6, merged total=280, OL%=96.4%, HC%=3.6%`
+
+**Output:**
+
+1. **Paris Trout** — Pete Dexter `[openlibrary]`
+   - why: A merciless character study of a store owner whose casual cruelty curdles into violence, and of the small-town moral rot that lets it happen — exactly the kind of morally complicated, unflinching portraiture you're describing, rendered in lean, precise prose.
+   - nonObvious: It's a National Book Award winner that rarely surfaces on 'literary fiction' recommendation lists, so it doesn't read as a default pick, even though its craft and moral seriousness are on par with more frequently cited books.
+2. **The Memory of Love** — Aminatta Forna `[openlibrary]`
+   - why: A slow-burning, gorgeously written novel about compromised, self-deceiving people in post-war Sierra Leone — love, betrayal, and complicity examined with real psychological patience rather than melodrama, which suits a taste for character studies over plot mechanics.
+   - nonObvious: It fits the brief precisely without being the reflexive answer — it's not one of the handful of titles that automatically get named when someone asks for 'literary fiction with moral complexity.'
+3. **Sult** — Knut Hamsun `[openlibrary]`
+   - why: An unnamed, starving writer narrates his own unraveling with disturbing intimacy and pride — a foundational character study in morally slippery first-person narration, and the prose (even in translation) is famous for its jittery, hallucinatory beauty.
+   - nonObvious: It's a canonical influence on modern psychological fiction, but it's rarely the book people reach for first when asked for a 'character study' recommendation, despite being arguably more radical than many later, more commonly cited books.
+
+### Case 7a — Rejection → clarify
+
+**Input:**
+> I asked for recommendations similar to quiet, literary character studies, but the three you gave me last time were all too dark and bleak for what I wanted. I'd like something in a similar literary vein, but warmer and more hopeful in tone.
+
+**Retrieval:** attempt 1/3, outcome: grounded (no grounding-validator rejections this case). Merge rounds (one per `search_books` call this generation):
+1. `OL raw=280, HC raw=7, duplicates removed=6, merged total=281, OL%=97.5%, HC%=2.5%`
+2. `OL raw=244, HC raw=7, duplicates removed=6, merged total=245, OL%=97.6%, HC%=2.9%`
+
+**Output:**
+
+1. **A Gentleman in Moscow** — Amor Towles `[openlibrary]`
+   - why: It's exactly the kind of quiet, interior character study you loved, but built around wit, grace, and the deliberate cultivation of meaning inside constraint — the warmth comes from watching a man choose curiosity and human connection over despair.
+   - nonObvious: Its popularity can make it feel like the default 'hopeful literary fiction' answer, but it earns the pick here specifically because its warmth isn't sentimental — it's hard-won through the protagonist's discipline and wit, which matches the seriousness of the character studies you already enjoy.
+2. **The Enchanted April** — Elizabeth von Arnim `[openlibrary]`
+   - why: A slow, close-focus ensemble study of four unhappy women who rent an Italian castle for a month — it has the same patient attention to inner life as a 'quiet character study,' but the arc is one of gradual thawing, humor, and unexpected joy rather than tragedy.
+   - nonObvious: It's rarely the first title that comes up for 'literary and hopeful,' despite doing exactly that work — its charm is easy to underestimate because it reads lightly, but the psychological insight underneath is genuine and earned.
+3. **My Ántonia** — Willa Cather `[openlibrary]`
+   - why: A reflective, memory-soaked character study of a pioneer woman and the friend who never stops admiring her — steeped in loss and hardship, yet its overall register is elegiac warmth rather than bleakness, prizing endurance, land, and quiet dignity.
+   - nonObvious: It gets filed under 'American classic' rather than 'hopeful comfort read,' so it's overlooked for this kind of request even though its emotional core — hard lives rendered with tenderness rather than despair — fits precisely what you're asking for.
+
+### Case 7b — Rejection → clarify → widen escalation
+
+**Input:**
+> I've now rejected two rounds of recommendations for quiet literary character studies — the first round was too dark, and the second round (aiming for warmer and more hopeful) still didn't land, they felt flat and forgettable. At this point just show me your best editable read on what you think I'm actually after, and feel free to widen out and take some real chances rather than staying narrowly in that same lane.
+
+**Retrieval:** attempt 1/3, outcome: grounded (no grounding-validator rejections this case). Merge rounds (one per `search_books` call this generation):
+1. `OL raw=281, HC raw=7, duplicates removed=6, merged total=282, OL%=97.5%, HC%=2.5%`
+2. `OL raw=199, HC raw=7, duplicates removed=18, merged total=188, OL%=96.3%, HC%=3.7%`
+3. `OL raw=243, HC raw=7, duplicates removed=7, merged total=243, OL%=97.5%, HC%=2.9%`
+
+**Output:**
+
+1. **Memento Mori** — Muriel Spark `[openlibrary]`
+   - why: It's a quiet character study of a whole circle of elderly Londoners confronting mortality — sharp, intimate, and psychologically exact, but its dry wit and ensemble warmth keep it from tipping into the bleakness you rejected the first time.
+   - nonObvious: Spark's more famous school-novel tends to eclipse this one, but its blend of mordant humor and tenderness toward its aging cast makes it a richer, less predictable answer to 'quiet character study' than the usual suspects.
+2. **Обломов** — Ива́н Алекса́ндрович Гончаро́в `[openlibrary]`
+   - why: A patient, deeply interior portrait of a man who can't bring himself to leave his couch or his old habits — funny, melancholy, and tender rather than warm-and-fuzzy, it gives the 'flat' hopeful pick you got last time real texture and ambiguity instead.
+   - nonObvious: It's a 19th-century Russian classic, but rarely surfaces on 'quiet character study' lists dominated by contemporary Anglophone fiction — a genuine widen-out pick rather than a safe genre-adjacent choice.
+3. **A Pale View of Hills** — Kazuo Ishiguro `[openlibrary]`
+   - why: A restrained, memory-haunted narrator whose calm surface hides real unease — it has the hush and interiority you're drawn to, without the heavy darkness of round one or the toothless warmth of round two.
+   - nonObvious: Ishiguro's debut is often passed over for his more famous later novels, but its ambiguity and quiet dread make it a sharper, less expected fit for exactly this kind of taste.
+
+### Case 8 — Texture-match, not genre-match
+
+**Input:**
+> I'm looking for something with a really granular, immersive sense of place — I want to feel like I'm actually there — and characters who are morally ambiguous, not clearly good or bad. Genre doesn't matter much to me as long as it has that texture.
+
+**Retrieval:** attempt 1/3, outcome: grounded (no grounding-validator rejections this case). Merge rounds (one per `search_books` call this generation):
+1. `OL raw=29, HC raw=17, duplicates removed=0, merged total=46, OL%=63%, HC%=37%`
+2. `OL raw=197, HC raw=17, duplicates removed=5, merged total=209, OL%=92.3%, HC%=8.1%`
+3. `OL raw=298, HC raw=17, duplicates removed=5, merged total=310, OL%=94.5%, HC%=5.5%`
+
+**Output:**
+
+1. **Sátántangó** — László Krasznahorkai `[openlibrary]`
+   - why: Its slow, hypnotic prose builds a decaying Hungarian village so viscerally that the mud, rain, and rot become almost tactile, while every villager — schemers, drunks, a messianic conman — operates in shades of grey rather than clear virtue or vice.
+   - nonObvious: It's a demanding, unconventional pick rather than the standard 'atmospheric literary fiction' answer, rewarding patience with an unmatched immersive density.
+2. **Paris Trout** — Pete Dexter `[openlibrary]`
+   - why: The small Georgia town of the title is rendered in granular, oppressive detail — its social codes, courthouse politics, and racial tensions — while the characters, including the murderous Trout himself, resist easy moral categorization.
+   - nonObvious: It's a quieter, less-reached-for entry in the Southern crime/literary tradition than the usual suspects, praised for its unflinching character work rather than plot mechanics.
+3. **Garlic, mint & sweet basil** — Jean-Claude Izzo `[openlibrary]`
+   - why: Marseille itself is practically a character — its markets, ports, and back alleys rendered with sensory specificity — anchoring a noir plot where the ex-cop protagonist and everyone around him blur the line between corruption and decency.
+   - nonObvious: Mediterranean noir gets less spotlight than American or Nordic crime fiction, making this a fresher route to the same morally murky, place-drenched texture.
+
+### Case 9 — Genre/category fidelity & adjacent expansion
+
+**Input:**
+> I love narrative nonfiction — real events told with the pacing and craft of a novel. Specifically deep-dive investigative journalism or historical accounts that read like thrillers. That's exactly what I'm looking for right now.
+
+**Retrieval:** attempt 1/3, outcome: grounded (no grounding-validator rejections this case). Merge rounds (one per `search_books` call this generation):
+1. `OL raw=202, HC raw=30, duplicates removed=1, merged total=231, OL%=87%, HC%=13%`
+2. `OL raw=301, HC raw=30, duplicates removed=3, merged total=328, OL%=90.9%, HC%=9.1%`
+
+**Output:**
+
+1. **Say Nothing** — Patrick Radden Keefe `[openlibrary]`
+   - why: It's a deep-dive investigation into a real unsolved murder tied to the Troubles, built with the tension, secrecy, and slow-burn reveal of a thriller — exactly the 'true events, novelistic pacing' craft you're after.
+   - nonObvious: It's investigative journalism in the fullest sense — years of reporting and legal sleuthing — but structured like a crime novel, which sets it apart from more straightforward historical accounts of the same conflict.
+2. **ZeroZeroZero** — Roberto Saviano `[openlibrary]`
+   - why: A sprawling, immersive investigation into the global cocaine trade told with the urgency and momentum of a thriller, matching your appetite for reporting that reads like fiction without losing its factual teeth.
+   - nonObvious: Rather than a single crime story, it operates at a systemic, global scale — closer to a geopolitical thriller than a typical true-crime narrative, which makes it a less predictable pick for this request.
+3. **Billion Dollar Whale** — Wright, Tom (Wall Street Journal reporter) `[openlibrary]`
+   - why: A meticulously reported financial scandal — the 1MDB fraud — unspooled with heist-movie pacing, satisfying the craving for real events dramatized with thriller momentum.
+   - nonObvious: Financial investigative journalism rarely gets recommended alongside classic true-crime picks, but its pacing and scale of deception make it just as gripping while covering fresh territory.
+
+### Case 10 — Creative-framing-only input
+
+**Input:**
+> 🌊🏚️👻🕯️ — moody, atmospheric, a little unsettling but not full horror. That's the vibe I want.
+
+**Retrieval:** attempt 1/3, outcome: grounded (no grounding-validator rejections this case). Merge rounds (one per `search_books` call this generation):
+1. `OL raw=200, HC raw=30, duplicates removed=2, merged total=228, OL%=86.8%, HC%=13.2%`
+2. `OL raw=292, HC raw=30, duplicates removed=7, merged total=315, OL%=91.1%, HC%=9.5%`
+
+**Output:**
+
+1. **Ghost Wall** — Sarah Moss `[openlibrary]`
+   - why: A tense, slow-burn atmosphere builds around a bog, an Iron Age reenactment camp, and a controlling father—dread seeps in through landscape and silence rather than jump scares, matching the 'moody, unsettling but not full horror' vibe.
+   - nonObvious: It's a literary novella more likely to turn up on 'unsettling literary fiction' lists than horror ones, so it sidesteps the usual haunted-house reflex while still delivering that eerie, waterlogged dread.
+2. **Seven Gothic tales** — Isak Dinesen `[openlibrary]`
+   - why: Dinesen's stories are steeped in candlelit interiors, ambiguous supernatural undertones, and decaying aristocratic worlds—atmosphere and mood take precedence over plot, which fits the candle/haunted-house imagery without tipping into horror.
+   - nonObvious: A 1930s Danish take on gothic tale-telling that's stylistically closer to fairy tale and fable than to the Anglo-American haunted house canon, offering a different flavor of eerie than the usual suspects.
+3. **Uncle Silas** — Sheridan Le Fanu `[openlibrary]`
+   - why: A young heiress trapped in a crumbling, secretive household with a menacing guardian—claustrophobic, slow-building unease and a decaying-estate atmosphere rather than outright horror.
+   - nonObvious: Le Fanu is often reduced to 'Carmilla' in casual recommendations, but this domestic gothic mystery delivers the same dread through psychological suspense and inheritance intrigue instead of the supernatural, a less-trodden path to the same mood.
+

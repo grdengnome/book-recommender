@@ -454,3 +454,18 @@ Ran the identical `cult novel` query against Open Library side by side for direc
 3. Investigate the thin/empty-pool case on its own — it now fails closed (502), e.g. during an Open Library outage, where it used to return ungrounded picks.
 4. Watch for remaining false-rejection risk in the author key ("Last, First" pool entries, transliterated names); not observed so far.
 5. Case 10's repeated staple titles remain an open item.
+
+---
+
+## September 23, 2026 — v0 baseline run + rubric scoring; one pre-launch data-integrity bug found
+
+**Status:** Engine considered functionally done for v0, with documented limitations. Full baseline eval run and rubric scoring complete post grounding fix (PR #5).
+
+**What happened:** Ran the 11-case eval against live `/api/recommend` on `main` (cb3f827) via `scratchpad/run-eval-grounded.mjs`, then scored all 11 against the 6-dimension rubric. Grounding fix confirmed clean: 11/11 HTTP 200 on attempt 1, zero validator rejections. Found one real bug: case 8 described Izzo's *Garlic, Mint & Sweet Basil* (an essay collection) as a noir novel — that plot belongs to his Marseille Trilogy; the grounding validator only checks that a title exists in the pool, not that the description matches the book. Also flagged: cross-case title repeats, weak non-obviousness on 3 cases, zero Hardcover candidates on case 4 (cause unchecked), and raw OL metadata leaking into display strings. Full findings and scores: `docs/eval-log.md`, "2026-09-23 — v0 baseline scoring (post grounding fix, PR #5)".
+
+**Next session (in order):**
+1. Read-only check: which fields each candidate carries when the model sees it in the search_books tool result (show one real example), and why case 4 got 0 Hardcover candidates (check `scratchpad/hardcover-failure-log.json`).
+2. Decide how to address the wrong-book description (fix now vs. pre-launch).
+3. Repo cleanup.
+4. Decision log.
+5. Post-engine planning (likely question-flow UI).

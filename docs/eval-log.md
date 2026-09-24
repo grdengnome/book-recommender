@@ -4,6 +4,42 @@ Running log of quality findings, known limitations, and decisions made while eva
 
 ---
 
+## 2026-09-23 — v0 baseline scoring (post grounding fix, PR #5)
+
+Rubric scoring of the Sept 23 baseline run (raw output: `docs/eval-results.md`, "v0 baseline — Sept 23, 2026 — post grounding fix (PR #5)"). Same 4-point scale and dimensions as prior scorings (fail/weak/good/excellent).
+
+| Case | Relevance | Non-obvious | Range | Real & correct | Traceability | Variety |
+|---|---|---|---|---|---|---|
+| **1** | excellent | good | excellent | excellent | excellent | good |
+| **2** | excellent | good | good | excellent | excellent | weak |
+| **3***| good | weak | good | excellent | good | good |
+| **4** | good | excellent | excellent | excellent | good | excellent |
+| **5** | excellent | good | good | good | excellent | good |
+| **6** | excellent | good | excellent | excellent | excellent | weak |
+| **7a***| excellent | weak | good | excellent | excellent | good |
+| **7b***| good | good | good | good | good | good |
+| **8** | excellent | good | good | weak | good | weak |
+| **9** | excellent | weak | good | good | excellent | weak |
+| **10**| excellent | excellent | excellent | excellent | excellent | excellent |
+
+*single-turn stand-ins until the question-flow UI exists.
+
+**Findings:**
+
+- Grounding fix confirmed: 11/11 HTTP 200 on attempt 1, zero validator rejections, 33/33 picks in-pool.
+- **PRE-LAUNCH BLOCKER (not a v0 blocker):** case 8 picked Izzo's "Garlic, Mint & Sweet Basil" (an essay collection) but described it as a noir novel with an ex-cop protagonist — that's his Marseille Trilogy. The validator checks that the title is in the pool, not that the description matches the book. Hypothesis, unverified: candidates reach the model with minimal metadata, so it describes from memory and conflates works by the same author.
+- Cross-case repeats within one run: *The Memory of Love* (cases 2, 6), *Paris Trout* (cases 6, 8). Across runs: *Los informantes* (case 2), *Sátántangó* recurring, *Say Nothing* returned in case 9. Same-input repeats across runs are acceptable; cross-case repeats suggest pool size alone doesn't produce selection variety. Not yet investigated.
+- Case 10's recurring pair (*We Have Always Lived in the Castle* + *The Little Stranger*) is gone.
+- Non-obviousness weak in cases 3, 7a, 9 (*A Fine Balance*, *A Gentleman in Moscow*, *Say Nothing*). Case 3's `nonObvious` text makes an unverified obscurity claim, breaking the August rule.
+- Case 4's reasoning cites a preference not in the input ("leaves a mark rather than a comfort read") — likely leaking from system prompt taste rules.
+- Hardcover: 0/33 picks, but its share at final selection was only 2–10% (case 8's 37% was round 1 only). Exception: case 4 got 0 Hardcover candidates in every round — likely a fetch or tag-mapping failure, not yet checked.
+- Card-UX data quality (not an engine issue): raw OL metadata leaks into display — author 夏目漱石 (*Kokoro*), *Oblomov* fully in Cyrillic, "Jerome Klapka Jérôme", "Wright, Tom (Wall Street Journal reporter)" with co-author missing.
+- Scoring caveat: award/popularity facts from assistant knowledge; only the Izzo error was web-verified.
+
+**Status:** engine considered done for v0 with documented limitations, pending the read-only check below.
+
+---
+
 ## 2026-09-20 — Grounded-picks enforcement — full eval-set re-run: 10/11 delivered, but the new validation falsely rejected legitimately grounded picks (accents, subtitles) — one case returned a 502
 
 Full 11-case re-run of `docs/eval-set.md` (same inputs, same sequential method as the 2026-08-04 run) against branch `feat/enforce-grounded-picks` (PR #5, commit cd5da06): prompt now requires all 3 picks to come from the retrieved pools, and `lib/merge/pickGrounding.ts` checks every pick with the merge's own `dedupKey`, retrying up to 3 attempts, then a clean 502. Every pick's source (OL/HC) comes from the route's per-attempt console log, parsed per case by `scratchpad/run-eval-grounded.mjs`. Raw output: `scratchpad/eval-run-grounded-2026-09-20.json`; rejection classification: `scratchpad/classify-grounding-rejections.cjs`.
