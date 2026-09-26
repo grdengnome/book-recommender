@@ -8,13 +8,13 @@ import {
   prepareHardcoverPool,
   type HardcoverBookCandidate,
 } from "@/lib/hardcover/preparePool";
-import { mergeCandidatePools } from "@/lib/merge/mergeCandidatePools";
+import { mergeCandidatePools, toModelPool } from "@/lib/merge/mergeCandidatePools";
 import {
   checkPickGrounding,
   formatPickSources,
-  recordPoolSources,
+  recordSeenCandidates,
   type GroundingResult,
-  type SeenSources,
+  type SeenCandidates,
 } from "@/lib/merge/pickGrounding";
 
 const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
@@ -230,9 +230,9 @@ async function generateOnce(
     { role: "user", content: tasteDescription },
   ];
 
-  // Sources of every candidate the model was shown this generation, keyed by the
-  // merge's own dedupKey — the reference set the final picks are checked against.
-  const seenSources: SeenSources = new Map();
+  // Every candidate the model was shown this generation (with its internal IDs), keyed by
+  // pickGrounding's groundingKey — the reference set the final picks are checked against.
+  const seenCandidates: SeenCandidates = new Map();
 
   let data;
   for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
@@ -285,8 +285,10 @@ async function generateOnce(
             const olResult = result as SearchBooksResult;
             const hardcoverPool = await hardcoverPoolPromise;
             const { pool } = mergeCandidatePools(olResult.pool, hardcoverPool);
-            recordPoolSources(seenSources, pool);
-            result = { pool, poolSize: pool.length };
+            recordSeenCandidates(seenCandidates, pool);
+            // Internal IDs (olWorkKey, hcBookId) stop here: the model's tool_result
+            // shape stays { title, author, subjects, sources }.
+            result = { pool: toModelPool(pool), poolSize: pool.length };
           }
         } catch (err) {
           result = {
@@ -313,6 +315,6 @@ async function generateOnce(
     ok: true,
     data,
     recommendations,
-    grounding: checkPickGrounding(recommendations, seenSources),
+    grounding: checkPickGrounding(recommendations, seenCandidates),
   };
 }

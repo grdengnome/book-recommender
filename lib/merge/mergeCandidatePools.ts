@@ -22,11 +22,33 @@ import type { HardcoverBookCandidate } from "../hardcover/preparePool";
 
 export type PoolSource = "openlibrary" | "hardcover";
 
-export interface MergedBookCandidate {
+// What the model sees for each candidate in a search_books tool_result — unchanged from
+// before IDs were carried internally. Keep this the only shape that reaches the model.
+export interface ModelPoolCandidate {
   title: string;
   author: string;
   subjects: string[];
   sources: PoolSource[];
+}
+
+// Internal merged record: the model-facing fields plus each source's ID, carried so a
+// final pick can be traced to its records (e.g. to fetch a description for verification).
+// A book found in both sources keeps both IDs. Never sent to the model — route.ts passes
+// the pool through toModelPool first.
+export interface MergedBookCandidate extends ModelPoolCandidate {
+  olWorkKey?: string;
+  hcBookId?: number;
+}
+
+// Strips internal IDs, rebuilding each record field by field (not spreading) so any
+// future internal field is excluded by default rather than leaking by accident.
+export function toModelPool(pool: MergedBookCandidate[]): ModelPoolCandidate[] {
+  return pool.map((c) => ({
+    title: c.title,
+    author: c.author,
+    subjects: c.subjects,
+    sources: c.sources,
+  }));
 }
 
 export interface MergeStats {
@@ -148,7 +170,13 @@ export function mergeCandidatePools(
   for (const c of openLibraryPool) {
     const key = dedupKey(c.title, c.author);
     byKey.set(key, {
-      record: { title: c.title, author: c.author, subjects: [...c.subjects], sources: ["openlibrary"] },
+      record: {
+        title: c.title,
+        author: c.author,
+        subjects: [...c.subjects],
+        sources: ["openlibrary"],
+        ...(c.olWorkKey ? { olWorkKey: c.olWorkKey } : {}),
+      },
       usersCount: 0, // Open Library carries no comparable engagement count
     });
   }
@@ -168,10 +196,17 @@ export function mergeCandidatePools(
       }
       existing.record.subjects = mergeSubjects(existing.record.subjects, c.subjects);
       existing.record.sources = ["openlibrary", "hardcover"];
+      existing.record.hcBookId ??= c.hcBookId; // keep both IDs; first Hardcover match wins
       existing.usersCount = Math.max(existing.usersCount, c.usersCount);
     } else {
       byKey.set(key, {
-        record: { title: c.title, author: c.author, subjects: [...c.subjects], sources: ["hardcover"] },
+        record: {
+          title: c.title,
+          author: c.author,
+          subjects: [...c.subjects],
+          sources: ["hardcover"],
+          hcBookId: c.hcBookId,
+        },
         usersCount: c.usersCount,
       });
     }
