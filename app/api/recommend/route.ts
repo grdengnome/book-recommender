@@ -16,6 +16,7 @@ import {
   type GroundingResult,
   type SeenCandidates,
 } from "@/lib/merge/pickGrounding";
+import { formatPickMetadata, lookupPickMetadata } from "@/lib/verify/lookupPickMetadata";
 
 const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
 const MODEL = "claude-sonnet-5";
@@ -186,6 +187,16 @@ export async function POST(request: NextRequest) {
       console.log(
         `recommend: pick sources (attempt ${attempt}/${MAX_GENERATION_ATTEMPTS})\n${formatPickSources(grounding.picks)}`,
       );
+
+      // Pick metadata lookup (feat/verify-pick-descriptions, step 2): LOG ONLY — the
+      // results don't touch the response yet. Awaited rather than deferred because step 3
+      // needs them before responding; lookupPickMetadata never rejects and caps each
+      // lookup at 5s. Wall time is timed here, around the await, so the log shows the
+      // real latency this step adds to the request.
+      const lookupStart = performance.now();
+      const pickMetadata = await lookupPickMetadata(grounding.picks);
+      console.log(formatPickMetadata(pickMetadata, Math.round(performance.now() - lookupStart)));
+
       return NextResponse.json({
         recommendations: generation.recommendations,
         raw: generation.data,

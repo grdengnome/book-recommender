@@ -73,7 +73,13 @@ export interface PreparePoolResult {
   poolSize: number;
 }
 
-async function hcGraphql<T>(query: string, variables: Record<string, unknown>): Promise<T> {
+// Exported for lib/verify/lookupPickMetadata.ts. `signal` is optional so the pool
+// pre-fetch's behavior is unchanged; the pick lookup passes a timeout signal.
+export async function hcGraphql<T>(
+  query: string,
+  variables: Record<string, unknown>,
+  signal?: AbortSignal,
+): Promise<T> {
   const token = process.env.HARDCOVER_API_TOKEN;
   if (!token) throw new Error("HARDCOVER_API_TOKEN is not set");
   const auth = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
@@ -82,6 +88,7 @@ async function hcGraphql<T>(query: string, variables: Record<string, unknown>): 
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: auth },
     body: JSON.stringify({ query, variables }),
+    signal,
   });
 
   const bodyText = await res.text();
