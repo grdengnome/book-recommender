@@ -79,10 +79,14 @@ interface RawCandidate {
   subjects: string[];
 }
 
+// olWorkKey is internal plumbing (e.g. "/works/OL1174972W"), carried so a final pick can
+// be traced back to its Open Library work record. Never model-facing: route.ts strips it
+// (via mergeCandidatePools.ts's toModelPool) before the pool goes into a tool_result.
 export interface BookCandidate {
   title: string;
   author: string;
   subjects: string[];
+  olWorkKey?: string;
 }
 
 export interface SearchBooksResult {
@@ -195,12 +199,14 @@ export async function searchBooks(
   const merged = mergeAndDedupe([searchResults, ...subjectResultGroups]);
   const shuffled = shuffle(merged);
 
-  // Strip work IDs and any other ranking/origin metadata — the model sees
-  // only title, author, and a tag or two, never which call or rank a result came from.
+  // Strip ranking/origin metadata — the model sees only title, author, and a tag or
+  // two, never which call or rank a result came from. The work key is kept internally
+  // for pick tracing; it is removed before the model sees the pool (route.ts).
   const pool: BookCandidate[] = shuffled.map((c) => ({
     title: c.title,
     author: c.author,
     subjects: c.subjects.slice(0, 2),
+    ...(c.workId ? { olWorkKey: c.workId } : {}),
   }));
 
   logSearchBooksCall(input, pool);

@@ -37,6 +37,7 @@ interface TaggableCountRow {
   count: number;
   tag: { tag: string } | null;
   book: {
+    id: number;
     title: string;
     users_count: number;
     contributions: { author: { name: string } | null }[];
@@ -44,6 +45,7 @@ interface TaggableCountRow {
 }
 
 interface RankedBook {
+  hcBookId: number;
   title: string;
   author: string;
   matchedTags: string[];
@@ -60,6 +62,10 @@ export interface HardcoverBookCandidate {
   author: string;
   subjects: string[];
   usersCount: number;
+  // Internal plumbing for pick tracing, like usersCount never model-facing (route.ts
+  // strips it via toModelPool). If one title+author appears under several Hardcover
+  // book IDs in the raw rows, the first row's ID is the one kept (see rankByTagRelevance).
+  hcBookId: number;
 }
 
 export interface PreparePoolResult {
@@ -117,6 +123,7 @@ async function fetchTaggableCounts(tagIds: number[]): Promise<TaggableCountRow[]
         count
         tag { tag }
         book {
+          id
           title
           users_count
           contributions(limit: 1) { author { name } }
@@ -154,6 +161,7 @@ function rankByTagRelevance(rows: TaggableCountRow[]): RankedBook[] {
       if (tagName && !existing.matchedTags.includes(tagName)) existing.matchedTags.push(tagName);
     } else {
       byBook.set(key, {
+        hcBookId: row.book.id,
         title: row.book.title,
         author,
         matchedTags: tagName ? [tagName] : [],
@@ -198,6 +206,7 @@ export async function prepareHardcoverPool(tagIds: number[]): Promise<PreparePoo
     author: b.author,
     subjects: b.matchedTags.slice(0, 2),
     usersCount: b.usersCount,
+    hcBookId: b.hcBookId,
   }));
 
   return { pool, poolSize: pool.length };
