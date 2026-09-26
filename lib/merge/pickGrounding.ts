@@ -55,17 +55,26 @@ function groundingKey(title: string, author: string): string | null {
   return t && a ? `${t}|${a}` : null;
 }
 
-// groundingKey -> sources that contributed the record, unioned across every search_books
-// round of one generation (the model may pick from any round's pool).
-export type SeenSources = Map<string, Set<PoolSource>>;
+// groundingKey -> the pool record a pick would match, unioned across every search_books
+// round of one generation (the model may pick from any round's pool). Sources are unioned;
+// each ID is first-seen-wins and filled in from a later round if the first record lacked
+// it. Because groundingKey is more tolerant than dedupKey, two distinct pool records (e.g.
+// subtitle variants) can share one key — in that case the IDs come from whichever was
+// seen first.
+export type SeenCandidates = Map<string, MergedBookCandidate>;
 
-export function recordPoolSources(seen: SeenSources, pool: MergedBookCandidate[]): void {
+export function recordSeenCandidates(seen: SeenCandidates, pool: MergedBookCandidate[]): void {
   for (const c of pool) {
     const key = groundingKey(c.title, c.author);
     if (key === null) continue; // an unkeyable candidate can never ground a pick
-    const set = seen.get(key) ?? new Set<PoolSource>();
-    c.sources.forEach((s) => set.add(s));
-    seen.set(key, set);
+    const existing = seen.get(key);
+    if (!existing) {
+      seen.set(key, { ...c, subjects: [...c.subjects], sources: [...c.sources] });
+      continue;
+    }
+    for (const s of c.sources) if (!existing.sources.includes(s)) existing.sources.push(s);
+    existing.olWorkKey ??= c.olWorkKey;
+    existing.hcBookId ??= c.hcBookId;
   }
 }
 
@@ -73,6 +82,7 @@ export interface CheckedPick {
   title: string;
   author: string;
   sources: PoolSource[]; // empty = not found in any retrieved pool
+  record: MergedBookCandidate | null; // the matched pool record (with IDs); null = not found
 }
 
 // "unparseable" is a failure too: a response that can't be verified can't be returned.
@@ -83,7 +93,7 @@ export type GroundingResult =
 
 export function checkPickGrounding(
   recommendationsText: string,
-  seen: SeenSources,
+  seen: SeenCandidates,
 ): GroundingResult {
   let parsed: unknown;
   try {
@@ -99,16 +109,25 @@ export function checkPickGrounding(
     const title = typeof p?.title === "string" ? p.title : "";
     const author = typeof p?.author === "string" ? p.author : "";
     const key = groundingKey(title, author);
-    return { title, author, sources: key === null ? [] : [...(seen.get(key) ?? [])] };
+    const record = key === null ? null : (seen.get(key) ?? null);
+    return { title, author, sources: record ? [...record.sources] : [], record };
   });
   const allGrounded = picks.every((p) => p.sources.length > 0);
   return { status: allGrounded ? "grounded" : "ungrounded", picks };
 }
 
 // Same per-call console convention as logMergeStats. Printed on every attempt, pass or
-// fail, so source attribution stays visible for every run.
+// fail, so source attribution stays visible for every run. Each matched pick's IDs go on
+// their own following line, so the pick line itself keeps the exact format the eval
+// driver parses (scratchpad/run-eval-grounded.mjs, PICK_LINE).
 export function formatPickSources(picks: CheckedPick[]): string {
   return picks
-    .map((p) => `  "${p.title}" — ${p.author}: ${p.sources.length ? p.sources.join("+") : "NONE (not in any retrieved pool)"}`)
+    .map((p) => {
+      const line = `  "${p.title}" — ${p.author}: ${p.sources.length ? p.sources.join("+") : "NONE (not in any retrieved pool)"}`;
+      if (!p.record) return line;
+      const ol = p.record.olWorkKey ?? "none";
+      const hc = p.record.hcBookId ?? "none";
+      return `${line}\n    ids: ol=${ol} hc=${hc}`;
+    })
     .join("\n");
 }
