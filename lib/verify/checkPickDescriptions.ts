@@ -1,14 +1,22 @@
 // Final-pick description check + rewrite — step 3 of verifying pick descriptions (branch
 // feat/verify-pick-descriptions). Step 2 (lookupPickMetadata.ts) fetches each validated
 // pick's own source records; this makes one model call that compares the recommender's
-// `why` / `nonObvious` text for all 3 picks against those facts, and rewrites the text for
-// any pick it contradicts (e.g. the Sept 23 case-8 pick describing Izzo's essay
+// `why` / `nonObvious` text for the gated picks (see below) against those facts, and
+// rewrites the text for any pick it contradicts (e.g. the Sept 23 case-8 pick describing Izzo's essay
 // collection "Garlic, Mint & Sweet Basil" as a noir novel).
+//
+// Gated on a hard signal (2026-09-26): only picks whose catalog subjects trigger the form
+// hint (formHint below) are sent to the checker; every other pick passes through unchanged
+// as "not checked", and a request with no such pick makes no checker call at all. Replays
+// showed the ungated checker catching the target error but also misfiring on fresh live
+// picks — flagging Oblomov's "tragedy" vs the catalog's "comedic" (a tone judgment) and
+// rewriting an accurate Los informantes blurb because the catalog description covered a
+// different thread of the novel — with no real catches among them. The lookups still run
+// for every pick: they compute the hint, and their data will be reused for cards.
 //
 // Scope limits, deliberate:
 // - Never changes which book was picked — only `why` and `nonObvious` are ever replaced,
 //   and only on the pick at the index the checker returned.
-// - A pick with no usable looked-up facts is not sent to the checker and stays unchanged.
 // - Never breaks a response: any failure (timeout, API error, unparseable or malformed
 //   output) returns the original recommendations text unchanged, byte for byte. The text
 //   is only re-serialized when at least one pick was actually rewritten.
@@ -23,7 +31,9 @@ const CHECK_MAX_TOKENS = 2000;
 const DESCRIPTION_MAX_CHARS = 1000;
 const OL_SUBJECTS_MAX = 30;
 
-export type PickCheckStatus = "confirmed" | "rewritten" | "unchecked";
+// "not checked" = gated out (no hard signal), passed through unchanged by design;
+// "unchecked" = was eligible for checking, but the check failed or gave no usable verdict.
+export type PickCheckStatus = "confirmed" | "rewritten" | "unchecked" | "not checked";
 
 export interface PickCheckResult {
   title: string;
@@ -38,6 +48,7 @@ export interface CheckPickDescriptionsResult {
   recommendations: string; // text to send to the user — the original unless something was rewritten
   picks: PickCheckResult[];
   checkMs: number; // time spent in the model call (0 when no call was made)
+  checkCalled: boolean; // false when no pick had a hard signal (or the input couldn't be used)
   error?: string; // set when the whole check fell back to the original text
 }
 
@@ -269,6 +280,7 @@ export async function checkPickDescriptions(
     recommendations,
     picks,
     checkMs,
+    checkCalled: checkMs > 0,
     ...(error ? { error } : {}),
   });
 
@@ -285,8 +297,11 @@ export async function checkPickDescriptions(
   const toCheck: { index: number; pick: ParsedPick; facts: PickFacts }[] = [];
   parsed.forEach((pick, index) => {
     const facts = collectFacts(metadata[index]);
-    if (hasFacts(facts)) toCheck.push({ index, pick, facts });
-    else base[index].reason = "no usable facts from lookups";
+    if (facts.formNote) toCheck.push({ index, pick, facts });
+    else {
+      base[index].status = "not checked";
+      base[index].reason = hasFacts(facts) ? "no hard signal" : "no hard signal; no usable facts from lookups";
+    }
   });
   if (toCheck.length === 0) return unchanged(base, 0);
 
@@ -354,17 +369,21 @@ export async function checkPickDescriptions(
     recommendations: rewroteAny ? JSON.stringify(parsed, null, 2) : recommendations,
     picks: base,
     checkMs,
+    checkCalled: true,
   };
 }
 
 // Same per-call console convention as formatPickMetadata. totalMs is measured by the
 // caller around lookups + check together — the full latency verification adds.
 export function formatPickCheck(result: CheckPickDescriptionsResult, lookupMs: number, totalMs: number): string {
-  const counts = { confirmed: 0, rewritten: 0, unchecked: 0 };
+  const counts = { confirmed: 0, rewritten: 0, unchecked: 0, "not checked": 0 };
   result.picks.forEach((p) => counts[p.status]++);
+  const check = result.checkCalled
+    ? `check ${result.checkMs}ms, model ${CHECK_MODEL}, timeout ${CHECK_TIMEOUT_MS}ms`
+    : "check skipped, no pick with a hard signal";
   const lines = [
-    `pickCheck: ${counts.confirmed} confirmed, ${counts.rewritten} rewritten, ${counts.unchecked} unchecked — ` +
-      `added wall time=${totalMs}ms (lookups ${lookupMs}ms + check ${result.checkMs}ms, model ${CHECK_MODEL}, timeout ${CHECK_TIMEOUT_MS}ms)` +
+    `pickCheck: ${counts.confirmed} confirmed, ${counts.rewritten} rewritten, ${counts.unchecked} unchecked, ` +
+      `${counts["not checked"]} not checked — added wall time=${totalMs}ms (lookups ${lookupMs}ms + ${check})` +
       (result.error ? ` — FELL BACK TO ORIGINAL TEXT: ${result.error}` : ""),
   ];
   for (const p of result.picks) {
