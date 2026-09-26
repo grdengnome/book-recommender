@@ -17,6 +17,7 @@ import {
   type SeenCandidates,
 } from "@/lib/merge/pickGrounding";
 import { formatPickMetadata, lookupPickMetadata } from "@/lib/verify/lookupPickMetadata";
+import { checkPickDescriptions, formatPickCheck } from "@/lib/verify/checkPickDescriptions";
 
 const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
 const MODEL = "claude-sonnet-5";
@@ -188,17 +189,27 @@ export async function POST(request: NextRequest) {
         `recommend: pick sources (attempt ${attempt}/${MAX_GENERATION_ATTEMPTS})\n${formatPickSources(grounding.picks)}`,
       );
 
-      // Pick metadata lookup (feat/verify-pick-descriptions, step 2): LOG ONLY — the
-      // results don't touch the response yet. Awaited rather than deferred because step 3
-      // needs them before responding; lookupPickMetadata never rejects and caps each
-      // lookup at 5s. Wall time is timed here, around the await, so the log shows the
-      // real latency this step adds to the request.
-      const lookupStart = performance.now();
+      // Pick description verification (feat/verify-pick-descriptions): look up each
+      // pick's catalog records (step 2), then one checker call compares the `why` /
+      // `nonObvious` text against them and rewrites any pick it contradicts (step 3).
+      // Neither step can fail the request: lookups cap at 5s each and never reject, and
+      // checkPickDescriptions returns the original text unchanged on any failure. Timed
+      // here, around both awaits, so the log shows the real latency verification adds.
+      // `raw` stays the unmodified model response; only `recommendations` can change.
+      const verifyStart = performance.now();
       const pickMetadata = await lookupPickMetadata(grounding.picks);
-      console.log(formatPickMetadata(pickMetadata, Math.round(performance.now() - lookupStart)));
+      const lookupMs = Math.round(performance.now() - verifyStart);
+      console.log(formatPickMetadata(pickMetadata, lookupMs));
+      const checked = await checkPickDescriptions(
+        apiKey,
+        tasteDescription,
+        generation.recommendations,
+        pickMetadata,
+      );
+      console.log(formatPickCheck(checked, lookupMs, Math.round(performance.now() - verifyStart)));
 
       return NextResponse.json({
-        recommendations: generation.recommendations,
+        recommendations: checked.recommendations,
         raw: generation.data,
       });
     }
