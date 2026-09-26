@@ -151,6 +151,12 @@ Only a few sentences — the mechanics live in code and the tool definition, not
 
 No change here; this section's resolution is scoped to the recommendation-engine grounding question only.
 
+### 5e. Post-selection verification of pick descriptions (added 2026-09-26)
+
+Grounding (5c) proves each pick is a real, retrieved book; it doesn't prove the `why`/`nonObvious` text describes *that* book — the model describes picks from memory and can conflate works by the same author (Sept 23: an Izzo essay collection described as a noir novel). So after grounding passes, in `route.ts`:
+- **Lookup:** each final pick's catalog records are fetched by the IDs carried internally through the merge (Open Library work key, Hardcover book ID — never shown to the model): description, subjects, and Hardcover Genre/Mood tags. Parallel, 5s timeout each, never fails the request. The data is also intended for the card UX.
+- **Gated check-and-rewrite:** only a pick with a hard, code-computed signal is checked — currently the *criticism form hint* (its Open Library subjects mark it as "history and criticism" / "criticism and interpretation" of its genre). One small-model call rewrites that pick's `why`/`nonObvious` only if they contradict the catalog facts; it never changes which book was picked, and any failure sends the original text. Picks without a hard signal pass through unchanged, and a request with none makes no model call. An ungated check was tried and rejected: on fresh picks it rewrote accurate descriptions where the catalog was merely incomplete (details: `docs/eval-log.md`, 2026-09-26).
+
 ---
 
 ## 6. Roadmap (deferred, captured so nothing's lost)

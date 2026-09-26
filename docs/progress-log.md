@@ -469,3 +469,25 @@ Ran the identical `cult novel` query against Open Library side by side for direc
 3. Repo cleanup.
 4. Decision log.
 5. Post-engine planning (likely question-flow UI).
+
+---
+
+## September 26, 2026 — Wrong-book description fix shipped (PR #6), gated on hard evidence
+
+**Conclusion:** The Sept 23 pre-launch blocker is fixed for its class of error. Final picks are now looked up by catalog ID, and a pick whose catalog subjects mark it as criticism of its genre gets its description checked and rewritten by Haiku; all other picks pass through unchanged. PR #6 merged into `main` as `20fb55d`. Full write-up: `docs/eval-log.md`, 2026-09-26; spec: Section 5e.
+
+**Findings:**
+- Root cause confirmed: the model sees only title/author/subjects/sources per candidate and describes picks from memory.
+- Case 4's 0 Hardcover candidates (Sept 23 item 1): `empty_tag_mapping` on every case-4 run — its input names no genre, mood, or theme to map to a tag.
+- Replays on a fixed 7-pick set looked strong, but fresh live picks exposed false positives (an accurate *Los informantes* blurb made wrong), so the check was gated on hard evidence instead of more prompt rounds. Sonnet 5 tested and rejected (slower, not more accurate).
+
+**Result:** 45/45 on target across 15 frozen picks × 3 runs. Added latency: lookups only (0.4–5.0s) for most requests; +2.6–3.2s when a pick has the hint.
+
+**Also:**
+- Git author name switched to `grdengnome` (global config). Rewriting the 44 existing `grimallday` commits is deferred to repo cleanup.
+- **Open question:** the model can still see each candidate's `sources` field, though Spec 5b says ranking/origin metadata is stripped (`toModelPool` keeps `sources` by design of the merge). Possibly related to how rarely Hardcover candidates become final picks — unverified.
+
+**Next session (in order):**
+1. Repo cleanup, including `scratchpad/` and the `grimallday` history decision.
+2. Decision log.
+3. Post-engine planning (likely the question-flow UI).
