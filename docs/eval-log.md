@@ -4,6 +4,45 @@ Running log of quality findings, known limitations, and decisions made while eva
 
 ---
 
+## 2026-09-26 — Wrong-book description fix: post-selection verification, gated on hard evidence (PR #6)
+
+Follow-up to the Sept 23 pre-launch blocker: case 8 described Izzo's *Garlic, Mint & Sweet Basil* (an essay collection) as a noir novel with an ex-cop protagonist.
+
+**Root cause, confirmed:** each candidate reaches the model as `{ title, author, subjects, sources }` only — no description, year, or work ID, and the subjects are at most 2 (often just the subject slug the model itself searched with). The model picks from the pool correctly but describes each pick from memory, so it can conflate works by the same author. The grounding check confirms a title is in the pool, not that the description matches the book. Open Library already had the evidence: Izzo's work record carries 8 subjects, 4 of them "… history and criticism".
+
+**Design (merged as PR #6):**
+- **ID plumbing:** OL work key + Hardcover book ID carried internally through the merge (a book in both sources keeps both), stripped before the model sees the pool — model input unchanged.
+- **Lookups on final picks:** after grounding, each pick's OL work record and Hardcover record are fetched in parallel (5s timeout each, never blocks the response). Runs for every pick; the data is also meant for cards.
+- **Check-and-rewrite, gated:** only picks whose OL subjects trigger the *criticism form hint* (2+ or 25%+ of the first 30 subjects contain "history and criticism" / "criticism and interpretation") go to one `claude-haiku-4-5` call, which rewrites `why`/`nonObvious` if they contradict the catalog facts. Every other pick passes through unchanged ("not checked — no hard signal"); a request with no hinted pick makes no model call. Any failure returns the original text unchanged.
+
+**Tuning history, brief:**
+1. Ungated check on all 3 picks: caught Izzo, but rewrites kept invented details from the wrong blurb → required rewrites to use only the provided facts.
+2. Replays on a fixed 7-pick set (case 8 + today's cases 1/5): false positive on Brookner's *Strangers* ("character study rather than a plotted novel" read as a plot contradiction). Three prompt/code rounds — factual-error-types-only rule, required error type + quoted evidence, code-verified quotes — fixed *Strangers* but lost Izzo; adding the form hint as an explicit fact line recovered Izzo. Best ungated result: all target picks correct on every completed run.
+3. **Key lesson:** that strong replay score didn't transfer. On the first fresh live picks, the ungated check made 2 rewrites and no real catches: *Oblomov* flagged for "tragedy" vs the catalog's "comedic" (a tone judgment), and **an accurate *Los informantes* blurb was made wrong** — the catalog description covers a different thread of the novel, so the checker quoted it as a "contradiction" and the rewrite removed the book's central event. Genuine quotes can't distinguish "the catalog omits this" from "the catalog contradicts this". Tuning on a small fixed set was overfitting to it. Instead of more prompt rounds, the check was gated on the one hard, code-computable signal the data supports.
+
+**Sonnet 5 tested and rejected:** same frozen inputs, prompt C. All 9 calls exceeded the 8s timeout; with the timeout lifted, median 11.3s (7.4–21.5s), one call hit max_tokens, and it wasn't more accurate (22/24 completed vs Haiku's 24/27 on the corrected targets; it missed *Paris Trout* outright).
+
+**Final results (gated, Haiku):** replay on frozen inputs, 15 picks × 3 runs (Sept 23 case 8, cases 1 and 5, and both live requests with *Oblomov* / *Los informantes* restored to their original text): **45/45 on target** — Izzo rewritten every run (citing the catalog note; rewrite describes it as criticism of noir), every other pick unchanged and byte-identical. Across the 31 unique Sept 23 baseline picks, only Izzo carries these subjects (4/8; no other pick has any).
+
+**Added latency per request:**
+
+| Request | Lookups | Check | Total |
+|---|---|---|---|
+| No hinted pick (the common case) | 0.4–5.0s | skipped, no model call | lookups only |
+| One hinted pick | 0.4–5.0s | 2.6–3.2s (Haiku) | ≈3–8s |
+
+**Known limitations:**
+- **Series-volume mix-ups go out uncorrected.** *Adrian Mole*'s pool record was a later volume ("Aged 30¼") while the blurb described the teenage diary; the ungated check caught it 3/3, the gate skips it (no form hint).
+- **Errors catalog data can't show.** *Paris Trout*'s blurb calls it "the small Georgia town of the title"; Trout is the protagonist. The facts (no plot description, subjects only) can't reveal that.
+- **Borderline verdicts shift with prompt wording.** *Paris Trout* went from flagged 3/3 to confirmed 3/3 when an unrelated line was added for a different pick. Anything outside the hard gate should be treated as unreliable.
+- **Lookup timeouts.** Open Library latency ranged ~0.2s to 7s+ during testing; a pick whose lookup times out has no facts and can't get a hint. Form-hint thresholds are also provisional — one positive example.
+
+**Deferred question:** when a rewrite reveals that a pick no longer fits the request, should it be replaced rather than just re-described? Izzo's corrected blurb is accurate, but a critical study of noir doesn't serve case 8's ask for an immersive sense of place — the honest rewrite exposes a relevance miss the check can't fix.
+
+Replay scripts, frozen inputs, and results: `scratchpad/pick-check-*` (local, not committed).
+
+---
+
 ## 2026-09-23 — v0 baseline scoring (post grounding fix, PR #5)
 
 Rubric scoring of the Sept 23 baseline run (raw output: `docs/eval-results.md`, "v0 baseline — Sept 23, 2026 — post grounding fix (PR #5)"). Same 4-point scale and dimensions as prior scorings (fail/weak/good/excellent).
