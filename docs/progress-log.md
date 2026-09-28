@@ -387,6 +387,8 @@ Ran the identical `cult novel` query against Open Library side by side for direc
 
 **Case-8 verification** (`scratchpad/step4-real-merge.mts`, against current `main`): tags selected `["mysterious","Tense","dark","reflective"]`, Hardcover raw pool 16, merged pool 211 (92.9% OL / 7.6% HC) — 15 `[hardcover]`-only entries plus 1 deduped cross-source entry (*The Bell Jar*). No fallback to OL-only; Hardcover's presence in the pool is real, not nominal.
 
+**Also reran case-3** (same script): also clean. Tags `["General","fiction","Novel","read"]`, Hardcover raw pool 30, merged 218 (86.7% OL / 13.8% HC), 1 cross-source entry (*1984*) survived dedup. (Recovered from an uncommitted draft on Sept 28.)
+
 **Open, not yet done:** this only confirms Hardcover candidates reach the merged *pool*, not that any survive to the model's final 3 picks. No end-to-end run through the live `/api/recommend` route was attempted for case-8 this session.
 
 **Next:**
