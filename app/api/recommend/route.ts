@@ -308,8 +308,8 @@ async function generateOnce(
             const hardcoverPool = await hardcoverPoolPromise;
             const { pool } = mergeCandidatePools(olResult.pool, hardcoverPool);
             recordSeenCandidates(seenCandidates, pool);
-            // Internal IDs (olWorkKey, hcBookId) stop here: the model's tool_result
-            // shape stays { title, author, subjects, sources }.
+            // Sources and internal IDs (olWorkKey, hcBookId) stop here: the model's
+            // tool_result shape is { title, author, subjects }.
             result = { pool: toModelPool(pool), poolSize: pool.length };
           }
         } catch (err) {

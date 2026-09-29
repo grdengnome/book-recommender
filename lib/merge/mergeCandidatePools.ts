@@ -28,26 +28,25 @@ export interface ModelPoolCandidate {
   title: string;
   author: string;
   subjects: string[];
-  sources: PoolSource[];
 }
 
-// Internal merged record: the model-facing fields plus each source's ID, carried so a
-// final pick can be traced to its records (e.g. to fetch a description for verification).
-// A book found in both sources keeps both IDs. Never sent to the model — route.ts passes
-// the pool through toModelPool first.
+// Internal merged record: the model-facing fields plus which catalogs it came from and each
+// source's ID, carried so a final pick can be traced to its records (e.g. to fetch a
+// description for verification). A book found in both sources keeps both IDs. Never sent to
+// the model — route.ts passes the pool through toModelPool first.
 export interface MergedBookCandidate extends ModelPoolCandidate {
+  sources: PoolSource[];
   olWorkKey?: string;
   hcBookId?: number;
 }
 
-// Strips internal IDs, rebuilding each record field by field (not spreading) so any
+// Strips sources and internal IDs, rebuilding each record field by field (not spreading) so any
 // future internal field is excluded by default rather than leaking by accident.
 export function toModelPool(pool: MergedBookCandidate[]): ModelPoolCandidate[] {
   return pool.map((c) => ({
     title: c.title,
     author: c.author,
     subjects: c.subjects,
-    sources: c.sources,
   }));
 }
 
