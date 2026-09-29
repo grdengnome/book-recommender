@@ -1,6 +1,6 @@
 # Decision Log
 
-*Covers decisions through the v0 engine (September 2026). Question-flow UI decisions will be added as that phase is built.*
+*Covers decisions through the v0 engine (September 29, 2026). Question-flow UI decisions will be added as that phase is built.*
 
 The product and architecture decisions behind this recommender, and the paths I rejected. The [progress log](./progress-log.md) is the session-by-session diary; this file is the story told by decision. Each entry gives the decision and why, with a link to the full detail.
 
@@ -185,6 +185,10 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 **Decision:** The pick check got its own accent- and subtitle-tolerant matching, separate from the merge.
 **Why:** It falsely rejected 5 legitimate picks (accent encoding, marketing subtitles) and failed one fully grounded request. ([eval log, Sep 20](./eval-log.md))
 
+### 5.8 Hide each candidate's catalog from the model
+**Decision:** The model no longer sees which catalog a candidate came from.
+**Why:** Showing it broke the rule that the model sees only title, author, and subjects. Removing it was safe: grounding and logging read the internal record. Subject formats still differ between the catalogs, but the evidence doesn't justify normalizing them. ([eval log, Sep 29](./eval-log.md))
+
 ---
 
 ## 6. Retrieval: where candidates come from
@@ -363,7 +367,6 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 
 ## 12. Open questions I'm carrying
 
-- **The model can see which catalog each candidate came from**, though the spec says it shouldn't. Possibly linked to Hardcover's low pick rate.
 - **Does tag relevance still favor popular books?** Needs logging first.
 - **Cross-case repeats** within a run. Pool size alone doesn't create variety.
 - **Thin or empty pools** error cleanly by design; no recovery path yet.

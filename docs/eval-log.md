@@ -4,6 +4,16 @@ Running log of quality findings, known limitations, and decisions made while eva
 
 ---
 
+## 2026-09-29 — Candidate catalog hidden from the model (`fix/hide-pick-sources`)
+
+**Change:** `sources` is no longer in the `search_books` tool result; the model now sees `{ title, author, subjects }` per candidate. `sources` stays on the internal merged record, so grounding, pick-source logging, and ID tracing are unchanged.
+
+**Result:** cases 1/5/8/9 through the live route, all HTTP 200 on attempt 1, no grounding failures. 1/12 picks from Hardcover (case 9, *The Radium Girls*), in line with its ~7–10% pool share. A regression check, not a bias measurement.
+
+**Caveat:** source isn't fully hidden. Hardcover subjects are plain-word reader tags ("slow burn"); Open Library's are underscore slugs ("domestic_fiction"). Not normalized: the Sept 17 stress test showed no evidence of bias against Hardcover books (see progress log, Sep 17).
+
+---
+
 ## 2026-09-26 — Wrong-book description fix: post-selection verification, gated on hard evidence (PR #6)
 
 Follow-up to the Sept 23 pre-launch blocker: case 8 described Izzo's *Garlic, Mint & Sweet Basil* (an essay collection) as a noir novel with an ex-cop protagonist.
