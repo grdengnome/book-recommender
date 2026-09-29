@@ -493,3 +493,22 @@ Ran the identical `cult novel` query against Open Library side by side for direc
 1. Repo cleanup, including `scratchpad/` and the old-username history decision.
 2. Decision log.
 3. Post-engine planning (likely the question-flow UI).
+
+---
+
+## September 28, 2026 — Repo cleanup, history rewrite, build fix, decision log
+
+**Conclusion:** Repo cleanup done, and it surfaced two real issues: personal data still in git history, and an app that couldn't build from a fresh copy. Both fixed. Wrote the decision log (`docs/decisions.md`) and refreshed README and CLAUDE.md to match the v0 engine.
+
+**History rewrite:** Removed the old username (44 commits) and a personal email from all history via `git filter-repo`, one rewrite covering both, then force-pushed. Verified from a fresh clone: 0 matches for either, all 57 commits under grdengnome with the noreply address. Updated 11 commit-ID references in the docs. GitHub keeps pre-rewrite copies of PRs #1–6 that a push can't reach, so a GitHub Support ticket was filed to purge them (0 forks confirmed).
+
+**Scratchpad:** Removed 21 finished experiments (recoverable from history), committed 13 untracked September scripts after a secrets scan, and added `scratchpad/README.md` indexing the rest as critical / tools / evidence. Recovered the Sept 2 case-3 rerun from an uncommitted draft into that entry.
+
+**Build fix:** `next build` failed on a clean checkout because `tsconfig.json` type-checked scratchpad scripts; it only passed locally because of untracked files. Excluded `scratchpad/` from the type check; a clean-checkout build now passes.
+
+**Docs:** `docs/decisions.md` records 69 decisions and rejected paths across 12 sections, with CLAUDE.md rules for keeping it current. README rewritten around the v0 engine (how it works, status, setup). CLAUDE.md updated with current priority, engine map, enforced rules, the secrets rule, and new "looks like a bug but isn't" entries. eval-set status line corrected.
+
+**Next:**
+1. Refresh spec.md alongside planning: Hardcover architecture is missing, §4b still says grounding is unresolved, and §5b overstates free-text search.
+2. Post-engine planning: confirm the next phase (likely question-flow UI), sort `decisions.md` §12 open questions into before / alongside / later, and pick a first build step.
+3. Watch for the GitHub Support reply on the PR-ref purge.
