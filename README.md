@@ -1,34 +1,42 @@
 # Book Recommender
 
-An AI-powered book recommendation app — built as a portfolio project to demonstrate real product thinking around AI: taste elicitation, eval-driven prompt development, and honest handling of the "obvious recommendation" problem most book-rec tools fall into.
+An AI book recommender built to beat the obvious pick. It turns a description of your taste into three recommendations drawn from real catalogs, chosen for fit rather than fame. Built as a portfolio project in product thinking around AI: grounding, evaluation, and honest handling of the model's pull toward mainstream answers.
 
 ## The problem
 
-Most book recommenders default to consensus picks — the same 10 books every "if you liked X" list surfaces. The interesting product problem isn't "call an LLM," it's:
+Ask an LLM for book recommendations and you get the same consensus picks every "if you liked X" list surfaces. The interesting problems aren't "call an LLM":
 
-- How do you get enough *signal* about someone's taste without turning the app into a survey?
-- How do you keep an AI recommender from defaulting to mainstream, obvious picks?
-- How do you know if it's actually working, rather than just eyeballing outputs?
+- How do you keep a recommender from defaulting to famous, obvious books?
+- How do you make sure every pick is a real book, described accurately?
+- How do you know it's working, rather than eyeballing outputs?
+- How do you get enough signal about someone's taste without turning the app into a survey?
 
-This project treats those three questions as the actual engineering problems, and treats "call the Anthropic API" as the easy part.
+## How it works
+
+1. **Retrieve real candidates.** The model searches Open Library, a broad catalog, up to three times. In parallel, the taste description is mapped to Hardcover reader tags (moods, genres, tropes) to pull a second, taste-shaped pool.
+2. **Merge and neutralize bias.** The pools are deduplicated, shuffled, and stripped of ranking data, so neither catalog's popularity ordering reaches the model.
+3. **Pick three, from the pool only.** Code checks every pick against the candidates the model was shown. A pick from outside the pool triggers a retry, never an invented or remembered book.
+4. **Verify descriptions.** Each pick is looked up in its catalog. When the catalog flags a mismatch risk, a small model checks the description against the catalog facts and corrects it.
 
 ## Approach
 
-1. **Question architecture, not a form.** A fixed backbone (anchor book → why it stuck → appetite for the familiar vs. the strange) carries the real signal, with rotating phrasing pools so repeat use doesn't feel like the same quiz every time. Follow-up questions are adaptive — asked only when signal is thin, never on a fixed schedule.
-2. **Eval-driven development.** Before writing recommendation logic, this project defines a rubric (relevance, non-obviousness, range, correctness, traceability, variety-across-sessions) and a bank of test cases — including deliberately hard ones (contradictory signals, anti-mainstream demands, rejection-and-recovery). Prompt changes get scored against this set, not vibes.
-3. **Honest fallbacks.** Cover images, rejection handling, and low-signal cases all have designed fallback paths rather than silent failure or hallucination.
+- **Eval-driven.** A six-part rubric (relevance, non-obviousness, range, correctness, traceability, variety across sessions) scored against 11 test cases, using outside sources like Goodreads and award records, not the model's own judgment.
+- **Evidence before architecture.** Most design calls were settled by a small test before building, and several hypotheses were proven wrong along the way.
+- **Rules enforced in code.** Grounding, the search limit, and bias controls are enforced in code, not left to prompt instructions.
+- **Question flow, not a form.** A three-question backbone (a book you loved → why → how adventurous you're feeling) with rotating wording and adaptive follow-ups. Designed; the next build phase.
 
-Full design rationale lives in [`/docs`](./docs) — this repo's decisions are documented as they were made, including the ones that got reversed.
-
-## Stack
-
-- **Next.js** (React) — frontend + co-located API routes for the LLM calls, so the recommendation logic and the UI live in one deployable app.
-- **Anthropic API** (Claude) — the recommendation engine itself.
-- Deploy target: Vercel.
+Every decision, including the reversals and rejected paths, is in [`docs/decisions.md`](./docs/decisions.md).
 
 ## Status
 
-🚧 Early build. Current focus: proving the core recommendation loop works against the eval set before layering on UI.
+**v0 engine complete** (September 2026). Baseline: 11/11 test cases delivered, 33/33 picks grounded in retrieved catalogs. Known limitations are documented rather than hidden. Next: the question-flow and card UI. Not yet deployed.
+
+## Stack
+
+- **Next.js** (TypeScript, App Router): the engine runs as an API route
+- **Anthropic API**: Claude Sonnet for recommendations and tag mapping, Claude Haiku for description checks
+- **Open Library**: breadth catalog (subject lists and search)
+- **Hardcover** (GraphQL): reader-applied taste tags
 
 ## Getting started
 
@@ -37,13 +45,25 @@ npm install
 npm run dev
 ```
 
-Requires an `ANTHROPIC_API_KEY` in `.env.local` (not committed — see `.gitignore`).
+Add to `.env.local` (not committed):
+- `ANTHROPIC_API_KEY`: required
+- `HARDCOVER_API_TOKEN`: optional; without it, the engine runs on Open Library alone
+
+There's no UI yet. Call the engine directly:
+
+```bash
+curl -X POST localhost:3000/api/recommend \
+  -H "Content-Type: application/json" \
+  -d '{"tasteDescription": "Quiet, character-driven literary fiction with a strong sense of place."}'
+```
 
 ## Docs
 
-- [`docs/spec.md`](./docs/spec.md) — full product spec, current version
-- [`docs/decisions.md`](./docs/decisions.md) — every product and architecture decision, what was rejected, and why
-- [`docs/question-bank.md`](./docs/question-bank.md) — actual question wording, phrasing pools, rejection/reflect-back mechanics
-- [`docs/eval-set.md`](./docs/eval-set.md) — rubric + test case bank
-- [`docs/checkpoint.md`](./docs/checkpoint.md) — historical notes from the question-architecture design session (its decisions are summarized in decisions.md)
-- [`docs/capture-doc.md`](./docs/capture-doc.md) — original raw idea capture, archival, everything else is synthesized from this
+- [`docs/decisions.md`](./docs/decisions.md): every product and architecture decision, what was rejected, and why
+- [`docs/spec.md`](./docs/spec.md): product spec
+- [`docs/eval-set.md`](./docs/eval-set.md): rubric and test cases
+- [`docs/eval-log.md`](./docs/eval-log.md): quality findings from each eval run
+- [`docs/progress-log.md`](./docs/progress-log.md): session-by-session build log
+- [`docs/question-bank.md`](./docs/question-bank.md): question wording and flow mechanics
+- [`scratchpad/README.md`](./scratchpad/README.md): index of the experiments behind the decisions
+- [`docs/checkpoint.md`](./docs/checkpoint.md), [`docs/capture-doc.md`](./docs/capture-doc.md): original design notes and idea capture (archival)

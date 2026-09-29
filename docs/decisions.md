@@ -197,8 +197,8 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 **Decision:** Stop chasing individual repeated titles.
 **Why:** Identical runs showed the same clustering rate with different titles. Blocking books would just surface new ones. ([eval log, Aug 2](./eval-log.md))
 
-### 6.3 Abandon free-text search, across three providers
-**Decision:** No free-text search for retrieval.
+### 6.3 Stop relying on free-text search, across three providers
+**Decision:** Stop tuning free-text search and shift the retrieval burden to subject lists and Hardcover tags. Open Library's search call still runs but contributes very little.
 **Why:** It matches words, not taste. "cult novel" returned *1984* and a *Batman* comic, and longer queries collapse to zero hits. Google Books and Hardcover search failed the same way. ([progress log, Aug 4–6](./progress-log.md))
 
 ### 6.4 Two sources with different jobs

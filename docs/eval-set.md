@@ -1,6 +1,6 @@
 # Eval Set
 
-*Status: draft starter set (10 cases). Finalizing this to the 20–30 target, applying the #10 reword and #7 split, is a pending next step — not done yet. Use this as-is for now; don't treat it as complete.*
+*Status: 11 cases (10 scenarios, with #7 split into 7a/7b), used for every scored run to date, including the Sept 23 v0 baseline. Cases 3, 7a, and 7b test question-flow behavior that isn't built yet, so they're scored as single-message approximations. Expanding toward 20–30 cases is still pending.*
 
 ## Rubric
 
