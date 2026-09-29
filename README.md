@@ -42,7 +42,8 @@ Requires an `ANTHROPIC_API_KEY` in `.env.local` (not committed — see `.gitigno
 ## Docs
 
 - [`docs/spec.md`](./docs/spec.md) — full product spec, current version
+- [`docs/decisions.md`](./docs/decisions.md) — every product and architecture decision, what was rejected, and why
 - [`docs/question-bank.md`](./docs/question-bank.md) — actual question wording, phrasing pools, rejection/reflect-back mechanics
 - [`docs/eval-set.md`](./docs/eval-set.md) — rubric + test case bank
-- [`docs/checkpoint.md`](./docs/checkpoint.md) — decision log from the question-architecture design session
+- [`docs/checkpoint.md`](./docs/checkpoint.md) — historical notes from the question-architecture design session (its decisions are summarized in decisions.md)
 - [`docs/capture-doc.md`](./docs/capture-doc.md) — original raw idea capture, archival, everything else is synthesized from this

@@ -35,6 +35,15 @@ Entries in `docs/progress-log.md` have been getting too verbose, undermining the
 
 This applies starting with the next entry, not retroactively to past entries.
 
+## Decision log
+
+`docs/decisions.md` records every product and architecture decision and every rejected approach. Keep it current:
+- When a session makes a product or architecture decision, or deliberately rejects an approach, add an entry under the matching section (or a new section if none fits).
+- Format: `### N.N Title`, then a **Decision:** line and a **Why:** line, ending with a link to the progress-log or eval-log entry with the full detail.
+- Routine bug fixes don't get entries.
+- Update the date in the italic scope line under the title whenever entries are added.
+- Resolved items in section 12 ("Open questions") become entries in the matching section and are removed from the list.
+
 ## Things that look like bugs but aren't
 
 - No fixed question count / no "always ask 5 questions" logic — this was deliberately removed in favor of a confidence-based stopping rule. See spec Section 4a.
