@@ -512,3 +512,24 @@ Ran the identical `cult novel` query against Open Library side by side for direc
 1. Refresh spec.md alongside planning: Hardcover architecture is missing, §4b still says grounding is unresolved, and §5b overstates free-text search.
 2. Post-engine planning: confirm the next phase (likely question-flow UI), sort `decisions.md` §12 open questions into before / alongside / later, and pick a first build step.
 3. Watch for the GitHub Support reply on the PR-ref purge.
+
+---
+
+## September 29, 2026 — Sources hidden from the model; full v0 product planned; spec refreshed
+
+**Conclusion:** Closed the `sources` open question (PR #7) and planned the complete v0 product end to end. v0 is now a deployed product (question flow, cards, feedback, rejection path), not just the engine. The spec is rewritten around it, with a 7-phase build plan starting with the foundation.
+
+**Sources field (PR #7, merged):** The model could see which catalog each candidate came from, against the spec's own rule. Removed it from the model's view (it's kept internally for grounding, logging, and tracing). Cases 1/5/8/9: all 200 on the first attempt, no grounding failures, 1/12 picks from Hardcover, in line with its pool share. Subject formats still differ by catalog; not normalized, since the Sept 17 stress test showed no evidence of bias.
+
+**v0 planning:** Considered a text-box-only thin slice first; chose to plan the whole flow screen by screen, because the pieces depend on each other. Key decisions (full list in `docs/decisions.md` §1.7–1.10, §2.10–2.17, §9.7–9.9):
+- Anchor autocomplete that never blocks; an AI taste summary as the engine input, code-checked with a template fallback; read-back only on the rejection path.
+- Cards without ratings; a configurable "find this book" link (Bookshop.org affiliate → Open Library); 2–3 reserve picks per run so swaps are instant; 👎 records feedback and offers an optional swap; the rejection path is capped at three reruns.
+- Loading shows reflected-back answers, then curated, verified author facts. Anonymous feedback events are the one exception to stateless.
+- A visual design pass before building any screen; engine speed as its own workstream.
+
+**Docs:** `spec.md` rewritten (Hardcover and the merge documented; stale grounding and free-text sections fixed; new v0 sections §4f–4k; build plan §8). 15 decisions added to `decisions.md`. CLAUDE.md points to Phase 1. Also restored upstream tracking on local `main`, lost in the Sept 28 history rewrite.
+
+**Next:**
+1. Phase 1, foundation: choose hosting and confirm its request-time limit (engine runs take up to ~2 minutes); move logs to a hosted data store; add a rate limit and monthly spend cap.
+2. Phase 2: the visual design pass (question screens and cards together).
+3. Watch for the GitHub Support reply on the PR-ref purge.
