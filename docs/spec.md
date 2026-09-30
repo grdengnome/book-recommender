@@ -1,43 +1,38 @@
 # Book Recommender — Spec
 
-*Single source of truth. Fully self-contained — nothing here refers back to an earlier version you'd need to cross-reference. Tags: **[FACT]** = needs research/verification · **[SYNTH]** = judgment/design call · **[YOU]** = only you decide · **[RESOLVED]** = settled, with the reasoning kept below.*
+*Current state of the product and its design. Decisions, reversals, and rejected paths are in [`decisions.md`](./decisions.md); this file says what the product is and how it works. Last updated September 29, 2026.*
 
 ---
 
 ## 1. Product summary
 
-An AI book recommender whose wedge is *taste articulation* — turning a user's mood, preferences, and feedback into **non-obvious, high-quality recommendations** drawn from many sources, delivered through a distinctive card-flip UX. The differentiator isn't "recommends books"; it's "recommends the books a thoughtful friend with eclectic taste would, not the bestseller list everyone already knows." See Flag A — this conviction actively fights how LLMs default to behaving, and solving that visibly is the portfolio-worthy part.
+An AI book recommender whose wedge is *taste articulation*: turning a user's mood, preferences, and feedback into **non-obvious, high-quality recommendations** drawn from real catalogs, delivered as cards. The differentiator isn't "recommends books"; it's "recommends the books a thoughtful friend with eclectic taste would, not the bestseller list everyone already knows." This fights how LLMs behave by default (Flag A), and solving that visibly is the portfolio-worthy part.
 
 ---
 
 ## 2. Core scope decision
 
-The full product idea (from the original capture doc) is three products in one trenchcoat: a recommender, a Beli-style ranking system, and a reading-organization tool, plus Goodreads import, profiles, and gamified visual prompts. That's a full consumer app, not a first AI build.
-
-The recommender is the only piece that's actually about AI. Everything else is conventional app-building that doesn't showcase the skill being demonstrated.
+The original idea was three products in one: a recommender, a Beli-style ranking system, and a reading tracker, plus Goodreads import, profiles, and gamified prompts. Only the recommender is an AI problem.
 
 | Tier | Scope | Why |
 |---|---|---|
-| **v0 (build this)** | The recommender: adaptive questioning → 3 card recommendations → feedback/refine loop → the eval system behind it | This is the AI. It's the portfolio piece. Shippable in weeks. |
-| **v1 (next)** | Reading-organization page (shelves), profile, card-flip detail view, returning-user persistence | Conventional features that make it a real product. |
-| **Later** | Beli-style ranking, Goodreads/import, gamified visual prompts | High effort, none of it AI; import has a hard external dependency (Flag C). |
+| **v0 (build this)** | The recommender as a complete, deployed product: question flow → 3 cards → feedback and rejection path, plus the eval system behind it (full list in §4) | This is the AI, and the portfolio piece. A live link beats a repo |
+| **v1 (next)** | Shelves, profiles, returning-user persistence | Conventional features that make it a real product |
+| **Later** | Beli-style ranking, Goodreads import, gamified visual prompts | High effort, none of it AI; import has a hard external dependency (Flag C) |
 
-**Confirmed:** v0 = the recommender only.
+**v0 status (Sept 29):** the engine is complete (§5). The product around it is designed (§4) and next to build (§8).
 
 ---
 
 ## 3. Where AI earns its keep (and where it doesn't)
 
-Being able to articulate this boundary is itself part of the portfolio signal.
-
 | Genuinely AI (LLM-shaped) | NOT AI (conventional code) |
 |---|---|
-| The recommendation reasoning — synthesizing taste into picks | The ranking system — pairwise comparison is a sort algorithm (Elo-style), not an LLM |
-| Adaptive questioning — deciding when to ask more vs. recommend | Shelves / organization — basic CRUD |
-| Writing the engaging card descriptions | Goodreads import — data plumbing |
-| The "you didn't like these" clarifying pivot | Card-flip UI, tabs, navigation — front-end |
-
-The ranking feature is not an AI feature. That's not a knock, it's clarity — the AI story lives entirely in the recommender.
+| Picking recommendations from the candidate pool | Ranking (a pairwise sort, Elo-style) |
+| Mapping a taste description to Hardcover tags | Shelves and organization (basic data storage) |
+| Writing the taste summary from question answers | Goodreads import (data plumbing) |
+| Deciding whether to ask another question | Card UI, navigation, animation |
+| Writing card hooks; checking flagged descriptions | Cover lookup, links, logging |
 
 ---
 
@@ -45,152 +40,192 @@ The ranking feature is not an AI feature. That's not a knock, it's clarity — t
 
 ### 4a. Core flow
 
-Opening page *is* the recommender (no landing/login wall). User answers preference prompts → AI refines as answers come in → returns **3** recommendations as cards.
+The opening page *is* the recommender (no landing or login wall). The flow:
 
-**[RESOLVED] Input mode:** every question — trio, adaptive, rejection — presents as clickable/tappable options with a "write your own" free-text fallback. Nothing requires typing to proceed.
+**Questions (3 backbone + 0–2 follow-ups) → loading → 3 cards → feedback / rejection path.**
 
-**[RESOLVED] Adaptive depth — confidence-based, no hard cap:** the model keeps asking only while signal is genuinely improving, and stops once it judges input sufficient. This *replaces* an earlier "~5 questions max" rule, which was reversed because a hard cap fights against letting genuinely thin signal get a real follow-up.
-- Guardrail (not a cap, exact number TBD from testing): if confidence isn't improving after repeated attempts, use best judgment and move to recommendations rather than spiraling.
-- Targeted follow-ups: when signal is weak, return to the *specific* thin category rather than pulling generically from the adaptive pool.
+- **Input mode:** every question is tap-to-answer with a "write your own" fallback. Nothing requires typing.
+- **Backbone (always asked):** anchor ("a book you loved") → why ("what stuck with you?": the writing / the world / the characters / the ideas / the feeling) → appetite (comfort ↔ strange). Fixed structure, rotating wording: 2–3 phrasings per question at launch, growing toward 4–5.
+- **Anchor entry:** autocomplete against a catalog as the user types, with a "use what I typed" escape. Suggestions appear after 3+ characters and a short typing pause, target under ~1 second, and never block progress. Source (Open Library or Hardcover search) is chosen by measured speed.
+- **Adaptive follow-ups:** after the backbone, one small model call judges whether the signal is enough. If not, it asks 1–2 targeted follow-ups (mood, length, turn-off) aimed at the thin category. No fixed question count; a guardrail stops the loop if confidence isn't improving (threshold TBD from usage data).
+- **Creative framing:** emoji-style prompts woven into the pools, about one per session.
+- **Stateless:** no memory of users across sessions. The one exception is anonymous feedback events (§4i), which identify no one.
 
-**[RESOLVED] Persistence:** v0 is fully stateless — no cross-session memory of a user, even locally. The rotating phrasing pools (4a-i) do the anti-staleness work instead of tracking what a returning user has seen. Revisit in v1 once profiles exist.
-
-Full question wording, pools, and mechanics: see **`docs/question-bank.md`** — kept separate from this spec because it's content, not architecture, and will grow independently.
+Full question wording and pools: [`question-bank.md`](./question-bank.md).
 
 ### 4b. The recommendation engine
 
-The heart of the product. Takes the user's articulated taste and produces non-obvious, multi-source-grounded picks.
+Built and grounded; see §5. The engine takes one input, the taste description, and returns picks that are real, retrieved, and checked.
 
-**Open [FACT/SYNTH] — the single biggest build-architecture question:** does v0 recommend from the model's own knowledge, or ground it against an external book dataset/API for breadth and to fight repetition? Not yet resolved — see Section 5.
+**Engine additions required for the v0 product:**
+- **Taste summary step (§4f):** answers → verified plain-language summary → engine input.
+- **Reserves:** each run returns 3 picks plus 2–3 reserves, all grounded and verified the same way, so swaps are instant.
+- **Exclude list:** reruns and swaps never return a book the user has already seen this session.
+- **Widen mode:** deliberately varied picks for the final step of the rejection path.
+- **Card-ready output:** cover image, cleaned-up title and author text (no raw catalog artifacts like "Last, First" or untransliterated names), and the "find this book" link.
 
 ### 4c. The card UX
 
-Concise list of 3 cards, "Pokémon-card" reveal. Cover image as background + a short, engaging hook. Tap to flip → fuller description + ratings.
+Three cards shown at once.
 
-**[RESOLVED] Cover image sourcing:** lookup order is **Open Library (primary) → Google Books (fallback) → designed placeholder (final fallback)**.
-- Open Library: free, no commercial-use restriction, no signup, rate limit (~3 req/sec with identified User-Agent) sufficient for on-demand single-user fetches. Fetch by ISBN: `https://covers.openlibrary.org/b/isbn/{isbn}-L.jpg`. Gap: inconsistent coverage on obscure/non-mainstream titles — exactly where this app leans.
-- Google Books: stronger coverage on gaps, but unauthenticated requests cap around 100/day — a real API key is needed for actual usage, and there are attribution/branding rules to follow.
-- Lookup: Open Library by ISBN → if empty, Google Books by ISBN → if still empty, designed placeholder.
+- **Front:** cover image as background, title, author, and a one-line hook (why it's for you). Designed placeholder when there's no cover.
+- **Back (tap to flip):** catalog description, why it fits, the non-obvious angle, and a "find this book" link. **No ratings in v0**: no reliable source is confirmed, and thin rating counts on obscure books work against the product.
+- **"Find this book" link:** destination and affiliate tag are configuration, not code. v0: Bookshop.org (affiliate) → Open Library fallback when no ISBN. Amazon may be added later as a secondary option. A short commission disclosure is shown.
+- **Per-card actions:**
+  - **👍:** recorded.
+  - **👎:** recorded, and reveals an optional "show me another" (swaps in a reserve). It doesn't auto-swap, so the user can still compare.
+  - **"Already read it":** swaps in a reserve immediately.
+  - When reserves run out, the swap control becomes "none of these working?" → rejection path (§4g).
 
-Note the tension with "simple/uncluttered" (Flag B): keep the *interface* simple even while the *cards* are visually rich. Spend the visual budget on the cards, not the surrounding chrome.
-
-**Visual design direction (from original ideation, not yet fully designed):**
-- Opening page *is* the recommender — simple layout, with a "cartoon" / fairy-tale-accessory visual quality that mimics book covers, potentially rotating between cover-style imagery.
-- Vibrant color theme, meant to evoke imagination/creativity rather than a neutral utility-app palette.
-- Buttons should feel physically satisfying — a "pop" or "explode like a cloud" interaction on tap, not a flat click.
-- All screens/features should carry one consistent visual theme rather than feeling like separate mini-apps bolted together.
-- v1, once shelves/profile exist: bottom tab bar for navigation between sections.
-These are directional, not final — treat as a brief for whoever designs the actual UI, not literal implementation instructions.
+**Cover images:** Open Library → Google Books → designed placeholder.
 
 ### 4d. What "good" means
 
-The quality bar the recommender (and the evals) must hit:
-
-- **Impression over popularity.** Target books that "leave a mark" — that you'd itch to recommend, quiet standouts you can't put down. Touchstones: *Stoner*, *The Uncool*, *Project Hail Mary*.
-- **Penalize the bandwagon.** Over-recommended, everyone-says-so picks are a *failure*, not a safe default. Reward range across years, authors, genres.
-- **Multi-source, not single-source.** Synthesize from many places; never lean on one canon.
-
-This directly informs the system prompt's explicit instructions and the eval rubric in 4e.
+- **Impression over popularity.** Target books that leave a mark: quiet standouts you'd itch to recommend.
+- **Penalize the bandwagon.** A pick fails if a well-read person would name it first for this exact request, whatever its fame or awards.
+- **Range** across era, author, and genre.
+- **Real and correct.** Every pick is a real, retrieved book, and its description matches that book.
 
 ### 4e. Evaluation
 
-Build a set of **20–30 test inputs** (taste descriptions) with notes on what a *good* vs *lazy* response looks like for each. Score prompts against it as you tune. Track quality over time in an `eval-log.md`. Full rubric and current test case bank: **`docs/eval-set.md`**.
+- **Rubric:** 6 dimensions (relevance, non-obviousness, range, real & correct, traceability, variety across sessions), fail / weak / good / excellent, scored against external sources. Test cases: [`eval-set.md`](./eval-set.md). Findings: [`eval-log.md`](./eval-log.md).
+- **New for v0:**
+  - **Taste summary fidelity:** about 10 answer sets, scored on two questions: was anything dropped, and was anything added?
+  - **"Enough signal?" decisions:** cases for when to ask more vs. recommend. Cases 3, 7a, and 7b stop being single-message stand-ins once the flow exists.
+  - **Real-world signal:** completion rate through the questions, 👍/👎 rates, and "already read it" rates, from anonymous feedback events.
 
-**[RESOLVED] Rubric — 6 dimensions, 4-point scale (fail/weak/good/excellent):** Relevance, Non-obviousness, Range, Real & correct, Traceability, Variety across sessions (new — avoids near-identical rec sets for similar/repeat inputs; individual repeat titles are fine if genuinely relevant, staleness across sessions is the failure mode).
+### 4f. Taste summary
+
+One small model call turns the question answers into a plain-language summary. That summary is both the engine's input and the text shown on the read-back screen, so editing the read-back edits exactly what the engine sees.
+
+- **Rules:** include every answer, keep the user's own words for anything typed, add nothing they didn't say.
+- **Code check:** confirms the anchor title, any typed text, the appetite level, and any turn-offs appear in the summary. On failure, retry once, then fall back to a plain stitched template. Never blocks the request.
+- **Shown to the user only on the rejection path** (§4g), to keep the main flow fast.
+
+### 4g. Rejection path
+
+"None of these" leads to at most three reruns, then "start over":
+1. **Clarify:** one tap ("too safe / too heavy / wrong mood / something else"). Rerun with that adjustment, excluding everything shown.
+2. **Read-back:** "Here's what I heard" (the taste summary), editable. Rerun.
+3. **Widen:** deliberately varied wildcard picks. The clean exit.
+
+Each rerun is a full engine run (a full wait).
+
+### 4h. Loading and error states
+
+- **Loading (30–120 seconds today):** the user's answers reflected back in their own words, then rotating author facts, then the cards. Reflect-back quotes real answers, specific enough that it couldn't describe just anyone.
+- **Author facts:** a curated library of about 50–100 facts about well-known and historic authors, each verified once against a cited source, shuffled, never repeated within a session. Not tied to the request. (Famous-only vs. a mix with lesser-known authors: undecided.)
+- **Errors:** "Something went wrong, try again," with all answers kept. Covers the engine's grounding failure (502), catalog outages, and requests that run too long.
+
+### 4i. Feedback and logging
+
+Anonymous events (question completion, 👍/👎, already-read, swaps, reruns) are stored in a small hosted data store, which also replaces the file-based logs the engine writes today. No user identity, no profiles.
+
+### 4j. Visual design
+
+- **Direction:** vibrant, storybook feel; simple layout and flow, with the visual budget spent on rich moments (the card reveal, the button "pop"). One consistent theme across every screen (Flag B).
+- **Principles:** one question per screen; large tap targets; every tap gets a response; book covers wherever possible (including autocomplete); the appetite question as something visual; progress shown as momentum, not "2 of 5"; mobile first.
+- **Process:** a visual design pass (mockups of the question screens and cards together) before any screen is built.
+
+### 4k. Supporting pages
+
+A short "How it works" page, linked from the footer, explaining the approach and linking to [`decisions.md`](./decisions.md).
 
 ---
 
 ## 5. Data & sources — RESOLVED
 
-**The open question — resolved.** Does v0 need grounding, or can a well-prompted model carry it alone? **Answer: grounding is needed.** Two separate eval findings (documented in `docs/eval-log.md`, 2026-07-08) showed the model repeatedly draws from a narrow internal "go-to" pool for common taste profiles (e.g., "So Long, See You Tomorrow," "Convenience Store Woman," "Independent People," "Piranesi" recurring across structurally distinct inputs) regardless of prompt wording changes. This is a real, evidenced limitation, not a hypothetical one — prompt tuning alone (Prompt v2, v3) did not resolve it.
+**Grounding is required.** The model repeatedly drew from a narrow internal pool of "go-to" titles across very different inputs, and prompt changes didn't fix it. Every pick now comes from real catalog candidates.
 
-### 5a. Architecture — tool-based retrieval, not prompt-embedded logic
+**Pipeline:** Open Library search (model-driven, §5b) and Hardcover tag pool (fixed pre-fetch, §5f) → merge (§5g) → model picks → grounding check (§5c) → catalog lookup and description check (§5e).
 
-The retrieval logic does **not** live in `SYSTEM_PROMPT` as inline instructions. It's implemented as a **tool** the model can call via the Anthropic API's tool-use (function-calling) feature — the same general mechanism used for any external capability a model needs mid-reasoning, not something custom-built for this one case.
+### 5a. Architecture — tool-based retrieval
 
-**Why tool-use over stuffing logic into the prompt:** keeps `SYSTEM_PROMPT` focused on taste judgment (what makes a good recommendation) rather than mixed with retrieval mechanics (how to query an external API). It also means the model itself decides *when* and *how many times* to call the tool — including retrying with broader search terms if an initial pool comes back thin — rather than requiring hand-coded retry logic in the application.
+Retrieval is a tool the model calls (Anthropic tool use), not instructions embedded in the prompt. This keeps `SYSTEM_PROMPT` about taste judgment and lets the model re-search when results are thin.
 
-**This project should adopt a general "tools" pattern, not a single hardcoded integration** — built so that future capabilities (e.g., a cover-image lookup tool, an author-fact-pool lookup, anything else identified later) can be added the same way, without re-architecting. Concretely:
-- A `lib/tools/` directory, one file per tool (e.g., `lib/tools/searchBooks.ts`).
-- Each tool file exports: (1) its Anthropic tool-definition schema (name, description, input parameters), and (2) the actual implementation function the code runs when the model calls it.
-- A central tool registry (e.g., `lib/tools/index.ts`) that assembles the list of available tool definitions to pass to the API, and dispatches incoming tool-call requests to the right implementation.
-- `SYSTEM_PROMPT` references available tools by name and intent only ("you have access to a search_books tool — use it to ground recommendations in real candidates") — never by embedding a tool's internal logic as prompt text.
+- `lib/tools/`: one file per tool (definition schema + implementation), with a registry in `index.ts`.
+- `SYSTEM_PROMPT` references tools by name and intent only.
+- New tools follow the same pattern without re-deciding it.
 
-**Convention for adding tools going forward:** each new tool gets its own numbered subsection (5b, 5c, 5d...) following this same template — purpose, mechanics, any bias/quality mitigations specific to it. Section 5a's architecture pattern (the `lib/tools/` structure, registry, prompt-reference-only rule) does not need to be re-explained or re-decided for each new tool — only referenced.
+### 5b. Open Library — the `search_books` tool
 
-### 5b. First tool — `search_books`
+- **Inputs:** a short keyword query and one or more subject slugs. Subjects are fetched in parallel (multi-subject fan-out) and merged with the search results.
+- **Retrieval weight:** subject lists carry the pool. Open Library's free-text search matches words, not taste (implicit AND across terms, keyword matches like "cult novel" returning *1984*), so it's deprioritized: still called, but it contributes very little.
+- **Loop cap:** at most 3 search rounds; the 4th model call omits the tool, forcing an answer.
+- **No pool size cap.** Cost is small at this scale; dilution is handled by the shuffle.
 
-**Two underlying API calls, merged into one candidate pool:**
-1. **Open Library Search API** (`/search.json?q=...`) — free-text, relevance-ranked search. Model-generated natural-language-ish search terms (e.g., "quiet character study morally ambiguous") work here; matching is lenient (terms are boosted, not all required to match).
-2. **Open Library Subjects API** (`/subjects/{subject}.json`) — exact controlled-vocabulary genre/subject tags (e.g., `psychological_fiction`). Model-generated stricter subject guesses go here.
+### 5c. Grounding enforcement
 
-Both are free, require no API key, and are called once per tool invocation — no meaningful cost or rate-limit concern at this scale.
+- **Prompt:** `search_books` must be called, and all 3 picks must come from the retrieved pools, even a small one. No fallback to the model's own knowledge.
+- **Code:** `lib/merge/pickGrounding.ts` checks every pick against the pools the model was shown, using a tolerant key (title up to the first colon or parenthesis + author last name, Unicode-folded; an empty title or author never matches). A miss or unparseable answer retries the whole generation (max 3 attempts), then returns a clean 502. Never an ungrounded pick.
+- **Thin pools** too small for 3 valid picks fail closed (the 502). A recovery path is not designed.
 
-**Merge and pool-building logic (in code, not the model):**
-- Combine results from both calls.
-- Deduplicate by title + author (or Open Library's internal work ID where available).
-- **No hard cap on pool size, and this is a deliberate choice, not an oversight.** The two real risks of a large candidate pool are (1) token cost and (2) relevance dilution. (1) is a non-issue at this scale — even 150–200 candidates is roughly 3,000–4,000 tokens, small change against Claude's context window. (2) is real, but it's addressed directly by the shuffle and explicit "don't favor earlier entries" instruction below — those solve dilution without needing to artificially throttle breadth, which is the actual goal here. If pool size later proves to be a genuine problem in practice (not just a theoretical one), revisit with real data rather than pre-emptively capping it now.
-- **If the merged pool is thin (under ~15–20 candidates):** this is a signal for the *model* to recognize and act on — it can call `search_books` again with broader or different terms, rather than the application silently proceeding with a weak pool. **There is no fallback to trained knowledge (decided 2026-09-20):** all 3 picks must come from a retrieved pool, even a small one. A pool too small to support 3 valid picks is a known, unresolved edge case — deliberately not designed for yet (flagged for its own investigation); today it surfaces as a failed grounding check (see 5c) and the bounded retry.
+### 5d. Cover images
 
-**Bias mitigation — critical, non-negotiable requirements:**
-- **Shuffle the merged candidate list before returning it to the model.** Language models exhibit measurable position bias — favoring earlier list items regardless of actual merit. Randomizing order in code, every time, before the tool result is returned neutralizes this entirely.
-- **Strip relevance scores, rank position, and any other ranking metadata** before returning results to the model. Only title, author, and a subject tag or two should be visible — the model must never see which API result was "ranked first."
-- **`SYSTEM_PROMPT` must explicitly state** that the candidate list is unordered and that earlier entries should not be favored — reinforcing the shuffle in code with an explicit instruction, belt-and-suspenders.
+Open Library → Google Books → designed placeholder (§4c). Open Library is free but thin on obscure titles; Google Books needs an API key at real volume.
 
-### 5c. What `SYSTEM_PROMPT` actually needs to say about this (kept short, by design)
+### 5e. Post-selection verification of pick descriptions
 
-Only a few sentences — the mechanics live in code and the tool definition, not here:
-- That a `search_books` tool exists, must be called, and that all 3 picks MUST be selected from the retrieved candidate pools — no book outside a pool, under any circumstance, even if the pool is small (changed 2026-09-20 from "ground ... rather than relying solely on trained knowledge", which allowed ungrounded picks: a test request returned 2 of 3 picks absent from both pools).
-- That the tool may be called more than once if results feel too narrow.
-- That the returned candidate list is unordered — no positional favoritism.
-- That the final picks should still be judged against the existing taste-fit rules (impression over popularity, resist the bandwagon, awards ≠ non-obviousness) — grounding changes *where candidates come from*, not the *judgment* applied to them.
+Grounding proves each pick is a real, retrieved book, not that its description matches that book.
+- **Lookup:** each final pick's catalog records are fetched by the IDs carried internally through the merge (Open Library work key, Hardcover book ID; never shown to the model). Parallel, 5-second timeout each, never fails the request. The same data feeds the cards.
+- **Gated check:** only a pick whose catalog subjects mark it as criticism of its genre ("history and criticism" / "criticism and interpretation") gets checked. One Haiku call rewrites its description only if it contradicts the catalog facts; any failure keeps the original. Everything else passes through unchanged. An ungated check was rejected after it corrupted accurate descriptions on fresh picks.
 
-**Enforced in code, not just prompted (2026-09-20):** after the model answers, `lib/merge/pickGrounding.ts` checks every pick against the merged pools it was shown, using its own tolerant key (title up to the first colon/parenthesis + author last name, Unicode-folded; an empty title or author never matches) — deliberately looser than the merge's `dedupKey`, which falsely rejected accented titles and subtitled titles in the 2026-09-20 eval. Any pick not found — or an answer that can't be parsed — is a failed generation: logged, and the whole generation is retried (bounded at 3 attempts; then a clean 502, never an ungrounded pick).
+### 5f. Hardcover — the tag pool
 
-### 5d. Cover images — unchanged, already resolved (Section 4c)
+A second, taste-shaped pool built from reader-applied tags. Fetched once per request, in parallel with the Open Library loop, not as a model-invoked tool.
+- **Tag mapping** (`lib/hardcover/mapTasteToTags.ts`): one model call maps the taste description to up to 4 tags from a cleaned 153-tag vocabulary. The model sees tag names only, shuffled, never usage counts.
+- **Vocabulary cleaning** (`tagExclusions.ts`): excludes disguised review-form answers (Loveable/Unloveable Characters, Character/Plot driven, fast/medium/slow-paced) and personal shelf labels ("to-read", "Kindle").
+- **Pool prep** (`preparePool.ts`): rank by tag-match relevance (never by popularity), require at least 2 matched tags (`RELEVANCE_FLOOR = 2`), keep up to 30 (`WORKING_POOL_SIZE`), shuffle.
+- **Failure handling:** a missing token, API error, or no matching tags silently degrades to Open Library only, logged by category, never shown to the user.
+- **Known limitation:** a tag can be misread across categories (e.g., "slow burn" is a romance trope, not pacing). One confirmed case; accepted and documented.
 
-No change here; this section's resolution is scoped to the recommendation-engine grounding question only.
+### 5g. Merge — what the model sees
 
-### 5e. Post-selection verification of pick descriptions (added 2026-09-26)
-
-Grounding (5c) proves each pick is a real, retrieved book; it doesn't prove the `why`/`nonObvious` text describes *that* book — the model describes picks from memory and can conflate works by the same author (Sept 23: an Izzo essay collection described as a noir novel). So after grounding passes, in `route.ts`:
-- **Lookup:** each final pick's catalog records are fetched by the IDs carried internally through the merge (Open Library work key, Hardcover book ID — never shown to the model): description, subjects, and Hardcover Genre/Mood tags. Parallel, 5s timeout each, never fails the request. The data is also intended for the card UX.
-- **Gated check-and-rewrite:** only a pick with a hard, code-computed signal is checked — currently the *criticism form hint* (its Open Library subjects mark it as "history and criticism" / "criticism and interpretation" of its genre). One small-model call rewrites that pick's `why`/`nonObvious` only if they contradict the catalog facts; it never changes which book was picked, and any failure sends the original text. Picks without a hard signal pass through unchanged, and a request with none makes no model call. An ungated check was tried and rejected: on fresh picks it rewrote accurate descriptions where the catalog was merely incomplete (details: `docs/eval-log.md`, 2026-09-26).
+`lib/merge/mergeCandidatePools.ts`:
+- **Dedup:** exact match on normalized title + author last name (not fuzzy). A book in both catalogs is merged, keeping both sources' data. Hardcover reader count is used only to break ties on which record is canonical.
+- **Supplement, not filter:** Hardcover adds candidates; it never re-ranks Open Library's.
+- **Shuffle** the full merged pool.
+- **What the model sees:** title, author, and subjects only (`toModelPool`). Catalog source, IDs, scores, and rank positions stay internal. Subject formats still differ by catalog (Hardcover plain words, Open Library slugs); normalizing them isn't justified by the evidence so far.
+- **Typical split:** roughly 87% Open Library / 13% Hardcover. An estimate, not a target.
 
 ---
 
-## 6. Roadmap (deferred, captured so nothing's lost)
+## 6. Roadmap (after v0)
 
-- **Reading-organization page** — shelves for read / want-to-read. Conventional, v1.
-- **Profile** — account, preferences, layout selections. v1.
-- **Returning-user persistence / anti-repeat tracking** — lightweight local storage of last-seen phrasing IDs. Deferred to v1 alongside profiles, since v0 is deliberately stateless.
-- **Beli-style pairwise ranking** — comparison-sort to maintain a favorites list. Pure algorithm, not AI. Later.
-- **Goodreads / tracking-app import** — see Flag C. Later, and verify feasibility first.
-- **Gamified visual prompts** — pick-by-image/color instead of text questions. Strong idea, real front-end effort. v1/later.
-- **Monetization** — parked. Decide *launch vs. portfolio piece* before designing any revenue in.
-
----
-
-## 7. Flags — resolve these
-
-**Flag A — the core conviction fights how LLMs default to behaving. [most important]** The strongest taste rule is "no over-recommended mainstream books." But an LLM asked for book recs gravitates *toward* popular, frequently-discussed titles by default — exactly the bandwagon this app is trying to avoid. This isn't a reason not to build; it's *the* design problem, and solving it visibly is what makes this portfolio-worthy. Levers: explicit anti-popularity instructions in the prompt, asking for picks across decades/obscurity tiers, possibly grounding against a broad dataset, and using the eval set to *measure* non-obviousness. Name this problem in the case study; don't paper over it.
-
-**Flag B — "rich visuals" vs. "simple interface."** The goal is vibrant, immersive *and* simple, uncluttered. These trade off. Resolution: simple *layout and flow*, rich *moments* (the card reveal, the button pop). Guide the eye with restraint; spend the visual budget on the cards.
-
-**Flag C — Goodreads import may not be feasible. [FACT — verify before promising it]** Goodreads closed its public API to new developers some years back, so "connect to Goodreads" likely isn't a straightforward integration anymore. Verify current state before committing to it. Alternatives: StoryGraph export files, Open Library, or manual add. Another reason import is "later," not v0.
+- **Shelves** (read / want-to-read) and **profiles**. v1.
+- **Returning-user persistence**, including anti-repeat across sessions. v1, alongside profiles.
+- **Writing-style signal** from reader reviews (needs an extraction step). v1 candidate.
+- **Beli-style pairwise ranking.** Pure algorithm, not AI. Later.
+- **Goodreads / tracking-app import.** Later; verify feasibility first (Flag C).
+- **Gamified visual prompts and bespoke illustration.** Later.
+- **Monetization:** v0 ships a configurable affiliate link (§4c). Anything beyond that waits on the "launch vs. portfolio piece" decision.
 
 ---
 
-## 8. Next steps
+## 7. Flags
 
-1. ~~Confirm v0 scope~~ ✅ done.
-2. ~~Draft question architecture + eval set, review, merge~~ ✅ done — see `docs/question-bank.md` and `docs/eval-set.md`.
-3. **Stand up the GitHub repo** — starter pack, point Claude Code at it, prove the pipeline with a throwaway task. *(In progress — this is the repo you're building now.)*
-4. **Prove the core recommendation loop** — one hardcoded test input → one LLM call using the 4d taste rules → one raw output. No UI yet.
-5. **Build the author-fact pool**, with a fact-check pass — deferred until real recommendations exist, so it only covers authors that actually come up (folded in here rather than gated as a separate phase).
-6. **Finalize test cases** into final form — expand toward the 20–30 target in `docs/eval-set.md`.
+**Flag A — the core conviction fights how LLMs behave by default. [most important]** An LLM asked for book recommendations gravitates toward popular, frequently discussed titles. Solving that visibly is the point of the project. Current levers: grounding in real catalogs (§5), bias controls in code (§5b, §5f, §5g), the "first-guess" test for non-obviousness (§4d), and evals that measure it (§4e).
 
-## Still open (not decided, don't need to be yet)
+**Flag B — "rich visuals" vs. "simple interface."** Resolved: simple layout and flow, rich moments (§4j).
 
-- Exact copy/wording for each phrasing pool beyond what's drafted in `docs/question-bank.md`.
-- The specific number/threshold for the "confidence isn't improving" guardrail — revisit once observable in testing.
+**Flag C — Goodreads import may not be feasible.** Goodreads closed its public API to new developers. Verify before promising import; alternatives are export files or manual add.
+
+---
+
+## 8. Build plan (v0)
+
+1. **Foundation:** choose hosting and confirm its request-time limit (engine runs take up to ~2 minutes); move logs to a hosted data store; add a rate limit and monthly spend cap.
+2. **Visual design pass:** mockups of the question screens and cards together (§4j).
+3. **Results:** cards, loading screen, error states; engine reserves and card-ready output.
+4. **Question flow:** backbone and follow-ups, anchor autocomplete, taste summary with its check and eval set, the "enough signal?" call.
+5. **Feedback loop:** per-card actions, rejection path, exclude list, widen mode, feedback logging.
+6. **Speed:** set a latency target and trim the engine to meet it, measured on the deployed setup.
+7. **Launch polish:** mobile pass, author-fact library, "How it works" page, eval expansion, animations.
+
+## Still open
+
+- Exact wording for each phrasing pool beyond the drafts in `question-bank.md`.
+- The "confidence isn't improving" guardrail threshold; needs usage data.
+- Author facts: famous authors only, or a mix with lesser-known ones.
+- Hosting provider (decided in step 1 of §8).
+- Engine-level open questions: [`decisions.md` §12](./decisions.md#12-open-questions-im-carrying).

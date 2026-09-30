@@ -1,6 +1,6 @@
 # Decision Log
 
-*Covers decisions through the v0 engine (September 29, 2026). Question-flow UI decisions will be added as that phase is built.*
+*Covers decisions through the v0 engine and v0 product planning (September 29, 2026). Build-phase decisions will be added as they're made.*
 
 The product and architecture decisions behind this recommender, and the paths I rejected. The [progress log](./progress-log.md) is the session-by-session diary; this file is the story told by decision. Each entry gives the decision and why, with a link to the full detail.
 
@@ -63,11 +63,27 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 **Decision:** No revenue design until "launch vs. portfolio" is decided. Goodreads import must be verified before it's promised.
 **Why:** Goodreads closed its API to new developers, and designing revenue before knowing the audience is premature. ([spec §6, Flag C](./spec.md))
 
+### 1.7 v0 is a complete, deployed product, not just an engine
+**Decision:** v0 includes the question flow, cards, feedback and rejection path, and a public deployment with a spending guard.
+**Why:** A live link beats a repo for a portfolio. Planning the UI also surfaced needs the engine alone never showed: long waits, hosting limits, a public API bill, and no way to learn whether picks land. ([spec §2](./spec.md))
+
+### 1.8 Anonymous feedback is the one exception to stateless
+**Decision:** Record anonymous events (👍/👎, already read, swaps, question completion) with no user identity.
+**Why:** The original goal included knowing whether picks are "valued and accepted," and v0 had no way to learn that. Anonymous events answer it without profiles. ([spec §4i](./spec.md))
+
+### 1.9 Monetization starts as a configurable affiliate link
+**Decision:** "Find this book" links to Bookshop.org (affiliate), with Open Library as the fallback. Destination and tag are configuration, not code. Amazon later.
+**Why:** Bookshop has no minimum-sales requirement and fits the anti-default brand; Amazon's qualifying-sales rule risks closing a low-traffic account. Revenue is small either way, so the link has to be easy to swap. ([spec §4c](./spec.md))
+
+### 1.10 Author facts move from the cards to the loading screen
+**Decision:** A curated, source-verified library of facts about well-known authors plays during the wait, instead of facts about each pick on the cards.
+**Why:** Catalog lookups already cover the cards, and a 30–120 second wait needs something worth watching. General facts need no engine change, and verifying each once means the most visible moment can't show a false claim. ([spec §4h](./spec.md))
+
 ---
 
 ## 2. Question flow and UX
 
-*Designed in planning; the question-flow UI is the next build phase.*
+*2.1–2.9 designed in initial planning; 2.10–2.17 decided in v0 product planning, Sept 29. Not yet built.*
 
 ### 2.1 Tap-to-answer, with free text as a fallback
 **Decision:** No question requires typing.
@@ -104,6 +120,38 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 ### 2.9 Simple layout, rich moments
 **Decision:** Keep the flow simple; spend the visual budget on the card reveal and button "pop."
 **Why:** "Vibrant" and "uncluttered" pull against each other, so I resolved it on purpose. ([spec Flag B](./spec.md))
+
+### 2.10 Anchor entry uses autocomplete, and never blocks
+**Decision:** Suggest real books as the user types, with a "use what I typed" escape. Suggestions target under a second, and "Next" always works.
+**Why:** An exact book helps both the engine and the summary check. It runs while typing, so it never adds to the wait. The source (Open Library or Hardcover search) is chosen by measured speed. ([spec §4a](./spec.md))
+
+### 2.11 An AI-written taste summary is the engine's input
+**Decision:** One small model call turns the answers into a plain-language summary. That summary is both the engine's input and the read-back text.
+**Why:** Editing the read-back then edits exactly what the engine sees. The risk of a dropped or invented preference is handled like grounding: a code check for must-have answers, a template fallback, and its own eval set. ([spec §4f](./spec.md))
+
+### 2.12 The read-back appears only on the rejection path
+**Decision:** Don't show the taste summary before every run.
+**Why:** It keeps the main flow fast, and the code check makes misreads rare. Revisit if first-result 👎 rates run high. ([spec §4g](./spec.md))
+
+### 2.13 Reserve picks make swaps instant
+**Decision:** Each run returns 3 picks plus 2–3 grounded, verified reserves.
+**Why:** Every rerun is a 30–90 second wait. Reserves from the same run make "already read it" instant for a small extra cost. ([spec §4b](./spec.md))
+
+### 2.14 👎 records feedback and offers an optional swap
+**Decision:** A thumbs-down is always recorded and reveals "show me another"; it doesn't auto-swap.
+**Why:** Auto-swapping removes the chance to compare; record-only leaves the user at a dead end. ([spec §4c](./spec.md))
+
+### 2.15 The rejection path is capped at three reruns
+**Decision:** Clarify → read-back → widen, then offer "start over."
+**Why:** Each rerun is a full wait and a full cost, and three misses usually means a fresh start will work better. ([spec §4g](./spec.md))
+
+### 2.16 No ratings on cards in v0
+**Decision:** The card back shows the description, why it fits, the non-obvious angle, and a link, not ratings.
+**Why:** No reliable ratings source is confirmed, and thin rating counts on obscure books drag averages down, working against the product. ([spec §4c](./spec.md))
+
+### 2.17 A visual design pass before building screens
+**Decision:** Mock up the question screens and cards together before writing UI code.
+**Why:** They're the first impression and must feel engaging and satisfying. Designing them together keeps one visual language, and mockups are cheaper to change than code. ([spec §4j](./spec.md))
 
 ---
 
@@ -325,6 +373,18 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 **Decision:** Index experiment scripts, remove finished ones, fix the build.
 **Why:** A portfolio repo should be navigable. The cleanup also found the app couldn't build from a fresh copy. ([scratchpad index](../scratchpad/README.md))
 
+### 9.7 Plan the whole v0 flow before building any of it
+**Decision:** Sketch every screen and the engine changes each needs before building. Considered and set aside: shipping a text-box-only slice first, or starting with card design alone.
+**Why:** The pieces depend on each other: the read-back reuses the taste summary, swaps and reruns need the same engine change, and feedback and logs share storage. Planning end to end avoids building into a corner. ([spec §8](./spec.md))
+
+### 9.8 Foundation before any UI
+**Decision:** Hosting, log storage, and a spending guard come first.
+**Why:** A host's request-time limit or ban on file writes could change what's possible, and a public link without a spend cap risks a surprise bill. ([spec §8](./spec.md))
+
+### 9.9 Engine speed is a v0 workstream
+**Decision:** Set a latency target and trim the engine to meet it, measured on the deployed setup.
+**Why:** Waits of 30–120 seconds were fine while reading logs. They're a product problem once someone is watching a screen. ([spec §8](./spec.md))
+
 ---
 
 ## 10. Identity, privacy, and security
@@ -373,4 +433,4 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 - **One eval case never gets Hardcover candidates**: its input names no genre or mood to map.
 - **Replace or re-describe** a pick whose corrected description no longer fits.
 - **The question-flow stopping threshold** needs real usage data.
-- **Raw catalog data leaks into display text** (non-Latin author names, missing co-authors). A card-UX issue for the next phase.
+- **Raw catalog data leaks into display text** (non-Latin author names, missing co-authors). Scheduled: card-ready output in [spec §4b](./spec.md).

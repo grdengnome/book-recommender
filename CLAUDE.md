@@ -10,9 +10,9 @@ An AI book recommender whose core problem is resisting the model's pull toward f
 
 ## Current build priority
 
-**The v0 engine is complete** (Sept 2026), with known limitations documented in `docs/decisions.md` §12. The next phase is being planned; the question-flow and card UI is the likely candidate.
+**The v0 engine is complete** (Sept 2026). The full v0 product is designed (`docs/spec.md` §4) with a phased build plan (`docs/spec.md` §8). Next up: Phase 1, the foundation (hosting, log storage, spending guard).
 
-Do not start building UI (question flow, cards, cover images) until explicitly told to.
+Build phases in order. Don't start UI (question flow, cards, cover images) until the foundation and the visual design pass are done and you're explicitly told to.
 
 ## How the engine works
 
@@ -26,7 +26,7 @@ One API route, `app/api/recommend/route.ts`: POST `{ tasteDescription }` → `{ 
 ## Rules the code enforces (don't weaken them)
 
 - **Picks come only from the retrieved pools.** Checked in code; a miss retries the whole generation (max 3 attempts), then returns a clean 502. Never add a fallback to the model's own knowledge.
-- **The model never sees ranking data.** Candidates are shuffled, with scores, rank positions, and catalog IDs stripped. Don't add popularity or relevance fields to what the model sees.
+- **The model sees only title, author, and subjects.** Candidates are shuffled; scores, rank positions, catalog source, and IDs stay internal. Don't add popularity, relevance, or source fields to what the model sees.
 - **Tag selection never sees tag counts.** The tag mapper gets names only, shuffled.
 
 ## Stack & conventions
@@ -81,8 +81,7 @@ One entry per session in `docs/progress-log.md`, written at session close:
 
 ## Open questions (do not resolve unilaterally)
 
-- Exact wording for each rotating phrasing pool.
-- The threshold for the "confidence isn't improving" guardrail; needs real usage data.
-- Engine-level open questions are listed in `docs/decisions.md` §12.
+- Product-level open questions: `docs/spec.md` "Still open".
+- Engine-level open questions: `docs/decisions.md` §12.
 
 Flag these rather than picking an answer.
