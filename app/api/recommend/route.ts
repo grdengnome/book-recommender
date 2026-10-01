@@ -19,6 +19,9 @@ import {
 import { formatPickMetadata, lookupPickMetadata } from "@/lib/verify/lookupPickMetadata";
 import { checkPickDescriptions, formatPickCheck } from "@/lib/verify/checkPickDescriptions";
 
+// Engine runs take up to ~2 min; 300s is the Vercel Hobby maximum.
+export const maxDuration = 300;
+
 const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
 const MODEL = "claude-sonnet-5";
 
