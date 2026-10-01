@@ -214,7 +214,7 @@ A second, taste-shaped pool built from reader-applied tags. Fetched once per req
 
 ## 8. Build plan (v0)
 
-1. **Foundation:** choose hosting and confirm its request-time limit (engine runs take up to ~2 minutes); move logs to a hosted data store; add a rate limit and monthly spend cap.
+1. **Foundation:** choose hosting and confirm its request-time limit (engine runs take up to ~2 minutes); move logs to a hosted data store; add a rate limit and monthly spend cap. (Hosting: Vercel Hobby, done Sept 30.)
 2. **Visual design pass:** mockups of the question screens and cards together (§4j).
 3. **Results:** cards, loading screen, error states; engine reserves and card-ready output.
 4. **Question flow:** backbone and follow-ups, anchor autocomplete, taste summary with its check and eval set, the "enough signal?" call.
@@ -227,5 +227,4 @@ A second, taste-shaped pool built from reader-applied tags. Fetched once per req
 - Exact wording for each phrasing pool beyond the drafts in `question-bank.md`.
 - The "confidence isn't improving" guardrail threshold; needs usage data.
 - Author facts: famous authors only, or a mix with lesser-known ones.
-- Hosting provider (decided in step 1 of §8).
 - Engine-level open questions: [`decisions.md` §12](./decisions.md#12-open-questions-im-carrying).

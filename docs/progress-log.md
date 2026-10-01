@@ -533,3 +533,20 @@ Ran the identical `cult novel` query against Open Library side by side for direc
 1. Phase 1, foundation: choose hosting and confirm its request-time limit (engine runs take up to ~2 minutes); move logs to a hosted data store; add a rate limit and monthly spend cap.
 2. Phase 2: the visual design pass (question screens and cards together).
 3. Watch for the GitHub Support reply on the PR-ref purge.
+
+---
+
+## September 30, 2026 — Hosted on Vercel, privately
+
+**Conclusion:** The engine runs on Vercel's free (Hobby) plan, locked behind Vercel login, using a spend-capped API key. First live request: 200 in 19s. Stays private until the data store and rate limit exist.
+
+**Hosting:** Chose Vercel Hobby (300s functions, built for Next.js, PR preview links, can't bill). Netlify ruled out (60s limit); Render/Railway cost money or sleep. Hobby is non-commercial; revisit if the affiliate link or a real launch needs Pro.
+
+**Setup:** Console workspace `book-recommender-prod` with a $20/month cap and alert, its key only in Vercel. Deployment Protection on all deployments; both keys stored as Secrets. PR #8 set `maxDuration = 300`, tested on its preview before merging.
+
+**Found:** The route returns `recommendations` as raw model text (JSON wrapped in code-fence markers), not structured data. Fix before cards (spec §4b).
+
+**Next:**
+1. Choose a data store; move file logs there; add a per-visitor rate limit.
+2. Then open the site publicly and start Phase 2 (visual design pass).
+3. Watch for the GitHub Support reply on the PR-ref purge.

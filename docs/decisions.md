@@ -1,6 +1,6 @@
 # Decision Log
 
-*Covers decisions through the v0 engine and v0 product planning (September 29, 2026). Build-phase decisions will be added as they're made.*
+*Covers decisions through the v0 engine, v0 product planning, and the start of the build (September 30, 2026). Further build decisions will be added as they're made.*
 
 The product and architecture decisions behind this recommender, and the paths I rejected. The [progress log](./progress-log.md) is the session-by-session diary; this file is the story told by decision. Each entry gives the decision and why, with a link to the full detail.
 
@@ -385,6 +385,14 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 **Decision:** Set a latency target and trim the engine to meet it, measured on the deployed setup.
 **Why:** Waits of 30–120 seconds were fine while reading logs. They're a product problem once someone is watching a screen. ([spec §8](./spec.md))
 
+### 9.10 Host on Vercel's free plan
+**Decision:** Vercel Hobby, with the recommend route's limit set to 300 seconds.
+**Why:** Netlify's 60-second limit would force a redesign, and Render/Railway cost money or sleep when idle. Vercel is built for Next.js, gives every PR a preview link, and the free plan can't run up a bill. Its non-commercial terms are fine for a portfolio project; move to Pro if this becomes a product. ([progress log, Sep 30](./progress-log.md))
+
+### 9.11 Deploy privately first
+**Decision:** All deployments stay behind Vercel login until the rate limit exists.
+**Why:** The moment it deploys, the engine is a public endpoint that spends money per call. ([progress log, Sep 30](./progress-log.md))
+
 ---
 
 ## 10. Identity, privacy, and security
@@ -400,6 +408,10 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 ### 10.3 Secrets never pass through chat or terminal
 **Decision:** Keys go straight into a local env file; tokens are read-only.
 **Why:** AI tools confirm saves by key name only, so secrets never appear in a transcript. ([CLAUDE.md](../CLAUDE.md))
+
+### 10.4 Cap spending at the API, not the host
+**Decision:** A dedicated Console workspace with a $20 monthly limit and an alert; its key is used only by Vercel, separate from the development key.
+**Why:** On Vercel's free plan, hosting can't cost anything; the real risk is model calls. A hard cap at the source is the simplest guarantee. ([progress log, Sep 30](./progress-log.md))
 
 ---
 

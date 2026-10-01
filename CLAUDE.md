@@ -10,7 +10,7 @@ An AI book recommender whose core problem is resisting the model's pull toward f
 
 ## Current build priority
 
-**The v0 engine is complete** (Sept 2026). The full v0 product is designed (`docs/spec.md` §4) with a phased build plan (`docs/spec.md` §8). Next up: Phase 1, the foundation (hosting, log storage, spending guard).
+**The v0 engine is complete** (Sept 2026). The full v0 product is designed (`docs/spec.md` §4) with a phased build plan (`docs/spec.md` §8). Phase 1 in progress: hosted on Vercel (private). Next: a data store for logs, feedback, and the rate limit.
 
 Build phases in order. Don't start UI (question flow, cards, cover images) until the foundation and the visual design pass are done and you're explicitly told to.
 
@@ -35,6 +35,7 @@ One API route, `app/api/recommend/route.ts`: POST `{ tasteDescription }` → `{ 
 - Plain `fetch` to the Anthropic `/v1/messages` endpoint; no SDK unless there's a concrete need.
 - Env vars in `.env.local` (gitignored): `ANTHROPIC_API_KEY` (required), `HARDCOVER_API_TOKEN` (optional; without it the engine runs on Open Library alone).
 - No database. v0 is stateless by design.
+- Hosted on Vercel (Hobby plan), project `book-recommender` under `grdengnome`. Deployment Protection is on for all deployments. Production keys are Vercel Secrets (separate, spend-capped Console workspace); never copy them into the repo or chat. The recommend route sets `maxDuration = 300`.
 - `scratchpad/` holds experiment scripts and two live logs the app writes to (`query-log.json`, `hardcover-failure-log.json`). It's excluded from the app's type check; see `scratchpad/README.md` before deleting anything there.
 
 ## Security
