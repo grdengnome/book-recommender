@@ -214,8 +214,8 @@ A second, taste-shaped pool built from reader-applied tags. Fetched once per req
 
 ## 8. Build plan (v0)
 
-1. **Foundation:** choose hosting and confirm its request-time limit (engine runs take up to ~2 minutes); move logs to a hosted data store; add a rate limit and monthly spend cap. (Hosting: Vercel Hobby, done Sept 30.)
-2. **Visual design pass:** mockups of the question screens and cards together (§4j).
+1. **Foundation:** choose hosting and confirm its request-time limit (engine runs take up to ~2 minutes); add a monthly spend cap. (Hosting: Vercel Hobby, done Sept 30.) The hosted data store for logs and the rate limit are deferred to just before public launch.
+2. **Visual design pass (in progress):** mockups of the question screens and cards together (§4j). Design system: [`design.md`](./design.md).
 3. **Results:** cards, loading screen, error states; engine reserves and card-ready output.
 4. **Question flow:** backbone and follow-ups, anchor autocomplete, taste summary with its check and eval set, the "enough signal?" call.
 5. **Feedback loop:** per-card actions, rejection path, exclude list, widen mode, feedback logging.

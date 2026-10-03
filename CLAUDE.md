@@ -7,12 +7,13 @@ Read automatically by Claude Code at the start of every session in this repo. De
 An AI book recommender whose core problem is resisting the model's pull toward famous, obvious picks. Start here:
 - `docs/decisions.md`: every product and architecture decision and why. Check it before questioning something that looks odd; it's usually deliberate.
 - `docs/spec.md`: product spec. `docs/question-bank.md`: question wording and flow mechanics.
+- `docs/design.md`: the design system. All UI follows its shared structure and theme rules.
 
 ## Current build priority
 
-**The v0 engine is complete** (Sept 2026). The full v0 product is designed (`docs/spec.md` §4) with a phased build plan (`docs/spec.md` §8). Phase 1 in progress: hosted on Vercel (private). Next: a data store for logs, feedback, and the rate limit.
+**The v0 engine is complete** (Sept 2026). The full v0 product is designed (`docs/spec.md` §4) with a phased build plan (`docs/spec.md` §8). Phase 1: hosted on Vercel (private); the data store and rate limit are deferred to just before going public. Phase 2 (visual design) in progress: five themes approved for the question and reveal screens; remaining screens still to design.
 
-Build phases in order. Don't start UI (question flow, cards, cover images) until the foundation and the visual design pass are done and you're explicitly told to.
+Don't build UI screens until the visual design pass is approved and you're explicitly told to. All UI follows `docs/design.md`. The data store and rate limit must be in place before the site is made public.
 
 ## How the engine works
 

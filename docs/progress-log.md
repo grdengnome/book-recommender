@@ -550,3 +550,23 @@ Ran the identical `cult novel` query against Open Library side by side for direc
 1. Choose a data store; move file logs there; add a per-visitor rate limit.
 2. Then open the site publicly and start Phase 2 (visual design pass).
 3. Watch for the GitHub Support reply on the PR-ref purge.
+
+---
+
+## October 3, 2026 — Visual design pass begun; five themes approved
+
+**Conclusion:** Reordered the plan: design now, data store and rate limit just before going public (nothing uses them while the site is private with no screens). The design brief is set, and five rotating themes are approved for the question and reveal screens. Written up in `docs/design.md`; decisions in `decisions.md` §13.
+
+**Brief:** For readers first, aiming for a cult following. Feeling: Epic, Clean, Colorful. Working name: Worm. "Clean, never quiet": few words per screen, 7–8 out of 10 energy, with the reveal as the 10.
+
+**Themes:** The app opens in a different genre theme each visit, on one shared layout: Bookshop, Fantasy, Superhero, Mystery, Sci-fi. Each theme changes fonts, shapes, fields, and wording, not just color. Random per visit; a user light/dark toggle is deferred. A small worm, costumed per theme, appears on every theme's question screen as a brand detail.
+
+**Reveal flow:** One book per screen with the cover dominant, then all three together, then a detail page per book.
+
+**Mockups:** Question and single-book reveal in all five themes; "all three" and detail in Bookshop only. Placeholder covers; no motion yet.
+
+**Next:**
+1. Design the remaining screens: follow-up questions, loading, rejection path, errors; then "all three" and detail in the other four themes.
+2. Design motion: the reveal animation and button feedback.
+3. Engine: return structured, card-ready picks (spec §4b).
+4. Watch for the GitHub Support reply on the PR-ref purge.

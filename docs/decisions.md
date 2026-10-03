@@ -1,6 +1,6 @@
 # Decision Log
 
-*Covers decisions through the v0 engine, v0 product planning, and the start of the build (September 30, 2026). Further build decisions will be added as they're made.*
+*Covers decisions through the v0 engine, v0 product planning, and the start of the build (October 3, 2026). Further build decisions will be added as they're made.*
 
 The product and architecture decisions behind this recommender, and the paths I rejected. The [progress log](./progress-log.md) is the session-by-session diary; this file is the story told by decision. Each entry gives the decision and why, with a link to the full detail.
 
@@ -24,6 +24,7 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 10. [Identity, privacy, and security](#10-identity-privacy-and-security)
 11. [How I work with AI tools](#11-how-i-work-with-ai-tools)
 12. [Open questions I'm carrying](#12-open-questions-im-carrying)
+13. [Visual design](#13-visual-design)
 
 ---
 
@@ -446,3 +447,47 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 - **Replace or re-describe** a pick whose corrected description no longer fits.
 - **The question-flow stopping threshold** needs real usage data.
 - **Raw catalog data leaks into display text** (non-Latin author names, missing co-authors). Scheduled: card-ready output in [spec §4b](./spec.md).
+
+---
+
+## 13. Visual design
+
+### 13.1 Design before data store
+**Decision:** Start the visual design pass now; move the data store and rate limit to just before the site goes public.
+**Why:** Nothing uses the data store while the site is private and has no screens. Deploying already surfaced the hosting constraints the foundation phase was meant to find. ([progress log, Oct 3](./progress-log.md))
+
+### 13.2 Readers first, not recruiters
+**Decision:** Design for the book nerd who cares about a book's whole presentation; aim for a cult following.
+**Why:** A product built for its real audience makes a better portfolio piece than a demo built for reviewers. ([design §1](./design.md))
+
+### 13.3 Clean, never quiet
+**Decision:** Few words and one idea per screen, at 7–8 out of 10 energy; the reveal is the 10.
+**Why:** My first framing ("calm canvas, big moments") read as stock. Every screen needs personality; restraint comes from word count and focus, not muted color. ([design §2](./design.md))
+
+### 13.4 Rotating themes on one shared structure
+**Decision:** The app opens in a different genre theme each visit. Every theme uses the same layout; only the skin changes (fonts, colors, shapes, art, wording).
+**Why:** Rotation keeps the app fresh. A shared structure means each screen is built once, and it still feels like one product. ([design §3](./design.md))
+
+### 13.5 Five themes at launch
+**Decision:** Bookshop, Fantasy, Superhero, Mystery, Sci-fi. Horror, historical, and romance come later.
+**Why:** Five is enough for variety while each gets real care; a weak theme hurts more than a missing one. Horror was held back as the most likely to feel wrong on the wrong request. ([design §4](./design.md))
+
+### 13.6 A theme changes everything, not just color
+**Decision:** Fonts, button shapes, input fields, cards, and wording all follow the theme.
+**Why:** Early versions felt like one template recolored. Distinct shapes and voice are what make each theme feel like its genre. ([design §4](./design.md))
+
+### 13.7 Themes are decoration, picked at random
+**Decision:** A theme doesn't signal the genre of the picks. Skinning each reveal to its book's genre is a later step.
+**Why:** Random rotation is simple and needs no engine change. Matched reveals need a genre label per pick. ([design §5](./design.md))
+
+### 13.8 One book per reveal screen
+**Decision:** Reveal each pick on its own screen with the cover dominant, then show all three together, with a detail page per book.
+**Why:** A single cover gets full attention, which makes each pick an event; comparison comes after. ([design §3](./design.md))
+
+### 13.9 Light or dark by theme; the toggle waits
+**Decision:** Each theme is whichever mode suits it. No user light/dark toggle in v0.
+**Why:** A toggle would double five themes into ten skins. ([design §4](./design.md))
+
+### 13.10 The worm as a recurring brand detail
+**Decision:** One small worm on key screens in every theme, costumed for the theme.
+**Why:** It ties the themes together as one brand without a heavy logo. ([design §6](./design.md))

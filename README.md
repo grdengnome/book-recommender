@@ -60,6 +60,7 @@ curl -X POST localhost:3000/api/recommend \
 ## Docs
 
 - [`docs/decisions.md`](./docs/decisions.md): every product and architecture decision, what was rejected, and why
+- [`docs/design.md`](./docs/design.md): the design system: brief, principles, and the five themes
 - [`docs/spec.md`](./docs/spec.md): product spec
 - [`docs/eval-set.md`](./docs/eval-set.md): rubric and test cases
 - [`docs/eval-log.md`](./docs/eval-log.md): quality findings from each eval run

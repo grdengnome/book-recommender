@@ -1,0 +1,115 @@
+# Design System
+
+*How Worm looks and why. Decisions behind it are in [`decisions.md`](./decisions.md) §13; what each screen does is in [`spec.md`](./spec.md) §4. Mockups live on the design canvas (private link, held by the owner). Last updated October 3, 2026.*
+
+---
+
+## 1. Brief
+
+- **Product name (working):** Worm / The Worm.
+- **For:** readers first. The book nerd who cares about the whole presentation of a book, not just the story.
+- **Feeling:** Epic, Clean, Colorful.
+- **The idea:** getting a book should feel like an event, in a world built from great book covers.
+
+## 2. Principles
+
+1. **Clean, never quiet.** Few words and one idea per screen, but every screen has personality. Regular screens run at about 7–8 out of 10 in energy; the reveal is the 10.
+2. **Covers are the art.** Book covers dominate wherever a book appears.
+3. **One world, varied screens.** The app opens in a different theme each visit. Themes share one structure, so it always feels like the same product.
+4. **Every part of a theme carries the theme.** Fonts, button shapes, input fields, cards, and wording all change with the theme, not just colors.
+5. **Storytelling framing.** Screens read like the opening of a story in that theme's genre.
+6. **The worm appears everywhere, subtly.** One small worm per key screen, dressed for the theme (see §6).
+
+**Avoid:** busy or wordy screens, saturation with no hierarchy, plain spreadsheet-style displays, generic stock illustration.
+
+## 3. Shared structure (identical in every theme)
+
+Themes never change what is on a screen or where it sits. They change how it looks.
+
+**Question screen, top to bottom:**
+1. Header: wordmark left, progress marker right.
+2. Scene: a themed illustration.
+3. Question: one sentence, in the theme's voice.
+4. Title field with a label.
+5. Up to two suggestions (cover thumbnail, title, author), plus "use what I typed."
+6. One primary button, pinned to the bottom.
+
+**Reveal screen (one book per screen), top to bottom:**
+1. Header: "one of three" marker.
+2. Cover: about 265 × 400 on a 390-wide phone, the largest element on the screen.
+3. Title, author, and a one-line "why it's for you."
+4. Two buttons: more detail (secondary), next pick (primary).
+
+**Then:** an "all three" screen with the covers together, and a book detail screen (cover, why it's for you, the story, the non-obvious angle, "find this book," and the three feedback actions).
+
+**Fixed rules:**
+- Phone first: designed at 390 × 844. Tap targets at least 44px.
+- Text contrast at least 4.5:1 (3:1 for text 24px and larger).
+- Real buttons, links, and labeled inputs, so the app works with a keyboard and screen readers.
+- The meaning of every question and button is the same in every theme; only the wording's flavor changes. If themed wording ever confuses, plain wording wins.
+
+## 4. The five launch themes
+
+Each theme is light or dark, whichever suits it. A user-facing light/dark toggle is deferred.
+
+| | Bookshop | Fantasy | Superhero | Mystery | Sci-fi |
+|---|---|---|---|---|---|
+| **Concept** | A cozy, stylish indie bookstore | An illuminated manuscript | A comic book | Film noir | A ship's console |
+| **Mode** | Light | Light page, dark reveal | Light | Dark | Dark |
+| **Display font** | Caveat Brush | Uncial Antiqua | Bangers | Limelight | Orbitron |
+| **Body font** | Bricolage Grotesque | Alegreya | Comic Neue | Special Elite | Share Tech Mono |
+| **Ground** | Cream `#F4E7CE`, wood `#6B3F1D` | Parchment `#F1E3C0`, night `#2A1B4A` | Yellow `#FFE14A`, cyan `#19B5E6` | Near-black `#0B0D12` | Deep navy `#060B14` |
+| **Ink** | `#2A211B` | `#2B1A12` | `#111111` | `#D9D4C7` | `#D8F6FA` |
+| **Accents** | Tomato `#C2371F`, mustard `#F2C230`, teal `#1F6F6B` | Crimson `#9B1C2E`, gold `#F2C230` | Red `#C91D22`, green `#3DBE6C` | Amber `#E8B04A` only | Orange `#FF6B2C`, cyan `#36D6E7` |
+| **Scene** | Wooden shelves, varied spines, face-out covers, plants | Castle and moon in an arched window | City skyline, searchlight signal | Rainy street, lamppost, figure in a hat | Ringed planet, rocket, stars |
+| **Question container** | Staff-pick card, tilted, thick outline | Illuminated capital and running text | Speech bubble in a panel | Title-card text over the scene | "Incoming transmission" panel, cut corners |
+| **Title field** | Outlined box | Ink underline, italic | Thick-outlined box | Thin underline, typewriter | Terminal prompt `>` |
+| **Primary button** | Solid block, hard offset shadow | Ribbon banner | Outlined block, hard shadow | Thin double-line frame | Angled key |
+| **Reveal treatment** | Cover on a shelf, starburst, staff-pick card | Cover in a gold arch, title on a ribbon | Splash page with a burst | Cover lit from above, blind shadows, rain | Cover in targeting brackets before a planet |
+| **Voice** | "Ask the bookseller" / "Turn the page" | "Once upon a time" / "Turn the page" | "Meanwhile, in the city..." / "To the rescue!" | "It was a dark and stormy night." / "Follow the lead" | "Incoming transmission" / "Launch" |
+
+**Texture rules per theme:**
+- **Bookshop:** 3px ink outlines, hard offset shadows, slight tilts on cards.
+- **Fantasy:** double-rule page border with corner jewels, arches, diamond bullets.
+- **Superhero:** 4px black outlines, halftone dots, caption boxes, bursts.
+- **Mystery:** near-monochrome, one amber accent, thin lines, rain. No stamps, tags, or pop-art devices.
+- **Sci-fi:** scanlines, cut-corner panels, bracket corners, segmented progress.
+
+## 5. Theme rotation
+
+- A theme is picked at random on each visit and stays for the whole session.
+- Themes are decoration: they don't imply the genre of the recommendations.
+- Later: skin each reveal to the genre of that pick (needs a genre label per pick from the engine).
+- Later themes: horror, historical, romance. Horror was held back because it's the most likely to feel wrong on the wrong request.
+
+## 6. The worm
+
+A small worm appears on key screens in every theme, as the brand's through-line. It is a supporting detail, never the focus.
+
+- **Bookshop:** peeking out between books on the shelf.
+- **Superhero:** flying over the skyline in a red cape.
+- **Fantasy:** on the hill beside the castle, in a wizard's hat.
+- **Mystery:** on the wet street near the lamppost, in a fedora.
+- **Sci-fi:** floating beside the rocket, in a bubble helmet.
+
+So far the worm appears on each theme's question screen (and on Bookshop's shelf). Its place on the other screens is still to design.
+
+Rules: one worm per screen at most; drawn as a single thick wavy line with an eye; costumed with one prop per theme; never on the book cover itself.
+
+## 7. Status
+
+| Screen | Bookshop | Fantasy | Superhero | Mystery | Sci-fi |
+|---|---|---|---|---|---|
+| Question | Mocked | Mocked | Mocked | Mocked | Mocked |
+| Reveal, one book | Mocked | Mocked | Mocked | Mocked | Mocked |
+| All three | Mocked | To do | To do | To do | To do |
+| Book detail | Mocked | To do | To do | To do | To do |
+| Follow-up questions, loading, rejection path, errors | To do | To do | To do | To do | To do |
+
+Mockups use placeholder covers and bracketed placeholder text. Real covers come from the catalogs (spec §4c). Motion (the reveal animation, button feedback, page-turn transitions) is not yet designed.
+
+## 8. Building it
+
+- Build each screen once against the shared structure. A theme is a set of values (fonts, colors, shapes, scene art, wording) applied to that structure.
+- Adding a theme must not require changing any screen's layout.
+- Fonts above are all on Google Fonts.
