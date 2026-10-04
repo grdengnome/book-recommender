@@ -27,9 +27,9 @@
 Themes never change what is on a screen or where it sits. They change how it looks.
 
 **Question screen, top to bottom:**
-1. Header: wordmark left, progress marker right.
+1. Header: wordmark left. No question counter, because the number of questions varies.
 2. Scene: a themed illustration.
-3. Question: one sentence, in the theme's voice.
+3. Question: one sentence, in the theme's voice. It is the largest text on the screen, with one key phrase in the accent colour and a quieter lead-in line above.
 4. Title field with a label.
 5. Up to two suggestions (cover thumbnail, title, author), plus "use what I typed."
 6. One primary button, pinned to the bottom.
@@ -40,7 +40,24 @@ Themes never change what is on a screen or where it sits. They change how it loo
 3. Title, author, and a one-line "why it's for you."
 4. Two buttons: more detail (secondary), next pick (primary).
 
-**Then:** an "all three" screen with the covers together, and a book detail screen (cover, why it's for you, the story, the non-obvious angle, "find this book," and the three feedback actions).
+**Follow-up question screen:** same as the question screen, with a shorter scene and up to four tappable answers plus a free-text "say it your way" field in place of the title field.
+
+**Loading screen, top to bottom:**
+1. Header.
+2. Scene (the richest scene in the theme; this is the longest wait).
+3. The reflect-back of what the user asked for, shown as an object in the scene (Café Bookshop: an order ticket hanging from the shelf).
+4. Headline and an honest wait estimate ("About a minute or two").
+5. One author fact, unboxed, with the author's name.
+6. Progress indicator.
+Each section gets clear space around it so nothing reads as a wall of text.
+
+**Rejection read-back screen:** question ("Did I hear you right?"), the taste summary on the same object used on the loading screen, and two buttons (fix it, look again). The first rejection step reuses the follow-up question layout.
+
+**Error screen:** scene, headline, one plain sentence on what went wrong, and two buttons (start over, try again).
+
+**Attention signal (rejection and error screens):** these screens stay on brand but signal that something needs the user. Each theme has one attention colour used only here (Café Bookshop: terracotta `#E8744B`), on the highlighted phrase, a stripe on the question card, and a small header chip ("One more thing", "Hiccup"). The scene's lighting also changes: dimmed for rejection, off for errors. Fonts do not change. Colour is never the only signal; the chip wording and scene carry it too.
+
+**Reveal follow-ons:** an "all three" screen with the covers together, and a book detail screen (cover, why it's for you, the story, the non-obvious angle, "find this book," and the three feedback actions).
 
 **Fixed rules:**
 - Phone first: designed at 390 × 844. Tap targets at least 44px.
@@ -80,7 +97,7 @@ Each theme is light or dark, whichever suits it. A user-facing light/dark toggle
 - A theme is picked at random on each visit and stays for the whole session.
 - Themes are decoration: they don't imply the genre of the recommendations.
 - Later: skin each reveal to the genre of that pick (needs a genre label per pick from the engine).
-- **Café Bookshop is the home theme.** Screens outside a themed session (settings, profile, "How it works", errors) use it. It should support the other themes, not overshadow them. Open: whether it also stays in the random rotation.
+- **Café Bookshop is the home theme.** Screens outside a themed session (settings, profile, "How it works", and errors that happen outside a session) use it. Errors inside a themed session use that session's theme. It should support the other themes, not overshadow them. Open: whether it also stays in the random rotation.
 - Later: shelf items that change to reflect the reader (for example, covers from their last session). Needs the app to remember a visitor, so not v0.
 - Later themes: horror, historical, romance. Horror was held back because it's the most likely to feel wrong on the wrong request.
 
@@ -94,7 +111,7 @@ A small worm appears on key screens in every theme, as the brand's through-line.
 - **Mystery:** on the wet street near the lamppost, in a fedora.
 - **Sci-fi:** floating beside the rocket, in a bubble helmet.
 
-So far the worm appears on each theme's question screen (and on all four Café Bookshop screens). Its place on the other screens is still to design.
+So far the worm appears on each theme's question screen (and on all eight Café Bookshop screens). Its place on the other screens is still to design.
 
 Rules: one worm per screen at most; drawn as a single thick wavy line with an eye; costumed with one prop per theme; never on the book cover itself.
 
@@ -103,12 +120,15 @@ Rules: one worm per screen at most; drawn as a single thick wavy line with an ey
 | Screen | Café Bookshop | Fantasy | Superhero | Mystery | Sci-fi |
 |---|---|---|---|---|---|
 | Question | Mocked | Mocked | Mocked | Mocked | Mocked |
+| Follow-up question | Mocked | To do | To do | To do | To do |
+| Loading | Mocked | To do | To do | To do | To do |
 | Reveal, one book | Mocked | Mocked | Mocked | Mocked | Mocked |
 | All three | Mocked | To do | To do | To do | To do |
 | Book detail | Mocked | To do | To do | To do | To do |
-| Follow-up questions, loading, rejection path, errors | To do | To do | To do | To do | To do |
+| Rejection read-back | Mocked | To do | To do | To do | To do |
+| Error | Mocked | To do | To do | To do | To do |
 
-Mockups use placeholder covers and bracketed placeholder text. Real covers come from the catalogs (spec §4c). Motion (the reveal animation, button feedback, page-turn transitions) is not yet designed.
+Mockups use placeholder covers and bracketed placeholder text. Real covers come from the catalogs (spec §4c). Motion is not yet designed. Priorities when it is: the reveal, a satisfying "magical" answer-button press, and staged fade-ins (question before answers; loading sections one at a time) to guide the eye.
 
 ## 8. Building it
 

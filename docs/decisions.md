@@ -498,5 +498,25 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 **Why:** A real bookstore-café photo gave a warmer, more specific look (low light, vintage browns, brick, rain) that fits the cozy feel readers love. ([design §4](./design.md))
 
 ### 13.12 Café Bookshop is the home theme
-**Decision:** Screens outside a themed session (settings, profile, How it works, errors) use Café Bookshop.
+**Decision:** Screens outside a themed session (settings, profile, How it works, and errors that happen outside a session) use Café Bookshop. Errors inside a themed session use that session's theme (13.17).
 **Why:** It gives the app one consistent backbone without overshadowing the rotating themes. ([design §5](./design.md))
+
+### 13.13 No question counter
+**Decision:** Question screens show no question counter or total.
+**Why:** The flow asks a varying number of questions, so a total would be a promise it can't keep. ([design §3](./design.md))
+
+### 13.14 The question is the visual focus
+**Decision:** The question is the largest text on the screen, with one highlighted phrase and a quieter lead-in line above.
+**Why:** The user should read the question first. ([design §3](./design.md))
+
+### 13.15 An honest, uncrowded loading screen
+**Decision:** The loading screen states an honest wait estimate and gives each section clear space. The estimate should shrink once the engine is faster.
+**Why:** A stated wait feels shorter, and crowded text overwhelms. ([design §3](./design.md))
+
+### 13.16 An attention signal for rejection and error screens
+**Decision:** Rejection and error screens use one dedicated attention colour per theme, a header chip, and changed scene lighting. Fonts stay the same.
+**Why:** It signals "something needs you" while staying on brand; a font change reads as a bug. ([design §3](./design.md))
+
+### 13.17 Every screen in every theme
+**Decision:** Each theme gets its own version of every screen, and a session stays in one theme throughout.
+**Why:** Themes should feel seamless, not fall back to the café mid-session. ([design §5](./design.md))

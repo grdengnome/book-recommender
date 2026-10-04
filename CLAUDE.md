@@ -11,7 +11,7 @@ An AI book recommender whose core problem is resisting the model's pull toward f
 
 ## Current build priority
 
-**The v0 engine is complete** (Sept 2026). The full v0 product is designed (`docs/spec.md` §4) with a phased build plan (`docs/spec.md` §8). Phase 1: hosted on Vercel (private); the data store and rate limit are deferred to just before going public. Phase 2 (visual design) in progress: five themes approved for the question and reveal screens; remaining screens still to design.
+**The v0 engine is complete** (Sept 2026). The full v0 product is designed (`docs/spec.md` §4) with a phased build plan (`docs/spec.md` §8). Phase 1: hosted on Vercel (private); the data store and rate limit are deferred to just before going public. Phase 2 (visual design) in progress: Café Bookshop (the home theme) is mocked for all eight screens; the other four themes have the question and reveal screens, with their remaining screens still to design.
 
 Don't build UI screens until the visual design pass is approved and you're explicitly told to. All UI follows `docs/design.md`. The data store and rate limit must be in place before the site is made public.
 

@@ -570,3 +570,20 @@ Ran the identical `cult novel` query against Open Library side by side for direc
 2. Design motion: the reveal animation and button feedback.
 3. Engine: return structured, card-ready picks (spec §4b).
 4. Watch for the GitHub Support reply on the PR-ref purge.
+
+---
+
+## October 4, 2026 — Café Bookshop mocked for all eight screens
+
+**Conclusion:** Café Bookshop replaced Bookshop and became the home theme (commit 7d15149). It is now mocked for all eight screens: question, follow-up, loading, reveal, all three, detail, rejection read-back, and error. The rules settled for those screens are in `docs/design.md` §3; decisions in `decisions.md` §13.13–13.17.
+
+**Later idea logged:** shelf items that reflect the reader (needs the app to remember a visitor, so not v0).
+
+**Open:** whether the loading progress bar reports real engine stages or loops; whether Café Bookshop stays in the random rotation.
+
+**Next:**
+1. Extend the other four themes to the same eight screens, one theme at a time, starting with Mystery.
+2. Motion pass: the reveal, the answer-button press, staged fade-ins.
+3. Engine: return structured picks.
+4. Before going public: data store and rate limit.
+5. Watch for the GitHub Support reply on the PR-ref purge.
