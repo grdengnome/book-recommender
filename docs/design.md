@@ -1,6 +1,6 @@
 # Design System
 
-*How Worm looks and why. Decisions behind it are in [`decisions.md`](./decisions.md) §13; what each screen does is in [`spec.md`](./spec.md) §4. Mockups live on the design canvas (private link, held by the owner). Last updated October 3, 2026.*
+*How Worm looks and why. Decisions behind it are in [`decisions.md`](./decisions.md) §13; what each screen does is in [`spec.md`](./spec.md) §4. Mockups live on the design canvas (private link, held by the owner). Last updated October 4, 2026.*
 
 ---
 
@@ -15,7 +15,7 @@
 
 1. **Clean, never quiet.** Few words and one idea per screen, but every screen has personality. Regular screens run at about 7–8 out of 10 in energy; the reveal is the 10.
 2. **Covers are the art.** Book covers dominate wherever a book appears.
-3. **One world, varied screens.** The app opens in a different theme each visit. Themes share one structure, so it always feels like the same product.
+3. **One world, varied screens.** The app opens in a different theme each visit. Themes share one structure, so it always feels like the same product. The Café Bookshop is the home theme behind them all (see §5).
 4. **Every part of a theme carries the theme.** Fonts, button shapes, input fields, cards, and wording all change with the theme, not just colors.
 5. **Storytelling framing.** Screens read like the opening of a story in that theme's genre.
 6. **The worm appears everywhere, subtly.** One small worm per key screen, dressed for the theme (see §6).
@@ -52,24 +52,24 @@ Themes never change what is on a screen or where it sits. They change how it loo
 
 Each theme is light or dark, whichever suits it. A user-facing light/dark toggle is deferred.
 
-| | Bookshop | Fantasy | Superhero | Mystery | Sci-fi |
+| | Café Bookshop | Fantasy | Superhero | Mystery | Sci-fi |
 |---|---|---|---|---|---|
-| **Concept** | A cozy, stylish indie bookstore | An illuminated manuscript | A comic book | Film noir | A ship's console |
-| **Mode** | Light | Light page, dark reveal | Light | Dark | Dark |
-| **Display font** | Caveat Brush | Uncial Antiqua | Bangers | Limelight | Orbitron |
-| **Body font** | Bricolage Grotesque | Alegreya | Comic Neue | Special Elite | Share Tech Mono |
-| **Ground** | Cream `#F4E7CE`, wood `#6B3F1D` | Parchment `#F1E3C0`, night `#2A1B4A` | Yellow `#FFE14A`, cyan `#19B5E6` | Near-black `#0B0D12` | Deep navy `#060B14` |
-| **Ink** | `#2A211B` | `#2B1A12` | `#111111` | `#D9D4C7` | `#D8F6FA` |
-| **Accents** | Tomato `#C2371F`, mustard `#F2C230`, teal `#1F6F6B` | Crimson `#9B1C2E`, gold `#F2C230` | Red `#C91D22`, green `#3DBE6C` | Amber `#E8B04A` only | Orange `#FF6B2C`, cyan `#36D6E7` |
-| **Scene** | Wooden shelves, varied spines, face-out covers, plants | Castle and moon in an arched window | City skyline, searchlight signal | Rainy street, lamppost, figure in a hat | Ringed planet, rocket, stars |
-| **Question container** | Staff-pick card, tilted, thick outline | Illuminated capital and running text | Speech bubble in a panel | Title-card text over the scene | "Incoming transmission" panel, cut corners |
-| **Title field** | Outlined box | Ink underline, italic | Thick-outlined box | Thin underline, typewriter | Terminal prompt `>` |
-| **Primary button** | Solid block, hard offset shadow | Ribbon banner | Outlined block, hard shadow | Thin double-line frame | Angled key |
-| **Reveal treatment** | Cover on a shelf, starburst, staff-pick card | Cover in a gold arch, title on a ribbon | Splash page with a burst | Cover lit from above, blind shadows, rain | Cover in targeting brackets before a planet |
-| **Voice** | "Ask the bookseller" / "Turn the page" | "Once upon a time" / "Turn the page" | "Meanwhile, in the city..." / "To the rescue!" | "It was a dark and stormy night." / "Follow the lead" | "Incoming transmission" / "Launch" |
+| **Concept** | A cozy bookstore café on a rainy day | An illuminated manuscript | A comic book | Film noir | A ship's console |
+| **Mode** | Light question, dark reveal | Light page, dark reveal | Light | Dark | Dark |
+| **Display font** | Barlow Condensed | Uncial Antiqua | Bangers | Limelight | Orbitron |
+| **Body font** | Courier Prime | Alegreya | Comic Neue | Special Elite | Share Tech Mono |
+| **Ground** | Whitewashed brick `#E9E2D4`, dark brick `#5A2A1C`, walnut `#4A2C1A` | Parchment `#F1E3C0`, night `#2A1B4A` | Yellow `#FFE14A`, cyan `#19B5E6` | Near-black `#0B0D12` | Deep navy `#060B14` |
+| **Ink** | `#171311` on light, `#F3EAD8` on dark | `#2B1A12` | `#111111` | `#D9D4C7` | `#D8F6FA` |
+| **Accents** | Amber glow `#F2A23A`, fern `#4F7F45`, teal `#3E7C7A` | Crimson `#9B1C2E`, gold `#F2C230` | Red `#C91D22`, green `#3DBE6C` | Amber `#E8B04A` only | Orange `#FF6B2C`, cyan `#36D6E7` |
+| **Scene** | Walnut shelves on iron brackets, brick wall, rainy window, lamp, jars, mugs, ferns, comic covers as colour pops | Castle and moon in an arched window | City skyline, searchlight signal | Rainy street, lamppost, figure in a hat | Ringed planet, rocket, stars |
+| **Question container** | Black poster card, cream type | Illuminated capital and running text | Speech bubble in a panel | Title-card text over the scene | "Incoming transmission" panel, cut corners |
+| **Title field** | Cream label, typewriter text | Ink underline, italic | Thick-outlined box | Thin underline, typewriter | Terminal prompt `>` |
+| **Primary button** | Walnut price tag | Ribbon banner | Outlined block, hard shadow | Thin double-line frame | Angled key |
+| **Reveal treatment** | Cover on a walnut shelf, amber glow on dark brick, jar-label card | Cover in a gold arch, title on a ribbon | Splash page with a burst | Cover lit from above, blind shadows, rain | Cover in targeting brackets before a planet |
+| **Voice** | "Rainy day. Pull up a chair." / "Turn the page" | "Once upon a time" / "Turn the page" | "Meanwhile, in the city..." / "To the rescue!" | "It was a dark and stormy night." / "Follow the lead" | "Incoming transmission" / "Launch" |
 
 **Texture rules per theme:**
-- **Bookshop:** 3px ink outlines, hard offset shadows, slight tilts on cards.
+- **Café Bookshop:** low warm light, vintage browns, brick texture, 2px ink outlines, price-tag and jar-label shapes, organized clutter of small objects. Colour pops come only from covers.
 - **Fantasy:** double-rule page border with corner jewels, arches, diamond bullets.
 - **Superhero:** 4px black outlines, halftone dots, caption boxes, bursts.
 - **Mystery:** near-monochrome, one amber accent, thin lines, rain. No stamps, tags, or pop-art devices.
@@ -80,25 +80,27 @@ Each theme is light or dark, whichever suits it. A user-facing light/dark toggle
 - A theme is picked at random on each visit and stays for the whole session.
 - Themes are decoration: they don't imply the genre of the recommendations.
 - Later: skin each reveal to the genre of that pick (needs a genre label per pick from the engine).
+- **Café Bookshop is the home theme.** Screens outside a themed session (settings, profile, "How it works", errors) use it. It should support the other themes, not overshadow them. Open: whether it also stays in the random rotation.
+- Later: shelf items that change to reflect the reader (for example, covers from their last session). Needs the app to remember a visitor, so not v0.
 - Later themes: horror, historical, romance. Horror was held back because it's the most likely to feel wrong on the wrong request.
 
 ## 6. The worm
 
 A small worm appears on key screens in every theme, as the brand's through-line. It is a supporting detail, never the focus.
 
-- **Bookshop:** peeking out between books on the shelf.
+- **Café Bookshop:** peeking out of a coffee mug.
 - **Superhero:** flying over the skyline in a red cape.
 - **Fantasy:** on the hill beside the castle, in a wizard's hat.
 - **Mystery:** on the wet street near the lamppost, in a fedora.
 - **Sci-fi:** floating beside the rocket, in a bubble helmet.
 
-So far the worm appears on each theme's question screen (and on Bookshop's shelf). Its place on the other screens is still to design.
+So far the worm appears on each theme's question screen (and on all four Café Bookshop screens). Its place on the other screens is still to design.
 
 Rules: one worm per screen at most; drawn as a single thick wavy line with an eye; costumed with one prop per theme; never on the book cover itself.
 
 ## 7. Status
 
-| Screen | Bookshop | Fantasy | Superhero | Mystery | Sci-fi |
+| Screen | Café Bookshop | Fantasy | Superhero | Mystery | Sci-fi |
 |---|---|---|---|---|---|
 | Question | Mocked | Mocked | Mocked | Mocked | Mocked |
 | Reveal, one book | Mocked | Mocked | Mocked | Mocked | Mocked |

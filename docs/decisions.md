@@ -1,6 +1,6 @@
 # Decision Log
 
-*Covers decisions through the v0 engine, v0 product planning, and the start of the build (October 3, 2026). Further build decisions will be added as they're made.*
+*Covers decisions through the v0 engine, v0 product planning, and the start of the build (October 4, 2026). Further build decisions will be added as they're made.*
 
 The product and architecture decisions behind this recommender, and the paths I rejected. The [progress log](./progress-log.md) is the session-by-session diary; this file is the story told by decision. Each entry gives the decision and why, with a link to the full detail.
 
@@ -447,6 +447,7 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 - **Replace or re-describe** a pick whose corrected description no longer fits.
 - **The question-flow stopping threshold** needs real usage data.
 - **Raw catalog data leaks into display text** (non-Latin author names, missing co-authors). Scheduled: card-ready output in [spec §4b](./spec.md).
+- **Does Café Bookshop stay in the random theme rotation** now that it's also the home theme? ([design §5](./design.md))
 
 ---
 
@@ -469,7 +470,7 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 **Why:** Rotation keeps the app fresh. A shared structure means each screen is built once, and it still feels like one product. ([design §3](./design.md))
 
 ### 13.5 Five themes at launch
-**Decision:** Bookshop, Fantasy, Superhero, Mystery, Sci-fi. Horror, historical, and romance come later.
+**Decision:** Bookshop (replaced by Café Bookshop, 13.11), Fantasy, Superhero, Mystery, Sci-fi. Horror, historical, and romance come later.
 **Why:** Five is enough for variety while each gets real care; a weak theme hurts more than a missing one. Horror was held back as the most likely to feel wrong on the wrong request. ([design §4](./design.md))
 
 ### 13.6 A theme changes everything, not just color
@@ -491,3 +492,11 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 ### 13.10 The worm as a recurring brand detail
 **Decision:** One small worm on key screens in every theme, costumed for the theme.
 **Why:** It ties the themes together as one brand without a heavy logo. ([design §6](./design.md))
+
+### 13.11 Café Bookshop replaces Bookshop
+**Decision:** The Café Bookshop theme replaces the Bookshop theme.
+**Why:** A real bookstore-café photo gave a warmer, more specific look (low light, vintage browns, brick, rain) that fits the cozy feel readers love. ([design §4](./design.md))
+
+### 13.12 Café Bookshop is the home theme
+**Decision:** Screens outside a themed session (settings, profile, How it works, errors) use Café Bookshop.
+**Why:** It gives the app one consistent backbone without overshadowing the rotating themes. ([design §5](./design.md))
