@@ -1,6 +1,6 @@
 # Book Recommender — Spec
 
-*Current state of the product and its design. Decisions, reversals, and rejected paths are in [`decisions.md`](./decisions.md); this file says what the product is and how it works. Last updated September 29, 2026.*
+*Current state of the product and its design. Decisions, reversals, and rejected paths are in [`decisions.md`](./decisions.md); this file says what the product is and how it works. Last updated October 5, 2026.*
 
 ---
 
@@ -48,6 +48,7 @@ The opening page *is* the recommender (no landing or login wall). The flow:
 - **Backbone (always asked):** anchor ("a book you loved") → why ("what stuck with you?": the writing / the world / the characters / the ideas / the feeling) → appetite (comfort ↔ strange). Fixed structure, rotating wording: 2–3 phrasings per question at launch, growing toward 4–5.
 - **Anchor entry:** autocomplete against a catalog as the user types, with a "use what I typed" escape. Suggestions appear after 3+ characters and a short typing pause, target under ~1 second, and never block progress. Source (Open Library or Hardcover search) is chosen by measured speed.
 - **Adaptive follow-ups:** after the backbone, one small model call judges whether the signal is enough. If not, it asks 1–2 targeted follow-ups (mood, length, turn-off) aimed at the thin category. No fixed question count; a guardrail stops the loop if confidence isn't improving (threshold TBD from usage data).
+- **Unclear typed answers:** never block. If no answer is chosen and the typed text is obviously unusable (fewer than 3 characters, or no real letters), show one gentle inline nudge under the field ("Tell me a little more? Or tap an answer above.") and keep the page from turning once. Ask once, then move on: a second tap proceeds anyway. Subtler unclear answers are handled by the taste summary's code check and template fallback (§4f); an unusable answer is dropped quietly, and the rejection path (§4g) catches a miss.
 - **Creative framing:** emoji-style prompts woven into the pools, about one per session.
 - **Stateless:** no memory of users across sessions. The one exception is anonymous feedback events (§4i), which identify no one.
 

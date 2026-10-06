@@ -84,7 +84,7 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 
 ## 2. Question flow and UX
 
-*2.1–2.9 designed in initial planning; 2.10–2.17 decided in v0 product planning, Sept 29. Not yet built.*
+*2.1–2.9 designed in initial planning; 2.10–2.17 decided in v0 product planning, Sept 29; 2.18–2.19 decided with the question-screen motion prototype, Oct 5. Not yet built.*
 
 ### 2.1 Tap-to-answer, with free text as a fallback
 **Decision:** No question requires typing.
@@ -153,6 +153,14 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 ### 2.17 A visual design pass before building screens
 **Decision:** Mock up the question screens and cards together before writing UI code.
 **Why:** They're the first impression and must feel engaging and satisfying. Designing them together keeps one visual language, and mockups are cheaper to change than code. ([spec §4j](./spec.md))
+
+### 2.18 A second tap unselects an answer
+**Decision:** Tapping a chosen answer again unselects it; tapping a different answer switches to it.
+**Why:** Users shouldn't feel locked in. A second tap is the expected toggle and is more reliable on phones than a double tap. ([design §7](./design.md))
+
+### 2.19 Unclear typed answers get one gentle nudge and never block
+**Decision:** If no answer is chosen and the typed text is obviously unusable, show one inline nudge and hold the page once; a second tap proceeds anyway. Subtler cases fall to the taste summary's code check and the rejection path.
+**Why:** Nothing is broken, so no error screen; keeping the flow smooth matters more than a perfect answer. ([spec §4a](./spec.md))
 
 ---
 
@@ -528,3 +536,11 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 ### 13.19 A living design system
 **Decision:** The visual design is a living system, not a locked spec. Mockup source files are kept in `docs/mockups/` as a snapshot.
 **Why:** The owner expects to keep improving screens and adding themes, and the artwork is worth protecting and reusing. ([progress log, Oct 5](./progress-log.md#october-5-2026--static-design-complete-all-40-screens-mocked))
+
+### 13.20 The primary button appears only when there is something to submit
+**Decision:** The primary button is hidden until an answer is chosen or text is typed, and hides again if that is undone. Its space is reserved so nothing shifts.
+**Why:** One action at a time. A greyed-out button makes people wonder why it won't work, and its arrival is direct feedback. ([design §7](./design.md))
+
+### 13.21 The first question enters at full pace, later ones faster
+**Decision:** The first question's entrance takes about 2s; later questions run the same sequence about 40% faster.
+**Why:** The pause helps focus on the first question but would get tiresome across several. ([design §7](./design.md))

@@ -133,7 +133,18 @@ The worm now appears on every screen in every theme; the placements above are it
 
 Rules: one worm per screen at most; drawn as a single thick wavy line with an eye; costumed with one prop per theme; never on the book cover itself.
 
-## 7. Status
+## 7. Motion: question screens
+
+Settled in a tappable prototype (source: [`mockups/motion-question-press.html`](./mockups/motion-question-press.html)).
+
+- **Entrance order:** the question first, then the answers one by one, then the free-text field. On the first question, the question settles in about 0.9s, the first answer starts at about 0.8s, and each answer fades in over about 0.4s, 0.1s apart; the whole entrance takes about 2s. Later questions run the same sequence at about 60% of those durations.
+- **Answer press:** the answer dips on press, stamps down with a small bounce, and fills with the theme's selected colour from the left. Its marker lights up, the scene's light source flares, and the other answers fade back. Under half a second in total.
+- **Primary button:** hidden until there is something to submit. It appears when an answer is chosen or the first character is typed, and hides again if that is undone. Its space is reserved so nothing shifts.
+- **Changing an answer:** tapping a chosen answer again unselects it; tapping a different answer switches to it.
+- **Turning the page:** the whole screen swings away like a page.
+- **Reduced motion:** when the device's reduced-motion setting is on, nothing animates.
+
+## 8. Status
 
 | Screen | Café Bookshop | Fantasy | Superhero | Mystery | Sci-fi |
 |---|---|---|---|---|---|
@@ -146,9 +157,9 @@ Rules: one worm per screen at most; drawn as a single thick wavy line with an ey
 | Rejection read-back | Mocked | Mocked | Mocked | Mocked | Mocked |
 | Error | Mocked | Mocked | Mocked | Mocked | Mocked |
 
-Mockups use placeholder covers and bracketed placeholder text. Real covers come from the catalogs (spec §4c). Motion is not yet designed. Priorities when it is: the reveal, a satisfying "magical" answer-button press, and staged fade-ins (question before answers; loading sections one at a time) to guide the eye.
+Mockups use placeholder covers and bracketed placeholder text. Real covers come from the catalogs (spec §4c). Motion is designed for the question screens (§7) in Café Bookshop. Still to design: the reveal, the loading screen (sections fading in one at a time), and carrying motion to the other four themes.
 
-## 8. Building it
+## 9. Building it
 
 - Build each screen once against the shared structure. A theme is a set of values (fonts, colors, shapes, scene art, wording) applied to that structure.
 - Adding a theme must not require changing any screen's layout.

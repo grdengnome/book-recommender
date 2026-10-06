@@ -600,10 +600,14 @@ Ran the identical `cult novel` query against Open Library side by side for direc
 
 **Living design:** the design is not locked; screens will keep being refined and themes added. Mockup source files snapshotted to `docs/mockups/` so the artwork can be reused when screens are built.
 
+**Motion (question screens):** settled in a tappable prototype (`docs/mockups/motion-question-press.html`): staged entrance, answer press, button hidden until there's something to submit, second tap unselects, page-turn exit, reduced motion respected. Later questions enter about 40% faster. Written up in `design.md` §7; decisions 2.18, 13.20–13.21.
+
+**Fail path for typed answers:** never block; one gentle nudge for obviously unusable text, then move on (`spec.md` §4a, decision 2.19).
+
 **Open:** whether the loading progress bar reports real engine stages or loops; whether Café Bookshop stays in the random rotation.
 
 **Next:**
-1. Motion pass: the reveal, the answer-button press, staged fade-ins, loading scenes.
+1. Motion for the reveal, then loading screens, then carry motion to the other four themes.
 2. Owner sign-off on the full design.
 3. Engine: return structured picks.
 4. Before going public: data store and rate limit.
