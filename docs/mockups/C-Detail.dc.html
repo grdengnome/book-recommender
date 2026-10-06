@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Superhero: book detail</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; padding: 20px 18px 22px; background-color: #19B5E6; background-image: radial-gradient(rgba(17,17,17,0.16) 1.6px, transparent 1.8px); background-size: 9px 9px; color: #111111; font-family: 'Comic Neue', sans-serif; display: flex; flex-direction: column; gap: 14px; overflow: hidden; position: relative">
+<div style="position: absolute; width: 420px; height: 420px; left: -110px; top: -40px; background: {{accent}}; clip-path: polygon(50% 0%,59% 14%,75% 7%,76% 24%,93% 25%,86% 41%,100% 50%,86% 59%,93% 75%,76% 76%,75% 93%,59% 86%,50% 100%,41% 86%,25% 93%,24% 76%,7% 75%,14% 59%,0% 50%,14% 41%,7% 25%,24% 24%,25% 7%,41% 14%)"></div>
+<div style="position: relative; display: flex; justify-content: space-between; align-items: center; height: 40px">
+<a href="C-Together.dc.html" style="color: #111111; font-weight: 700; font-size: 16px; background: #FFFFFF; border: 3px solid #111111; padding: 2px 8px">Back to your three</a>
+<svg viewBox="0 0 110 56" style="width: 90px; height: 46px" aria-hidden="true"><g transform="translate(8,8) scale(1.0)"><path d="M0 24 l34 -14 l-6 30z" fill="#E8262B" stroke="#111111" stroke-width="3" stroke-linejoin="round"/><path d="M22 28 Q38 0 54 22 T86 14" stroke="#3DBE6C" stroke-width="13" fill="none" stroke-linecap="round"/><path d="M22 28 Q38 0 54 22 T86 14" stroke="#111111" stroke-width="2" fill="none" stroke-dasharray="1 12" stroke-linecap="round"/><circle cx="88" cy="10" r="3" fill="#111111"/></g>
+</svg>
+</div>
+<div style="position: relative; display: flex; gap: 14px; align-items: flex-end">
+<div style="width: 150px; height: 225px; background: #E8262B; border: 5px solid #111111; box-shadow: 8px 8px 0 #111111; transform: rotate(-2deg); flex-shrink: 0; display: flex; align-items: flex-end; padding: 10px; box-sizing: border-box; color: #FFFFFF; font-size: 12px; font-weight: 700; letter-spacing: 2px">COVER ART</div>
+<div style="background: #FFFFFF; border: 4px solid #111111; padding: 8px 10px; margin-bottom: 4px"><div style="font-family: 'Bangers', cursive; font-size: 26px; line-height: 1; letter-spacing: 1px">[Book title]</div><div style="font-size: 14px; font-weight: 700; margin-top: 4px">[Author name]</div><div style="font-size: 14px; margin-top: 2px">[Year] · [Pages] pages</div></div>
+</div>
+<div style="position: relative; background: #FFE14A; border: 4px solid #111111; padding: 16px 12px 8px; margin-top: 8px">
+<div style="position: absolute; left: 8px; top: -14px; background: #FFE14A; border: 3px solid #111111; padding: 0 8px; font-family: 'Bangers', cursive; font-size: 17px; letter-spacing: 1px">WHY IT'S FOR YOU</div>
+<div style="font-size: 15px; font-weight: 700; line-height: 1.25">[Two lines tying this book to your answers.]</div>
+</div>
+<div style="position: relative; background: #FFFFFF; border: 4px solid #111111; padding: 16px 12px 8px; margin-top: 8px">
+<div style="position: absolute; left: 8px; top: -14px; background: #FFE14A; border: 3px solid #111111; padding: 0 8px; font-family: 'Bangers', cursive; font-size: 17px; letter-spacing: 1px">THE STORY</div>
+<div style="font-size: 15px; font-weight: 700; line-height: 1.25">[Catalog description of the book, three or four sentences.]</div>
+</div>
+<div style="position: relative; background: #FFFFFF; border: 4px solid #111111; padding: 16px 12px 8px; margin-top: 8px">
+<div style="position: absolute; left: 8px; top: -14px; background: #FFE14A; border: 3px solid #111111; padding: 0 8px; font-family: 'Bangers', cursive; font-size: 17px; letter-spacing: 1px">WHY YOU HAVEN'T HEARD OF IT</div>
+<div style="font-size: 15px; font-weight: 700; line-height: 1.25">[The non-obvious angle, one or two sentences.]</div>
+</div>
+<button style="margin-top: auto; padding: 12px; background: #C91D22; color: #FFFFFF; border: 4px solid #111111; box-shadow: 6px 6px 0 #111111; font: 400 28px 'Bangers', cursive; letter-spacing: 3px">FIND THIS BOOK!</button>
+<div style="position: relative; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px">
+<button style="padding: 9px 2px; background: #FFFFFF; border: 4px solid #111111; font: 400 19px 'Bangers', cursive; letter-spacing: 1px; color: #111111">LOVE IT</button>
+<button style="padding: 9px 2px; background: #FFFFFF; border: 4px solid #111111; font: 400 19px 'Bangers', cursive; letter-spacing: 1px; color: #111111">NOT FOR ME</button>
+<button style="padding: 9px 2px; background: #FFFFFF; border: 4px solid #111111; font: 400 19px 'Bangers', cursive; letter-spacing: 1px; color: #111111">READ IT</button>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#FFE14A"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return { accent: this.props.accent ?? '#FFE14A' };
+}
+}
+</script>
+</body>
+</html>

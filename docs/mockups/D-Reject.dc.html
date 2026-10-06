@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mystery: rejection read-back</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Limelight&family=Special+Elite&display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; padding: 22px 24px 28px; gap: 14px; background: #0B0D12; color: #D9D4C7; font-family: 'Special Elite', monospace; display: flex; flex-direction: column; overflow: hidden; position: relative">
+<svg viewBox="0 0 390 230" style="position: absolute; left: 0; top: 0; width: 390px; height: 230px" aria-hidden="true">
+<g stroke="#161A22" stroke-width="7"><path d="M200 64 L390 50"/><path d="M200 82 L390 68"/><path d="M200 100 L390 86"/><path d="M200 118 L390 104"/><path d="M200 136 L390 122"/><path d="M200 154 L390 140"/><path d="M200 172 L390 158"/></g>
+<path d="M62 112 L8 190 H236 L150 112z" fill="{{accent}}" opacity="0.080"/>
+<rect x="0" y="190" width="390" height="40" fill="#161A22"/>
+<path d="M0 190 h390" stroke="#3A404D" stroke-width="1"/>
+<rect x="84" y="182" width="44" height="8" fill="#2A2F3B"/>
+<path d="M106 182 V120" stroke="#2A2F3B" stroke-width="5"/>
+<path d="M58 112 q48 -40 96 0z" fill="#2A2F3B"/>
+<rect x="62" y="112" width="88" height="4" fill="{{accent}}" opacity="0.45"/>
+<rect x="206" y="160" width="92" height="58" fill="#D9D4C7" opacity="0.8" transform="rotate(-8 252 190)"/>
+<rect x="250" y="154" width="92" height="58" fill="#D9D4C7" opacity="0.6" transform="rotate(6 296 190)"/>
+<circle cx="270" cy="156" r="26" fill="#12151C" fill-opacity="0.6" stroke="#D9D4C7" stroke-width="3"/>
+<path d="M289 175 l30 28" stroke="#D9D4C7" stroke-width="6" stroke-linecap="round"/>
+<g transform="translate(150,172)"><path d="M0 14 Q10 -4 20 12 T40 8" stroke="#8D95A6" stroke-width="8" fill="none" stroke-linecap="round"/><ellipse cx="42" cy="1" rx="10" ry="2.6" fill="#05060A" stroke="#8D95A6" stroke-width="0.8"/><path d="M36 1 q1 -9 6 -9 q5 0 6 9z" fill="#05060A" stroke="#8D95A6" stroke-width="0.8"/></g>
+</svg>
+<div style="display: flex; justify-content: space-between; align-items: center; position: relative; height: 34px">
+<div style="font-family: 'Limelight', serif; font-size: 28px; letter-spacing: 2px">Worm</div>
+<div style="font-size: 14px; color: #E5604F; border: 1px solid #E5604F; padding: 5px 9px 2px">One more question</div>
+</div>
+<div style="position: relative; margin-top: 176px; border-left: 3px solid #E5604F; padding-left: 14px;">
+<div style="font-size: 14px; color: #A9AFBD">Those leads went cold.</div>
+<div style="font-family: 'Limelight', serif; font-size: 36px; line-height: 1.1; margin-top: 8px">Did I get it <span style="color: #E5604F">straight</span>?</div>
+</div>
+<div style="position: relative; margin-top: 22px;  box-sizing: border-box; background: #12151C; border: 1px solid #D9D4C7; padding: 14px 16px 12px; transform: rotate(1.2deg); box-shadow: 0 10px 24px rgba(0,0,0,0.6)">
+<div style="font-size: 13px; letter-spacing: 3px; text-transform: uppercase; color: {{accent}}; border-bottom: 1px solid #3A404D; padding-bottom: 4px">Case notes</div>
+<div style="font-size: 16px; line-height: 1.4; margin-top: 8px">[The summary of your taste, read back in two or three sentences.]</div>
+</div>
+<div style="position: relative; display: flex; gap: 14px; margin-top: auto">
+<button style="flex: 1; padding: 13px 6px; background: transparent; color: #D9D4C7; border: 0; border-bottom: 1px solid #D9D4C7; font: 400 17px 'Limelight', serif; letter-spacing: 2px">Set it straight</button>
+<button style="flex: 1; padding: 13px 6px; background: transparent; color: {{accent}}; border: 1px solid {{accent}}; box-shadow: inset 0 0 0 4px #0B0D12, inset 0 0 0 5px {{accent}}; font: 400 17px 'Limelight', serif; letter-spacing: 2px">Look again</button>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#E8B04A"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return { accent: this.props.accent ?? '#E8B04A' };
+}
+}
+</script>
+</body>
+</html>

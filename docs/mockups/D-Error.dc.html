@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mystery: error</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Limelight&family=Special+Elite&display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; padding: 22px 24px 28px; gap: 14px; background: #0B0D12; color: #D9D4C7; font-family: 'Special Elite', monospace; display: flex; flex-direction: column; overflow: hidden; position: relative">
+<svg viewBox="0 0 390 300" style="position: absolute; left: 0; top: 0; width: 390px; height: 300px" aria-hidden="true">
+<defs><pattern id="raine" width="26" height="60" patternUnits="userSpaceOnUse" patternTransform="rotate(16)"><path d="M6 0 v26 M19 30 v22" stroke="#8D95A6" stroke-width="1.2" opacity="0.5"/></pattern></defs>
+<path d="M0 0 L126 70 V250 L0 300z" fill="#12151C"/>
+<path d="M390 0 L264 70 V250 L390 300z" fill="#12151C"/>
+<rect x="126" y="70" width="138" height="180" fill="#161A22"/>
+<g stroke="#232833" stroke-width="1"><path d="M126 84 h138"/><path d="M126 98 h138"/><path d="M126 112 h138"/><path d="M126 126 h138"/><path d="M126 140 h138"/><path d="M126 154 h138"/><path d="M126 168 h138"/><path d="M126 182 h138"/><path d="M126 196 h138"/><path d="M126 210 h138"/><path d="M126 224 h138"/><path d="M126 238 h138"/></g>
+<rect x="150" y="112" width="90" height="34" fill="#0B0D12" stroke="#D9D4C7" stroke-width="1"/>
+<text x="195" y="135" text-anchor="middle" font-family="Special Elite, monospace" font-size="15" letter-spacing="2" fill="#D9D4C7">DEAD END</text>
+<path d="M126 250 L0 300 M264 250 L390 300" stroke="#3A404D" stroke-width="1"/>
+<path d="M60 60 h28 l-6 12 h-16z" fill="#2A2F3B"/>
+<rect x="68" y="72" width="12" height="4" fill="#1B1F28"/>
+<path d="M74 60 V44 H48" stroke="#2A2F3B" stroke-width="4" fill="none"/>
+<rect x="282" y="208" width="36" height="50" fill="#05060A" stroke="#2A2F3B" stroke-width="1"/>
+<rect x="278" y="202" width="44" height="8" fill="#05060A" stroke="#2A2F3B" stroke-width="1"/>
+<path d="M150 270 h40 M210 278 h60" stroke="#8D95A6" stroke-width="2" opacity="0.3"/>
+<g transform="translate(170,242)"><path d="M0 14 Q10 -4 20 12 T40 8" stroke="#8D95A6" stroke-width="8" fill="none" stroke-linecap="round"/><ellipse cx="42" cy="1" rx="10" ry="2.6" fill="#05060A" stroke="#8D95A6" stroke-width="0.8"/><path d="M36 1 q1 -9 6 -9 q5 0 6 9z" fill="#05060A" stroke="#8D95A6" stroke-width="0.8"/></g>
+<rect width="390" height="300" fill="url(#raine)"/>
+</svg>
+<div style="display: flex; justify-content: space-between; align-items: center; position: relative; height: 34px">
+<div style="font-family: 'Limelight', serif; font-size: 28px; letter-spacing: 2px">Worm</div>
+<div style="font-size: 14px; color: #E5604F; border: 1px solid #E5604F; padding: 5px 9px 2px">Dead end</div>
+</div>
+<div style="position: relative; margin-top: 246px; border-left: 3px solid #E5604F; padding-left: 14px;">
+<div style="font-size: 14px; color: #A9AFBD">That one is on us.</div>
+<div style="font-family: 'Limelight', serif; font-size: 36px; line-height: 1.1; margin-top: 8px">The trail went <span style="color: #E5604F">cold</span>.</div>
+</div>
+<div style="position: relative; margin-top: 22px; font-size: 17px; line-height: 1.4">[One plain sentence on what went wrong.]</div>
+<div style="position: relative; font-size: 15px; color: #A9AFBD">Your answers are saved.</div>
+<div style="position: relative; display: flex; gap: 14px; margin-top: auto">
+<button style="flex: 1; padding: 13px 6px; background: transparent; color: #D9D4C7; border: 0; border-bottom: 1px solid #D9D4C7; font: 400 17px 'Limelight', serif; letter-spacing: 2px">Start over</button>
+<button style="flex: 1; padding: 13px 6px; background: transparent; color: {{accent}}; border: 1px solid {{accent}}; box-shadow: inset 0 0 0 4px #0B0D12, inset 0 0 0 5px {{accent}}; font: 400 17px 'Limelight', serif; letter-spacing: 2px">Try again</button>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#E8B04A"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return { accent: this.props.accent ?? '#E8B04A' };
+}
+}
+</script>
+</body>
+</html>

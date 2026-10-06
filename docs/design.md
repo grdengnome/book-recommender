@@ -1,8 +1,12 @@
 # Design System
 
-*How Worm looks and why. Decisions behind it are in [`decisions.md`](./decisions.md) §13; what each screen does is in [`spec.md`](./spec.md) §4. Mockups live on the design canvas (private link, held by the owner). Last updated October 4, 2026.*
+*How Worm looks and why. Decisions behind it are in [`decisions.md`](./decisions.md) §13; what each screen does is in [`spec.md`](./spec.md) §4. Mockups live on the design canvas (private link, held by the owner). Last updated October 5, 2026.*
 
 ---
+
+## A living design
+
+The design is not locked. Current screens will keep being refined, and more themes and screens will be added over time. What stays fixed is the shared structure (§3) and the principles (§2). Changes are made on the design canvas first, then recorded here. The artwork in the mockups (snapshot in [`mockups/`](./mockups/)) is strong: preserve and reuse it when screens are built, rather than redrawing from scratch.
 
 ## 1. Brief
 
@@ -18,7 +22,13 @@
 3. **One world, varied screens.** The app opens in a different theme each visit. Themes share one structure, so it always feels like the same product. The Café Bookshop is the home theme behind them all (see §5).
 4. **Every part of a theme carries the theme.** Fonts, button shapes, input fields, cards, and wording all change with the theme, not just colors.
 5. **Storytelling framing.** Screens read like the opening of a story in that theme's genre.
-6. **The worm appears everywhere, subtly.** One small worm per key screen, dressed for the theme (see §6).
+6. **A different corner of the world on every screen.** Within a theme, each screen shows a new setting from the same world, so a session reads like a story and never repeats a scene. Palette, light source, fonts, and the worm tie the settings together. Settings per theme:
+   - **Café Bookshop:** two shelves, one shelf, rainy window, spill.
+   - **Mystery:** street, desk, office window, dead-end alley.
+   - **Fantasy:** castle, crossroads, cauldron, crystal ball, dragon.
+   - **Superhero:** skyline, headquarters, open sky, storm.
+   - **Sci-fi:** planet, porthole, black hole, moon dish, asteroid field.
+7. **The worm appears everywhere, subtly.** One small worm per screen, dressed for the theme (see §6).
 
 **Avoid:** busy or wordy screens, saturation with no hierarchy, plain spreadsheet-style displays, generic stock illustration.
 
@@ -55,7 +65,15 @@ Each section gets clear space around it so nothing reads as a wall of text.
 
 **Error screen:** scene, headline, one plain sentence on what went wrong, and two buttons (start over, try again).
 
-**Attention signal (rejection and error screens):** these screens stay on brand but signal that something needs the user. Each theme has one attention colour used only here (Café Bookshop: terracotta `#E8744B`), on the highlighted phrase, a stripe on the question card, and a small header chip ("One more thing", "Hiccup"). The scene's lighting also changes: dimmed for rejection, off for errors. Fonts do not change. Colour is never the only signal; the chip wording and scene carry it too.
+**Attention signal (rejection and error screens):** these screens stay on brand but signal that something needs the user. Each theme has one attention colour used only here, on the highlighted phrase, a stripe on the question card, and a small header chip ("One more thing", "Hiccup"). The scene's lighting also changes: dimmed for rejection, off for errors. Fonts do not change. Colour is never the only signal; the chip wording and scene carry it too.
+
+| Theme | Attention colour |
+|---|---|
+| Café Bookshop | Terracotta `#E8744B` |
+| Fantasy | Ember `#B8430F` |
+| Superhero | Villain purple `#7B2FBE` |
+| Mystery | Neon-sign red `#E5604F` |
+| Sci-fi | Alert magenta `#FF4F9A` |
 
 **Reveal follow-ons:** an "all three" screen with the covers together, and a book detail screen (cover, why it's for you, the story, the non-obvious angle, "find this book," and the three feedback actions).
 
@@ -103,7 +121,7 @@ Each theme is light or dark, whichever suits it. A user-facing light/dark toggle
 
 ## 6. The worm
 
-A small worm appears on key screens in every theme, as the brand's through-line. It is a supporting detail, never the focus.
+A small worm appears on every screen in every theme, as the brand's through-line. It is a supporting detail, never the focus.
 
 - **Café Bookshop:** peeking out of a coffee mug.
 - **Superhero:** flying over the skyline in a red cape.
@@ -111,7 +129,7 @@ A small worm appears on key screens in every theme, as the brand's through-line.
 - **Mystery:** on the wet street near the lamppost, in a fedora.
 - **Sci-fi:** floating beside the rocket, in a bubble helmet.
 
-So far the worm appears on each theme's question screen (and on all eight Café Bookshop screens). Its place on the other screens is still to design.
+The worm now appears on every screen in every theme; the placements above are its question-screen spots, and each other screen places it within that screen's setting.
 
 Rules: one worm per screen at most; drawn as a single thick wavy line with an eye; costumed with one prop per theme; never on the book cover itself.
 
@@ -120,13 +138,13 @@ Rules: one worm per screen at most; drawn as a single thick wavy line with an ey
 | Screen | Café Bookshop | Fantasy | Superhero | Mystery | Sci-fi |
 |---|---|---|---|---|---|
 | Question | Mocked | Mocked | Mocked | Mocked | Mocked |
-| Follow-up question | Mocked | To do | To do | To do | To do |
-| Loading | Mocked | To do | To do | To do | To do |
+| Follow-up question | Mocked | Mocked | Mocked | Mocked | Mocked |
+| Loading | Mocked | Mocked | Mocked | Mocked | Mocked |
 | Reveal, one book | Mocked | Mocked | Mocked | Mocked | Mocked |
-| All three | Mocked | To do | To do | To do | To do |
-| Book detail | Mocked | To do | To do | To do | To do |
-| Rejection read-back | Mocked | To do | To do | To do | To do |
-| Error | Mocked | To do | To do | To do | To do |
+| All three | Mocked | Mocked | Mocked | Mocked | Mocked |
+| Book detail | Mocked | Mocked | Mocked | Mocked | Mocked |
+| Rejection read-back | Mocked | Mocked | Mocked | Mocked | Mocked |
+| Error | Mocked | Mocked | Mocked | Mocked | Mocked |
 
 Mockups use placeholder covers and bracketed placeholder text. Real covers come from the catalogs (spec §4c). Motion is not yet designed. Priorities when it is: the reveal, a satisfying "magical" answer-button press, and staged fade-ins (question before answers; loading sections one at a time) to guide the eye.
 

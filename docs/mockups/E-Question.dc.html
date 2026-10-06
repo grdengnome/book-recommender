@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sci-fi: question</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800&family=Share+Tech+Mono&display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; padding: 20px 20px 24px; background-color: #060B14; background-image: repeating-linear-gradient(transparent, transparent 3px, rgba(54,214,231,0.05) 3px, rgba(54,214,231,0.05) 4px); color: #D8F6FA; font-family: 'Share Tech Mono', monospace; display: flex; flex-direction: column; gap: 14px; overflow: hidden; position: relative">
+<svg viewBox="0 0 390 270" style="position: absolute; left: 0; top: 50px; width: 390px; height: 270px" aria-hidden="true">
+<circle cx="276" cy="120" r="78" fill="{{accent}}"/>
+<path d="M208 94 h136 M200 120 h152 M208 146 h136" stroke="#060B14" stroke-width="6"/>
+<ellipse cx="276" cy="120" rx="128" ry="26" fill="none" stroke="#36D6E7" stroke-width="6" transform="rotate(-18 276 120)"/>
+<circle cx="50" cy="40" r="3" fill="#D8F6FA"/><circle cx="130" cy="96" r="2" fill="#D8F6FA"/><circle cx="150" cy="24" r="2" fill="#36D6E7"/><circle cx="36" cy="150" r="2" fill="#D8F6FA"/>
+<path d="M66 232 l22 -64 l22 64 l-10 -8 v20 h-24 v-20z" fill="#D8F6FA"/>
+<circle cx="88" cy="208" r="6" fill="#36D6E7"/>
+<path d="M78 248 l10 20 l10 -20z" fill="{{accent}}"/>
+<path d="M132 196 Q144 176 156 194 T180 188" stroke="#3DBE6C" stroke-width="9" fill="none" stroke-linecap="round"/>
+<circle cx="181" cy="186" r="10" fill="#D8F6FA" fill-opacity="0.2" stroke="#D8F6FA" stroke-width="2"/>
+<circle cx="183" cy="185" r="2" fill="#060B14"/>
+</svg>
+<div style="display: flex; justify-content: space-between; align-items: center; position: relative">
+<div style="font-family: 'Orbitron', sans-serif; font-weight: 800; font-size: 22px; letter-spacing: 4px">WORM//</div>
+</div>
+<div style="position: relative; margin-top: 246px; padding: 2px; background: #36D6E7; clip-path: polygon(16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%, 0 16px)">
+<div style="background: #0A1626; padding: 14px 16px; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)">
+<div style="font-size: 13px; color: #36D6E7; letter-spacing: 1px">&gt; INCOMING TRANSMISSION</div>
+<div style="font-family: 'Orbitron', sans-serif; font-weight: 800; font-size: 26px; line-height: 1.18; margin-top: 6px">Which book pulled you <span style="color: {{accent}}">into its orbit</span>?</div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<label for="e-anchor" style="font-size: 13px; color: #36D6E7; letter-spacing: 1px">ENTER TITLE</label>
+<div style="display: flex; align-items: center; gap: 8px; background: #0A1626; border-left: 4px solid {{accent}}; padding: 10px 12px">
+<div style="font-size: 22px; color: {{accent}}">&gt;</div>
+<input id="e-anchor" type="text" value="Sto_" style="flex: 1; min-width: 0; font: 400 22px 'Share Tech Mono', monospace; padding: 0; border: 0; background: transparent; color: #D8F6FA; border-radius: 0">
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<button style="display: flex; align-items: center; gap: 12px; padding: 8px 14px; background: #36D6E7; border: 0; clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px); text-align: left; font: inherit; color: #060B14">
+<div style="font-family: 'Orbitron', sans-serif; font-weight: 800; font-size: 16px">01</div>
+<div style="width: 32px; height: 46px; background: {{accent}}; flex-shrink: 0"></div>
+<div><div style="font-size: 17px">[Matching title]</div><div style="font-size: 14px">[Author name]</div></div>
+<div style="margin-left: auto; font-size: 13px">LOCKED</div>
+</button>
+<button style="display: flex; align-items: center; gap: 12px; padding: 8px 14px; background: #0F2236; border: 0; clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px); text-align: left; font: inherit; color: #D8F6FA">
+<div style="font-family: 'Orbitron', sans-serif; font-weight: 800; font-size: 16px; color: #36D6E7">02</div>
+<div style="width: 32px; height: 46px; background: #17344A; flex-shrink: 0"></div>
+<div><div style="font-size: 17px">[Matching title]</div><div style="font-size: 14px">[Author name]</div></div>
+</button>
+</div>
+<button style="margin-top: auto; padding: 16px; background: {{accent}}; color: #060B14; border: 0; clip-path: polygon(20px 0, calc(100% - 20px) 0, 100% 50%, calc(100% - 20px) 100%, 20px 100%, 0 50%); font: 800 20px 'Orbitron', sans-serif; letter-spacing: 6px">LAUNCH</button>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#FF6B2C"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return { accent: this.props.accent ?? '#FF6B2C' };
+}
+}
+</script>
+</body>
+</html>

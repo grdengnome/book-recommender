@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Superhero: question</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; padding: 20px 18px 22px; background-color: {{accent}}; background-image: radial-gradient(rgba(17,17,17,0.16) 1.6px, transparent 1.8px); background-size: 9px 9px; color: #111111; font-family: 'Comic Neue', sans-serif; display: flex; flex-direction: column; gap: 14px; overflow: hidden">
+<div style="display: flex; justify-content: space-between; align-items: center">
+<div style="font-family: 'Bangers', cursive; font-size: 38px; letter-spacing: 2px; background: #111111; color: #FFE14A; padding: 2px 14px; transform: rotate(-2deg)">WORM</div>
+</div>
+<div style="position: relative; height: 190px; background: #19B5E6; border: 4px solid #111111; box-shadow: 6px 6px 0 #111111; overflow: hidden">
+<svg viewBox="0 0 346 190" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%" aria-hidden="true">
+<path d="M70 150 L250 18 L300 60z" fill="#FFE14A" stroke="#111111" stroke-width="3" stroke-linejoin="round"/>
+<circle cx="278" cy="40" r="30" fill="#FFE14A" stroke="#111111" stroke-width="4"/>
+<path d="M262 30 l7 22 l9 -14 l9 14 l7 -22" fill="none" stroke="#111111" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+<g fill="#FFFFFF" stroke="#111111" stroke-width="4" stroke-linejoin="round">
+<path d="M0 190 V110 h44 v80z"/>
+<path d="M44 190 V84 h20 v-16 h14 v16 h18 v106z"/>
+<path d="M96 190 V126 h50 v64z"/>
+<path d="M146 190 V98 h40 v92z"/>
+<path d="M186 190 V136 h46 v54z"/>
+<path d="M232 190 V112 l22 -20 l22 20 v78z"/>
+<path d="M276 190 V140 h70 v50z"/>
+</g>
+<g fill="#111111">
+<rect x="10" y="122" width="8" height="10"/><rect x="26" y="122" width="8" height="10"/><rect x="10" y="144" width="8" height="10"/>
+<rect x="56" y="100" width="8" height="10"/><rect x="74" y="100" width="8" height="10"/><rect x="56" y="124" width="8" height="10"/>
+<rect x="156" y="112" width="8" height="10"/><rect x="170" y="112" width="8" height="10"/><rect x="156" y="136" width="8" height="10"/>
+<rect x="246" y="126" width="8" height="10"/><rect x="290" y="152" width="8" height="10"/><rect x="310" y="152" width="8" height="10"/>
+</g>
+<path d="M118 70 l34 -14 l-6 30z" fill="#E8262B" stroke="#111111" stroke-width="3" stroke-linejoin="round"/>
+<path d="M140 74 Q156 46 172 68 T204 60" stroke="#3DBE6C" stroke-width="13" fill="none" stroke-linecap="round"/>
+<path d="M140 74 Q156 46 172 68 T204 60" stroke="#111111" stroke-width="2" fill="none" stroke-dasharray="1 12" stroke-linecap="round"/>
+<circle cx="206" cy="56" r="3" fill="#111111"/>
+<path d="M98 62 h-22 M102 74 h-30 M100 86 h-20" stroke="#111111" stroke-width="3" stroke-linecap="round"/>
+</svg>
+<div style="position: absolute; left: 10px; top: 10px; background: #FFE14A; border: 3px solid #111111; padding: 4px 10px; font-weight: 700; font-size: 15px">MEANWHILE, IN THE CITY...</div>
+</div>
+<div style="position: relative; background: #FFFFFF; border: 4px solid #111111; border-radius: 28px; padding: 16px 20px; margin-top: 4px">
+<div style="font-family: 'Bangers', cursive; font-size: 38px; line-height: 1; letter-spacing: 1px">What's a book you <span style="color: #C91D22">couldn't put down</span>?</div>
+<div style="position: absolute; left: 230px; top: -20px; width: 24px; height: 24px; background: #FFFFFF; border-left: 4px solid #111111; border-top: 4px solid #111111; transform: skewX(-20deg) rotate(45deg)"></div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="c-anchor" style="font-size: 15px; font-weight: 700">Start typing a title</label>
+<input id="c-anchor" type="text" value="Sto" style="font: 700 22px 'Comic Neue', sans-serif; padding: 12px 14px; border: 4px solid #111111; background: #FFFFFF; color: #111111; border-radius: 0">
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+<button style="display: flex; gap: 10px; align-items: center; padding: 8px; background: #FFFFFF; border: 4px solid #111111; box-shadow: 5px 5px 0 #111111; text-align: left; font: inherit; color: inherit">
+<div style="width: 40px; height: 58px; background: #E8262B; border: 3px solid #111111; box-sizing: border-box; flex-shrink: 0"></div>
+<div><div style="font-weight: 700; font-size: 15px">[Title]</div><div style="font-size: 14px">[Author]</div></div>
+</button>
+<button style="display: flex; gap: 10px; align-items: center; padding: 8px; background: #FFFFFF; border: 4px solid #111111; text-align: left; font: inherit; color: inherit">
+<div style="width: 40px; height: 58px; background: #3DBE6C; border: 3px solid #111111; box-sizing: border-box; flex-shrink: 0"></div>
+<div><div style="font-weight: 700; font-size: 15px">[Title]</div><div style="font-size: 14px">[Author]</div></div>
+</button>
+</div>
+<button style="margin-top: auto; padding: 12px; background: #C91D22; color: #FFFFFF; border: 4px solid #111111; box-shadow: 6px 6px 0 #111111; font: 400 28px 'Bangers', cursive; letter-spacing: 3px">TO THE RESCUE!</button>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#FFE14A"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return { accent: this.props.accent ?? '#FFE14A' };
+}
+}
+</script>
+</body>
+</html>

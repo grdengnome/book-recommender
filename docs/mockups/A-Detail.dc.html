@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Café bookshop: book detail</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800&family=Courier+Prime:wght@400;700&display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F3EAD8; color: #171311; font-family: 'Courier Prime', monospace; display: flex; flex-direction: column; overflow: hidden; position: relative">
+<svg viewBox="0 0 390 190" style="position: absolute; left: 0; top: 0; width: 390px; height: 190px" aria-hidden="true">
+<defs>
+<pattern id="cd-brick" width="56" height="36" patternUnits="userSpaceOnUse">
+<rect width="56" height="36" fill="#2A1A12"/>
+<rect x="1" y="1" width="54" height="16" fill="#5A2A1C"/>
+<rect x="-27" y="19" width="54" height="16" fill="#6B3222"/>
+<rect x="29" y="19" width="54" height="16" fill="#52261A"/>
+</pattern>
+<radialGradient id="cd-glow" cx="0.5" cy="0.5" r="0.5">
+<stop offset="0" stop-color="{{accent}}" stop-opacity="0.8"/>
+<stop offset="1" stop-color="{{accent}}" stop-opacity="0"/>
+</radialGradient>
+</defs>
+<rect width="390" height="178" fill="url(#cd-brick)"/>
+<rect width="390" height="178" fill="#171311" opacity="0.35"/>
+<circle cx="96" cy="150" r="150" fill="url(#cd-glow)"/>
+<path d="M330 178 Q322 160 332 152 T338 136" stroke="#6FA35A" stroke-width="8" fill="none" stroke-linecap="round"/>
+<circle cx="339" cy="136" r="1.8" fill="#171311"/>
+<rect x="312" y="150" width="30" height="28" rx="3" fill="#FBF6EA" stroke="#171311" stroke-width="2"/>
+<rect y="178" width="390" height="12" fill="#4A2C1A"/>
+</svg>
+<div style="position: relative; padding: 18px 20px 0; height: 190px; box-sizing: border-box">
+<a href="A-Together.dc.html" style="color: #F3EAD8; font-weight: 700; font-size: 15px">Back to your three</a>
+</div>
+<div style="position: relative; padding: 0 20px 22px; display: flex; flex-direction: column; gap: 12px; flex: 1">
+<div style="display: flex; gap: 16px; align-items: flex-end; margin-top: -140px">
+<div style="width: 150px; height: 225px; background: #3E7C7A; border: 3px solid #171311; box-shadow: 0 0 30px rgba(242,162,58,0.5); flex-shrink: 0; display: flex; align-items: flex-end; padding: 10px; box-sizing: border-box; color: #FFFFFF; font-size: 12px; font-weight: 700">COVER ART</div>
+<div style="padding-bottom: 2px"><div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 26px; line-height: 1.05; text-transform: uppercase">[Book title]</div><div style="font-size: 15px; margin-top: 4px">[Author name]</div><div style="font-size: 14px; margin-top: 2px">[Year] · [Pages] pages</div></div>
+</div>
+<div style="background: #171311; color: #F3EAD8; padding: 12px 14px; margin-top: 4px">
+<div style="font-size: 13px; font-weight: 700; color: {{accent}}">Why it's for you</div>
+<div style="font-size: 16px; line-height: 1.3; margin-top: 4px">[Two lines tying this book to your answers.]</div>
+</div>
+<div>
+<div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 17px; letter-spacing: 2px; text-transform: uppercase; color: #4A2C1A">The story</div>
+<div style="font-size: 15px; line-height: 1.35; margin-top: 2px">[Catalog description of the book, three or four sentences.]</div>
+</div>
+<div>
+<div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 17px; letter-spacing: 2px; text-transform: uppercase; color: #4A2C1A">Why you haven't heard of it</div>
+<div style="font-size: 15px; line-height: 1.35; margin-top: 2px">[The non-obvious angle, one or two sentences.]</div>
+</div>
+<button style="position: relative; margin-top: auto; padding: 14px 16px 14px 34px; background: #4A2C1A; color: #FFFFFF; border: 0; clip-path: polygon(22px 0, 100% 0, 100% 100%, 22px 100%, 0 50%); font: 800 22px 'Barlow Condensed', sans-serif; letter-spacing: 3px; text-transform: uppercase">
+<div style="position: absolute; left: 16px; top: 50%; width: 10px; height: 10px; margin-top: -5px; border-radius: 50%; background: #F3EAD8"></div>
+Find this book
+</button>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px">
+<button style="padding: 12px 4px 10px; background: #FBF6EA; border: 2px solid #171311; font: 700 14px 'Courier Prime', monospace; color: #171311">Love it</button>
+<button style="padding: 12px 4px 10px; background: #FBF6EA; border: 2px solid #171311; font: 700 14px 'Courier Prime', monospace; color: #171311">Not for me</button>
+<button style="padding: 12px 4px 10px; background: #FBF6EA; border: 2px solid #171311; font: 700 14px 'Courier Prime', monospace; color: #171311">Read it</button>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#F2A23A"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return { accent: this.props.accent ?? '#F2A23A' };
+}
+}
+</script>
+</body>
+</html>

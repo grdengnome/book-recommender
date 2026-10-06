@@ -587,3 +587,24 @@ Ran the identical `cult novel` query against Open Library side by side for direc
 3. Engine: return structured picks.
 4. Before going public: data store and rate limit.
 5. Watch for the GitHub Support reply on the PR-ref purge.
+
+---
+
+## October 5, 2026 — Static design complete: all 40 screens mocked
+
+**Conclusion:** All five themes are mocked for all eight screens (40 screens). The static design is done; motion is the remaining design step. Decisions in `decisions.md` §13.18–13.19.
+
+**New rule:** each screen shows a different corner of its theme's world (Mystery: street, desk, office window, dead-end alley), tied together by palette, light, fonts, and the worm (`design.md` §2).
+
+**Changed:** question-screen counters ("Chapter the First", "ISSUE #1", etc.) removed in every theme, per the no-counter rule.
+
+**Living design:** the design is not locked; screens will keep being refined and themes added. Mockup source files snapshotted to `docs/mockups/` so the artwork can be reused when screens are built.
+
+**Open:** whether the loading progress bar reports real engine stages or loops; whether Café Bookshop stays in the random rotation.
+
+**Next:**
+1. Motion pass: the reveal, the answer-button press, staged fade-ins, loading scenes.
+2. Owner sign-off on the full design.
+3. Engine: return structured picks.
+4. Before going public: data store and rate limit.
+5. Watch for the GitHub Support reply on the PR-ref purge.

@@ -1,6 +1,6 @@
 # Decision Log
 
-*Covers decisions through the v0 engine, v0 product planning, and the start of the build (October 4, 2026). Further build decisions will be added as they're made.*
+*Covers decisions through the v0 engine, v0 product planning, and the start of the build (October 5, 2026). Further build decisions will be added as they're made.*
 
 The product and architecture decisions behind this recommender, and the paths I rejected. The [progress log](./progress-log.md) is the session-by-session diary; this file is the story told by decision. Each entry gives the decision and why, with a link to the full detail.
 
@@ -520,3 +520,11 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 ### 13.17 Every screen in every theme
 **Decision:** Each theme gets its own version of every screen, and a session stays in one theme throughout.
 **Why:** Themes should feel seamless, not fall back to the café mid-session. ([design §5](./design.md))
+
+### 13.18 A different setting on every screen
+**Decision:** Within a theme, each screen shows a different setting from that theme's world (Mystery: street, desk, office window, dead-end alley).
+**Why:** Repeating one scene across a session gets boring; varied settings keep it interesting while the shared palette, fonts, and worm keep it cohesive. ([progress log, Oct 5](./progress-log.md#october-5-2026--static-design-complete-all-40-screens-mocked))
+
+### 13.19 A living design system
+**Decision:** The visual design is a living system, not a locked spec. Mockup source files are kept in `docs/mockups/` as a snapshot.
+**Why:** The owner expects to keep improving screens and adding themes, and the artwork is worth protecting and reusing. ([progress log, Oct 5](./progress-log.md#october-5-2026--static-design-complete-all-40-screens-mocked))

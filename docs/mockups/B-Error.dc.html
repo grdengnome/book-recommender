@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Fantasy: error</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=Alegreya:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; padding: 14px; background: #F1E3C0; color: #2B1A12; font-family: 'Alegreya', serif; overflow: hidden">
+<div style="position: relative; height: 100%; box-sizing: border-box; border: 2px solid #8A5A1C; box-shadow: inset 0 0 0 5px #F1E3C0, inset 0 0 0 7px #8A5A1C; padding: 22px 20px 24px; display: flex; flex-direction: column; gap: 14px">
+<div style="position: absolute; left: -7px; top: -7px; width: 12px; height: 12px; background: {{accent}}; transform: rotate(45deg)"></div>
+<div style="position: absolute; left: -7px; bottom: -7px; width: 12px; height: 12px; background: {{accent}}; transform: rotate(45deg)"></div>
+<div style="position: absolute; right: -7px; top: -7px; width: 12px; height: 12px; background: {{accent}}; transform: rotate(45deg)"></div>
+<div style="position: absolute; right: -7px; bottom: -7px; width: 12px; height: 12px; background: {{accent}}; transform: rotate(45deg)"></div>
+<div style="display: flex; justify-content: space-between; align-items: center; height: 34px">
+<div style="font-family: 'Uncial Antiqua', serif; font-size: 28px;">Worm</div>
+<div style="font-style: italic; font-size: 16px; color: #B8430F; border-top: 1px solid #B8430F; border-bottom: 1px solid #B8430F; padding: 2px 8px">Alas</div>
+</div>
+<div style="height: 214px; border: 4px solid #8A5A1C; border-radius: 160px 160px 0 0; overflow: hidden; background: #1B1330; box-sizing: border-box; flex-shrink: 0">
+<svg viewBox="0 0 322 206" style="display: block; width: 100%; height: 100%" aria-hidden="true">
+<rect width="322" height="206" fill="#1B1330"/>
+<path d="M0 60 q60 -30 120 -6 q50 -30 110 0 q50 -20 92 6 V0 H0z" fill="#150C2B"/>
+<path d="M0 206 Q90 136 322 186 V206z" fill="#3A2A66"/>
+<g fill="#0E0820"><path d="M150 120 L110 40 L170 80 L200 30 L215 90 L250 60 L235 130z"/><path d="M110 160 Q160 100 240 140 Q270 155 296 126 L302 148 Q270 185 230 170 Q170 150 130 180z"/><path d="M118 162 Q90 130 96 100 L80 96 L58 108 L84 112 Q86 140 112 170z"/></g>
+<circle cx="80" cy="103" r="2.5" fill="#B8430F"/>
+<path d="M58 108 l-24 6 l14 4 l-20 10 l30 -6z" fill="#B8430F"/>
+<g transform="translate(250,184)"><path d="M0 14 Q10 -6 20 12 T40 8" stroke="#F2C230" stroke-width="9" fill="none" stroke-linecap="round"/><circle cx="42" cy="5" r="2" fill="#150C2B"/><path d="M34 0 l7 -20 l7 18z" fill="#9B1C2E" stroke="#F1E3C0" stroke-width="1.5" stroke-linejoin="round"/></g>
+</svg>
+</div>
+<div>
+<div style="font-style: italic; font-size: 16px; color: #6B4A2A">That one is on us.</div>
+<div style="display: flex; gap: 12px; align-items: flex-start; margin-top: 6px">
+<div style="width: 70px; height: 70px; background: #B8430F; color: #F1E3C0; box-shadow: inset 0 0 0 3px #B8430F, inset 0 0 0 5px #F2C230; display: flex; align-items: center; justify-content: center; font-family: 'Uncial Antiqua', serif; font-size: 50px; line-height: 1; flex-shrink: 0">A</div>
+<div style="font-size: 30px; line-height: 1.1"> dragon <span style="color: #B8430F; font-weight: 700">blocks</span> the road.</div>
+</div>
+</div>
+<div style="font-size: 18px; line-height: 1.35">[One plain sentence on what went wrong.]</div>
+<div style="font-style: italic; font-size: 16px; color: #6B4A2A">Your answers are saved.</div>
+<div style="display: flex; gap: 12px; align-items: center; margin-top: auto">
+<button style="flex: 1; padding: 13px 8px; background: transparent; color: #2B1A12; border: 0; border-top: 1px solid #8A5A1C; border-bottom: 1px solid #8A5A1C; font: 400 17px 'Uncial Antiqua', serif">Start over</button>
+<button style="flex: 1; padding: 14px 22px; background: {{accent}}; color: #F1E3C0; border: 0; clip-path: polygon(0 0, 100% 0, calc(100% - 16px) 50%, 100% 100%, 0 100%, 16px 50%); font: 400 17px 'Uncial Antiqua', serif">Try again</button>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#9B1C2E"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return { accent: this.props.accent ?? '#9B1C2E' };
+}
+}
+</script>
+</body>
+</html>

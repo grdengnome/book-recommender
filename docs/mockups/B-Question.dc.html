@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Fantasy: question</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=Alegreya:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; padding: 14px; background: #F1E3C0; color: #2B1A12; font-family: 'Alegreya', serif; overflow: hidden">
+<div style="position: relative; height: 100%; box-sizing: border-box; border: 2px solid #8A5A1C; box-shadow: inset 0 0 0 5px #F1E3C0, inset 0 0 0 7px #8A5A1C; padding: 22px 20px 24px; display: flex; flex-direction: column; gap: 14px">
+<div style="position: absolute; left: -7px; top: -7px; width: 12px; height: 12px; background: {{accent}}; transform: rotate(45deg)"></div>
+<div style="position: absolute; right: -7px; top: -7px; width: 12px; height: 12px; background: {{accent}}; transform: rotate(45deg)"></div>
+<div style="position: absolute; left: -7px; bottom: -7px; width: 12px; height: 12px; background: {{accent}}; transform: rotate(45deg)"></div>
+<div style="position: absolute; right: -7px; bottom: -7px; width: 12px; height: 12px; background: {{accent}}; transform: rotate(45deg)"></div>
+<div style="display: flex; justify-content: space-between; align-items: baseline">
+<div style="font-family: 'Uncial Antiqua', serif; font-size: 28px">Worm</div>
+</div>
+<div style="height: 214px; border: 4px solid #8A5A1C; border-radius: 160px 160px 0 0; overflow: hidden; background: #2A1B4A; box-sizing: border-box">
+<svg viewBox="0 0 322 206" style="display: block; width: 100%; height: 100%" aria-hidden="true">
+<circle cx="230" cy="70" r="38" fill="#F2C230"/>
+<circle cx="244" cy="60" r="38" fill="#2A1B4A"/>
+<path d="M90 70 l4 11 11 4 -11 4 -4 11 -4 -11 -11 -4 11 -4z" fill="#F1E3C0"/>
+<path d="M160 40 l3 8 8 3 -8 3 -3 8 -3 -8 -8 -3 8 -3z" fill="#F2C230"/>
+<path d="M0 170 Q70 118 150 156 T322 132 V206 H0z" fill="#5B3FA0"/>
+<path d="M0 194 Q100 148 190 184 T322 168 V206 H0z" fill="#1F7A6C"/>
+<path d="M118 160 v-44 h9 v-12 h8 v12 h10 v-30 l13 -20 13 20 v30 h10 v-12 h8 v12 h9 v44z" fill="#150C2B"/>
+<rect x="155" y="96" width="6" height="11" fill="#F2C230"/>
+<path d="M226 184 Q236 164 246 182 T266 178" stroke="#F2C230" stroke-width="9" fill="none" stroke-linecap="round"/>
+<circle cx="268" cy="175" r="2" fill="#150C2B"/>
+<path d="M260 170 l7 -20 l7 18z" fill="#9B1C2E" stroke="#F1E3C0" stroke-width="1.5" stroke-linejoin="round"/>
+</svg>
+</div>
+<div style="display: flex; gap: 12px; align-items: flex-start; margin-top: 2px">
+<div style="width: 70px; height: 70px; background: {{accent}}; color: #F1E3C0; box-shadow: inset 0 0 0 3px {{accent}}, inset 0 0 0 5px #F2C230; display: flex; align-items: center; justify-content: center; font-family: 'Uncial Antiqua', serif; font-size: 50px; line-height: 1; flex-shrink: 0">O</div>
+<div style="font-size: 30px; line-height: 1.1">nce upon a time, a book <span style="color: {{accent}}; font-weight: 700">would not let you go</span>.</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<label for="b-anchor" style="font-family: 'Uncial Antiqua', serif; font-size: 17px; color: {{accent}}">Name the tome</label>
+<input id="b-anchor" type="text" value="Sto" style="font: italic 400 24px 'Alegreya', serif; padding: 6px 2px; border: 0; border-bottom: 2px solid #2B1A12; background: transparent; color: #2B1A12; border-radius: 0">
+</div>
+<div style="display: flex; flex-direction: column">
+<button style="display: flex; align-items: center; gap: 12px; padding: 8px 4px; background: #E6CF94; border: 0; border-top: 1px solid #8A5A1C; text-align: left; font: inherit; color: inherit">
+<div style="width: 10px; height: 10px; background: {{accent}}; transform: rotate(45deg); flex-shrink: 0; margin: 0 4px"></div>
+<div style="width: 34px; height: 48px; background: #1F7A6C; border: 2px solid #8A5A1C; flex-shrink: 0"></div>
+<div><div style="font-weight: 700; font-size: 18px">[Matching title]</div><div style="font-style: italic; font-size: 15px">[Author name]</div></div>
+</button>
+<button style="display: flex; align-items: center; gap: 12px; padding: 8px 4px; background: transparent; border: 0; border-top: 1px solid #8A5A1C; border-bottom: 1px solid #8A5A1C; text-align: left; font: inherit; color: inherit">
+<div style="width: 10px; height: 10px; border: 2px solid #8A5A1C; box-sizing: border-box; transform: rotate(45deg); flex-shrink: 0; margin: 0 4px"></div>
+<div style="width: 34px; height: 48px; background: #5B3FA0; border: 2px solid #8A5A1C; flex-shrink: 0"></div>
+<div><div style="font-weight: 700; font-size: 18px">[Matching title]</div><div style="font-style: italic; font-size: 15px">[Author name]</div></div>
+</button>
+</div>
+<button style="margin-top: auto; padding: 15px 30px; background: {{accent}}; color: #F1E3C0; border: 0; clip-path: polygon(0 0, 100% 0, calc(100% - 18px) 50%, 100% 100%, 0 100%, 18px 50%); font: 400 21px 'Uncial Antiqua', serif">Turn the page</button>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#9B1C2E"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return { accent: this.props.accent ?? '#9B1C2E' };
+}
+}
+</script>
+</body>
+</html>

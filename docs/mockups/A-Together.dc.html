@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Café bookshop: all three</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800&family=Courier+Prime:wght@400;700&display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; padding: 20px 20px 22px; background: #2A1A12; color: #F3EAD8; font-family: 'Courier Prime', monospace; display: flex; flex-direction: column; gap: 14px; overflow: hidden; position: relative">
+<svg viewBox="0 0 390 844" style="position: absolute; left: 0; top: 0; width: 390px; height: 844px" aria-hidden="true">
+<defs>
+<pattern id="ct-brick" width="56" height="36" patternUnits="userSpaceOnUse">
+<rect width="56" height="36" fill="#2A1A12"/>
+<rect x="1" y="1" width="54" height="16" fill="#5A2A1C"/>
+<rect x="-27" y="19" width="54" height="16" fill="#6B3222"/>
+<rect x="29" y="19" width="54" height="16" fill="#52261A"/>
+</pattern>
+<radialGradient id="ct-glow" cx="0.5" cy="0.5" r="0.5">
+<stop offset="0" stop-color="{{accent}}" stop-opacity="0.6"/>
+<stop offset="1" stop-color="{{accent}}" stop-opacity="0"/>
+</radialGradient>
+</defs>
+<rect width="390" height="844" fill="url(#ct-brick)"/>
+<ellipse cx="80" cy="420" rx="260" ry="420" fill="url(#ct-glow)"/>
+<rect width="390" height="844" fill="#171311" opacity="0.35"/>
+<path d="M352 62 Q344 44 354 36 T360 20" stroke="#6FA35A" stroke-width="8" fill="none" stroke-linecap="round"/>
+<circle cx="361" cy="20" r="1.8" fill="#171311"/>
+</svg>
+<div style="position: relative">
+<div style="font-size: 14px; font-weight: 700; color: {{accent}}">Your shelf</div>
+<div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 44px; line-height: 1; text-transform: uppercase; letter-spacing: 1px">Three for you</div>
+</div>
+<a href="A-Detail.dc.html" style="position: relative; display: flex; gap: 14px; align-items: center; text-decoration: none; color: #171311; background: #FBF6EA; border: 2px solid #171311; border-bottom: 8px solid #4A2C1A; padding: 10px">
+<div style="width: 112px; height: 168px; background: #C2371F; border: 2px solid #171311; flex-shrink: 0; display: flex; align-items: flex-end; padding: 8px; box-sizing: border-box; color: #FFFFFF; font-size: 12px; font-weight: 700">COVER</div>
+<div><div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 24px; line-height: 1.05; text-transform: uppercase">[Book title]</div><div style="font-size: 14px; margin-top: 2px">[Author name]</div><div style="font-size: 15px; line-height: 1.25; margin-top: 8px">[Why it's for you.]</div></div>
+</a>
+<a href="A-Detail.dc.html" style="position: relative; display: flex; gap: 14px; align-items: center; text-decoration: none; color: #171311; background: #FBF6EA; border: 2px solid #171311; border-bottom: 8px solid #4A2C1A; padding: 10px">
+<div style="width: 112px; height: 168px; background: #3E7C7A; border: 2px solid #171311; flex-shrink: 0; display: flex; align-items: flex-end; padding: 8px; box-sizing: border-box; color: #FFFFFF; font-size: 12px; font-weight: 700">COVER</div>
+<div><div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 24px; line-height: 1.05; text-transform: uppercase">[Book title]</div><div style="font-size: 14px; margin-top: 2px">[Author name]</div><div style="font-size: 15px; line-height: 1.25; margin-top: 8px">[Why it's for you.]</div></div>
+</a>
+<a href="A-Detail.dc.html" style="position: relative; display: flex; gap: 14px; align-items: center; text-decoration: none; color: #171311; background: #FBF6EA; border: 2px solid #171311; border-bottom: 8px solid #4A2C1A; padding: 10px">
+<div style="width: 112px; height: 168px; background: #171311; border: 2px solid #171311; flex-shrink: 0; display: flex; align-items: flex-end; padding: 8px; box-sizing: border-box; color: #FFFFFF; font-size: 12px; font-weight: 700">COVER</div>
+<div><div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 24px; line-height: 1.05; text-transform: uppercase">[Book title]</div><div style="font-size: 14px; margin-top: 2px">[Author name]</div><div style="font-size: 15px; line-height: 1.25; margin-top: 8px">[Why it's for you.]</div></div>
+</a>
+<button style="position: relative; margin-top: auto; padding: 12px; background: #2A1A12; color: #F3EAD8; border: 2px solid #F3EAD8; font: 800 20px 'Barlow Condensed', sans-serif; letter-spacing: 2px; text-transform: uppercase">None of these</button>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#F2A23A"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return { accent: this.props.accent ?? '#F2A23A' };
+}
+}
+</script>
+</body>
+</html>

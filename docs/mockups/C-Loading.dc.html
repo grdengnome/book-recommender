@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Superhero: loading</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; padding: 20px 18px 22px; background-color: #19B5E6; background-image: radial-gradient(rgba(17,17,17,0.16) 1.6px, transparent 1.8px); background-size: 9px 9px; color: #111111; font-family: 'Comic Neue', sans-serif; display: flex; flex-direction: column; gap: 14px; overflow: hidden; position: relative">
+<div style="display: flex; justify-content: space-between; align-items: center; height: 46px; position: relative">
+<div style="font-family: 'Bangers', cursive; font-size: 38px; letter-spacing: 2px; background: #111111; color: #FFE14A; padding: 2px 14px; transform: rotate(-2deg)">WORM</div>
+</div>
+<div style="position: relative; height: 210px; background: #19B5E6; border: 4px solid #111111; box-shadow: 6px 6px 0 #111111; overflow: hidden; flex-shrink: 0">
+<svg viewBox="0 0 346 210" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%" aria-hidden="true">
+<g fill="#FFFFFF" stroke="#111111" stroke-width="4" stroke-linejoin="round"><path d="M20 70 q-4 -22 20 -20 q8 -18 28 -6 q22 -6 22 14 q14 4 4 16 h-70 q-12 -2 -4 -4z"/><path d="M236 170 q-4 -22 20 -20 q8 -18 28 -6 q22 -6 22 14 q14 4 4 16 h-70 q-12 -2 -4 -4z"/></g>
+<path d="M210 96 l20 -34 l6 30 l34 -18 l-14 32 l36 6 l-32 16 l22 28 l-36 -8 l-4 36 l-22 -30 l-26 26 l2 -38 l-36 -6 l32 -18z" fill="#FFE14A" stroke="#111111" stroke-width="4" stroke-linejoin="round"/>
+<path d="M20 130 h90 M10 150 h70 M36 170 h80 M60 112 h50" stroke="#111111" stroke-width="4" stroke-linecap="round"/>
+<g transform="translate(120,92) scale(1.5)"><path d="M0 24 l34 -14 l-6 30z" fill="#E8262B" stroke="#111111" stroke-width="3" stroke-linejoin="round"/><path d="M22 28 Q38 0 54 22 T86 14" stroke="#3DBE6C" stroke-width="13" fill="none" stroke-linecap="round"/><path d="M22 28 Q38 0 54 22 T86 14" stroke="#111111" stroke-width="2" fill="none" stroke-dasharray="1 12" stroke-linecap="round"/><circle cx="88" cy="10" r="3" fill="#111111"/></g>
+<text x="60" y="194" font-family="Bangers, cursive" font-size="38" letter-spacing="2" fill="#C91D22" stroke="#111111" stroke-width="2" transform="rotate(-6 60 194)">WHOOSH!</text>
+</svg>
+<div style="position: absolute; left: 10px; top: 10px; background: #FFE14A; color: #111111; border: 3px solid #111111; padding: 4px 10px; font-weight: 700; font-size: 15px">UP, UP AND AWAY...</div>
+</div>
+<div style="position: relative; background: #FFFFFF; border: 4px solid #111111; box-shadow: 5px 5px 0 #111111; padding: 20px 14px 12px; transform: rotate(-2deg); margin-top: 10px">
+<div style="position: absolute; left: 10px; top: -16px; background: #FFE14A; color: #111111; border: 3px solid #111111; padding: 1px 10px; font-family: 'Bangers', cursive; font-size: 19px; letter-spacing: 1px">YOUR MISSION</div>
+<div style="font-weight: 700; font-size: 16px; line-height: 1.3">[One line reflecting back what you told us.]</div>
+</div>
+<div style="margin-top: 16px">
+<div style="font-family: 'Bangers', cursive; font-size: 52px; line-height: 1; letter-spacing: 3px; text-shadow: 3px 3px 0 #FFFFFF; transform: rotate(-2deg)">ON THE WAY!</div>
+<div style="font-weight: 700; font-size: 16px; margin-top: 8px">About a minute or two.</div>
+</div>
+<div style="background: #FFE14A; border: 4px solid #111111; padding: 10px 14px; margin-top: 16px">
+<div style="font-weight: 700; font-size: 16px; line-height: 1.3">[A short, verified fact about a well-known author.]</div>
+<div style="font-family: 'Bangers', cursive; font-size: 20px; letter-spacing: 1px; margin-top: 4px">[Author name]</div>
+</div>
+<div style="display: flex; gap: 10px; margin-top: auto">
+<div style="flex: 1; height: 18px; background: #C91D22; border: 4px solid #111111; box-sizing: border-box"></div>
+<div style="flex: 1; height: 18px; background: #C91D22; border: 4px solid #111111; box-sizing: border-box"></div>
+<div style="flex: 1; height: 18px; background: #FFFFFF; border: 4px solid #111111; box-sizing: border-box"></div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#FFE14A"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return { accent: this.props.accent ?? '#FFE14A' };
+}
+}
+</script>
+</body>
+</html>
