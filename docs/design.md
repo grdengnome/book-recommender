@@ -1,6 +1,6 @@
 # Design System
 
-*How Worm looks and why. Decisions behind it are in [`decisions.md`](./decisions.md) §13; what each screen does is in [`spec.md`](./spec.md) §4. Mockups live on the design canvas (private link, held by the owner). Last updated October 5, 2026.*
+*How Worm looks and why. Decisions behind it are in [`decisions.md`](./decisions.md) §13; what each screen does is in [`spec.md`](./spec.md) §4. Mockups live on the design canvas (private link, held by the owner). Last updated October 6, 2026.*
 
 ---
 
@@ -46,7 +46,7 @@ Themes never change what is on a screen or where it sits. They change how it loo
 
 **Reveal screen (one book per screen), top to bottom:**
 1. Header: "one of three" marker.
-2. Cover: about 265 × 400 on a 390-wide phone, the largest element on the screen.
+2. Cover: about 284 × 426 on a 390-wide phone, the largest element on the screen.
 3. Title, author, and a one-line "why it's for you."
 4. Two buttons: more detail (secondary), next pick (primary).
 
@@ -144,7 +144,26 @@ Settled in a tappable prototype (source: [`mockups/motion-question-press.html`](
 - **Turning the page:** the whole screen swings away like a page.
 - **Reduced motion:** when the device's reduced-motion setting is on, nothing animates.
 
-## 8. Status
+## 8. Motion: the reveal
+
+Settled in a tappable prototype (source: [`mockups/motion-reveal.html`](./mockups/motion-reveal.html)). Done for Café Bookshop; the other four themes are still to design.
+
+- **The cover is the main attraction.** It is the largest thing on screen, about 284 × 426 on a 390-wide phone. The clue chips, title, author, "why it's for you" line, and buttons are small and quiet.
+- **Wrapping:** each pick arrives wrapped. Each theme has one wrapping, and it comes off the same way whichever reveal plays. Café Bookshop: brown kraft paper, crossed twine tied in a bow, and a tag with the pick number.
+- **Starting the reveal:** the user taps the wrapped book itself; there is no button. The book wobbles every few seconds as an invitation, and a "Tap to unwrap" line shows on the first pick only. The prompt wording may vary by theme; only the café wording is decided.
+- **Suspense build (about 3s):** the room darkens, the light pulses, and three clue chips fade in one at a time: year, page count, and a one-word mood.
+- **Reveal styles:** three for v0, one per pick. More will be added over time; never play the same one twice in a row.
+  - **Pinball:** the book ricochets around the screen, spinning.
+  - **Coin spin:** it lifts and spins on its axis, accelerating.
+  - **Vanish and slam:** it spins away and disappears, the room blacks out, then it slams back in with a screen shake and shockwave rings.
+- **Unwrapping:** the bow unties itself; then, on the flash, the twine snaps away and the paper tears down the middle and is thrown off to both sides.
+- **Landing:** a flash, light rays turning slowly behind the cover, a burst of sparks, and a shine sweeping across the cover.
+- **Details:** fade in gently after the cover lands, text first and then the buttons, so nothing competes with the cover.
+- **After the reveal:** dragging across the cover tilts it with a moving shine. Tapping it brings it forward and enlarges it for a closer look, where it turns further. Tap again to put it back.
+- **Backdrop (Café Bookshop):** bookshelves down both edges, string lights, and a pendant lamp lighting the cover.
+- **Reduced motion:** when the device's reduced-motion setting is on, skip straight to the revealed cover.
+
+## 9. Status
 
 | Screen | Café Bookshop | Fantasy | Superhero | Mystery | Sci-fi |
 |---|---|---|---|---|---|
@@ -157,9 +176,9 @@ Settled in a tappable prototype (source: [`mockups/motion-question-press.html`](
 | Rejection read-back | Mocked | Mocked | Mocked | Mocked | Mocked |
 | Error | Mocked | Mocked | Mocked | Mocked | Mocked |
 
-Mockups use placeholder covers and bracketed placeholder text. Real covers come from the catalogs (spec §4c). Motion is designed for the question screens (§7) in Café Bookshop. Still to design: the reveal, the loading screen (sections fading in one at a time), and carrying motion to the other four themes.
+Mockups use placeholder covers and bracketed placeholder text. Real covers come from the catalogs (spec §4c). Motion is done for the question screens (§7) and the reveal (§8) in Café Bookshop. Still to design: the loading screen (sections fading in one at a time), and carrying motion to the other four themes.
 
-## 9. Building it
+## 10. Building it
 
 - Build each screen once against the shared structure. A theme is a set of values (fonts, colors, shapes, scene art, wording) applied to that structure.
 - Adding a theme must not require changing any screen's layout.

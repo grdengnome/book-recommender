@@ -8,3 +8,4 @@ Source files for the Worm design canvas: five themes, eight screens each (40 scr
 - The files load `support.js` from the design canvas, so they will not render by themselves in a browser.
 - The design is not locked. When screens change on the canvas, replace this folder with a new snapshot.
 - `motion-question-press.html` is a standalone, tappable motion prototype for the question screen (Café Bookshop). Unlike the screen files, it opens directly in a browser.
+- `motion-reveal.html` is a standalone, tappable motion prototype for the reveal screen (Café Bookshop): wrapping, the three reveal styles, tilt and closer look. It also opens directly in a browser.

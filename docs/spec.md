@@ -63,16 +63,17 @@ Built and grounded; see §5. The engine takes one input, the taste description, 
 - **Reserves:** each run returns 3 picks plus 2–3 reserves, all grounded and verified the same way, so swaps are instant.
 - **Exclude list:** reruns and swaps never return a book the user has already seen this session.
 - **Widen mode:** deliberately varied picks for the final step of the rejection path.
-- **Card-ready output:** cover image, cleaned-up title and author text (no raw catalog artifacts like "Last, First" or untransliterated names), and the "find this book" link.
+- **Card-ready output:** cover image, cleaned-up title and author text (no raw catalog artifacts like "Last, First" or untransliterated names), the "find this book" link, and the three pre-reveal clue values (year, page count, one-word mood; §4c).
 
 ### 4c. The card UX
 
-Three cards shown at once.
+Each pick is revealed alone on its own screen, then all three are shown together; tapping one opens its detail screen (decision 13.8). Layouts: [`design.md`](./design.md) §3.
 
-- **Front:** cover image as background, title, author, and a one-line hook (why it's for you). Designed placeholder when there's no cover.
-- **Back (tap to flip):** catalog description, why it fits, the non-obvious angle, and a "find this book" link. **No ratings in v0**: no reliable source is confirmed, and thin rating counts on obscure books work against the product.
+- **Reveal:** each pick arrives wrapped and is revealed by tapping the wrapped book. Before it is revealed, it shows three clue chips: year, page count, and a one-word mood. The engine's card-ready output (§4b) needs to supply these three values. Motion: [`design.md`](./design.md) §8.
+- **Revealed pick:** cover image, title, author, and a one-line hook (why it's for you). Designed placeholder when there's no cover.
+- **Detail screen:** cover, catalog description, why it fits, the non-obvious angle, and a "find this book" link. **No ratings in v0**: no reliable source is confirmed, and thin rating counts on obscure books work against the product.
 - **"Find this book" link:** destination and affiliate tag are configuration, not code. v0: Bookshop.org (affiliate) → Open Library fallback when no ISBN. Amazon may be added later as a secondary option. A short commission disclosure is shown.
-- **Per-card actions:**
+- **Per-book actions (on the detail screen):**
   - **👍:** recorded.
   - **👎:** recorded, and reveals an optional "show me another" (swaps in a reserve). It doesn't auto-swap, so the user can still compare.
   - **"Already read it":** swaps in a reserve immediately.

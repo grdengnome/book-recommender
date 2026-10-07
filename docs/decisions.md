@@ -1,6 +1,6 @@
 # Decision Log
 
-*Covers decisions through the v0 engine, v0 product planning, and the start of the build (October 5, 2026). Further build decisions will be added as they're made.*
+*Covers decisions through the v0 engine, v0 product planning, and the start of the build (October 6, 2026). Further build decisions will be added as they're made.*
 
 The product and architecture decisions behind this recommender, and the paths I rejected. The [progress log](./progress-log.md) is the session-by-session diary; this file is the story told by decision. Each entry gives the decision and why, with a link to the full detail.
 
@@ -456,6 +456,7 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 - **The question-flow stopping threshold** needs real usage data.
 - **Raw catalog data leaks into display text** (non-Latin author names, missing co-authors). Scheduled: card-ready output in [spec §4b](./spec.md).
 - **Does Café Bookshop stay in the random theme rotation** now that it's also the home theme? ([design §5](./design.md))
+- **Wrappings and reveal-prompt wording for Fantasy, Superhero, Mystery and Sci-fi.** Café Bookshop is settled. ([design §8](./design.md))
 
 ---
 
@@ -544,3 +545,27 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 ### 13.21 The first question enters at full pace, later ones faster
 **Decision:** The first question's entrance takes about 2s; later questions run the same sequence about 40% faster.
 **Why:** The pause helps focus on the first question but would get tiresome across several. ([design §7](./design.md))
+
+### 13.22 A big, theatrical reveal
+**Decision:** The reveal is big and theatrical, modelled on a trading-card pack opening.
+**Why:** It is the moment the whole flow builds to, and should feel like an event. ([design §8](./design.md))
+
+### 13.23 Several reveal styles
+**Decision:** Multiple reveal styles: three for v0, more over time. The same style never plays twice in a row.
+**Why:** A single animation gets old across three picks and repeat visits. ([design §8](./design.md))
+
+### 13.24 One wrapping per theme
+**Decision:** Each theme has one wrapping, removed the same way in every reveal style.
+**Why:** It keeps the work to five wrappings instead of fifteen combinations. ([design §8](./design.md))
+
+### 13.25 Tap the wrapped book to reveal it
+**Decision:** The user taps the wrapped book to reveal it; there is no button.
+**Why:** Fewer words on screen, and it feels like uncovering the book yourself. ([design §8](./design.md))
+
+### 13.26 The cover dominates the reveal
+**Decision:** The cover is the largest thing on screen; the details are small and fade in after it lands.
+**Why:** Nothing should distract from the cover. ([design §8](./design.md))
+
+### 13.27 The cover can be tilted and looked at closely
+**Decision:** After the reveal, the cover can be tilted by dragging and brought forward for a closer look by tapping.
+**Why:** Covers are the art, and readers will want to study them. ([design §8](./design.md))
