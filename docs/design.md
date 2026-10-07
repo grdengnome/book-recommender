@@ -54,11 +54,11 @@ Themes never change what is on a screen or where it sits. They change how it loo
 
 **Loading screen, top to bottom:**
 1. Header.
-2. Scene (the richest scene in the theme; this is the longest wait).
-3. The reflect-back of what the user asked for, shown as an object in the scene (Café Bookshop: an order ticket hanging from the shelf).
-4. Headline and an honest wait estimate ("About a minute or two").
+2. Scene (the richest scene in the theme; this is the longest wait). The scene leads: about 18% larger than in the static mockup, running nearly edge to edge.
+3. The reflect-back of what the user asked for, shown as an object in the scene (Café Bookshop: an order ticket hanging from the shelf), about a quarter smaller than in the static mockup.
+4. Headline ("Checking the shelves") and an honest wait estimate ("About a minute or two"), both small so they don't dominate.
 5. One author fact, unboxed, with the author's name.
-6. Progress indicator.
+6. Progress: three bars, no wording.
 Each section gets clear space around it so nothing reads as a wall of text.
 
 **Rejection read-back screen:** question ("Did I hear you right?"), the taste summary on the same object used on the loading screen, and two buttons (fix it, look again). The first rejection step reuses the follow-up question layout.
@@ -163,7 +163,18 @@ Settled in a tappable prototype (source: [`mockups/motion-reveal.html`](./mockup
 - **Backdrop (Café Bookshop):** bookshelves down both edges, string lights, and a pendant lamp lighting the cover.
 - **Reduced motion:** when the device's reduced-motion setting is on, skip straight to the revealed cover.
 
-## 9. Status
+## 9. Motion: the loading screen
+
+Settled in a prototype (source: [`mockups/motion-loading.html`](./mockups/motion-loading.html)). Done for Café Bookshop; the other four themes are still to design. Layout is in §3.
+
+- **A living scene:** the scene stays alive for the whole wait. Rain falls down the window, steam rises from the mug, the string lights twinkle, windows in the skyline switch on and off, the lamp glow breathes, and the worm sways.
+- **Entrance, in order:** the "Your order" ticket drops in on its string and swings before settling; then the headline fades in; then the author fact; then the progress bars.
+- **Progress:** three bars, no wording. Each fills when its engine stage finishes, and the one in progress shimmers. The headline does not change with the stage. The bars reflect real engine stages (spec §4b), never an estimate.
+- **Author facts:** rotate with a slow crossfade, roughly every 12 to 15 seconds in the real app.
+- **Hand-off:** when the last bar fills, the text fades out, the room dims, and the first wrapped book appears (the start of the reveal, §8).
+- **Reduced motion:** when the device's reduced-motion setting is on, nothing animates.
+
+## 10. Status
 
 | Screen | Café Bookshop | Fantasy | Superhero | Mystery | Sci-fi |
 |---|---|---|---|---|---|
@@ -176,9 +187,9 @@ Settled in a tappable prototype (source: [`mockups/motion-reveal.html`](./mockup
 | Rejection read-back | Mocked | Mocked | Mocked | Mocked | Mocked |
 | Error | Mocked | Mocked | Mocked | Mocked | Mocked |
 
-Mockups use placeholder covers and bracketed placeholder text. Real covers come from the catalogs (spec §4c). Motion is done for the question screens (§7) and the reveal (§8) in Café Bookshop. Still to design: the loading screen (sections fading in one at a time), and carrying motion to the other four themes.
+Mockups use placeholder covers and bracketed placeholder text. Real covers come from the catalogs (spec §4c). Motion is done for all three Café Bookshop stages: questions (§7), the reveal (§8), and loading (§9). Still to design: motion for the other four themes.
 
-## 10. Building it
+## 11. Building it
 
 - Build each screen once against the shared structure. A theme is a set of values (fonts, colors, shapes, scene art, wording) applied to that structure.
 - Adding a theme must not require changing any screen's layout.

@@ -63,6 +63,7 @@ Built and grounded; see §5. The engine takes one input, the taste description, 
 - **Reserves:** each run returns 3 picks plus 2–3 reserves, all grounded and verified the same way, so swaps are instant.
 - **Exclude list:** reruns and swaps never return a book the user has already seen this session.
 - **Widen mode:** deliberately varied picks for the final step of the rejection path.
+- **Stage reporting:** the engine reports when it moves between its three stages (searching, choosing, double-checking), so the loading screen's three bars show real progress, never an estimate ([`design.md`](./design.md) §9).
 - **Card-ready output:** cover image, cleaned-up title and author text (no raw catalog artifacts like "Last, First" or untransliterated names), the "find this book" link, and the three pre-reveal clue values (year, page count, one-word mood; §4c).
 
 ### 4c. The card UX

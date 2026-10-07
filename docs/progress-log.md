@@ -615,20 +615,21 @@ Ran the identical `cult novel` query against Open Library side by side for direc
 
 ---
 
-## October 6, 2026 — Café Bookshop reveal motion settled
+## October 6, 2026 — Café Bookshop motion complete: reveal and loading
 
-**Conclusion:** The reveal's motion is settled for Café Bookshop in a tappable prototype (`docs/mockups/motion-reveal.html`). Written up in `design.md` §8; decisions 13.22–13.27.
+**Conclusion:** Café Bookshop motion is complete end to end (questions, loading, reveal). Reveal and loading were each settled today in a prototype; written up in `design.md` §8–9, decisions 13.22–13.29.
 
-**What it does:** each pick arrives wrapped in kraft paper and twine; the user taps the book to unwrap it (no button). A ~3s suspense build shows three clue chips (year, page count, one-word mood), then one of three reveal styles plays (Pinball, Coin spin, Vanish and slam), never the same twice in a row. After landing, the cover can be tilted and brought forward for a closer look.
+**Reveal** (`docs/mockups/motion-reveal.html`): each pick arrives wrapped in kraft paper and twine; the user taps the book to unwrap it (no button). A ~3s suspense build shows three clue chips (year, page count, one-word mood), then one of three reveal styles plays (Pinball, Coin spin, Vanish and slam), never the same twice in a row. After landing, the cover can be tilted and brought forward for a closer look.
 
-**Engine impact:** card-ready output must supply the three clue values (`spec.md` §4b–4c).
+**Loading** (`docs/mockups/motion-loading.html`): a living scene, staged entrance, and three progress bars tied to real engine stages, then a hand-off into the first wrapped book.
+
+**Engine impact:** card-ready output must supply the three clue values (`spec.md` §4b–4c), and the engine must report its stage changes (searching, choosing, double-checking) for the loading bars.
 
 **Open:** wrappings and reveal-prompt wording for the other four themes (`decisions.md` §12).
 
 **Next:**
-1. Loading-screen motion.
-2. Wrappings and motion for the other four themes.
-3. Owner sign-off on the full design.
-4. Engine: return structured picks, including the three clue values.
-5. Before going public: data store and rate limit.
-6. Watch for the GitHub Support reply.
+1. Wrappings and motion for the other four themes.
+2. Owner sign-off on the full design.
+3. Engine: return structured picks, including the three clue values, and report stage changes.
+4. Before going public: data store and rate limit.
+5. Watch for the GitHub Support reply.

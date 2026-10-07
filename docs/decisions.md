@@ -569,3 +569,11 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 ### 13.27 The cover can be tilted and looked at closely
 **Decision:** After the reveal, the cover can be tilted by dragging and brought forward for a closer look by tapping.
 **Why:** Covers are the art, and readers will want to study them. ([design §8](./design.md))
+
+### 13.28 Loading progress shows real engine stages, without wording
+**Decision:** The loading screen shows three progress bars tied to real engine stages, with no stage wording.
+**Why:** Visible progress is reassuring, naming the steps adds words nobody needs, and progress must never be faked. ([design §9](./design.md))
+
+### 13.29 On the loading screen, the scene leads
+**Decision:** The scene leads the loading screen; the order ticket and headline are small.
+**Why:** The wait is the longest moment in the app, and a living scene is better company than large text. ([design §9](./design.md))
