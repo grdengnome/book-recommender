@@ -1,6 +1,6 @@
 # Design System
 
-*How Worm looks and why. Decisions behind it are in [`decisions.md`](./decisions.md) §13; what each screen does is in [`spec.md`](./spec.md) §4. Mockups live on the design canvas (private link, held by the owner). Last updated October 6, 2026.*
+*How Worm looks and why. Decisions behind it are in [`decisions.md`](./decisions.md) §13; what each screen does is in [`spec.md`](./spec.md) §4. Mockups live on the design canvas (private link, held by the owner). Last updated October 7, 2026.*
 
 ---
 
@@ -133,6 +133,9 @@ The worm now appears on every screen in every theme; the placements above are it
 
 Rules: one worm per screen at most; drawn as a single thick wavy line with an eye; costumed with one prop per theme; never on the book cover itself.
 
+- **Same mascot in every theme:** the worm keeps its mascot form everywhere (one wavy line, one eye, one prop). A theme costumes it; it never redraws it as a different character.
+- **Superhero cape:** attaches at mid-body.
+
 ## 7. Motion: question screens
 
 Settled in a tappable prototype (source: [`mockups/motion-question-press.html`](./mockups/motion-question-press.html)).
@@ -146,18 +149,29 @@ Settled in a tappable prototype (source: [`mockups/motion-question-press.html`](
 
 ## 8. Motion: the reveal
 
-Settled in a tappable prototype (source: [`mockups/motion-reveal.html`](./mockups/motion-reveal.html)). Done for Café Bookshop; the other four themes are still to design.
+Settled in tappable prototypes, done for all five themes (sources: [`mockups/motion-reveal.html`](./mockups/motion-reveal.html) for Café Bookshop, and `motion-reveal-mystery.html`, `-fantasy`, `-superhero`, `-scifi` in [`mockups/`](./mockups/)). The rules below apply to every theme; the wrapping and how it opens are per theme.
 
 - **The cover is the main attraction.** It is the largest thing on screen, about 284 × 426 on a 390-wide phone. The clue chips, title, author, "why it's for you" line, and buttons are small and quiet.
-- **Wrapping:** each pick arrives wrapped. Each theme has one wrapping, and it comes off the same way whichever reveal plays. Café Bookshop: brown kraft paper, crossed twine tied in a bow, and a tag with the pick number.
-- **Starting the reveal:** the user taps the wrapped book itself; there is no button. The book wobbles every few seconds as an invitation, and a "Tap to unwrap" line shows on the first pick only. The prompt wording may vary by theme; only the café wording is decided.
+- **Wrapping:** each pick arrives wrapped. Each theme has one wrapping, and it comes off the same way whichever reveal plays:
+
+| Theme | Wrapping | How it opens |
+|---|---|---|
+| Café Bookshop | Brown kraft paper, crossed twine tied in a bow, and a tag with the pick number | The bow unties, the twine snaps, the paper tears down the middle |
+| Mystery | A manila case envelope tied with string between two buttons, with a typed case label | The string unwinds, the flap lifts, the envelope drops away |
+| Fantasy | A violet-plum leather book with a visible spine, page edges and brass corner guards, tied with a thin ivory ribbon from all four sides and closed with an irregular, glossy crimson wax seal | The seal cracks, the ribbon whips away, the leather dissolves into gold sparks |
+| Superhero | A red foil trading pack with crimped ends and a starburst logo | The top strip peels and rips off, the pack drops away |
+| Sci-fi | A sealed cargo capsule with two doors, hazard stripes, a glowing seam and a ring lock | The ring spins up, the seam flares, the doors slide apart with vapour |
+
+  Fantasy's wrapping uses only the theme's own colours (violet, ivory, crimson, gold).
+- **Starting the reveal:** the user taps the wrapped book itself; there is no button. The book wobbles every few seconds as an invitation, and a "Tap to unwrap" line shows on the first pick only. The prompt wording may vary by theme; only the café wording is decided, and the other four themes' wording is still a placeholder.
 - **Suspense build (about 3s):** the room darkens, the light pulses, and three clue chips fade in one at a time: year, page count, and a one-word mood.
 - **Reveal styles:** three for v0, one per pick. More will be added over time; never play the same one twice in a row.
   - **Pinball:** the book ricochets around the screen, spinning.
   - **Coin spin:** it lifts and spins on its axis, accelerating.
   - **Vanish and slam:** it spins away and disappears, the room blacks out, then it slams back in with a screen shake and shockwave rings.
-- **Unwrapping:** the bow unties itself; then, on the flash, the twine snaps away and the paper tears down the middle and is thrown off to both sides.
+- **Unwrapping (Café Bookshop):** the bow unties itself; then, on the flash, the twine snaps away and the paper tears down the middle and is thrown off to both sides. Each other theme opens its own way (table above).
 - **Landing:** a flash, light rays turning slowly behind the cover, a burst of sparks, and a shine sweeping across the cover.
+- **Scene props:** the worm and small scene objects fade out once the cover lands, so nothing sits behind the cover.
 - **Details:** fade in gently after the cover lands, text first and then the buttons, so nothing competes with the cover.
 - **After the reveal:** dragging across the cover tilts it with a moving shine. Tapping it brings it forward and enlarges it for a closer look, where it turns further. Tap again to put it back.
 - **Backdrop (Café Bookshop):** bookshelves down both edges, string lights, and a pendant lamp lighting the cover.
@@ -165,12 +179,22 @@ Settled in a tappable prototype (source: [`mockups/motion-reveal.html`](./mockup
 
 ## 9. Motion: the loading screen
 
-Settled in a prototype (source: [`mockups/motion-loading.html`](./mockups/motion-loading.html)). Done for Café Bookshop; the other four themes are still to design. Layout is in §3.
+Settled in prototypes, done for all five themes (sources: [`mockups/motion-loading.html`](./mockups/motion-loading.html) for Café Bookshop, and `motion-loading-mystery.html`, `-fantasy`, `-superhero`, `-scifi` in [`mockups/`](./mockups/)). Layout is in §3.
 
-- **A living scene:** the scene stays alive for the whole wait. Rain falls down the window, steam rises from the mug, the string lights twinkle, windows in the skyline switch on and off, the lamp glow breathes, and the worm sways.
-- **Entrance, in order:** the "Your order" ticket drops in on its string and swings before settling; then the headline fades in; then the author fact; then the progress bars.
+- **A living scene:** the scene stays alive for the whole wait. It is large and leaves little empty space above the progress bars.
+- **Entrance, in order:** the theme's small card enters (below); then the headline fades in; then the progress bars. The author fact comes last (see below).
+- **Per theme:**
+
+| Theme | Living scene | Card entrance |
+|---|---|---|
+| Café Bookshop | Rain down the window, steam from the mug, twinkling string lights, skyline windows switching on and off, a breathing lamp glow, the worm swaying | The "Your order" ticket drops in on its string and swings before settling |
+| Mystery | The detective at a rainy window, lightning, flickering neon | The case-notes card slides in |
+| Fantasy | A bubbling cauldron in an archway | A scroll unrolls |
+| Superhero | The caped worm flying over a city at sunrise, with drifting clouds | The mission box pops in |
+| Sci-fi | A black hole with rotating swirl rings and a rocket being pulled in | The mission brief flickers on |
+
 - **Progress:** three bars, no wording. Each fills when its engine stage finishes, and the one in progress shimmers. The headline does not change with the stage. The bars reflect real engine stages (spec §4b), never an estimate.
-- **Author facts:** rotate with a slow crossfade, roughly every 12 to 15 seconds in the real app.
+- **Author facts:** the first one arrives later than everything else, after the reader has settled in to wait (about 8 to 10 seconds in the real app), with a slow fade. After that they rotate with a slow crossfade, roughly every 12 to 15 seconds.
 - **Hand-off:** when the last bar fills, the text fades out, the room dims, and the first wrapped book appears (the start of the reveal, §8).
 - **Reduced motion:** when the device's reduced-motion setting is on, nothing animates.
 
@@ -187,7 +211,7 @@ Settled in a prototype (source: [`mockups/motion-loading.html`](./mockups/motion
 | Rejection read-back | Mocked | Mocked | Mocked | Mocked | Mocked |
 | Error | Mocked | Mocked | Mocked | Mocked | Mocked |
 
-Mockups use placeholder covers and bracketed placeholder text. Real covers come from the catalogs (spec §4c). Motion is done for all three Café Bookshop stages: questions (§7), the reveal (§8), and loading (§9). Still to design: motion for the other four themes.
+Mockups use placeholder covers and bracketed placeholder text. Real covers come from the catalogs (spec §4c). Reveal motion (§8) and loading motion (§9) are done for all five themes. Question-screen motion (§7) is done for Café Bookshop and Mystery only (Mystery source: [`mockups/motion-question-press-mystery.html`](./mockups/motion-question-press-mystery.html)); Fantasy, Superhero and Sci-fi wait for the question-flow pass, since new answer formats would mean redoing it.
 
 ## 11. Building it
 

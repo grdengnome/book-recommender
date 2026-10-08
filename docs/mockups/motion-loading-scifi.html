@@ -1,0 +1,164 @@
+<title>Worm Loading Study: Sci-fi</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800&family=Share+Tech+Mono&display=swap">
+<style>
+/* Layout: one phone-sized cafe loading screen, centred, with a note and replay control beneath. Single dark look by design. */
+:root {
+  --page: #02040A; --mortar: #060B14; --walnut: #0F2236; --ink: #060B14; --cream: #0A1626; --note: #D8F6FA; --amber: #FF6B2C; --amber-hi: #B9F3FA; --cy: #36D6E7; --mid: #17344A;
+  --display: 'Orbitron', 'Arial Black', sans-serif; --body: 'Share Tech Mono', 'Courier New', monospace;
+  color-scheme: dark;
+}
+body { background: var(--page); color: var(--note); font-family: var(--body); padding-inline: 16px; padding-block: 20px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.phone { position: relative; flex: none; width: min(390px, 100%); height: 800px; box-sizing: border-box; padding: 20px 20px 24px; overflow: hidden; display: flex; flex-direction: column; gap: 12px; background: var(--mortar); }
+.phone > * { flex: none; position: relative; }
+.phone > .scene { position: absolute; inset: 0; width: 100%; height: 100%; transition: opacity 1s; transform: scale(1.18); transform-origin: 50% 0; }
+.bulbs circle { animation: twinkle 2.8s ease-in-out infinite; } .bulbs circle:nth-child(2n) { animation-delay: .9s; } .bulbs circle:nth-child(3n) { animation-delay: 1.7s; }
+.city rect { animation: citylight 6s steps(1) infinite; } .city rect:nth-child(2) { animation-delay: 1.5s; } .city rect:nth-child(3) { animation-delay: 3.1s; } .city rect:nth-child(4) { animation-delay: 4.4s; }
+.lampglow { animation: lamp 4.5s ease-in-out infinite; }
+.steam { opacity: 0; animation: steam 3s ease-in-out infinite; } .steam.s2 { animation-delay: 1.4s; }
+.wormy { transform-origin: 204px 288px; animation: sway 3.6s ease-in-out infinite; }
+.top { display: flex; justify-content: space-between; align-items: center; height: 30px; }
+.mark { font-family: var(--display); font-weight: 800; font-size: 30px; letter-spacing: 3px; line-height: 1; }
+.tagc { background: var(--walnut); color: #FFFFFF; font-weight: 700; font-size: 14px; padding: 4px 10px 2px; border: 1px solid var(--note); }
+.ticket { margin-top: 362px; margin-left: 20px; align-self: flex-start; width: 196px; box-sizing: border-box; background: var(--cream); color: var(--ink); padding: 14px 12px 8px; transform: rotate(-3deg); transform-origin: 20px -30px; box-shadow: 0 8px 18px rgba(0,0,0,.45); clip-path: polygon(11px 0, calc(100% - 11px) 0, 100% 11px, 100% 100%, 0 100%, 0 11px); }
+.ticket::before { content: ""; position: absolute; left: 15px; top: 4px; width: 7px; height: 7px; border-radius: 50%; background: var(--mortar); }
+.ticket b { display: block; font-family: var(--display); font-weight: 800; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; color: var(--walnut); border-bottom: 1px dashed var(--walnut); padding-bottom: 1px; }
+.ticket span { display: block; font-size: 13px; line-height: 1.3; margin-top: 4px; }
+.head { margin-top: 26px; }
+.head h1 { margin: 0; font-family: var(--display); font-weight: 800; font-size: 25px; line-height: 1; text-transform: uppercase; letter-spacing: 1.5px; }
+.head p { margin: 4px 0 0; font-size: 13px; color: var(--amber); }
+.fact { border-left: 4px solid var(--amber); padding: 4px 0 4px 16px; margin-top: 30px; min-height: 84px; transition: opacity .6s; }
+.fact p { margin: 0; font-size: 16px; line-height: 1.35; }
+.fact b { display: block; font-family: var(--display); font-weight: 800; font-size: 17px; letter-spacing: 2px; text-transform: uppercase; color: var(--amber); margin-top: 10px; }
+.fact.swap { opacity: 0; }
+.bars { margin-top: auto; display: flex; gap: 6px; }
+.bar { flex: 1; height: 10px; background: var(--ink); border: 1px solid var(--note); box-sizing: border-box; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--amber); transition: width .8s ease-out; }
+.bar.on i { width: 100%; }
+.bar.now i { width: 60%; background: linear-gradient(90deg, var(--amber) 0%, var(--amber-hi) 50%, var(--amber) 100%); background-size: 200% 100%; animation: shimmer 1.2s linear infinite; transition: width 4s ease-out; }
+/* entrance */
+.enter .ticket { animation: swing 1.5s cubic-bezier(.3,.7,.3,1) .3s both; }
+.enter .head { animation: fade .9s ease-out 1.5s both; }
+.enter .fact { animation: fade 1.4s ease-out 6.5s both; }
+.enter .bars { animation: fade .9s ease-out 2.6s both; }
+/* hand-off to the reveal */
+.done .scene { opacity: .25; }
+.done .ticket, .done .head, .done .fact, .done .bars, .done .tagc { animation: none; opacity: 0; transition: opacity .7s; }
+.ready { position: absolute !important; left: 20px; right: 20px; top: 300px; text-align: center; opacity: 0; pointer-events: none; }
+.ready h2 { margin: 0; font-family: var(--display); font-weight: 800; font-size: 46px; line-height: 1; text-transform: uppercase; letter-spacing: 1px; color: var(--amber-hi); }
+.ready p { margin: 10px 0 0; font-size: 14px; line-height: 1.4; }
+.done .ready { animation: arrive .8s cubic-bezier(.2,.9,.3,1.2) .5s both; }
+.notes { width: min(390px, 100%); font-size: 14px; line-height: 1.5; display: flex; flex-direction: column; gap: 10px; }
+.notes p { margin: 0; }
+.ctl { font: 700 15px var(--body); color: var(--ink); background: var(--amber); border: 2px solid var(--ink); padding: 10px 14px 8px; cursor: pointer; align-self: flex-start; }
+.ctl:focus-visible { outline: 3px solid var(--amber-hi); outline-offset: 2px; }
+@keyframes twinkle { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
+@keyframes citylight { 0%, 60% { opacity: .85; } 61%, 100% { opacity: .15; } }
+@keyframes lamp { 0%, 100% { opacity: 1; } 45% { opacity: .82; } 55% { opacity: .95; } }
+@keyframes steam { 0% { opacity: 0; transform: translateY(8px); } 35% { opacity: .75; } 100% { opacity: 0; transform: translateY(-16px); } }
+@keyframes sway { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(4deg); } }
+@keyframes swing { 0% { opacity: 0; transform: translateY(-40px) rotate(14deg); } 30% { opacity: 1; transform: rotate(-12deg); } 50% { transform: rotate(4deg); } 68% { transform: rotate(-7deg); } 84% { transform: rotate(-1deg); } 100% { opacity: 1; transform: rotate(-3deg); } }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes shimmer { to { background-position: -200% 0; } }
+@keyframes arrive { from { opacity: 0; transform: scale(.8); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01s !important; animation-delay: 0s !important; animation-iteration-count: 1 !important; transition: none !important; } .steam { opacity: .6; } }
+
+/* Sci-fi overrides */
+.phone::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(transparent, transparent 3px, rgba(54,214,231,.05) 3px, rgba(54,214,231,.05) 4px); pointer-events: none; }
+.phone > .scene { inset: auto; left: 0; top: 34px; width: 100%; height: auto; transform: scale(1.22); transform-origin: 50% 0; }
+.mark { font-size: 22px; letter-spacing: 4px; }
+.tagc { display: none; }
+.streak { animation: streak 1.6s ease-in-out infinite; } .streak:nth-of-type(3n) { animation-delay: .5s; } .streak:nth-of-type(3n+1) { animation-delay: 1s; }
+.swirl { transform-origin: 195px 138px; animation: spin 9s linear infinite; }
+.swirl.w2 { animation-duration: 13s; animation-direction: reverse; } .swirl.w3 { animation-duration: 17s; } .swirl.w4 { animation-duration: 23s; animation-direction: reverse; } .swirl.w5 { animation-duration: 30s; }
+.bhglow { animation: bhglow 3.5s ease-in-out infinite; }
+.pull { transform-origin: 22px 50px; animation: pull 2.4s ease-in-out infinite alternate; }
+.wormy { transform-origin: 0 20px; }
+.ticket { margin-top: 330px; margin-left: 0; width: 262px; background: var(--cream); color: var(--note); border: 2px solid var(--amber); padding: 10px 14px 9px; clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px); transform: none; box-shadow: none; }
+.ticket::before { display: none; }
+.ticket b { font-family: var(--display); font-weight: 800; font-size: 12px; letter-spacing: 3px; color: var(--amber); border-bottom: 0; padding-bottom: 0; }
+.ticket span { font-size: 15px; margin-top: 4px; }
+.ticket span::before { content: "> "; color: var(--amber); }
+.enter .ticket { animation: boot .9s steps(1) .3s both; }
+.head { margin-top: 24px; }
+.head h1 { font-size: 19px; letter-spacing: 1px; line-height: 1.2; }
+.head p { color: var(--cy); font-size: 14px; }
+.head p::before { content: "> ETA: "; }
+.fact { border-left: 4px solid var(--cy); margin-top: 26px; }
+.fact p { font-size: 15px; }
+.fact b { font-family: var(--body); font-weight: 400; font-size: 13px; letter-spacing: 2px; color: var(--cy); }
+.fact b::before { content: "SOURCE: "; }
+.bar { border: 0; background: var(--mid); }
+.bar.now i { background: linear-gradient(90deg, var(--amber) 0%, #FFC9A3 50%, var(--amber) 100%); background-size: 200% 100%; }
+.ready h2 { font-size: 30px; letter-spacing: 2px; line-height: 1.15; }
+@keyframes streak { 0%, 100% { opacity: .25; } 50% { opacity: 1; } }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes bhglow { 0%, 100% { opacity: .7; } 50% { opacity: 1; } }
+@keyframes pull { from { transform: translate(0,0) rotate(-3deg); } to { transform: translate(6px,-10px) rotate(4deg); } }
+@keyframes boot { 0% { opacity: 0; } 15% { opacity: 1; } 25% { opacity: .2; } 40% { opacity: 1; } 55% { opacity: .5; } 70%, 100% { opacity: 1; } }
+</style>
+<div class="phone enter" id="phone">
+<svg viewBox="0 0 390 300" class="scene" id="scene" aria-hidden="true">
+<defs><radialGradient id="el-glow" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#FF6B2C" stop-opacity="0.55"/><stop offset="0.45" stop-color="#FF6B2C" stop-opacity="0.18"/><stop offset="1" stop-color="#FF6B2C" stop-opacity="0"/></radialGradient></defs>
+<path class="streak" d="M265 141 L299 143" stroke="#36D6E7" stroke-width="1.0" stroke-linecap="round" opacity="0.35"/><path class="streak" d="M301 154 L387 167" stroke="#D8F6FA" stroke-width="1.8" stroke-linecap="round" opacity="0.49"/><path class="streak" d="M290 162 L426 196" stroke="#36D6E7" stroke-width="2.6" stroke-linecap="round" opacity="0.63"/><path class="streak" d="M279 168 L319 183" stroke="#D8F6FA" stroke-width="1.0" stroke-linecap="round" opacity="0.77"/><path class="streak" d="M267 172 L354 213" stroke="#FFC9A3" stroke-width="1.8" stroke-linecap="round" opacity="0.91"/><path class="streak" d="M256 175 L384 251" stroke="#36D6E7" stroke-width="2.6" stroke-linecap="round" opacity="0.35"/><path class="streak" d="M282 202 L323 233" stroke="#36D6E7" stroke-width="1.0" stroke-linecap="round" opacity="0.49"/><path class="streak" d="M268 205 L346 275" stroke="#D8F6FA" stroke-width="1.8" stroke-linecap="round" opacity="0.63"/><path class="streak" d="M255 205 L361 322" stroke="#36D6E7" stroke-width="2.6" stroke-linecap="round" opacity="0.77"/><path class="streak" d="M243 203 L279 252" stroke="#D8F6FA" stroke-width="1.0" stroke-linecap="round" opacity="0.91"/><path class="streak" d="M232 200 L290 298" stroke="#FFC9A3" stroke-width="1.8" stroke-linecap="round" opacity="0.35"/><path class="streak" d="M242 237 L313 388" stroke="#36D6E7" stroke-width="2.6" stroke-linecap="round" opacity="0.49"/><path class="streak" d="M229 232 L252 298" stroke="#36D6E7" stroke-width="1.0" stroke-linecap="round" opacity="0.63"/><path class="streak" d="M217 226 L247 346" stroke="#D8F6FA" stroke-width="1.8" stroke-linecap="round" opacity="0.77"/><path class="streak" d="M207 219 L233 393" stroke="#36D6E7" stroke-width="2.6" stroke-linecap="round" opacity="0.91"/><path class="streak" d="M199 211 L202 290" stroke="#D8F6FA" stroke-width="1.0" stroke-linecap="round" opacity="0.35"/><path class="streak" d="M190 248 L183 380" stroke="#FFC9A3" stroke-width="1.8" stroke-linecap="round" opacity="0.49"/><path class="streak" d="M180 238 L175 273" stroke="#36D6E7" stroke-width="2.6" stroke-linecap="round" opacity="0.63"/><path class="streak" d="M173 227 L151 313" stroke="#36D6E7" stroke-width="1.0" stroke-linecap="round" opacity="0.77"/><path class="streak" d="M167 216 L119 349" stroke="#D8F6FA" stroke-width="1.8" stroke-linecap="round" opacity="0.91"/><path class="streak" d="M163 205 L144 245" stroke="#36D6E7" stroke-width="2.6" stroke-linecap="round" opacity="0.35"/><path class="streak" d="M138 233 L88 316" stroke="#D8F6FA" stroke-width="1.0" stroke-linecap="round" opacity="0.49"/><path class="streak" d="M134 220 L45 340" stroke="#FFC9A3" stroke-width="1.8" stroke-linecap="round" opacity="0.63"/><path class="streak" d="M132 207 L97 246" stroke="#36D6E7" stroke-width="2.6" stroke-linecap="round" opacity="0.77"/><path class="streak" d="M133 194 L54 265" stroke="#36D6E7" stroke-width="1.0" stroke-linecap="round" opacity="0.91"/><path class="streak" d="M135 183 L7 277" stroke="#D8F6FA" stroke-width="1.8" stroke-linecap="round" opacity="0.35"/><path class="streak" d="M99 195 L46 227" stroke="#36D6E7" stroke-width="2.6" stroke-linecap="round" opacity="0.49"/><path class="streak" d="M102 182 L-2 231" stroke="#D8F6FA" stroke-width="1.0" stroke-linecap="round" opacity="0.63"/><path class="streak" d="M106 170 L-52 226" stroke="#FFC9A3" stroke-width="1.8" stroke-linecap="round" opacity="0.77"/><path class="streak" d="M113 159 L44 176" stroke="#36D6E7" stroke-width="2.6" stroke-linecap="round" opacity="0.91"/><path class="streak" d="M120 149 L-3 167" stroke="#36D6E7" stroke-width="1.0" stroke-linecap="round" opacity="0.35"/><path class="streak" d="M82 143 L-95 152" stroke="#D8F6FA" stroke-width="1.8" stroke-linecap="round" opacity="0.49"/><path class="streak" d="M91 133 L11 129" stroke="#36D6E7" stroke-width="2.6" stroke-linecap="round" opacity="0.63"/><path class="streak" d="M101 124 L-31 104" stroke="#D8F6FA" stroke-width="1.0" stroke-linecap="round" opacity="0.77"/><path class="streak" d="M112 117 L77 108" stroke="#FFC9A3" stroke-width="1.8" stroke-linecap="round" opacity="0.91"/><path class="streak" d="M123 112 L39 82" stroke="#36D6E7" stroke-width="2.6" stroke-linecap="round" opacity="0.35"/><path class="streak" d="M92 89 L-36 28" stroke="#36D6E7" stroke-width="1.0" stroke-linecap="round" opacity="0.49"/><path class="streak" d="M105 84 L66 61" stroke="#D8F6FA" stroke-width="1.8" stroke-linecap="round" opacity="0.63"/><path class="streak" d="M118 81 L39 22" stroke="#36D6E7" stroke-width="2.6" stroke-linecap="round" opacity="0.77"/><path class="streak" d="M131 80 L19 -22" stroke="#D8F6FA" stroke-width="1.0" stroke-linecap="round" opacity="0.91"/><path class="streak" d="M143 80 L106 40" stroke="#FFC9A3" stroke-width="1.8" stroke-linecap="round" opacity="0.35"/><path class="streak" d="M127 46 L63 -40" stroke="#36D6E7" stroke-width="2.6" stroke-linecap="round" opacity="0.49"/><path class="streak" d="M141 47 L58 -90" stroke="#36D6E7" stroke-width="1.0" stroke-linecap="round" opacity="0.63"/><path class="streak" d="M154 50 L127 -7" stroke="#D8F6FA" stroke-width="1.8" stroke-linecap="round" opacity="0.77"/><path class="streak" d="M165 55 L126 -54" stroke="#36D6E7" stroke-width="2.6" stroke-linecap="round" opacity="0.91"/><path class="streak" d="M176 61 L135 -103" stroke="#D8F6FA" stroke-width="1.0" stroke-linecap="round" opacity="0.35"/><path class="streak" d="M185 69 L174 -2" stroke="#FFC9A3" stroke-width="1.8" stroke-linecap="round" opacity="0.49"/><path class="streak" d="M190 31 L184 -94" stroke="#36D6E7" stroke-width="2.6" stroke-linecap="round" opacity="0.63"/><path class="streak" d="M200 40 L209 -138" stroke="#36D6E7" stroke-width="1.0" stroke-linecap="round" opacity="0.77"/><path class="streak" d="M208 50 L220 -30" stroke="#D8F6FA" stroke-width="1.8" stroke-linecap="round" opacity="0.91"/><path class="streak" d="M215 60 L247 -70" stroke="#36D6E7" stroke-width="2.6" stroke-linecap="round" opacity="0.35"/><path class="streak" d="M219 71 L231 36" stroke="#D8F6FA" stroke-width="1.0" stroke-linecap="round" opacity="0.49"/><path class="streak" d="M241 40 L280 -41" stroke="#FFC9A3" stroke-width="1.8" stroke-linecap="round" opacity="0.63"/><path class="streak" d="M246 53 L320 -69" stroke="#36D6E7" stroke-width="2.6" stroke-linecap="round" opacity="0.77"/><path class="streak" d="M249 66 L276 29" stroke="#36D6E7" stroke-width="1.0" stroke-linecap="round" opacity="0.91"/><path class="streak" d="M249 78 L316 5" stroke="#D8F6FA" stroke-width="1.8" stroke-linecap="round" opacity="0.35"/><path class="streak" d="M248 90 L361 -12" stroke="#36D6E7" stroke-width="2.6" stroke-linecap="round" opacity="0.49"/><path class="streak" d="M283 73 L327 40" stroke="#D8F6FA" stroke-width="1.0" stroke-linecap="round" opacity="0.63"/><path class="streak" d="M281 87 L374 31" stroke="#FFC9A3" stroke-width="1.8" stroke-linecap="round" opacity="0.77"/><path class="streak" d="M277 99 L423 30" stroke="#36D6E7" stroke-width="2.6" stroke-linecap="round" opacity="0.91"/><path class="streak" d="M272 110 L333 89" stroke="#36D6E7" stroke-width="1.0" stroke-linecap="round" opacity="0.35"/><path class="streak" d="M266 120 L379 92" stroke="#D8F6FA" stroke-width="1.8" stroke-linecap="round" opacity="0.49"/><path class="streak" d="M304 122 L472 97" stroke="#36D6E7" stroke-width="2.6" stroke-linecap="round" opacity="0.63"/><path class="streak" d="M296 133 L369 130" stroke="#D8F6FA" stroke-width="1.0" stroke-linecap="round" opacity="0.77"/>
+<circle cx="195" cy="138" r="170" fill="url(#el-glow)" class="bhglow"/>
+<circle class="swirl w1" cx="195" cy="138" r="66" fill="none" stroke="#36D6E7" stroke-width="2" stroke-dasharray="40 30" opacity="0.5"/><circle class="swirl w2" cx="195" cy="138" r="80" fill="none" stroke="#36D6E7" stroke-width="2" stroke-dasharray="70 46" opacity="0.4"/><circle class="swirl w3" cx="195" cy="138" r="96" fill="none" stroke="#36D6E7" stroke-width="2" stroke-dasharray="30 60" opacity="0.35"/><circle class="swirl w4" cx="195" cy="138" r="114" fill="none" stroke="#36D6E7" stroke-width="2" stroke-dasharray="90 80" opacity="0.28"/><circle class="swirl w5" cx="195" cy="138" r="134" fill="none" stroke="#36D6E7" stroke-width="2" stroke-dasharray="50 110" opacity="0.22"/>
+<g transform="rotate(-14 195 138)">
+<ellipse cx="195" cy="138" rx="104" ry="24" fill="none" stroke="#FF6B2C" stroke-width="12"/>
+<ellipse cx="195" cy="138" rx="104" ry="24" fill="none" stroke="#FFC9A3" stroke-width="3"/>
+<ellipse cx="195" cy="138" rx="126" ry="31" fill="none" stroke="#FF6B2C" stroke-width="2" opacity="0.5"/>
+</g>
+<circle cx="195" cy="138" r="52" fill="none" stroke="#FF6B2C" stroke-width="7"/>
+<circle cx="195" cy="138" r="46" fill="none" stroke="#FFC9A3" stroke-width="2.5"/>
+<circle cx="195" cy="138" r="43" fill="#000000"/>
+<g transform="rotate(-14 195 138)">
+<path d="M91 138 A104 24 0 0 0 299 138" fill="none" stroke="#FF6B2C" stroke-width="12"/>
+<path d="M91 138 A104 24 0 0 0 299 138" fill="none" stroke="#FFC9A3" stroke-width="3"/>
+</g>
+<path d="M40 286 Q70 250 104 226" stroke="#FF6B2C" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.7"/>
+<path d="M30 296 Q50 272 66 258" stroke="#FFC9A3" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.7"/>
+<g transform="translate(112,184) rotate(52) scale(0.62)"><g class="pull"><path d="M0 64 l22 -64 l22 64 l-10 -8 v20 h-24 v-20z" fill="#D8F6FA"/><circle cx="22" cy="40" r="6" fill="#36D6E7"/><path d="M12 80 l10 26 l10 -26z" fill="#FF6B2C"/></g></g>
+<g transform="translate(286,228)"><g class="wormy"><path d="M0 20 Q12 0 24 18 T48 12" stroke="#3DBE6C" stroke-width="9" fill="none" stroke-linecap="round"/><circle cx="49" cy="10" r="10" fill="#D8F6FA" fill-opacity="0.2" stroke="#D8F6FA" stroke-width="2"/><circle cx="51" cy="9" r="2" fill="#060B14"/></g></g>
+</svg>
+<div class="top"><div class="mark">WORM//</div><div class="tagc">Brewing</div></div>
+<div class="ticket"><b>MISSION BRIEF</b><span>[One line reflecting back what you told us.]</span></div>
+<div class="head"><h1 id="headline">SCANNING THE GALAXY</h1><p>about a minute or two</p></div>
+<div class="fact" id="fact" aria-live="polite"><p id="facttext">[A short, verified fact about a well-known author.]</p><b id="factwho">[Author name]</b></div>
+<div class="bars" role="img" aria-label="Progress: three stages"><div class="bar"><i></i></div><div class="bar"><i></i></div><div class="bar"><i></i></div></div>
+<div class="ready"><h2>3 SIGNALS FOUND</h2><p>In the app, the first sealed capsule appears here.</p></div>
+</div>
+<div class="notes">
+<p>Motion study for the loading screen. The real wait is a minute or two; this demo runs the three stages in about 20 seconds so you can see the whole arc, including the hand-off at the end.</p>
+<button class="ctl" type="button" id="replay">Replay from the start</button>
+</div>
+<script>
+(function () {
+  var phone = document.getElementById('phone'), scene = document.getElementById('scene');
+  var fact = document.getElementById('fact'), text = document.getElementById('facttext'), who = document.getElementById('factwho'), headline = document.getElementById('headline');
+  var bars = phone.querySelectorAll('.bar'), timers = [];
+  var facts = [['[A short, verified fact about a well-known author.]', '[Author name]'], ['[A second author fact.]', '[Another author]'], ['[A third author fact.]', '[A third author]']];
+  var calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (calm && scene.pauseAnimations) { scene.pauseAnimations(); }
+  function later(fn, ms) { timers.push(setTimeout(fn, ms)); }
+  function stage(i) { bars.forEach(function (b, k) { b.classList.toggle('on', k < i); b.classList.toggle('now', k === i); }); }
+  function showFact(i) {
+    fact.classList.add('swap');
+    later(function () { text.textContent = facts[i][0]; who.textContent = facts[i][1]; fact.classList.remove('swap'); }, 600);
+  }
+  function run() {
+    timers.forEach(clearTimeout); timers = [];
+    phone.className = 'phone enter'; fact.classList.remove('swap');
+    text.textContent = facts[0][0]; who.textContent = facts[0][1];
+    bars.forEach(function (b) { b.classList.remove('on', 'now'); });
+    void phone.offsetWidth;
+    later(function () { stage(0); }, 2900);
+    later(function () { showFact(1); }, 11800);
+    later(function () { stage(1); }, 8400);
+    later(function () { showFact(2); }, 15800);
+    later(function () { stage(2); }, 13400);
+    later(function () { stage(3); }, 18400);
+    later(function () { phone.classList.remove('enter'); phone.classList.add('done'); }, 19600);
+  }
+  document.getElementById('replay').addEventListener('click', run);
+  run();
+})();
+</script>

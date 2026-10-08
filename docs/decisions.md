@@ -1,6 +1,6 @@
 # Decision Log
 
-*Covers decisions through the v0 engine, v0 product planning, and the start of the build (October 6, 2026). Further build decisions will be added as they're made.*
+*Covers decisions through the v0 engine, v0 product planning, and the start of the build (October 7, 2026). Further build decisions will be added as they're made.*
 
 The product and architecture decisions behind this recommender, and the paths I rejected. The [progress log](./progress-log.md) is the session-by-session diary; this file is the story told by decision. Each entry gives the decision and why, with a link to the full detail.
 
@@ -456,7 +456,9 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 - **The question-flow stopping threshold** needs real usage data.
 - **Raw catalog data leaks into display text** (non-Latin author names, missing co-authors). Scheduled: card-ready output in [spec §4b](./spec.md).
 - **Does Café Bookshop stay in the random theme rotation** now that it's also the home theme? ([design §5](./design.md))
-- **Wrappings and reveal-prompt wording for Fantasy, Superhero, Mystery and Sci-fi.** Café Bookshop is settled. ([design §8](./design.md))
+- **Reveal-prompt wording for Fantasy, Superhero, Mystery and Sci-fi.** Every theme's wrapping is decided; only the café's "Tap to unwrap" wording is settled, and the other four are placeholders. ([design §8](./design.md))
+- **How to keep the question flow fresh:** wording variety, different answer formats, a new scene per question. The existing first-question template stays. ([design §7](./design.md))
+- **How much book detail to show on the reveal screen versus the detail screen.** ([design §8](./design.md))
 
 ---
 
@@ -577,3 +579,23 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 ### 13.29 On the loading screen, the scene leads
 **Decision:** The scene leads the loading screen; the order ticket and headline are small.
 **Why:** The wait is the longest moment in the app, and a living scene is better company than large text. ([design §9](./design.md))
+
+### 13.30 Scene props fade once the cover is revealed
+**Decision:** The worm and small scene objects fade out once the cover lands.
+**Why:** They distract from the cover and look stranded behind it. ([progress log, Oct 7](./progress-log.md))
+
+### 13.31 The author fact arrives last on the loading screen
+**Decision:** The author fact appears later than the rest of the loading screen, about 8 to 10 seconds in, with a slow fade.
+**Why:** Arriving after the reader has settled makes it a pleasant surprise instead of more text to read at once. ([progress log, Oct 7](./progress-log.md))
+
+### 13.32 The worm keeps its mascot form in every theme
+**Decision:** The worm stays one wavy line, one eye and one prop in every theme; it is never redrawn as a different character.
+**Why:** A consistent mascot builds the brand; a redrawn face reads as a different character. ([progress log, Oct 7](./progress-log.md))
+
+### 13.33 Fantasy's wrapping uses only the theme's own colours
+**Decision:** The Fantasy wrapping uses only violet, ivory, crimson and gold.
+**Why:** Unrelated colours made the book look like it came from another theme. ([progress log, Oct 7](./progress-log.md))
+
+### 13.34 Question-screen motion for three themes waits for a question-flow pass
+**Decision:** Question-screen motion for Fantasy, Superhero and Sci-fi is deferred until a question-flow pass.
+**Why:** New answer formats would mean redoing it. ([progress log, Oct 7](./progress-log.md))

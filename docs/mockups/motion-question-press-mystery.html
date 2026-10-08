@@ -1,0 +1,195 @@
+<title>Worm Motion Study: Mystery</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Limelight&family=Special+Elite&display=swap">
+<style>
+/* Layout: one phone-sized cafe screen, centred, with a short note and replay control beneath it. Single look by design (the cafe theme). */
+:root {
+  --wall: #0B0D12; --ink: #D9D4C7; --walnut: #161A22; --cream: #0B0D12; --amber: #E8B04A; --muted: #A9AFBD; --page: #05060A; --note: #D9D4C7; --line: #3A404D;
+  --display: 'Limelight', Georgia, serif; --body: 'Special Elite', 'Courier New', monospace;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body { background: var(--page); color: var(--note); font-family: var(--body); padding-inline: 16px; padding-block: 20px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.stage { width: min(390px, 100%); perspective: 1400px; }
+.phone { position: relative; min-height: 780px; background: var(--wall); color: var(--ink); overflow: hidden; display: flex; flex-direction: column; gap: 12px; padding: 20px 20px 24px; box-sizing: border-box; transform-origin: left center; }
+.scene { position: absolute; inset: 0; width: 100%; height: 100%; }
+#glow { transition: opacity .5s ease; opacity: .7; transform-origin: 338px 110px; }
+.phone.lit #glow { opacity: 1; animation: lamp .7s ease-out; }
+.phone > * { position: relative; }
+.phone > .scene { position: absolute; }
+.mark { font-family: var(--display); font-weight: 800; font-size: 30px; letter-spacing: 3px; line-height: 1; height: 30px; }
+.q { margin-top: 176px; background: var(--ink); color: var(--note); padding: 16px 18px 18px; transform: rotate(-1.2deg); box-shadow: 0 10px 22px rgba(42,26,18,.45); }
+.q small { display: block; font-size: 13px; color: var(--muted); }
+.q h1 { margin: 6px 0 0; font-family: var(--display); font-weight: 800; font-size: 40px; line-height: 1; text-transform: uppercase; letter-spacing: 1px; text-wrap: balance; }
+.q em { font-style: normal; color: var(--amber); }
+.answers { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
+.ans { display: flex; align-items: center; gap: 12px; padding: 13px 14px 11px; border: 2px solid var(--ink); text-align: left; font: 400 17px var(--body); color: var(--ink); cursor: pointer;
+  background: linear-gradient(var(--walnut), var(--walnut)) no-repeat left / 0% 100%, var(--cream);
+  transition: background-size .28s cubic-bezier(.2,.8,.2,1), color .2s, opacity .3s, transform .12s; -webkit-tap-highlight-color: transparent; }
+.ans:active { transform: scale(.97); }
+.ans:focus-visible, .go:focus-visible, .ctl:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+.dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--ink); box-sizing: border-box; flex-shrink: 0; transition: background .2s, border-color .2s; }
+.ans.picked { background-size: 100% 100%, auto; color: var(--cream); font-weight: 700; animation: stamp .42s cubic-bezier(.3,1.6,.5,1); }
+.ans.picked .dot { background: var(--amber); border-color: var(--cream); animation: ring .6s ease-out; }
+.answers.chosen .ans:not(.picked) { opacity: .6; }
+.field { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
+.field label { font-weight: 700; font-size: 14px; background: var(--wall); align-self: flex-start; padding: 0 4px; }
+.field input { font: 400 18px var(--body); padding: 10px 12px 8px; border: 2px solid var(--ink); background: var(--cream); color: var(--ink); border-radius: 0; }
+.hint { margin: 2px 0 0; font-size: 14px; font-weight: 700; background: var(--wall); align-self: flex-start; padding: 2px 4px 0; animation: rise .35s ease-out both; }
+.field.wobble input { animation: wobble .35s ease-in-out; }
+.go { margin-top: auto; padding: 14px 16px 14px 34px; background: var(--walnut); color: #FFFFFF; border: 0; clip-path: polygon(22px 0, 100% 0, 100% 100%, 22px 100%, 0 50%); font: 800 24px var(--display); letter-spacing: 3px; text-transform: uppercase; cursor: pointer; opacity: 0; visibility: hidden; transition: opacity .3s, transform .12s, visibility 0s .3s; }
+.go::before { content: ""; position: absolute; left: 16px; top: 50%; width: 10px; height: 10px; margin-top: -5px; border-radius: 50%; background: var(--wall); }
+.go.ready { opacity: 1; visibility: visible; transition: opacity .3s, transform .12s; animation: arrive .5s cubic-bezier(.2,.9,.3,1.2); }
+.go.ready:active { transform: translateX(6px); }
+/* entrance: question first, then answers one by one */
+.stage { --p: 1; }
+.stage.later { --p: .62; }
+.enter .q { animation: drop calc(var(--p) * .9s) cubic-bezier(.25,.8,.3,1) both; }
+.enter .ans { animation: rise calc(var(--p) * .42s) ease-out both; animation-delay: calc(var(--p) * (.8s + var(--i) * .1s)); }
+.enter .field { animation: rise calc(var(--p) * .5s) ease-out both; animation-delay: calc(var(--p) * 1.3s); }
+/* page turn */
+.phone.turn { animation: turn .6s cubic-bezier(.6,0,.4,1) forwards; }
+.next { width: min(390px, 100%); min-height: 780px; box-sizing: border-box; background: var(--wall); color: var(--ink); padding: 20px; display: flex; flex-direction: column; justify-content: center; gap: 16px; animation: rise .4s ease-out both; }
+.next h2 { margin: 0; font-family: var(--display); font-weight: 800; font-size: 34px; line-height: 1.05; text-transform: uppercase; text-wrap: balance; }
+.next p { margin: 0; font-size: 16px; line-height: 1.45; max-width: 34ch; }
+.ctl { font: 700 15px var(--body); color: var(--ink); background: var(--amber); border: 2px solid var(--ink); padding: 10px 14px 8px; cursor: pointer; align-self: flex-start; }
+.notes { width: min(390px, 100%); font-size: 14px; line-height: 1.5; display: flex; flex-direction: column; gap: 10px; }
+.notes p { margin: 0; }
+@keyframes drop { from { opacity: 0; transform: translateY(-18px) rotate(-4deg); } to { opacity: 1; transform: rotate(-1.2deg); } }
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes stamp { 0% { transform: scale(.94); } 55% { transform: scale(1.035); } 100% { transform: none; } }
+@keyframes ring { from { box-shadow: 0 0 0 0 rgba(242,162,58,.9); } to { box-shadow: 0 0 0 14px rgba(242,162,58,0); } }
+@keyframes lamp { 0% { transform: scale(1); } 40% { transform: scale(1.25); } 100% { transform: scale(1); } }
+@keyframes arrive { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes wobble { 0%, 100% { transform: none; } 30% { transform: translateX(-5px); } 65% { transform: translateX(4px); } }
+@keyframes nudge { 0% { transform: none; } 40% { transform: translateX(8px); } 100% { transform: none; } }
+@keyframes turn { to { transform: rotateY(-88deg); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { *, *::before { animation: none !important; transition: none !important; } }
+
+/* Mystery overrides */
+html, body { height: auto; }
+.phone { flex: none; }
+.scene { inset: auto; left: 0; top: 0; width: 100%; height: auto; }
+#glow { opacity: .16; transform-origin: 106px 112px; transition: opacity .5s ease; }
+.phone.lit #glow { opacity: .34; animation: flare .7s ease-out; }
+.mark { font-weight: 400; letter-spacing: 2px; font-size: 28px; }
+.q { background: transparent; box-shadow: none; transform: none; padding: 0; margin-top: 176px; }
+.q small { font-size: 14px; color: var(--muted); }
+.q h1 { font-weight: 400; text-transform: none; font-size: 36px; line-height: 1.1; margin-top: 8px; }
+.enter .q { animation: fadeq calc(var(--p) * .9s) ease-out both; }
+.answers { gap: 0; margin-top: 2px; }
+.ans { background: transparent; border: 0; border-bottom: 1px solid var(--line); padding: 13px 0 11px; gap: 14px; color: var(--note); font-weight: 400; transition: color .2s, border-color .3s, opacity .3s, transform .12s; }
+.dot { width: 12px; height: 12px; border-radius: 0; border: 1px solid var(--note); }
+.ans.picked { background: transparent; color: var(--amber); font-weight: 400; border-bottom-color: var(--amber); }
+.ans.picked .dot { background: var(--amber); border-color: var(--amber); }
+.field label { background: transparent; padding: 0; font-weight: 400; color: var(--muted); }
+.field input { background: transparent; border: 0; border-bottom: 1px solid var(--note); padding: 6px 0; color: var(--note); }
+.hint { background: transparent; padding: 2px 0 0; font-weight: 400; color: var(--amber); }
+.go { background: transparent; color: var(--amber); border: 1px solid var(--amber); box-shadow: inset 0 0 0 4px var(--wall), inset 0 0 0 5px var(--amber); clip-path: none; padding: 14px; font-weight: 400; font-size: 21px; text-transform: none; }
+.go::before { display: none; }
+.next h2 { font-weight: 400; text-transform: none; }
+.ctl { color: #05060A; }
+@keyframes fadeq { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes flare { 0% { opacity: .16; } 40% { opacity: .5; } 100% { opacity: .34; } }
+</style>
+<div class="stage" id="stage">
+<div class="phone enter" id="phone">
+<svg viewBox="0 0 390 230" class="scene" aria-hidden="true">
+<g stroke="#161A22" stroke-width="7"><path d="M200 64 L390 50"/><path d="M200 82 L390 68"/><path d="M200 100 L390 86"/><path d="M200 118 L390 104"/><path d="M200 136 L390 122"/><path d="M200 154 L390 140"/><path d="M200 172 L390 158"/></g>
+<path id="glow" d="M62 112 L8 190 H236 L150 112z" fill="#E8B04A" opacity="0.200"/>
+<rect x="0" y="190" width="390" height="40" fill="#161A22"/>
+<path d="M0 190 h390" stroke="#3A404D" stroke-width="1"/>
+<rect x="84" y="182" width="44" height="8" fill="#2A2F3B"/>
+<path d="M106 182 V120" stroke="#2A2F3B" stroke-width="5"/>
+<path d="M58 112 q48 -40 96 0z" fill="#2A2F3B"/>
+<rect x="62" y="112" width="88" height="4" fill="#E8B04A" opacity="1.0"/>
+<rect x="254" y="92" width="56" height="62" fill="#D9D4C7" opacity="0.85"/>
+<path d="M262 106 h38 M262 116 h30 M262 126 h36" stroke="#0B0D12" stroke-width="1.5"/>
+<rect x="232" y="146" width="100" height="10" rx="5" fill="#2A2F3B"/>
+<path d="M222 190 l14 -36 h92 l14 36z" fill="#1B1F28" stroke="#3A404D" stroke-width="1"/>
+<g fill="#8D95A6"><circle cx="246" cy="164" r="2.4"/><circle cx="258" cy="164" r="2.4"/><circle cx="270" cy="164" r="2.4"/><circle cx="282" cy="164" r="2.4"/><circle cx="294" cy="164" r="2.4"/><circle cx="306" cy="164" r="2.4"/><circle cx="318" cy="164" r="2.4"/><circle cx="252" cy="173" r="2.4"/><circle cx="264" cy="173" r="2.4"/><circle cx="276" cy="173" r="2.4"/><circle cx="288" cy="173" r="2.4"/><circle cx="300" cy="173" r="2.4"/><circle cx="312" cy="173" r="2.4"/><circle cx="324" cy="173" r="2.4"/><circle cx="246" cy="182" r="2.4"/><circle cx="258" cy="182" r="2.4"/><circle cx="270" cy="182" r="2.4"/><circle cx="282" cy="182" r="2.4"/><circle cx="294" cy="182" r="2.4"/><circle cx="306" cy="182" r="2.4"/><circle cx="318" cy="182" r="2.4"/></g>
+<g transform="translate(160,172)"><path d="M0 14 Q10 -4 20 12 T40 8" stroke="#8D95A6" stroke-width="8" fill="none" stroke-linecap="round"/><ellipse cx="42" cy="1" rx="10" ry="2.6" fill="#05060A" stroke="#8D95A6" stroke-width="0.8"/><path d="M36 1 q1 -9 6 -9 q5 0 6 9z" fill="#05060A" stroke="#8D95A6" stroke-width="0.8"/></g>
+</svg>
+<div class="mark">WORM</div>
+<div class="q"><small>The plot thickens.</small><h1>What kept you <em>guessing</em>?</h1></div>
+<div class="answers" id="answers">
+<button class="ans" type="button" id="ans-0" aria-pressed="false"><span class="dot"></span><span>The characters</span></button>
+<button class="ans" type="button" id="ans-1" aria-pressed="false"><span class="dot"></span><span>The plot twists</span></button>
+<button class="ans" type="button" id="ans-2" aria-pressed="false"><span class="dot"></span><span>The writing itself</span></button>
+<button class="ans" type="button" id="ans-3" aria-pressed="false"><span class="dot"></span><span>The world it built</span></button>
+</div>
+<div class="field"><label for="own">Or in your own words</label><input id="own" type="text" autocomplete="off" aria-describedby="hint"><p class="hint" id="hint" role="status" hidden>Tell me a little more? Or tap an answer above.</p></div>
+<button class="go" type="button" id="go" disabled>Follow the lead</button>
+</div>
+</div>
+<div class="notes">
+<p>Motion study for the answer press. Tap an answer, then "Follow the lead". Tap a chosen answer again to unselect it. To see the gentle nudge, type one letter with no answer chosen and tap "Follow the lead"; a second tap moves on anyway. The four answers are examples, not final wording.</p>
+<button class="ctl" type="button" id="replay">Replay as the first question</button>
+<button class="ctl" type="button" id="replay-later">Replay as a later question (faster)</button>
+</div>
+<script>
+(function () {
+  var stage = document.getElementById('stage');
+  var first = stage.innerHTML;
+  function wire() {
+    var phone = document.getElementById('phone');
+    var wrap = document.getElementById('answers');
+    var go = document.getElementById('go');
+    var list = wrap.querySelectorAll('.ans');
+    list.forEach(function (b, i) {
+      b.style.setProperty('--i', i);
+      b.addEventListener('click', function () {
+        if (b.classList.contains('picked')) {
+          b.classList.remove('picked'); b.setAttribute('aria-pressed', 'false');
+          wrap.classList.remove('chosen'); phone.classList.remove('lit');
+          ready(document.getElementById('own').value.trim().length > 0);
+          return;
+        }
+        list.forEach(function (o) { o.classList.remove('picked'); o.setAttribute('aria-pressed', 'false'); });
+        phone.classList.remove('enter');
+        void b.offsetWidth;
+        b.classList.add('picked'); b.setAttribute('aria-pressed', 'true');
+        wrap.classList.add('chosen');
+        phone.classList.remove('lit'); void phone.offsetWidth; phone.classList.add('lit');
+        ready(true);
+      });
+    });
+    var own = document.getElementById('own');
+    var asked = false;
+    function ready(on) {
+      if (on && !go.classList.contains('ready')) { phone.classList.remove('enter'); go.disabled = false; go.classList.add('ready'); }
+      if (!on) { go.classList.remove('ready'); go.disabled = true; }
+    }
+    own.addEventListener('input', function () {
+      var typed = own.value.trim().length > 0;
+      var picked = wrap.querySelector('.picked');
+      ready(typed || !!picked);
+    });
+    go.addEventListener('click', function () {
+      if (!go.classList.contains('ready')) return;
+      var typed = own.value.trim();
+      var thin = typed.length < 3 || !/[A-Za-z\u00C0-\uFFFF]{2}/.test(typed);
+      if (!wrap.querySelector('.picked') && thin && !asked) {
+        asked = true;
+        var hint = document.getElementById('hint'); hint.hidden = false;
+        var field = own.parentNode; field.classList.remove('wobble'); void field.offsetWidth; field.classList.add('wobble');
+        own.focus();
+        return;
+      }
+      phone.classList.remove('enter');
+      phone.classList.add('turn');
+      var done = false;
+      function show() {
+        if (done) return; done = true;
+        stage.innerHTML = '<div class="next"><h2>The next question lands here</h2><p>In the app, the page turns straight into the next question, which enters the same way this one did.</p><button class="ctl" type="button" id="again">Show the next question (faster pace)</button></div>';
+        document.getElementById('again').addEventListener('click', function () { reset(true); });
+      }
+      phone.addEventListener('animationend', show, { once: true });
+      setTimeout(show, 800);
+    });
+  }
+  function reset(later) { stage.classList.toggle('later', later === true); stage.innerHTML = first; wire(); }
+  document.getElementById('replay').addEventListener('click', function () { reset(false); });
+  document.getElementById('replay-later').addEventListener('click', function () { reset(true); });
+  wire();
+})();
+</script>

@@ -633,3 +633,23 @@ Ran the identical `cult novel` query against Open Library side by side for direc
 3. Engine: return structured picks, including the three clue values, and report stage changes.
 4. Before going public: data store and rate limit.
 5. Watch for the GitHub Support reply.
+
+---
+
+## October 7, 2026 — Reveal and loading motion complete for all five themes
+
+**Conclusion:** Reveal and loading motion are done for all five themes, and every theme has its wrapping. Mystery also has its question-screen motion; the other three themes wait for a question-flow pass. Written up in `design.md` §6–10, decisions 13.30–13.34.
+
+**Wrappings:** kraft paper (Café Bookshop), manila case envelope (Mystery), sealed leather book (Fantasy), foil trading pack (Superhero), cargo capsule (Sci-fi). Prototypes in `docs/mockups/motion-reveal-*.html` and `motion-loading-*.html`.
+
+**New rules:** scene props fade once the cover lands; the author fact arrives last on the loading screen (about 8–10s); the worm keeps one mascot form in every theme; Fantasy's wrapping sticks to the theme's own colours.
+
+**Closed:** GitHub Support completed the cleanup: the old pull-request references are gone and the old commit URLs return Not Found. This closes the item open since September 28.
+
+**Open:** reveal-prompt wording per theme; how to keep the question flow fresh; how much book detail to show on the reveal versus the detail screen (`decisions.md` §12).
+
+**Next:**
+1. Question-flow pass in Café Bookshop first (formats, wording variety, scenes), then roll out to all themes with motion.
+2. Owner sign-off on the full design.
+3. Engine: structured picks with the three clue values, and stage reporting.
+4. Before going public: data store and rate limit.

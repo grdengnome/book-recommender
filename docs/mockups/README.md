@@ -1,4 +1,4 @@
-# Design mockups (snapshot, October 5, 2026)
+# Design mockups (snapshot, October 7, 2026)
 
 Source files for the Worm design canvas: five themes, eight screens each (40 screens), plus `canvas.json` (the canvas layout).
 
@@ -10,3 +10,7 @@ Source files for the Worm design canvas: five themes, eight screens each (40 scr
 - `motion-question-press.html` is a standalone, tappable motion prototype for the question screen (Café Bookshop). Unlike the screen files, it opens directly in a browser.
 - `motion-reveal.html` is a standalone, tappable motion prototype for the reveal screen (Café Bookshop): wrapping, the three reveal styles, tilt and closer look. It also opens directly in a browser.
 - `motion-loading.html` is a standalone motion prototype for the loading screen (Café Bookshop): living scene, staged entrance, three stage bars, and the hand-off to the reveal. It runs the wait in about 20 seconds and also opens directly in a browser.
+- Per-theme motion prototypes, also standalone and openable directly in a browser:
+  - `motion-reveal-mystery.html`, `motion-reveal-fantasy.html`, `motion-reveal-superhero.html`, `motion-reveal-scifi.html`: the reveal screen, with each theme's wrapping and how it opens.
+  - `motion-loading-mystery.html`, `motion-loading-fantasy.html`, `motion-loading-superhero.html`, `motion-loading-scifi.html`: the loading screen, with each theme's living scene and card entrance.
+  - `motion-question-press-mystery.html`: the question screen for Mystery.
