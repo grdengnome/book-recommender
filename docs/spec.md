@@ -48,6 +48,8 @@ The opening page *is* the recommender (no landing or login wall). The flow:
 - **Backbone (always asked):** anchor ("a book you loved") → why ("what stuck with you?": the writing / the world / the characters / the ideas / the feeling) → appetite (comfort ↔ strange). Fixed structure, rotating wording: 2–3 phrasings per question at launch, growing toward 4–5.
 - **Anchor entry:** autocomplete against a catalog as the user types, with a "use what I typed" escape. Suggestions appear after 3+ characters and a short typing pause, target under ~1 second, and never block progress. Source (Open Library or Hardcover search) is chosen by measured speed.
 - **Adaptive follow-ups:** after the backbone, one small model call judges whether the signal is enough. If not, it asks 1–2 targeted follow-ups (mood, length, turn-off) aimed at the thin category. No fixed question count; a guardrail stops the loop if confidence isn't improving (threshold TBD from usage data).
+- **Answer formats:** pick one, open text, this or that, pick a few, and scale. Each question uses one; a run mixes them ([`design.md`](./design.md) §8).
+- **Length:** four bands: One sitting (under 120 pages), A weekend (120–300), A few weeks (300–500), The long haul (500+). Length acts as a direct filter on page count, which is already fetched for the reveal clues. "One sitting" stops at 120, not 100, so the pool isn't too thin.
 - **Unclear typed answers:** never block. If no answer is chosen and the typed text is obviously unusable (fewer than 3 characters, or no real letters), show one gentle inline nudge under the field ("Tell me a little more? Or tap an answer above.") and keep the page from turning once. Ask once, then move on: a second tap proceeds anyway. Subtler unclear answers are handled by the taste summary's code check and template fallback (§4f); an unusable answer is dropped quietly, and the rejection path (§4g) catches a miss.
 - **Creative framing:** emoji-style prompts woven into the pools, about one per session.
 - **Stateless:** no memory of users across sessions. The one exception is anonymous feedback events (§4i), which identify no one.
@@ -63,14 +65,14 @@ Built and grounded; see §5. The engine takes one input, the taste description, 
 - **Reserves:** each run returns 3 picks plus 2–3 reserves, all grounded and verified the same way, so swaps are instant.
 - **Exclude list:** reruns and swaps never return a book the user has already seen this session.
 - **Widen mode:** deliberately varied picks for the final step of the rejection path.
-- **Stage reporting:** the engine reports when it moves between its three stages (searching, choosing, double-checking), so the loading screen's three bars show real progress, never an estimate ([`design.md`](./design.md) §9).
+- **Stage reporting:** the engine reports when it moves between its three stages (searching, choosing, double-checking), so the loading screen's three bars show real progress, never an estimate ([`design.md`](./design.md) §10).
 - **Card-ready output:** cover image, cleaned-up title and author text (no raw catalog artifacts like "Last, First" or untransliterated names), the "find this book" link, and the three pre-reveal clue values (year, page count, one-word mood; §4c).
 
 ### 4c. The card UX
 
 Each pick is revealed alone on its own screen, then all three are shown together; tapping one opens its detail screen (decision 13.8). Layouts: [`design.md`](./design.md) §3.
 
-- **Reveal:** each pick arrives wrapped and is revealed by tapping the wrapped book. Before it is revealed, it shows three clue chips: year, page count, and a one-word mood. The engine's card-ready output (§4b) needs to supply these three values. Motion: [`design.md`](./design.md) §8.
+- **Reveal:** each pick arrives wrapped and is revealed by tapping the wrapped book. Before it is revealed, it shows three clue chips: year, page count, and a one-word mood. The engine's card-ready output (§4b) needs to supply these three values. Motion: [`design.md`](./design.md) §9.
 - **Revealed pick:** cover image, title, author, and a one-line hook (why it's for you). Designed placeholder when there's no cover.
 - **Detail screen:** cover, catalog description, why it fits, the non-obvious angle, and a "find this book" link. **No ratings in v0**: no reliable source is confirmed, and thin rating counts on obscure books work against the product.
 - **"Find this book" link:** destination and affiliate tag are configuration, not code. v0: Bookshop.org (affiliate) → Open Library fallback when no ISBN. Amazon may be added later as a secondary option. A short commission disclosure is shown.

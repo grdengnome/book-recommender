@@ -1,6 +1,6 @@
 # Design System
 
-*How Worm looks and why. Decisions behind it are in [`decisions.md`](./decisions.md) §13; what each screen does is in [`spec.md`](./spec.md) §4. Mockups live on the design canvas (private link, held by the owner). Last updated October 7, 2026.*
+*How Worm looks and why. Decisions behind it are in [`decisions.md`](./decisions.md) §13; what each screen does is in [`spec.md`](./spec.md) §4. Mockups live on the design canvas (private link, held by the owner). Last updated October 8, 2026.*
 
 ---
 
@@ -147,7 +147,20 @@ Settled in a tappable prototype (source: [`mockups/motion-question-press.html`](
 - **Turning the page:** the whole screen swings away like a page.
 - **Reduced motion:** when the device's reduced-motion setting is on, nothing animates.
 
-## 8. Motion: the reveal
+## 8. Motion: answer formats
+
+Prototyped for Café Bookshop (source: [`mockups/motion-question-formats.html`](./mockups/motion-question-formats.html)).
+
+- **Formats for v0:** pick one (existing), open text (existing), this or that, pick a few, and scale. Each question uses one format; a run mixes them so no two runs feel the same.
+- **This or that:** two illustrated cards with an "OR" badge between them, plus a small "in between" option (for example "Somewhere in between", "A bit of both"). The card art moves gently on a loop (rain, steam, drifting clouds, a flickering flame); nothing complex. Picking a card lifts and stamps it; the other dims and freezes, and the OR badge spins away.
+- **Pick a few:** mood tags styled as sugar packets (soft tint, coloured edge stripe, a raised shadow that presses down). Up to three; three small cups fill as you pick. A fourth tap wobbles the tag and the cups, and the label changes to "Tap one to swap it out". About 11 tags show at once; "More moods" swaps the unpicked ones for a fresh batch and keeps the picks. The open text field stays on this screen.
+- **Scale (heaviness):** drag a coffee cup along a shelf from Light to Heavy, across five stops (Feather-light, Easy going, Some weight, Hefty, Gut-punch). It snaps to the nearest stop on release. The coffee darkens and steams more as it gets heavier. Below it, books stack onto a shelf that sags, with the worm riding on top; at the heaviest stop the worm wobbles.
+- **Length (pour):** press and hold the mug; a pot tips and pours, and the cup fills past four levels. Releasing settles it to the level reached. Each level is also a tappable card beside the mug, which is how you go back down. Overfilling wobbles the mug.
+- **Haptics:** a short vibration at each step of the scale and the pour, where the device allows (Android; iPhone browsers don't support it).
+- **§7 still applies:** question first, then answers; button hidden until something is chosen; tap again to undo; page turn; reduced motion.
+- **Layout:** the café screen fits about 11 mood tags plus the text field. Themes with busier art may show fewer.
+
+## 9. Motion: the reveal
 
 Settled in tappable prototypes, done for all five themes (sources: [`mockups/motion-reveal.html`](./mockups/motion-reveal.html) for Café Bookshop, and `motion-reveal-mystery.html`, `-fantasy`, `-superhero`, `-scifi` in [`mockups/`](./mockups/)). The rules below apply to every theme; the wrapping and how it opens are per theme.
 
@@ -177,7 +190,7 @@ Settled in tappable prototypes, done for all five themes (sources: [`mockups/mot
 - **Backdrop (Café Bookshop):** bookshelves down both edges, string lights, and a pendant lamp lighting the cover.
 - **Reduced motion:** when the device's reduced-motion setting is on, skip straight to the revealed cover.
 
-## 9. Motion: the loading screen
+## 10. Motion: the loading screen
 
 Settled in prototypes, done for all five themes (sources: [`mockups/motion-loading.html`](./mockups/motion-loading.html) for Café Bookshop, and `motion-loading-mystery.html`, `-fantasy`, `-superhero`, `-scifi` in [`mockups/`](./mockups/)). Layout is in §3.
 
@@ -195,10 +208,10 @@ Settled in prototypes, done for all five themes (sources: [`mockups/motion-loadi
 
 - **Progress:** three bars, no wording. Each fills when its engine stage finishes, and the one in progress shimmers. The headline does not change with the stage. The bars reflect real engine stages (spec §4b), never an estimate.
 - **Author facts:** the first one arrives later than everything else, after the reader has settled in to wait (about 8 to 10 seconds in the real app), with a slow fade. After that they rotate with a slow crossfade, roughly every 12 to 15 seconds.
-- **Hand-off:** when the last bar fills, the text fades out, the room dims, and the first wrapped book appears (the start of the reveal, §8).
+- **Hand-off:** when the last bar fills, the text fades out, the room dims, and the first wrapped book appears (the start of the reveal, §9).
 - **Reduced motion:** when the device's reduced-motion setting is on, nothing animates.
 
-## 10. Status
+## 11. Status
 
 | Screen | Café Bookshop | Fantasy | Superhero | Mystery | Sci-fi |
 |---|---|---|---|---|---|
@@ -211,9 +224,9 @@ Settled in prototypes, done for all five themes (sources: [`mockups/motion-loadi
 | Rejection read-back | Mocked | Mocked | Mocked | Mocked | Mocked |
 | Error | Mocked | Mocked | Mocked | Mocked | Mocked |
 
-Mockups use placeholder covers and bracketed placeholder text. Real covers come from the catalogs (spec §4c). Reveal motion (§8) and loading motion (§9) are done for all five themes. Question-screen motion (§7) is done for Café Bookshop and Mystery only (Mystery source: [`mockups/motion-question-press-mystery.html`](./mockups/motion-question-press-mystery.html)); Fantasy, Superhero and Sci-fi wait for the question-flow pass, since new answer formats would mean redoing it.
+Mockups use placeholder covers and bracketed placeholder text. Real covers come from the catalogs (spec §4c). Reveal motion (§9) and loading motion (§10) are done for all five themes. Question-screen motion (§7) is done for Café Bookshop and Mystery only (Mystery source: [`mockups/motion-question-press-mystery.html`](./mockups/motion-question-press-mystery.html)); Fantasy, Superhero and Sci-fi wait for the question-flow pass, since new answer formats would mean redoing it. Answer-format motion (§8) is prototyped for Café Bookshop; rollout to the other four themes is next.
 
-## 11. Building it
+## 12. Building it
 
 - Build each screen once against the shared structure. A theme is a set of values (fonts, colors, shapes, scene art, wording) applied to that structure.
 - Adding a theme must not require changing any screen's layout.

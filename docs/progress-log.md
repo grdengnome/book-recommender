@@ -653,3 +653,17 @@ Ran the identical `cult novel` query against Open Library side by side for direc
 2. Owner sign-off on the full design.
 3. Engine: structured picks with the three clue values, and stage reporting.
 4. Before going public: data store and rate limit.
+
+---
+
+## October 8, 2026 — Question-flow pass, part 1: answer formats
+
+**Conclusion:** Started the question-flow pass. v0 questions now use five answer formats (pick one, open text, this or that, pick a few, scale), prototyped and iterated for Café Bookshop in `docs/mockups/motion-question-formats.html`. Written up in `design.md` §8, `spec.md` §4a and `question-bank.md`; decisions 13.35–13.39.
+
+**Prototype:** this-or-that cards with gently animated art; sugar-packet mood tags with "More moods"; a heaviness scale with a book-shelf visual; a hold-to-pour length question with four bands; haptics on the scale and pour where supported.
+
+**Engine impact:** length filters directly on page count, which is already fetched for the reveal clues.
+
+**Next:**
+1. Roll the answer formats out to Mystery, Fantasy, Superhero and Sci-fi with motion.
+2. A new scene per question.

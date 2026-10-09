@@ -35,6 +35,34 @@ Optional quick-pick facets: *the writing* / *the world* / *the characters* / *th
 
 ---
 
+## Starting pools for the answer formats
+
+All wording below is an example, not final. Formats and motion: `design.md` §8; length bands: `spec.md` §4a.
+
+**This-or-that pairs** (two cards plus a small "in between" option):
+- "Tonight's book should feel like…" A rainy night in / A long trip away / Somewhere in between
+- "Which pulls you in?" Real lives / Made-up worlds / A bit of both
+- "What pace sounds good?" Fast and twisty / Slow and dreamy / Somewhere in the middle
+- "When should it take place?" Long ago / The far future / Right now is fine
+
+**Moods** (pick up to three; about 11 show at a time, "More moods" swaps in more):
+Cozy, Tense, Funny, Heartbreaking, Weird, Hopeful, Dark, Romantic, Fast, Slow-burn, Thoughtful, Epic, Eerie, Whimsical, Gritty, Dreamy, Bittersweet, Nostalgic, Unsettling, Uplifting, Lyrical, Brutal, Playful, Tender, Angry, Mind-bending, Quiet, Wild, Lush, Sharp, Melancholy, Adventurous, Cerebral, Steamy, Absurd, Haunting.
+
+**Heaviness** (scale, Light to Heavy): "How heavy can it get?"
+1. Feather-light: Comfort read. Nothing too sad.
+2. Easy going: A few bumps, nothing that lingers.
+3. Some weight: It'll stay with you a while.
+4. Hefty: Bring tissues, maybe.
+5. Gut-punch: It will wreck you, in a good way.
+
+**Length** (pour): "How long a read?"
+1. One sitting: Under 120 pages. Done by bedtime.
+2. A weekend: 120 to 300 pages.
+3. A few weeks: 300 to 500 pages.
+4. The long haul: 500+ pages. Settle in.
+
+---
+
 ## Creative/visual/emoji framing
 
 **[RESOLVED — Option A, see spec.md 4a]** Not a separate track. These are alternate *phrasings* woven into the pools above — capped at ~1 (occasionally 2) creative-style question per session. Variety comes from *which* category goes creative that session, not from stacking multiple.

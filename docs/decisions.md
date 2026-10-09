@@ -1,6 +1,6 @@
 # Decision Log
 
-*Covers decisions through the v0 engine, v0 product planning, and the start of the build (October 7, 2026). Further build decisions will be added as they're made.*
+*Covers decisions through the v0 engine, v0 product planning, and the start of the build (October 8, 2026). Further build decisions will be added as they're made.*
 
 The product and architecture decisions behind this recommender, and the paths I rejected. The [progress log](./progress-log.md) is the session-by-session diary; this file is the story told by decision. Each entry gives the decision and why, with a link to the full detail.
 
@@ -456,9 +456,9 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 - **The question-flow stopping threshold** needs real usage data.
 - **Raw catalog data leaks into display text** (non-Latin author names, missing co-authors). Scheduled: card-ready output in [spec §4b](./spec.md).
 - **Does Café Bookshop stay in the random theme rotation** now that it's also the home theme? ([design §5](./design.md))
-- **Reveal-prompt wording for Fantasy, Superhero, Mystery and Sci-fi.** Every theme's wrapping is decided; only the café's "Tap to unwrap" wording is settled, and the other four are placeholders. ([design §8](./design.md))
-- **How to keep the question flow fresh:** wording variety, different answer formats, a new scene per question. The existing first-question template stays. ([design §7](./design.md))
-- **How much book detail to show on the reveal screen versus the detail screen.** ([design §8](./design.md))
+- **Reveal-prompt wording for Fantasy, Superhero, Mystery and Sci-fi.** Every theme's wrapping is decided; only the café's "Tap to unwrap" wording is settled, and the other four are placeholders. ([design §9](./design.md))
+- **How to keep the question flow fresh:** wording variety and a new scene per question (answer formats settled in 13.35). The existing first-question template stays. ([design §7](./design.md))
+- **How much book detail to show on the reveal screen versus the detail screen.** ([design §9](./design.md))
 
 ---
 
@@ -550,35 +550,35 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 
 ### 13.22 A big, theatrical reveal
 **Decision:** The reveal is big and theatrical, modelled on a trading-card pack opening.
-**Why:** It is the moment the whole flow builds to, and should feel like an event. ([design §8](./design.md))
+**Why:** It is the moment the whole flow builds to, and should feel like an event. ([design §9](./design.md))
 
 ### 13.23 Several reveal styles
 **Decision:** Multiple reveal styles: three for v0, more over time. The same style never plays twice in a row.
-**Why:** A single animation gets old across three picks and repeat visits. ([design §8](./design.md))
+**Why:** A single animation gets old across three picks and repeat visits. ([design §9](./design.md))
 
 ### 13.24 One wrapping per theme
 **Decision:** Each theme has one wrapping, removed the same way in every reveal style.
-**Why:** It keeps the work to five wrappings instead of fifteen combinations. ([design §8](./design.md))
+**Why:** It keeps the work to five wrappings instead of fifteen combinations. ([design §9](./design.md))
 
 ### 13.25 Tap the wrapped book to reveal it
 **Decision:** The user taps the wrapped book to reveal it; there is no button.
-**Why:** Fewer words on screen, and it feels like uncovering the book yourself. ([design §8](./design.md))
+**Why:** Fewer words on screen, and it feels like uncovering the book yourself. ([design §9](./design.md))
 
 ### 13.26 The cover dominates the reveal
 **Decision:** The cover is the largest thing on screen; the details are small and fade in after it lands.
-**Why:** Nothing should distract from the cover. ([design §8](./design.md))
+**Why:** Nothing should distract from the cover. ([design §9](./design.md))
 
 ### 13.27 The cover can be tilted and looked at closely
 **Decision:** After the reveal, the cover can be tilted by dragging and brought forward for a closer look by tapping.
-**Why:** Covers are the art, and readers will want to study them. ([design §8](./design.md))
+**Why:** Covers are the art, and readers will want to study them. ([design §9](./design.md))
 
 ### 13.28 Loading progress shows real engine stages, without wording
 **Decision:** The loading screen shows three progress bars tied to real engine stages, with no stage wording.
-**Why:** Visible progress is reassuring, naming the steps adds words nobody needs, and progress must never be faked. ([design §9](./design.md))
+**Why:** Visible progress is reassuring, naming the steps adds words nobody needs, and progress must never be faked. ([design §10](./design.md))
 
 ### 13.29 On the loading screen, the scene leads
 **Decision:** The scene leads the loading screen; the order ticket and headline are small.
-**Why:** The wait is the longest moment in the app, and a living scene is better company than large text. ([design §9](./design.md))
+**Why:** The wait is the longest moment in the app, and a living scene is better company than large text. ([design §10](./design.md))
 
 ### 13.30 Scene props fade once the cover is revealed
 **Decision:** The worm and small scene objects fade out once the cover lands.
@@ -599,3 +599,23 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 ### 13.34 Question-screen motion for three themes waits for a question-flow pass
 **Decision:** Question-screen motion for Fantasy, Superhero and Sci-fi is deferred until a question-flow pass.
 **Why:** New answer formats would mean redoing it. ([progress log, Oct 7](./progress-log.md))
+
+### 13.35 Five answer formats for v0
+**Decision:** Questions use five answer formats: pick one, open text, this or that, pick a few, and scale.
+**Why:** Variety keeps the flow fresh, and the scale is one value, so it's cheap for the engine. ([progress log, Oct 8](./progress-log.md))
+
+### 13.36 Choose by cover is deferred
+**Decision:** An answer format where the reader picks between book covers is deferred.
+**Why:** It needs real covers and is a bigger lift. ([progress log, Oct 8](./progress-log.md))
+
+### 13.37 Book length is asked as a hold-to-pour with four bands
+**Decision:** Length is asked by pressing and holding to pour a cup, across four bands.
+**Why:** A tester said length is a real factor in choosing a book; a different gesture from the slider avoids repetition; four bands are enough. ([progress log, Oct 8](./progress-log.md))
+
+### 13.38 This-or-that card art moves gently
+**Decision:** The illustrations on this-or-that cards move gently on a loop.
+**Why:** Still pictures felt flat; subtle motion makes the choice feel alive without distracting. ([progress log, Oct 8](./progress-log.md))
+
+### 13.39 More moods via swap, not a longer list
+**Decision:** "More moods" swaps the unpicked mood tags for a fresh batch instead of lengthening the list.
+**Why:** Choices felt limited, but the screen fits about 11 tags. ([progress log, Oct 8](./progress-log.md))
