@@ -184,6 +184,19 @@ button:focus-visible, [role=slider]:focus-visible { outline: 3px solid var(--amb
 @keyframes flk { from { transform: scale(1, 1) rotate(-3deg); } to { transform: scale(.85, 1.12) rotate(3deg); } }
 @keyframes turn { to { transform: rotateY(-88deg); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { *, *::before { animation: none !important; transition: none !important; } }
+
+/* ===== café catch-up: rule out + pill-shaped non-answer buttons ===== */
+.more { border: 2px solid var(--ink); border-radius: 999px; background: #F6E3D0; padding: 7px 14px 5px; box-shadow: 0 3px 0 var(--ink); }
+.offs { display: flex; flex-wrap: wrap; gap: 10px 8px; }
+.off { position: relative; padding: 7px 11px 5px; border: 2px solid var(--ink); background: var(--cream); color: var(--ink); font: 700 15px var(--body); cursor: pointer; transform: rotate(var(--r, 0deg)); box-shadow: 0 3px 0 var(--ink); transition: opacity .25s, transform .25s, background .2s; -webkit-tap-highlight-color: transparent; }
+.off::after { content: ""; position: absolute; left: 5px; right: 5px; top: 50%; height: 3px; margin-top: -1px; background: var(--terra); transform: scaleX(0); transform-origin: left; transition: transform .28s cubic-bezier(.6,0,.3,1); }
+.off::before { content: "NO"; position: absolute; right: -10px; top: -12px; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; border: 2px solid var(--terra); background: var(--wall); color: var(--terra); font: 800 12px var(--display); letter-spacing: 1px; transform: rotate(-14deg) scale(0); transition: transform .3s cubic-bezier(.3,1.7,.5,1) .15s; z-index: 1; }
+.off.picked { background: #EFE6D6; transform: rotate(0deg); }
+.off.picked::after { transform: scaleX(1); }
+.off.picked::before { transform: rotate(-14deg) scale(1); }
+.off:focus-visible, .open:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+.open { align-self: flex-start; margin-top: 6px; padding: 8px 16px 6px; background: #DCE8D2; border: 2px solid var(--ink); border-radius: 999px; color: var(--ink); font: 700 15px var(--body); cursor: pointer; box-shadow: 0 3px 0 var(--ink); }
+.open.picked { background: #6FA35A; color: var(--cream); animation: stamp .42s cubic-bezier(.3,1.6,.5,1); }
 </style>
 <div class="stage" id="stage"></div>
 <div class="notes">
@@ -191,8 +204,9 @@ button:focus-visible, [role=slider]:focus-visible { outline: 3px solid var(--amb
 <div class="jump" role="group" aria-label="Jump to a format">
 <button class="ctl" type="button" data-go="0" id="pairbtn">This or that</button>
 <button class="ctl" type="button" data-go="1">Pick a few</button>
-<button class="ctl" type="button" data-go="2">The scale</button>
-<button class="ctl" type="button" data-go="3">Book length</button>
+<button class="ctl" type="button" data-go="2">Rule out</button>
+<button class="ctl" type="button" data-go="3">The scale</button>
+<button class="ctl" type="button" data-go="4">Book length</button>
 </div>
 <button class="ctl" type="button" id="pace" aria-pressed="false">Play at later-question pace</button>
 </div>
@@ -279,7 +293,11 @@ button:focus-visible, [role=slider]:focus-visible { outline: 3px solid var(--amb
       '<div class="rule in" style="--i:0"><span id="rule" role="status">Up to three</span><div class="cups" id="cups">' + cup() + cup() + cup() + '</div></div>' +
       '<div class="tags" id="tags"></div>' +
       '<div class="field in" style="--i:7"><label for="own">Or say it your way</label><input id="own" type="text" autocomplete="off"></div>', wire: wireTags },
-    { small: 'Fourth cup.', title: 'How <em>heavy</em> can it get?', body:
+    { small: 'Fourth cup.', title: 'Anything <em>off the menu</em>?', body:
+      '<div class="rule in" style="--i:0"><span>As many as you like</span></div>' +
+      '<div class="offs" id="offs"><button class="off in" type="button" aria-pressed="false" style="--i:1.0;--r:-1.5deg">Gore</button><button class="off in" type="button" aria-pressed="false" style="--i:1.4;--r:1deg">Steamy scenes</button><button class="off in" type="button" aria-pressed="false" style="--i:1.8;--r:-1deg">Animals getting hurt</button><button class="off in" type="button" aria-pressed="false" style="--i:2.2;--r:1.5deg">Sad endings</button><button class="off in" type="button" aria-pressed="false" style="--i:2.6;--r:-0.5deg">Cliffhangers</button><button class="off in" type="button" aria-pressed="false" style="--i:3.0;--r:1deg">Long series</button><button class="off in" type="button" aria-pressed="false" style="--i:3.4000000000000004;--r:-1.5deg">Slow starts</button><button class="off in" type="button" aria-pressed="false" style="--i:3.8000000000000003;--r:0.5deg">Huge casts</button><button class="off in" type="button" aria-pressed="false" style="--i:4.2;--r:1deg">Dense prose</button><button class="off in" type="button" aria-pressed="false" style="--i:4.6;--r:-1deg">Too much jargon</button></div>' +
+      '<button class="open in" type="button" id="open" aria-pressed="false" style="--i:5">Nothing. Everything\'s on the menu</button>', wire: wireOffs },
+    { small: 'Fifth cup.', title: 'How <em>heavy</em> can it get?', body:
       '<div class="readout idle in" id="readout" style="--i:0" aria-live="polite"><b>Slide the cup</b><span>← drag it along the shelf →</span></div>' +
       '<div class="slider in" id="slider" role="slider" tabindex="0" aria-label="How heavy" aria-valuemin="1" aria-valuemax="5" aria-valuenow="1" aria-valuetext="Not set" style="--i:1;--x:0%">' +
       '<div class="track"><i></i></div><div class="ticks"><u style="left:0"></u><u style="left:25%"></u><u style="left:50%"></u><u style="left:75%"></u><u style="left:100%"></u></div>' +
@@ -553,6 +571,29 @@ button:focus-visible, [role=slider]:focus-visible { outline: 3px solid var(--amb
       });
     });
     draw();
+  }
+
+  function wireOffs(api) {
+    var wrap = document.getElementById('offs'), open = document.getElementById('open'), items = wrap.querySelectorAll('.off');
+    function sync() { api.ready(wrap.querySelectorAll('.off.picked').length > 0 || open.classList.contains('picked')); }
+    items.forEach(function (t) {
+      t.addEventListener('click', function () {
+        api.phone.classList.remove('enter');
+        open.classList.remove('picked'); open.setAttribute('aria-pressed', 'false');
+        var on = !t.classList.contains('picked');
+        t.classList.toggle('picked', on); t.setAttribute('aria-pressed', String(on));
+        if (on) { api.flare(); buzz(12); }
+        sync();
+      });
+    });
+    open.addEventListener('click', function () {
+      api.phone.classList.remove('enter');
+      var on = !open.classList.contains('picked');
+      items.forEach(function (t) { t.classList.remove('picked'); t.setAttribute('aria-pressed', 'false'); });
+      open.classList.toggle('picked', on); open.setAttribute('aria-pressed', String(on));
+      if (on) api.flare();
+      sync();
+    });
   }
 
   document.querySelectorAll('[data-go]').forEach(function (b) { b.addEventListener('click', function () { var g = +b.getAttribute('data-go'); if (g === 0 && current === 0 && document.getElementById('duo')) pairIdx++; render(g); }); });

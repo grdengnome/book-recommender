@@ -1,6 +1,6 @@
 # Design System
 
-*How Worm looks and why. Decisions behind it are in [`decisions.md`](./decisions.md) §13; what each screen does is in [`spec.md`](./spec.md) §4. Mockups live on the design canvas (private link, held by the owner). Last updated October 8, 2026.*
+*How Worm looks and why. Decisions behind it are in [`decisions.md`](./decisions.md) §13; what each screen does is in [`spec.md`](./spec.md) §4. Mockups live on the design canvas (private link, held by the owner). Last updated October 12, 2026.*
 
 ---
 
@@ -149,13 +149,18 @@ Settled in a tappable prototype (source: [`mockups/motion-question-press.html`](
 
 ## 8. Motion: answer formats
 
-Prototyped for Café Bookshop (source: [`mockups/motion-question-formats.html`](./mockups/motion-question-formats.html)).
+Prototyped for all five themes (sources: [`mockups/motion-question-formats.html`](./mockups/motion-question-formats.html) for Café Bookshop, and the `-mystery`, `-fantasy`, `-superhero` and `-scifi` versions beside it).
 
-- **Formats for v0:** pick one (existing), open text (existing), this or that, pick a few, and scale. Each question uses one format; a run mixes them so no two runs feel the same.
+- **Formats for v0:** pick one (existing), open text (existing), this or that, pick a few, and scale. Five is the cap for v0. Each question uses one format; a run mixes them so no two runs feel the same.
 - **This or that:** two illustrated cards with an "OR" badge between them, plus a small "in between" option (for example "Somewhere in between", "A bit of both"). The card art moves gently on a loop (rain, steam, drifting clouds, a flickering flame); nothing complex. Picking a card lifts and stamps it; the other dims and freezes, and the OR badge spins away.
 - **Pick a few:** mood tags styled as sugar packets (soft tint, coloured edge stripe, a raised shadow that presses down). Up to three; three small cups fill as you pick. A fourth tap wobbles the tag and the cups, and the label changes to "Tap one to swap it out". About 11 tags show at once; "More moods" swaps the unpicked ones for a fresh batch and keeps the picks. The open text field stays on this screen.
-- **Scale (heaviness):** drag a coffee cup along a shelf from Light to Heavy, across five stops (Feather-light, Easy going, Some weight, Hefty, Gut-punch). It snaps to the nearest stop on release. The coffee darkens and steams more as it gets heavier. Below it, books stack onto a shelf that sags, with the worm riding on top; at the heaviest stop the worm wobbles.
-- **Length (pour):** press and hold the mug; a pot tips and pours, and the cup fills past four levels. Releasing settles it to the level reached. Each level is also a tappable card beside the mug, which is how you go back down. Overfilling wobbles the mug.
+- **Rule out:** a pick-any question for turn-offs: gore, steamy scenes, animals getting hurt, sad endings, cliffhangers, long series, slow starts, huge casts, dense prose, plus one theme-specific item. No limit. A picked item is struck through with the theme's stamp (Café Bookshop "NO", Mystery "NO", Fantasy a "Nay" wax seal, Superhero "NOPE!", Sci-fi "BLOCKED"). An opt-out button clears them all.
+- **Scale (heaviness):** drag a coffee cup along a shelf from Light to Heavy, across five stops (Feather-light, Easy going, Some weight, Hefty, Gut-punch). It snaps to the nearest stop on release. The coffee darkens and steams more as it gets heavier. Below it, books stack onto a shelf that sags, with the worm riding on top; at the heaviest stop the worm wobbles. Each theme has its own slider object and stack: Café Bookshop a cup and books, Mystery a magnifying glass and case files, Fantasy a candle and tomes, Superhero a mask and comics, Sci-fi a probe and cargo crates. Step wording varies by theme ([`question-bank.md`](./question-bank.md)).
+- **Length (hold to fill):** one gesture in every theme: press and hold, and a themed object fills past four levels. Café Bookshop pours coffee into a mug, Mystery types a page on a typewriter, Fantasy brews a potion in a cauldron, Superhero flies the worm up a skyscraper, Sci-fi fuels a warp core. Releasing settles it to the level reached. Each level is also a tappable card beside the object, which is how you go back down. Overfilling wobbles it. The four page bands are fixed; only the labels change (for example Sci-fi: A quick hop / Across the system / Interstellar / Another galaxy).
+- **Each theme reskins every format:** for example Mystery uses case photos that develop into colour and evidence tags; Fantasy, illuminated plates with wax seals and ribbon banners; Superhero, comic panels with POW bursts; Sci-fi, holo screens that lock and angular chips.
+- **A different scene per question** in every theme (for example Mystery: office, evidence board, crime-scene doorway, rainy alley, stakeout car). Scenes move gently.
+- **Non-answer buttons** ("More moods", the rule-out opt-out) are rounded pills with a soft tint, so they never look like an answer.
+- **Wording:** the themed name first, then a short line that starts with the plain meaning (for example "Turbulence — Mixed. Some wins, some losses."). Opt-outs say plainly that there's nothing to rule out, in the theme's voice (for example "No suspects. I'm open", "All clear. Nothing to block"). Avoid leaning on the same word across themes.
 - **Haptics:** a short vibration at each step of the scale and the pour, where the device allows (Android; iPhone browsers don't support it).
 - **§7 still applies:** question first, then answers; button hidden until something is chosen; tap again to undo; page turn; reduced motion.
 - **Layout:** the café screen fits about 11 mood tags plus the text field. Themes with busier art may show fewer.
@@ -224,7 +229,7 @@ Settled in prototypes, done for all five themes (sources: [`mockups/motion-loadi
 | Rejection read-back | Mocked | Mocked | Mocked | Mocked | Mocked |
 | Error | Mocked | Mocked | Mocked | Mocked | Mocked |
 
-Mockups use placeholder covers and bracketed placeholder text. Real covers come from the catalogs (spec §4c). Reveal motion (§9) and loading motion (§10) are done for all five themes. Question-screen motion (§7) is done for Café Bookshop and Mystery only (Mystery source: [`mockups/motion-question-press-mystery.html`](./mockups/motion-question-press-mystery.html)); Fantasy, Superhero and Sci-fi wait for the question-flow pass, since new answer formats would mean redoing it. Answer-format motion (§8) is prototyped for Café Bookshop; rollout to the other four themes is next.
+Mockups use placeholder covers and bracketed placeholder text. Real covers come from the catalogs (spec §4c). Reveal motion (§9) and loading motion (§10) are done for all five themes. Answer formats (§8) and question-screen motion (§7) are prototyped for all five themes. Superhero's length question is good for now but flagged for a later pass.
 
 ## 12. Building it
 

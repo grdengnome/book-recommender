@@ -9,9 +9,10 @@ Source files for the Worm design canvas: five themes, eight screens each (40 scr
 - The design is not locked. When screens change on the canvas, replace this folder with a new snapshot.
 - `motion-question-press.html` is a standalone, tappable motion prototype for the question screen (Café Bookshop). Unlike the screen files, it opens directly in a browser.
 - `motion-reveal.html` is a standalone, tappable motion prototype for the reveal screen (Café Bookshop): wrapping, the three reveal styles, tilt and closer look. It also opens directly in a browser.
-- `motion-question-formats.html` is a standalone, tappable prototype (Café Bookshop) of the new answer formats: this or that, pick a few, the heaviness scale, and the book-length pour. It opens directly in a browser.
+- `motion-question-formats.html` is a standalone, tappable prototype (Café Bookshop) of the answer formats: this or that, pick a few, the rule-out question, the heaviness scale, and the book-length pour. It opens directly in a browser.
 - `motion-loading.html` is a standalone motion prototype for the loading screen (Café Bookshop): living scene, staged entrance, three stage bars, and the hand-off to the reveal. It runs the wait in about 20 seconds and also opens directly in a browser.
 - Per-theme motion prototypes, also standalone and openable directly in a browser:
   - `motion-reveal-mystery.html`, `motion-reveal-fantasy.html`, `motion-reveal-superhero.html`, `motion-reveal-scifi.html`: the reveal screen, with each theme's wrapping and how it opens.
   - `motion-loading-mystery.html`, `motion-loading-fantasy.html`, `motion-loading-superhero.html`, `motion-loading-scifi.html`: the loading screen, with each theme's living scene and card entrance.
   - `motion-question-press-mystery.html`: the question screen for Mystery.
+  - `motion-question-formats-mystery.html`, `motion-question-formats-fantasy.html`, `motion-question-formats-superhero.html`, `motion-question-formats-scifi.html`: the same answer formats, each in the theme's own look, with a different scene behind each question.

@@ -45,21 +45,78 @@ All wording below is an example, not final. Formats and motion: `design.md` §8;
 - "What pace sounds good?" Fast and twisty / Slow and dreamy / Somewhere in the middle
 - "When should it take place?" Long ago / The far future / Right now is fine
 
+**More this-or-that pairs** (examples; wording only, art is drawn during rollout, one picture set shared across all themes). Target about 12 pairs at launch:
+- Small town / Big city
+- Make me think / Let me escape
+- One hero / A whole crew
+- Lots of talk / Lots of action
+- Stands alone / Starts a series
+- Something familiar / Something totally new
+- Grounded / Over the top
+- One voice / Many voices
+
 **Moods** (pick up to three; about 11 show at a time, "More moods" swaps in more):
 Cozy, Tense, Funny, Heartbreaking, Weird, Hopeful, Dark, Romantic, Fast, Slow-burn, Thoughtful, Epic, Eerie, Whimsical, Gritty, Dreamy, Bittersweet, Nostalgic, Unsettling, Uplifting, Lyrical, Brutal, Playful, Tender, Angry, Mind-bending, Quiet, Wild, Lush, Sharp, Melancholy, Adventurous, Cerebral, Steamy, Absurd, Haunting.
 
-**Heaviness** (scale, Light to Heavy): "How heavy can it get?"
+**Rule out** (examples; pick any, no limit; picks act as hard filters):
+Gore, Steamy scenes, Animals getting hurt, Sad endings, Cliffhangers, Long series, Slow starts, Huge casts, Dense prose, plus one theme-specific item.
+
+| Theme | Question | Theme-specific item | Opt-out |
+|---|---|---|---|
+| Café Bookshop | Anything off the menu? | Too much jargon | Nothing. Everything's on the menu |
+| Mystery | Anything to rule out? | Lots of tech talk | No suspects. I'm open |
+| Fantasy | Anything to banish? | Made-up words | None to banish. I'm open |
+| Superhero | Any villains to avoid? | Too much lore | No villains here. Bring it on! |
+| Sci-fi | Anything to block? | Heavy tech talk | All clear. Nothing to block |
+
+**Heaviness** (scale, Light to Heavy; examples, word for word from the prototypes):
+
+Café Bookshop: "How heavy can it get?"
 1. Feather-light: Comfort read. Nothing too sad.
 2. Easy going: A few bumps, nothing that lingers.
 3. Some weight: It'll stay with you a while.
 4. Hefty: Bring tissues, maybe.
 5. Gut-punch: It will wreck you, in a good way.
 
-**Length** (pour): "How long a read?"
-1. One sitting: Under 120 pages. Done by bedtime.
-2. A weekend: 120 to 300 pages.
-3. A few weeks: 300 to 500 pages.
-4. The long haul: 500+ pages. Settle in.
+Mystery: "How dark can it get?"
+1. A cozy puzzle: Tea, clues, no real menace.
+2. Light shadows: A body, but nothing graphic.
+3. Getting dark: Tense. Some of it will linger.
+4. Dark: Brutal crimes. Strong stomach advised.
+5. Pitch black: Bleak, brutal and brilliant.
+
+Fantasy: "How dark should the tale be?"
+1. A fireside tale: Cozy and hopeful. Nobody truly lost.
+2. Some peril: Real danger, but good wins.
+3. Shadows fall: Darker. Real losses along the way.
+4. A cruel realm: Dark. War, betrayal, hard choices.
+5. No heroes left: Very dark. Only survivors.
+
+Superhero: "How gritty can it get?"
+1. Saturday-morning fun: Bright and funny. Nobody really gets hurt.
+2. Classic heroics: Real stakes, and good wins.
+3. Some grit: Losses and hard calls.
+4. Gritty: Morally grey. Plenty of bruises.
+5. Pitch dark: Antiheroes and broken cities.
+
+Sci-fi: "How bleak can it get?"
+1. Bright future: Hopeful. Things turn out well.
+2. Smooth flight: Mostly hopeful. Problems get solved.
+3. Turbulence: Mixed. Some wins, some losses.
+4. Dystopia: Dark. Things fall apart.
+5. Lost in the void: Very bleak. No happy ending.
+
+**Length** (hold to fill; examples, word for word from the prototypes). The bands are fixed: under 120, 120 to 300, 300 to 500, 500+ pages.
+
+| Theme | Question | Under 120 | 120 to 300 | 300 to 500 | 500+ |
+|---|---|---|---|---|---|
+| Café Bookshop | How long a read? | One sitting: Done by bedtime. | A weekend | A few weeks | The long haul: Settle in. |
+| Mystery | How long a case? | One night: Solved by morning. | A weekend | A few weeks | The long case: Settle in. |
+| Fantasy | How long a quest? | A short tale: One evening by the fire. | A journey | A long road | An epic quest: Pack provisions. |
+| Superhero | How big a saga? | A one-shot: Done in one sitting. | A mini-series | A full arc | An epic saga: Top of the city. |
+| Sci-fi | How far should it take you? | A quick hop: Back before dinner. | Across the system | Interstellar | Another galaxy: Pack for years. |
+
+Each label's line starts with its page range (for example "Under 120 pages. Back before dinner.").
 
 ---
 

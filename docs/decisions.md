@@ -1,6 +1,6 @@
 # Decision Log
 
-*Covers decisions through the v0 engine, v0 product planning, and the start of the build (October 8, 2026). Further build decisions will be added as they're made.*
+*Covers decisions through the v0 engine, v0 product planning, and the start of the build (October 12, 2026). Further build decisions will be added as they're made.*
 
 The product and architecture decisions behind this recommender, and the paths I rejected. The [progress log](./progress-log.md) is the session-by-session diary; this file is the story told by decision. Each entry gives the decision and why, with a link to the full detail.
 
@@ -457,7 +457,7 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 - **Raw catalog data leaks into display text** (non-Latin author names, missing co-authors). Scheduled: card-ready output in [spec §4b](./spec.md).
 - **Does Café Bookshop stay in the random theme rotation** now that it's also the home theme? ([design §5](./design.md))
 - **Reveal-prompt wording for Fantasy, Superhero, Mystery and Sci-fi.** Every theme's wrapping is decided; only the café's "Tap to unwrap" wording is settled, and the other four are placeholders. ([design §9](./design.md))
-- **How to keep the question flow fresh:** wording variety and a new scene per question (answer formats settled in 13.35). The existing first-question template stays. ([design §7](./design.md))
+- **How to keep the question flow fresh:** wording variety (answer formats settled in 13.35, scenes in 13.45; longer-term ideas in [spec §6](./spec.md)). The existing first-question template stays. ([design §7](./design.md))
 - **How much book detail to show on the reveal screen versus the detail screen.** ([design §9](./design.md))
 
 ---
@@ -619,3 +619,35 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 ### 13.39 More moods via swap, not a longer list
 **Decision:** "More moods" swaps the unpicked mood tags for a fresh batch instead of lengthening the list.
 **Why:** Choices felt limited, but the screen fits about 11 tags. ([progress log, Oct 8](./progress-log.md))
+
+### 13.40 A rule-out question joins the pool
+**Decision:** A pick-any question for turn-offs joins the follow-up pool; its picks act as hard filters.
+**Why:** Turn-offs are one of the strongest signals for avoiding a bad pick, and it reuses pick a few, so there's nothing new to build. ([progress log, Oct 12](./progress-log.md))
+
+### 13.41 Formats stop at five for v0
+**Decision:** v0 keeps the five answer formats from 13.35 and adds no more.
+**Why:** Every format is built five times, once per theme. ([progress log, Oct 12](./progress-log.md))
+
+### 13.42 Length is one hold-to-fill gesture with a themed object per theme
+**Decision:** Length is asked with the same press-and-hold gesture in every theme, filling a themed object (coffee, typewriter page, cauldron, skyscraper, warp core).
+**Why:** Coffee didn't fit the other themes; the same gesture keeps it learnable. ([progress log, Oct 12](./progress-log.md))
+
+### 13.43 Non-answer buttons get their own shape
+**Decision:** Buttons that aren't answers ("More moods", opt-outs) are rounded, softly tinted pills.
+**Why:** Users need to tell an action or opt-out from an answer before tapping. ([progress log, Oct 12](./progress-log.md))
+
+### 13.44 Wording: themed name, plain meaning first
+**Decision:** Each option shows its themed name, then a short line that starts with the plain meaning. Opt-outs say plainly that there's nothing to rule out.
+**Why:** "Event horizon", "Grey zone" and an unclear opt-out confused a reviewer; flavour stays, clarity leads. ([progress log, Oct 12](./progress-log.md))
+
+### 13.45 Every question gets its own scene in every theme
+**Decision:** Each question has a different scene behind it, in every theme.
+**Why:** It keeps the flow fresh and shows more of each theme's world. ([progress log, Oct 12](./progress-log.md))
+
+### 13.46 The this-or-that pool grows to about 12 pairs
+**Decision:** Eight more this-or-that pairs are written, for about 12 at launch, with one art set shared across themes.
+**Why:** Four pairs repeat quickly; wording is cheap and one art set serves all themes. ([progress log, Oct 12](./progress-log.md))
+
+### 13.47 Superhero's length question is accepted for now
+**Decision:** Superhero's length question (flying the worm up a skyscraper) stays as is for v0.
+**Why:** It works well enough to move on; it's flagged for a later pass. ([progress log, Oct 12](./progress-log.md))

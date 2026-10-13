@@ -1,6 +1,6 @@
 # Book Recommender — Spec
 
-*Current state of the product and its design. Decisions, reversals, and rejected paths are in [`decisions.md`](./decisions.md); this file says what the product is and how it works. Last updated October 5, 2026.*
+*Current state of the product and its design. Decisions, reversals, and rejected paths are in [`decisions.md`](./decisions.md); this file says what the product is and how it works. Last updated October 12, 2026.*
 
 ---
 
@@ -49,7 +49,8 @@ The opening page *is* the recommender (no landing or login wall). The flow:
 - **Anchor entry:** autocomplete against a catalog as the user types, with a "use what I typed" escape. Suggestions appear after 3+ characters and a short typing pause, target under ~1 second, and never block progress. Source (Open Library or Hardcover search) is chosen by measured speed.
 - **Adaptive follow-ups:** after the backbone, one small model call judges whether the signal is enough. If not, it asks 1–2 targeted follow-ups (mood, length, turn-off) aimed at the thin category. No fixed question count; a guardrail stops the loop if confidence isn't improving (threshold TBD from usage data).
 - **Answer formats:** pick one, open text, this or that, pick a few, and scale. Each question uses one; a run mixes them ([`design.md`](./design.md) §8).
-- **Length:** four bands: One sitting (under 120 pages), A weekend (120–300), A few weeks (300–500), The long haul (500+). Length acts as a direct filter on page count, which is already fetched for the reveal clues. "One sitting" stops at 120, not 100, so the pool isn't too thin.
+- **Length:** four bands: One sitting (under 120 pages), A weekend (120–300), A few weeks (300–500), The long haul (500+). Length acts as a direct filter on page count, which is already fetched for the reveal clues. "One sitting" stops at 120, not 100, so the pool isn't too thin. Labels vary by theme (for example Sci-fi: A quick hop / Across the system / Interstellar / Another galaxy); the bands stay fixed.
+- **Rule out:** a pick-any follow-up in the pool for turn-offs (gore, sad endings, long series and so on; full list in [`question-bank.md`](./question-bank.md)). Its picks act as hard filters.
 - **Unclear typed answers:** never block. If no answer is chosen and the typed text is obviously unusable (fewer than 3 characters, or no real letters), show one gentle inline nudge under the field ("Tell me a little more? Or tap an answer above.") and keep the page from turning once. Ask once, then move on: a second tap proceeds anyway. Subtler unclear answers are handled by the taste summary's code check and template fallback (§4f); an unusable answer is dropped quietly, and the rejection path (§4g) catches a miss.
 - **Creative framing:** emoji-style prompts woven into the pools, about one per session.
 - **Stateless:** no memory of users across sessions. The one exception is anonymous feedback events (§4i), which identify no one.
@@ -203,6 +204,7 @@ A second, taste-shaped pool built from reader-applied tags. Fetched once per req
 - **Beli-style pairwise ranking.** Pure algorithm, not AI. Later.
 - **Goodreads / tracking-app import.** Later; verify feasibility first (Flag C).
 - **Gamified visual prompts and bespoke illustration.** Later.
+- **Keep the question flow fresh:** reactive one-line bridges that respond to the last answer; growing and seasonal question pools; pruning questions using skip/abandon and liked-pick data; new formats later (choose by cover, a swipe deck of covers, dragging books onto a shelf); not repeating questions for a returning visitor, stored on their device only. Expand the question base once all themes are complete.
 - **Monetization:** v0 ships a configurable affiliate link (§4c). Anything beyond that waits on the "launch vs. portfolio piece" decision.
 
 ---

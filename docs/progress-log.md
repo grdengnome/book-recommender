@@ -667,3 +667,19 @@ Ran the identical `cult novel` query against Open Library side by side for direc
 **Next:**
 1. Roll the answer formats out to Mystery, Fantasy, Superhero and Sci-fi with motion.
 2. A new scene per question.
+
+---
+
+## October 12, 2026 — Question-flow pass, part 2: all five themes
+
+**Conclusion:** Settled the question set for v0: added a rule-out question and capped answer formats at five. Rolled the formats out to Mystery, Fantasy, Superhero and Sci-fi, each with a different scene per question. Written up in `design.md` §8, `spec.md` §4a and §6, and `question-bank.md`; decisions 13.40–13.47.
+
+**Prototypes:** `docs/mockups/motion-question-formats-{mystery,fantasy,superhero,scifi}.html`. The café prototype (`motion-question-formats.html`) was brought level, including the rule-out question.
+
+**Changes:** themed the length question per theme after the thermos didn't fit Mystery (same hold-to-fill gesture, a different object per theme). A clarity pass on wording: themed name first, plain meaning first in the line below it, plain opt-outs. Non-answer buttons got their own pill shape. Superhero's length question is accepted for now and flagged for a later pass.
+
+**Next:**
+1. Owner sign-off on the full design.
+2. Engine: structured picks with the clue values, stage reporting, and reserves.
+3. Later: expand the question base and draw the art for the new this-or-that pairs.
+4. Later: a wording pass to remove themed names repeated across themes (for example "Pitch black" / "Pitch dark", "tech talk").
