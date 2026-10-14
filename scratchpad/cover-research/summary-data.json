@@ -1,0 +1,128 @@
+{
+  "googleDisabled": "rate-limited after backoff; source stopped",
+  "placeholderShas": 0,
+  "groups": {
+    "pick": {
+      "openlibrary": {
+        "n": 57,
+        "hits": 56,
+        "wrong": 0,
+        "split": {
+          "Sharp": 1,
+          "Usable": 44,
+          "Small": 11,
+          "None": 1
+        }
+      },
+      "hardcover": {
+        "n": 57,
+        "hits": 57,
+        "wrong": 3,
+        "split": {
+          "Sharp": 2,
+          "Usable": 44,
+          "Small": 11,
+          "None": 0
+        }
+      },
+      "google": {
+        "n": 57,
+        "hits": 0,
+        "wrong": 0,
+        "split": {
+          "Sharp": 0,
+          "Usable": 0,
+          "Small": 0,
+          "None": 57
+        }
+      },
+      "best": {
+        "n": 57,
+        "hits": 57,
+        "wrong": 0,
+        "split": {
+          "Sharp": 3,
+          "Usable": 49,
+          "Small": 5,
+          "None": 0
+        }
+      },
+      "bestFrom": {
+        "openlibrary": 31,
+        "hardcover": 26,
+        "google": 0
+      },
+      "onlySharp": {
+        "openlibrary": 1,
+        "hardcover": 2,
+        "google": 0
+      },
+      "fakes": {
+        "openlibrary": 0,
+        "hardcover": 0,
+        "google": 0
+      }
+    },
+    "pool": {
+      "openlibrary": {
+        "n": 150,
+        "hits": 130,
+        "wrong": 0,
+        "split": {
+          "Sharp": 2,
+          "Usable": 98,
+          "Small": 30,
+          "None": 20
+        }
+      },
+      "hardcover": {
+        "n": 150,
+        "hits": 125,
+        "wrong": 34,
+        "split": {
+          "Sharp": 11,
+          "Usable": 79,
+          "Small": 35,
+          "None": 25
+        }
+      },
+      "google": {
+        "n": 150,
+        "hits": 0,
+        "wrong": 0,
+        "split": {
+          "Sharp": 0,
+          "Usable": 0,
+          "Small": 0,
+          "None": 150
+        }
+      },
+      "best": {
+        "n": 150,
+        "hits": 133,
+        "wrong": 0,
+        "split": {
+          "Sharp": 11,
+          "Usable": 105,
+          "Small": 17,
+          "None": 17
+        }
+      },
+      "bestFrom": {
+        "openlibrary": 82,
+        "hardcover": 51,
+        "google": 0
+      },
+      "onlySharp": {
+        "openlibrary": 2,
+        "hardcover": 9,
+        "google": 0
+      },
+      "fakes": {
+        "openlibrary": 0,
+        "hardcover": 0,
+        "google": 0
+      }
+    }
+  }
+}

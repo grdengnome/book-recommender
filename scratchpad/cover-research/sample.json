@@ -1,0 +1,1247 @@
+{
+  "builtWith": {
+    "seed": 20261014,
+    "poolSampleSize": 150,
+    "uniquePoolBooks": 4378,
+    "runs": [
+      {
+        "file": "eval-run-grounded-2026-09-20.json",
+        "found": true
+      },
+      {
+        "file": "eval-run-grounded-fix-verify-2026-09-20.json",
+        "found": true
+      },
+      {
+        "file": "eval-run-postfix-2026-09-23.json",
+        "found": true
+      }
+    ]
+  },
+  "books": [
+    {
+      "title": "Kokoro",
+      "author": "夏目漱石",
+      "tag": "pick",
+      "from": [
+        "eval-run-grounded-2026-09-20#case-1",
+        "eval-run-postfix-2026-09-23#case-1"
+      ]
+    },
+    {
+      "title": "Our Souls at Night",
+      "author": "Kent Haruf",
+      "tag": "pick",
+      "from": [
+        "eval-run-grounded-2026-09-20#case-1",
+        "eval-run-postfix-2026-09-23#case-1"
+      ]
+    },
+    {
+      "title": "The Stone Diaries",
+      "author": "Carol Shields",
+      "tag": "pick",
+      "from": [
+        "eval-run-grounded-2026-09-20#case-1"
+      ]
+    },
+    {
+      "title": "A Jest of God",
+      "author": "Margaret Laurence",
+      "tag": "pick",
+      "from": [
+        "eval-run-grounded-2026-09-20#case-2",
+        "eval-run-postfix-2026-09-23#case-2"
+      ]
+    },
+    {
+      "title": "The Memory of Love",
+      "author": "Aminatta Forna",
+      "tag": "pick",
+      "from": [
+        "eval-run-grounded-2026-09-20#case-2",
+        "eval-run-postfix-2026-09-23#case-2",
+        "eval-run-postfix-2026-09-23#case-6"
+      ]
+    },
+    {
+      "title": "Los informantes",
+      "author": "Juan Gabriel Vásquez",
+      "tag": "pick",
+      "from": [
+        "eval-run-grounded-2026-09-20#case-2",
+        "eval-run-grounded-2026-09-20#case-6",
+        "eval-run-postfix-2026-09-23#case-2"
+      ]
+    },
+    {
+      "title": "Diary of a Void",
+      "author": "Emi Yagi",
+      "tag": "pick",
+      "from": [
+        "eval-run-grounded-2026-09-20#case-4"
+      ]
+    },
+    {
+      "title": "Wizard of the Crow",
+      "author": "Ngũgĩ wa Thiongʼo",
+      "tag": "pick",
+      "from": [
+        "eval-run-grounded-2026-09-20#case-4"
+      ]
+    },
+    {
+      "title": "El llano en llamas",
+      "author": "Juan Rulfo",
+      "tag": "pick",
+      "from": [
+        "eval-run-grounded-2026-09-20#case-4"
+      ]
+    },
+    {
+      "title": "Gigi",
+      "author": "Colette",
+      "tag": "pick",
+      "from": [
+        "eval-run-grounded-2026-09-20#case-5"
+      ]
+    },
+    {
+      "title": "All Systems Red",
+      "author": "Martha Wells",
+      "tag": "pick",
+      "from": [
+        "eval-run-grounded-2026-09-20#case-5"
+      ]
+    },
+    {
+      "title": "Nettle & Bone",
+      "author": "T. Kingfisher",
+      "tag": "pick",
+      "from": [
+        "eval-run-grounded-2026-09-20#case-5"
+      ]
+    },
+    {
+      "title": "Sult",
+      "author": "Knut Hamsun",
+      "tag": "pick",
+      "from": [
+        "eval-run-grounded-2026-09-20#case-6",
+        "eval-run-postfix-2026-09-23#case-6"
+      ]
+    },
+    {
+      "title": "Paris Trout",
+      "author": "Pete Dexter",
+      "tag": "pick",
+      "from": [
+        "eval-run-grounded-2026-09-20#case-6",
+        "eval-run-grounded-fix-verify-2026-09-20#case-8",
+        "eval-run-postfix-2026-09-23#case-6",
+        "eval-run-postfix-2026-09-23#case-8"
+      ]
+    },
+    {
+      "title": "Sweet Thursday",
+      "author": "John Steinbeck",
+      "tag": "pick",
+      "from": [
+        "eval-run-grounded-2026-09-20#case-7a"
+      ]
+    },
+    {
+      "title": "The Chosen",
+      "author": "Chaim Potok",
+      "tag": "pick",
+      "from": [
+        "eval-run-grounded-2026-09-20#case-7a"
+      ]
+    },
+    {
+      "title": "O Pioneers!",
+      "author": "Willa Cather",
+      "tag": "pick",
+      "from": [
+        "eval-run-grounded-2026-09-20#case-7a"
+      ]
+    },
+    {
+      "title": "Hotel du Lac",
+      "author": "Anita Brookner",
+      "tag": "pick",
+      "from": [
+        "eval-run-grounded-2026-09-20#case-7b"
+      ]
+    },
+    {
+      "title": "All Passion Spent",
+      "author": "Vita Sackville-West",
+      "tag": "pick",
+      "from": [
+        "eval-run-grounded-2026-09-20#case-7b"
+      ]
+    },
+    {
+      "title": "Elizabeth Costello",
+      "author": "J. M. Coetzee",
+      "tag": "pick",
+      "from": [
+        "eval-run-grounded-2026-09-20#case-7b"
+      ]
+    },
+    {
+      "title": "Garlic, Mint & Sweet Basil",
+      "author": "Jean-Claude Izzo",
+      "tag": "pick",
+      "from": [
+        "eval-run-grounded-2026-09-20#case-8",
+        "eval-run-postfix-2026-09-23#case-8"
+      ]
+    },
+    {
+      "title": "Tar Baby",
+      "author": "Toni Morrison",
+      "tag": "pick",
+      "from": [
+        "eval-run-grounded-2026-09-20#case-8"
+      ]
+    },
+    {
+      "title": "Black Wings Has My Angel",
+      "author": "Elliott Chaze",
+      "tag": "pick",
+      "from": [
+        "eval-run-grounded-2026-09-20#case-8"
+      ]
+    },
+    {
+      "title": "Furious Hours",
+      "author": "Casey Cep",
+      "tag": "pick",
+      "from": [
+        "eval-run-grounded-2026-09-20#case-9"
+      ]
+    },
+    {
+      "title": "ZeroZeroZero",
+      "author": "Roberto Saviano",
+      "tag": "pick",
+      "from": [
+        "eval-run-grounded-2026-09-20#case-9",
+        "eval-run-postfix-2026-09-23#case-9"
+      ]
+    },
+    {
+      "title": "The Radium Girls: The Dark Story of America's Shining Women",
+      "author": "Kate Moore",
+      "tag": "pick",
+      "from": [
+        "eval-run-grounded-2026-09-20#case-9"
+      ]
+    },
+    {
+      "title": "We Have Always Lived in the Castle",
+      "author": "Shirley Jackson",
+      "tag": "pick",
+      "from": [
+        "eval-run-grounded-2026-09-20#case-10"
+      ]
+    },
+    {
+      "title": "The Little Stranger",
+      "author": "Sarah Waters",
+      "tag": "pick",
+      "from": [
+        "eval-run-grounded-2026-09-20#case-10"
+      ]
+    },
+    {
+      "title": "Lolly Willowes",
+      "author": "Sylvia Townsend Warner",
+      "tag": "pick",
+      "from": [
+        "eval-run-grounded-2026-09-20#case-10"
+      ]
+    },
+    {
+      "title": "The Garden of Evening Mists",
+      "author": "Tan Twan Eng",
+      "tag": "pick",
+      "from": [
+        "eval-run-grounded-fix-verify-2026-09-20#case-3",
+        "eval-run-grounded-fix-verify-2026-09-20#case-8",
+        "eval-run-postfix-2026-09-23#case-3"
+      ]
+    },
+    {
+      "title": "Ficciones",
+      "author": "Jorge Luis Borges",
+      "tag": "pick",
+      "from": [
+        "eval-run-grounded-fix-verify-2026-09-20#case-3"
+      ]
+    },
+    {
+      "title": "The Snow Child",
+      "author": "Eowyn Ivey",
+      "tag": "pick",
+      "from": [
+        "eval-run-grounded-fix-verify-2026-09-20#case-3"
+      ]
+    },
+    {
+      "title": "Sátántangó",
+      "author": "László Krasznahorkai",
+      "tag": "pick",
+      "from": [
+        "eval-run-grounded-fix-verify-2026-09-20#case-4",
+        "eval-run-grounded-fix-verify-2026-09-20#case-8",
+        "eval-run-postfix-2026-09-23#case-8"
+      ]
+    },
+    {
+      "title": "Dogeaters",
+      "author": "Jessica Tarahata Hagedorn",
+      "tag": "pick",
+      "from": [
+        "eval-run-grounded-fix-verify-2026-09-20#case-4"
+      ]
+    },
+    {
+      "title": "The Buddha of Suburbia",
+      "author": "Hanif Kureishi",
+      "tag": "pick",
+      "from": [
+        "eval-run-grounded-fix-verify-2026-09-20#case-4"
+      ]
+    },
+    {
+      "title": "Gilead",
+      "author": "Marilynne Robinson",
+      "tag": "pick",
+      "from": [
+        "eval-run-grounded-fix-verify-2026-09-20#case-1"
+      ]
+    },
+    {
+      "title": "Strangers",
+      "author": "Anita Brookner",
+      "tag": "pick",
+      "from": [
+        "eval-run-grounded-fix-verify-2026-09-20#case-1",
+        "eval-run-postfix-2026-09-23#case-1"
+      ]
+    },
+    {
+      "title": "Sadler's birthday",
+      "author": "Rose Tremain",
+      "tag": "pick",
+      "from": [
+        "eval-run-grounded-fix-verify-2026-09-20#case-1"
+      ]
+    },
+    {
+      "title": "A Fine Balance",
+      "author": "Rohinton Mistry",
+      "tag": "pick",
+      "from": [
+        "eval-run-postfix-2026-09-23#case-3"
+      ]
+    },
+    {
+      "title": "CivilWarLand in Bad Decline",
+      "author": "George Saunders",
+      "tag": "pick",
+      "from": [
+        "eval-run-postfix-2026-09-23#case-3"
+      ]
+    },
+    {
+      "title": "Morvern Callar",
+      "author": "Alan Warner",
+      "tag": "pick",
+      "from": [
+        "eval-run-postfix-2026-09-23#case-4"
+      ]
+    },
+    {
+      "title": "Niebla",
+      "author": "Miguel de Unamuno",
+      "tag": "pick",
+      "from": [
+        "eval-run-postfix-2026-09-23#case-4"
+      ]
+    },
+    {
+      "title": "My family's role in the world revolution and other prose",
+      "author": "Bora Ćosić",
+      "tag": "pick",
+      "from": [
+        "eval-run-postfix-2026-09-23#case-4"
+      ]
+    },
+    {
+      "title": "Three Men in a Boat (to say nothing of the dog)",
+      "author": "Jerome Klapka Jérôme",
+      "tag": "pick",
+      "from": [
+        "eval-run-postfix-2026-09-23#case-5"
+      ]
+    },
+    {
+      "title": "The Mouse on the Moon",
+      "author": "Leonard Wibberley",
+      "tag": "pick",
+      "from": [
+        "eval-run-postfix-2026-09-23#case-5"
+      ]
+    },
+    {
+      "title": "Miss Mapp",
+      "author": "E. F. Benson",
+      "tag": "pick",
+      "from": [
+        "eval-run-postfix-2026-09-23#case-5"
+      ]
+    },
+    {
+      "title": "A Gentleman in Moscow",
+      "author": "Amor Towles",
+      "tag": "pick",
+      "from": [
+        "eval-run-postfix-2026-09-23#case-7a"
+      ]
+    },
+    {
+      "title": "The Enchanted April",
+      "author": "Elizabeth von Arnim",
+      "tag": "pick",
+      "from": [
+        "eval-run-postfix-2026-09-23#case-7a"
+      ]
+    },
+    {
+      "title": "My Ántonia",
+      "author": "Willa Cather",
+      "tag": "pick",
+      "from": [
+        "eval-run-postfix-2026-09-23#case-7a"
+      ]
+    },
+    {
+      "title": "Memento Mori",
+      "author": "Muriel Spark",
+      "tag": "pick",
+      "from": [
+        "eval-run-postfix-2026-09-23#case-7b"
+      ]
+    },
+    {
+      "title": "Обломов",
+      "author": "Ива́н Алекса́ндрович Гончаро́в",
+      "tag": "pick",
+      "from": [
+        "eval-run-postfix-2026-09-23#case-7b"
+      ]
+    },
+    {
+      "title": "A Pale View of Hills",
+      "author": "Kazuo Ishiguro",
+      "tag": "pick",
+      "from": [
+        "eval-run-postfix-2026-09-23#case-7b"
+      ]
+    },
+    {
+      "title": "Say Nothing",
+      "author": "Patrick Radden Keefe",
+      "tag": "pick",
+      "from": [
+        "eval-run-postfix-2026-09-23#case-9"
+      ]
+    },
+    {
+      "title": "Billion Dollar Whale",
+      "author": "Wright, Tom (Wall Street Journal reporter)",
+      "tag": "pick",
+      "from": [
+        "eval-run-postfix-2026-09-23#case-9"
+      ]
+    },
+    {
+      "title": "Ghost Wall",
+      "author": "Sarah Moss",
+      "tag": "pick",
+      "from": [
+        "eval-run-postfix-2026-09-23#case-10"
+      ]
+    },
+    {
+      "title": "Seven Gothic tales",
+      "author": "Isak Dinesen",
+      "tag": "pick",
+      "from": [
+        "eval-run-postfix-2026-09-23#case-10"
+      ]
+    },
+    {
+      "title": "Uncle Silas",
+      "author": "Sheridan Le Fanu",
+      "tag": "pick",
+      "from": [
+        "eval-run-postfix-2026-09-23#case-10"
+      ]
+    },
+    {
+      "title": "The Young Elites",
+      "author": "Marie Lu",
+      "tag": "pool"
+    },
+    {
+      "title": "Cashemere y seda",
+      "author": "Adolfo Bianchi Silvestre",
+      "tag": "pool"
+    },
+    {
+      "title": "Mosses from an Old Manse",
+      "author": "Nathaniel Hawthorne",
+      "tag": "pool"
+    },
+    {
+      "title": "Night Life of the Gods (Annotated)",
+      "author": "Thorne Smith",
+      "tag": "pool"
+    },
+    {
+      "title": "Pippi Långstrump går ombord",
+      "author": "Astrid Lindgren",
+      "tag": "pool"
+    },
+    {
+      "title": "Social vulnerability to disasters",
+      "author": "Brenda Phillips",
+      "tag": "pool"
+    },
+    {
+      "title": "Humanistic Geography and Literature",
+      "author": "Douglas Charles David Pocock",
+      "tag": "pool"
+    },
+    {
+      "title": "Afropean Female Selves",
+      "author": "Christopher Hogarth",
+      "tag": "pool"
+    },
+    {
+      "title": "Recuerdo",
+      "author": "Cristina Pantoja-Hidalgo",
+      "tag": "pool"
+    },
+    {
+      "title": "This Book Is Haunted",
+      "author": "Joanne Rocklin",
+      "tag": "pool"
+    },
+    {
+      "title": "Latin America's new historical novel",
+      "author": "Seymour Menton",
+      "tag": "pool"
+    },
+    {
+      "title": "Collected Novellas",
+      "author": "Gabriel García Márquez",
+      "tag": "pool"
+    },
+    {
+      "title": "Les lieux de mémoire",
+      "author": "Maurice Agulhon",
+      "tag": "pool"
+    },
+    {
+      "title": "The Witches",
+      "author": "Roald Dahl",
+      "tag": "pool"
+    },
+    {
+      "title": "Winnie's Haunted House",
+      "author": "Valerie Thomas",
+      "tag": "pool"
+    },
+    {
+      "title": "Fiction",
+      "author": "R. S. Gwynn",
+      "tag": "pool"
+    },
+    {
+      "title": "Philosophies of Place",
+      "author": "Peter D. Hershock",
+      "tag": "pool"
+    },
+    {
+      "title": "Textplus - New Grub Street",
+      "author": "George Gissing",
+      "tag": "pool"
+    },
+    {
+      "title": "Islands of Protest",
+      "author": "Davinder L. Bhowmik",
+      "tag": "pool"
+    },
+    {
+      "title": "Guangdong sheng zhi",
+      "author": "Guangdong Sheng di fang shi zhi bian zuan wei yuan hui",
+      "tag": "pool"
+    },
+    {
+      "title": "Servant of the Bones",
+      "author": "Anne Rice",
+      "tag": "pool"
+    },
+    {
+      "title": "Narrative Space and Time",
+      "author": "Elana Gomel",
+      "tag": "pool"
+    },
+    {
+      "title": "Writing That Breaks Stones",
+      "author": "Joya F. Uraizee",
+      "tag": "pool"
+    },
+    {
+      "title": "山本健吉全集",
+      "author": "山本健吉",
+      "tag": "pool"
+    },
+    {
+      "title": "Someday",
+      "author": "David Levithan",
+      "tag": "pool"
+    },
+    {
+      "title": "Ward six and other stories [6 stories]",
+      "author": "Антон Павлович Чехов",
+      "tag": "pool"
+    },
+    {
+      "title": "The History of the Adventures of Joseph Andrews",
+      "author": "Henry Fielding",
+      "tag": "pool"
+    },
+    {
+      "title": "Cartographies of Transnationalism in Postcolonial Feminisms",
+      "author": "Jamil Khader",
+      "tag": "pool"
+    },
+    {
+      "title": "Soldiers Three (Collected Works of Rudyard Kipling)",
+      "author": "Rudyard Kipling",
+      "tag": "pool"
+    },
+    {
+      "title": "The Haunted Man and the Ghost's Bargain",
+      "author": "Charles Dickens",
+      "tag": "pool"
+    },
+    {
+      "title": "Joseph in Egypt",
+      "author": "Thomas Mann",
+      "tag": "pool"
+    },
+    {
+      "title": "The Outsiders",
+      "author": "S. E. Hinton",
+      "tag": "pool"
+    },
+    {
+      "title": "Captivity and Restoration",
+      "author": "Mary White Rowlandson",
+      "tag": "pool"
+    },
+    {
+      "title": "πολιτεία",
+      "author": "Plato",
+      "tag": "pool"
+    },
+    {
+      "title": "Scorpia",
+      "author": "Anthony Horowitz",
+      "tag": "pool"
+    },
+    {
+      "title": "Contemporary Latin American fiction",
+      "author": "Keith H. Brower",
+      "tag": "pool"
+    },
+    {
+      "title": "Beezus and Ramona",
+      "author": "Beverly Cleary",
+      "tag": "pool"
+    },
+    {
+      "title": "Sense and Sensibility",
+      "author": "Jane Austen",
+      "tag": "pool"
+    },
+    {
+      "title": "The Island of Dr. Moreau",
+      "author": "H. G. Wells",
+      "tag": "pool"
+    },
+    {
+      "title": "Moonfleet",
+      "author": "John Meade Falkner",
+      "tag": "pool"
+    },
+    {
+      "title": "The happy lion roars",
+      "author": "Louise Fatio",
+      "tag": "pool"
+    },
+    {
+      "title": "Pamela, or, Virtue rewarded",
+      "author": "Samuel Richardson",
+      "tag": "pool"
+    },
+    {
+      "title": "Der Steppenwolf",
+      "author": "Hermann Hesse",
+      "tag": "pool"
+    },
+    {
+      "title": "Rob Roy",
+      "author": "Sir Walter Scott",
+      "tag": "pool"
+    },
+    {
+      "title": "Les Liaisons dangereuses",
+      "author": "Pierre Choderlos de Laclos",
+      "tag": "pool"
+    },
+    {
+      "title": "Novels (Emma / Mansfield Park / Northanger Abbey / Persuasion / Pride and Prejudice / Sense and Sensibility)",
+      "author": "Jane Austen",
+      "tag": "pool"
+    },
+    {
+      "title": "Barefoot Gen, Vol. 2",
+      "author": "中沢 啓治",
+      "tag": "pool"
+    },
+    {
+      "title": "Rip Van Winkle and Sleepy Hollow",
+      "author": "Washington Irving",
+      "tag": "pool"
+    },
+    {
+      "title": "Child Christopher and Goldilind the Fair",
+      "author": "William Morris",
+      "tag": "pool"
+    },
+    {
+      "title": "Iced",
+      "author": "Sellers, Peter",
+      "tag": "pool"
+    },
+    {
+      "title": "La casa verde",
+      "author": "Mario Vargas Llosa",
+      "tag": "pool"
+    },
+    {
+      "title": "Invisible darkness",
+      "author": "Williams, Stephen",
+      "tag": "pool"
+    },
+    {
+      "title": "Relampago",
+      "author": "Danielle Steel",
+      "tag": "pool"
+    },
+    {
+      "title": "Bridge to Terabithia",
+      "author": "Katherine Paterson",
+      "tag": "pool"
+    },
+    {
+      "title": "Character, Driven",
+      "author": "David Lubar",
+      "tag": "pool"
+    },
+    {
+      "title": "Plural Maghreb",
+      "author": "Abdelkebir Khatibi",
+      "tag": "pool"
+    },
+    {
+      "title": "Killing Floor",
+      "author": "Lee Child",
+      "tag": "pool"
+    },
+    {
+      "title": "From Russia, with love",
+      "author": "Ian Fleming",
+      "tag": "pool"
+    },
+    {
+      "title": "Cara's letters",
+      "author": "Kathryn Sutherland",
+      "tag": "pool"
+    },
+    {
+      "title": "Farmer Boy",
+      "author": "Laura Ingalls Wilder",
+      "tag": "pool"
+    },
+    {
+      "title": "Short Stories (Black Cat / Cask of Amontillado / Fall of the House of Usher / Pit and the Pendulum)",
+      "author": "Edgar Allan Poe",
+      "tag": "pool"
+    },
+    {
+      "title": "Poems",
+      "author": "Samuel Taylor Coleridge",
+      "tag": "pool"
+    },
+    {
+      "title": "Codependent No More",
+      "author": "Melody Beattie",
+      "tag": "pool"
+    },
+    {
+      "title": "Amae no kōzō",
+      "author": "Doi, Takeo",
+      "tag": "pool"
+    },
+    {
+      "title": "Bobbsey Twins in the Country, The",
+      "author": "Laura Lee Hope",
+      "tag": "pool"
+    },
+    {
+      "title": "Directing the documentary",
+      "author": "Michael Rabiger",
+      "tag": "pool"
+    },
+    {
+      "title": "Short Stories (Black Cat / Gold-Bug)",
+      "author": "Edgar Allan Poe",
+      "tag": "pool"
+    },
+    {
+      "title": "Lord of the Flies",
+      "author": "William Golding",
+      "tag": "pool"
+    },
+    {
+      "title": "JR上野駅公園口",
+      "author": "柳美里",
+      "tag": "pool"
+    },
+    {
+      "title": "The Secret Adversary",
+      "author": "Agatha Christie",
+      "tag": "pool"
+    },
+    {
+      "title": "The Possession of Natalie Glasgow",
+      "author": "Hailey Piper",
+      "tag": "pool"
+    },
+    {
+      "title": "Masterworks of Latin American Short Fiction",
+      "author": "Cass Canfield",
+      "tag": "pool"
+    },
+    {
+      "title": "Half of a Yellow Sun",
+      "author": "Chimamanda Ngozi Adichie",
+      "tag": "pool"
+    },
+    {
+      "title": "Sonnets",
+      "author": "William Shakespeare",
+      "tag": "pool"
+    },
+    {
+      "title": "Good Harbor",
+      "author": "Anita Diamant",
+      "tag": "pool"
+    },
+    {
+      "title": "Ghostgirl",
+      "author": "Tonya Hurley",
+      "tag": "pool"
+    },
+    {
+      "title": "Nadine Gordimer",
+      "author": "Dominic Head",
+      "tag": "pool"
+    },
+    {
+      "title": "The Best Known Works of Edgar Allan Poe",
+      "author": "Edgar Allan Poe",
+      "tag": "pool"
+    },
+    {
+      "title": "Those We Thought We Knew",
+      "author": "David Joy",
+      "tag": "pool"
+    },
+    {
+      "title": "Take Your Life Back",
+      "author": "David Stoop",
+      "tag": "pool"
+    },
+    {
+      "title": "The autobiography of Mark Rutherford ; Mark Rutherford's deliverance",
+      "author": "William Hale White",
+      "tag": "pool"
+    },
+    {
+      "title": "Corinne",
+      "author": "Germaine de Staël",
+      "tag": "pool"
+    },
+    {
+      "title": "Aeneis",
+      "author": "Publius Vergilius Maro",
+      "tag": "pool"
+    },
+    {
+      "title": "The Lady of Lyon House",
+      "author": "Jennifer Wilde",
+      "tag": "pool"
+    },
+    {
+      "title": "Beyond the Boundaries",
+      "author": "Mineke Schipper",
+      "tag": "pool"
+    },
+    {
+      "title": "Inhuman Materiality in Gothic Media",
+      "author": "Aspasia Stephanou",
+      "tag": "pool"
+    },
+    {
+      "title": "Intellectual Origins of the African Revolution",
+      "author": "Kesteloot                    L",
+      "tag": "pool"
+    },
+    {
+      "title": "Ties of Love",
+      "author": "Meg Hutchinson",
+      "tag": "pool"
+    },
+    {
+      "title": "Place and the Scene of Literary Practice",
+      "author": "Angharad Saunders",
+      "tag": "pool"
+    },
+    {
+      "title": "A warning to the curious and other stories",
+      "author": "Montague Rhodes James",
+      "tag": "pool"
+    },
+    {
+      "title": "On soul and earth",
+      "author": "Elena Liotta",
+      "tag": "pool"
+    },
+    {
+      "title": "Selected Tales and Sketches",
+      "author": "Nathaniel Hawthorne",
+      "tag": "pool"
+    },
+    {
+      "title": "Being Forgetful",
+      "author": "Joy Berry",
+      "tag": "pool"
+    },
+    {
+      "title": "Treasure Island",
+      "author": "Robert Louis Stevenson",
+      "tag": "pool"
+    },
+    {
+      "title": "Mishima Yukio senshū",
+      "author": "三島由紀夫",
+      "tag": "pool"
+    },
+    {
+      "title": "The Warden",
+      "author": "Anthony Trollope",
+      "tag": "pool"
+    },
+    {
+      "title": "Star Hunter",
+      "author": "Andre Norton",
+      "tag": "pool"
+    },
+    {
+      "title": "A Dangerous Path",
+      "author": "Erin Hunter",
+      "tag": "pool"
+    },
+    {
+      "title": "Love Insurance",
+      "author": "Earl Derr Biggers",
+      "tag": "pool"
+    },
+    {
+      "title": "White Fang",
+      "author": "Jack London",
+      "tag": "pool"
+    },
+    {
+      "title": "I looked alive",
+      "author": "Gary Lutz",
+      "tag": "pool"
+    },
+    {
+      "title": "Read Real Japanese Fiction",
+      "author": "Michael Emmerich",
+      "tag": "pool"
+    },
+    {
+      "title": "Muckraker",
+      "author": "W. Sydney Robinson",
+      "tag": "pool"
+    },
+    {
+      "title": "Tom Sawyer Abroad",
+      "author": "Mark Twain",
+      "tag": "pool"
+    },
+    {
+      "title": "About them",
+      "author": "Chester Aaron",
+      "tag": "pool"
+    },
+    {
+      "title": "Братья Карамазовы",
+      "author": "Фёдор Достоевский",
+      "tag": "pool"
+    },
+    {
+      "title": "Edge of Eternity",
+      "author": "Ken Follett",
+      "tag": "pool"
+    },
+    {
+      "title": "Autobiography (Nineteenth-Century British Autobiographies)",
+      "author": "Harriet Martineau",
+      "tag": "pool"
+    },
+    {
+      "title": "The Antarctica of Love",
+      "author": "Sara Stridsberg",
+      "tag": "pool"
+    },
+    {
+      "title": "Umbrella",
+      "author": "Will Self",
+      "tag": "pool"
+    },
+    {
+      "title": "The Cat in the Hat",
+      "author": "Dr. Seuss",
+      "tag": "pool"
+    },
+    {
+      "title": "The First Horror",
+      "author": "Robert Lawrence Stine",
+      "tag": "pool"
+    },
+    {
+      "title": "Master of Go",
+      "author": "川端康成",
+      "tag": "pool"
+    },
+    {
+      "title": "Awareness Techniques",
+      "author": "William Swygard",
+      "tag": "pool"
+    },
+    {
+      "title": "Khozi͡ain i rabotnik",
+      "author": "Лев Толстой",
+      "tag": "pool"
+    },
+    {
+      "title": "Judy Moody Declares Independence",
+      "author": "Megan McDonald",
+      "tag": "pool"
+    },
+    {
+      "title": "Orca, a Literary Journal",
+      "author": "Joseph Ponepinto",
+      "tag": "pool"
+    },
+    {
+      "title": "The orange trees of Baghdad",
+      "author": "Leilah Nadir",
+      "tag": "pool"
+    },
+    {
+      "title": "Die Phantasten",
+      "author": "Uwe Grossu",
+      "tag": "pool"
+    },
+    {
+      "title": "I See You",
+      "author": "Ruslana Pidsadiuk",
+      "tag": "pool"
+    },
+    {
+      "title": "Things Fall Apart",
+      "author": "Chinua Achebe",
+      "tag": "pool"
+    },
+    {
+      "title": "Co-Habiting with Ghosts",
+      "author": "Caron Lipman",
+      "tag": "pool"
+    },
+    {
+      "title": "Great Short Works of Edgar Allan Poe",
+      "author": "Edgar Allan Poe",
+      "tag": "pool"
+    },
+    {
+      "title": "Valiant",
+      "author": "Holly Black",
+      "tag": "pool"
+    },
+    {
+      "title": "Creating unforgettable characters",
+      "author": "Linda Seger",
+      "tag": "pool"
+    },
+    {
+      "title": "Sarah",
+      "author": "Orson Scott Card",
+      "tag": "pool"
+    },
+    {
+      "title": "Diseño de nuevas geografías en la novela y el cine negros de Argentina y Chile",
+      "author": "Coloquio Internacional Diseños de Nuevas Geografías en la Novela y el Cine Negros del Cono Sur a Partir de 1975 (2012 Universität-Gesamthochschule Paderborn)",
+      "tag": "pool"
+    },
+    {
+      "title": "Road Work",
+      "author": "Mark Bowden",
+      "tag": "pool"
+    },
+    {
+      "title": "The Penguin Book of American Short Stories",
+      "author": "Cochrane, James.",
+      "tag": "pool"
+    },
+    {
+      "title": "The outside man",
+      "author": "Richard North Patterson",
+      "tag": "pool"
+    },
+    {
+      "title": "Love on the Run",
+      "author": "Barbara Cartland",
+      "tag": "pool"
+    },
+    {
+      "title": "A house divided",
+      "author": "Catherine Cookson",
+      "tag": "pool"
+    },
+    {
+      "title": "Western intelligence and the collapse of the Soviet Union, 1980-1990",
+      "author": "David Arbel",
+      "tag": "pool"
+    },
+    {
+      "title": "Our Man in Havana",
+      "author": "Graham Greene",
+      "tag": "pool"
+    },
+    {
+      "title": "Representations of groups",
+      "author": "Hermann Boerner",
+      "tag": "pool"
+    },
+    {
+      "title": "Learning and Memory",
+      "author": "W. Scott Terry",
+      "tag": "pool"
+    },
+    {
+      "title": "Russian - English Dual-Language Book based on the World Masterpiece Classical Novel by Leo Tolstoy \"Anna Karenina\"",
+      "author": "Mrs. Zoia Sproesser",
+      "tag": "pool"
+    },
+    {
+      "title": "Geocritical explorations",
+      "author": "Robert T. Tally",
+      "tag": "pool"
+    },
+    {
+      "title": "Interview With the Vampire",
+      "author": "Anne Rice",
+      "tag": "pool"
+    },
+    {
+      "title": "The Moonstone",
+      "author": "Wilkie Collins",
+      "tag": "pool"
+    },
+    {
+      "title": "Selections From Poe [6 stories, 35 poems]",
+      "author": "Edgar Allan Poe",
+      "tag": "pool"
+    },
+    {
+      "title": "Great Tales and Poems of Edgar Allan Poe [21 stories, 34 poems]",
+      "author": "Edgar Allan Poe",
+      "tag": "pool"
+    },
+    {
+      "title": "Soft Targets",
+      "author": "Carson Winter",
+      "tag": "pool"
+    },
+    {
+      "title": "Lewis at zenith",
+      "author": "Sinclair Lewis",
+      "tag": "pool"
+    },
+    {
+      "title": "Murder in the Middle Pasture",
+      "author": "John R. Erickson",
+      "tag": "pool"
+    },
+    {
+      "title": "Classic American crime fiction of the 1920s",
+      "author": "Leslie S. Klinger",
+      "tag": "pool"
+    },
+    {
+      "title": "Novela negra y otros crímenes",
+      "author": "Gustavo Forero Quintero",
+      "tag": "pool"
+    },
+    {
+      "title": "The Red Tent",
+      "author": "Anita Diamant",
+      "tag": "pool"
+    },
+    {
+      "title": "No Expenses Spared",
+      "author": "Robert Winnett",
+      "tag": "pool"
+    },
+    {
+      "title": "A Fine and Private Place",
+      "author": "Peter S. Beagle",
+      "tag": "pool"
+    }
+  ]
+}

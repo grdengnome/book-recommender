@@ -1,6 +1,6 @@
 # Book Recommender — Spec
 
-*Current state of the product and its design. Decisions, reversals, and rejected paths are in [`decisions.md`](./decisions.md); this file says what the product is and how it works. Last updated October 12, 2026.*
+*Current state of the product and its design. Decisions, reversals, and rejected paths are in [`decisions.md`](./decisions.md); this file says what the product is and how it works. Last updated October 13, 2026.*
 
 ---
 
@@ -83,7 +83,7 @@ Each pick is revealed alone on its own screen, then all three are shown together
   - **"Already read it":** swaps in a reserve immediately.
   - When reserves run out, the swap control becomes "none of these working?" → rejection path (§4g).
 
-**Cover images:** Open Library → Google Books → designed placeholder.
+**Cover images:** see §5d.
 
 ### 4d. What "good" means
 
@@ -168,7 +168,11 @@ Retrieval is a tool the model calls (Anthropic tool use), not instructions embed
 
 ### 5d. Cover images
 
-Open Library → Google Books → designed placeholder (§4c). Open Library is free but thin on obscure titles; Google Books needs an API key at real volume.
+Covers are their own gated workstream: nothing moves toward launch until real covers pass a reveal check. Research: `scratchpad/cover-research/summary.md`.
+- **Sources:** Open Library → Hardcover (only with a strict title + author match) → Google Books (needs a free API key; not yet tested) → themed placeholder (§4c).
+- **Fake-cover detection (required):** labelled stand-ins ("This is not the actual book cover") and Project Gutenberg auto-generated covers count as no cover.
+- **Enhancement:** each cover is upscaled 2× with a faithful upscaler (EDSR-style: sharpens existing detail only, never redraws; text must stay intact). It runs on a hosted GPU while the loading screen runs. If it isn't ready in time, the original is shown and the enhanced version is saved for next time.
+- **Card bank:** stores each book's best cover, enhanced version, colours and fake-cover flag, so each book is processed once. Commonly picked books are pre-filled before launch.
 
 ### 5e. Post-selection verification of pick descriptions
 
@@ -205,6 +209,8 @@ A second, taste-shaped pool built from reader-applied tags. Fetched once per req
 - **Goodreads / tracking-app import.** Later; verify feasibility first (Flag C).
 - **Gamified visual prompts and bespoke illustration.** Later.
 - **Keep the question flow fresh:** reactive one-line bridges that respond to the last answer; growing and seasonal question pools; pruning questions using skip/abandon and liked-pick data; new formats later (choose by cover, a swipe deck of covers, dragging books onto a shelf); not repeating questions for a returning visitor, stored on their device only. Expand the question base once all themes are complete.
+- **Card collection:** once a user marks a book as read, its enhanced card joins their collection.
+- **Larger cover sources:** test Google Books (with a key) and Apple Books for larger cover images.
 - **Monetization:** v0 ships a configurable affiliate link (§4c). Anything beyond that waits on the "launch vs. portfolio piece" decision.
 
 ---

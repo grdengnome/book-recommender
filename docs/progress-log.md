@@ -683,3 +683,29 @@ Ran the identical `cult novel` query against Open Library side by side for direc
 2. Engine: structured picks with the clue values, stage reporting, and reserves.
 3. Later: expand the question base and draw the art for the new this-or-that pairs.
 4. Later: a wording pass to remove themed names repeated across themes (for example "Pitch black" / "Pitch dark", "tech talk").
+
+---
+
+## October 13, 2026 — Cover research
+
+**Conclusion:** Coverage is fine; sharpness is the gap. Covers become their own gated workstream: nothing moves toward launch until real covers pass a reveal check. Every card will start from a faithful 2× upscale of the real cover, kept in a card bank so each book is processed once. Written up in `spec.md` §5d and §6; decisions 13.48–13.54.
+
+**Method:** tried Open Library, Hardcover and Google Books independently for 57 eval picks and 150 random pool books, and measured each image's real pixel size. Detail in `scratchpad/cover-research/summary.md`.
+
+**Numbers:**
+- 55 of 57 picks have a real cover, but only 3 are 500px or wider. The typical cover is about 326×500, against about 570px wide for a crisp phone reveal. Judged usable by eye on a phone.
+- Open Library's large covers top out at 500px tall, so it can almost never give a sharp cover.
+- Hardcover has some larger images, but its loose search returned a likely wrong book's cover 37 times in 207, so it needs a strict title and author match.
+- Google Books couldn't be tested: keyless access hit a daily quota.
+
+**Fakes:** two pick covers were fakes that the automated checks missed: *Miss Mapp* (a labelled stand-in) and *Sult* (a Project Gutenberg auto-cover). Fake-cover detection is now required.
+
+**Upscaler test:** EDSR ×2 (OpenCV, Apache-2.0, no GAN) on the 10 softest picks. Text stayed intact; about 90 seconds per cover on CPU, so production needs a GPU. In a blind phone test, the 2× version was picked as sharper 8 times out of 10.
+
+**Card study:** First café reveal card study built on the 8 enhanced covers (holo foil on the card stock, glow from the cover's colours, Common / Rare / Hidden gem tiers). Feedback: loves the direction and the rarity tiers; the cover should dominate the card more so it reads as a book — revisit the border and card shape next session.
+
+**Next:**
+1. Revisit the café card's border and shape so the cover dominates and it reads as a book.
+2. Card design on real enhanced covers, Café Bookshop first.
+3. Get a Google Books API key.
+4. Test the bigger sources (Google Books with a key, Apple Books).

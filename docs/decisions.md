@@ -1,6 +1,6 @@
 # Decision Log
 
-*Covers decisions through the v0 engine, v0 product planning, and the start of the build (October 12, 2026). Further build decisions will be added as they're made.*
+*Covers decisions through the v0 engine, v0 product planning, and the start of the build (October 13, 2026). Further build decisions will be added as they're made.*
 
 The product and architecture decisions behind this recommender, and the paths I rejected. The [progress log](./progress-log.md) is the session-by-session diary; this file is the story told by decision. Each entry gives the decision and why, with a link to the full detail.
 
@@ -114,9 +114,10 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 **Decision:** Loading screens quote the user's actual answers.
 **Why:** Specific quotes feel like understanding; generic lines feel like a horoscope. ([question bank](./question-bank.md))
 
-### 2.8 Cover images: a fallback chain
+### 2.8 Cover images: a fallback chain (superseded)
 **Decision:** Open Library, then Google Books, then a designed placeholder.
 **Why:** Open Library is free but thin on obscure titles, which is where this app leans. ([spec §4c](./spec.md))
+**Superseded** on October 13 by the cover plan in [spec §5d](./spec.md) and decisions 13.48–13.54.
 
 ### 2.9 Simple layout, rich moments
 **Decision:** Keep the flow simple; spend the visual budget on the card reveal and button "pop."
@@ -651,3 +652,31 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 ### 13.47 Superhero's length question is accepted for now
 **Decision:** Superhero's length question (flying the worm up a skyscraper) stays as is for v0.
 **Why:** It works well enough to move on; it's flagged for a later pass. ([progress log, Oct 12](./progress-log.md))
+
+### 13.48 Covers are their own gated workstream
+**Decision:** Covers are a separate workstream with a gate: nothing moves toward launch until real covers pass a reveal check.
+**Why:** The cover is the app's aha moment. ([progress log, Oct 13](./progress-log.md))
+
+### 13.49 Coverage is fine; sharpness is the gap
+**Decision:** Cover work focuses on sharpness, not coverage.
+**Why:** 55 of 57 real picks had a real cover, but the typical one is about 326×500, against about 570px wide for a crisp phone reveal. Judged usable by eye on a phone. ([cover research summary](../scratchpad/cover-research/summary.md); [progress log, Oct 13](./progress-log.md))
+
+### 13.50 Hardcover covers only with a strict title and author match
+**Decision:** A Hardcover cover is used only when its title and author strictly match the pick.
+**Why:** Its loose search returned a likely wrong book's cover 37 times in 207. ([progress log, Oct 13](./progress-log.md))
+
+### 13.51 Faithful 2× enhancement is the base for the card
+**Decision:** Every card starts from a faithful 2× upscale (EDSR-style) of the real cover. GPU timing is to be measured during the build.
+**Why:** In a blind test on a phone, the 2× version was picked as sharper 8 times out of 10, and it never alters the cover. ([progress log, Oct 13](./progress-log.md))
+
+### 13.52 The card treatment never edits the cover
+**Decision:** The card adds a frame, a holographic sheen on tilt, a glow drawn from the cover's own colours, and a rarity feel. The cover itself is never edited.
+**Why:** It keeps the publisher's art intact, and readers trust real covers. ([progress log, Oct 13](./progress-log.md))
+
+### 13.53 A card bank, pre-filled before launch
+**Decision:** A card bank stores each book's best cover, enhanced version, colours and fake-cover flag, so each book is processed once. Commonly picked books are pre-filled before launch.
+**Why:** Enhancement is too slow to repeat per request, and a pre-filled bank means most reveals start sharp. ([progress log, Oct 13](./progress-log.md))
+
+### 13.54 Google Images is not a cover source
+**Decision:** Google Images is not used for covers.
+**Why:** There's no supported access (Google's search API is closed to new users and shuts down January 1, 2027), and no way to verify it's the right book. ([progress log, Oct 13](./progress-log.md))

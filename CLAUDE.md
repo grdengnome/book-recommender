@@ -79,7 +79,7 @@ One entry per session in `docs/progress-log.md`, written at session close:
 - **Most picks skip the description check.** It only runs when a pick's catalog subjects flag it as criticism of its genre; everything else passes through unchanged by design.
 - **The Open Library search call contributes very little to pools** (about 1% when measured in August). Deliberately deprioritized, not broken; subject lists and Hardcover carry retrieval.
 - **No fixed question count** in the (planned) question flow; it uses a confidence-based stopping rule. The turn-off question not always appearing is also intended.
-- **Cover images fall back** Open Library → Google Books → placeholder by design.
+- **Cover images fall back** Open Library → Hardcover (strict title + author match only) → Google Books (needs an API key) → themed placeholder by design (`docs/spec.md` §5d). Fake covers (labelled stand-ins, Project Gutenberg auto-covers) count as no cover.
 
 ## Open questions (do not resolve unilaterally)
 

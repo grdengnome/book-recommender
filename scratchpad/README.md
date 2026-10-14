@@ -49,3 +49,4 @@ Most other `.json` output here is gitignored run output. Finished experiments ha
 - `ol-pick-metadata-check.mjs` — checked whether Open Library has descriptions and full subjects for the Sept 23 baseline's 33 picks; groundwork for the Sept 26 fix.
 - `pick-check-izzo.mts` — ran the real description check on the Izzo pick that was wrongly described in the Sept 23 baseline; expected it to be rewritten.
 - `pick-lookup-izzo-check.mts` — confirmed the metadata lookup surfaces the Izzo book's "history and criticism" subjects, the signal that it's essays, not a novel.
+- `cover-research/` — Oct 13 cover coverage and quality research: per-source hit rates and pixel sizes for 57 picks and 150 pool books, the fake-cover finding, and the EDSR 2× upscaler test. Start with `cover-research/summary.md`. Cover images and the pages that display them are gitignored; the scripts regenerate them.

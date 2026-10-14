@@ -37,6 +37,16 @@ yarn-error.log*
 # captured real diagnostic findings worth preserving in git history.
 /scratchpad/*.json
 
+# cover research: cover images, the pages that display them, and working files
+/scratchpad/cover-research/samples/
+/scratchpad/cover-research/samples-2x/
+/scratchpad/cover-research/upscaled/
+/scratchpad/cover-research/work/
+/scratchpad/cover-research/contact-sheet.html
+/scratchpad/cover-research/reveal-preview.html
+/scratchpad/cover-research/upscale-compare.html
+/scratchpad/cover-research/upscale-blind.html
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
