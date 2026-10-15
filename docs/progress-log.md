@@ -709,3 +709,17 @@ Ran the identical `cult novel` query against Open Library side by side for direc
 2. Card design on real enhanced covers, Café Bookshop first.
 3. Get a Google Books API key.
 4. Test the bigger sources (Google Books with a key, Apple Books).
+
+---
+
+## October 14, 2026 — The reveal book (Café Bookshop)
+
+**Conclusion:** The revealed pick is now a 3D book, not a flat card. Designed for Café Bookshop over five iterations. Written up in `design.md` §10 and `spec.md` §4b–§4c; decisions 13.55–13.59, plus a new open question on how rarity tiers are assigned (`decisions.md` §12).
+
+**Iterations:** flat card vs book (the book wins on the phone); paperback or hardcover from edition data; a designed spine with a worm publisher mark; rarity renamed to Staff pick / First edition / Holy grail; a sleeker cover foil sheen; natural page edges for Staff pick; vivid rarity edges; a level camera; a first-pass shelving exit.
+
+**Next:**
+1. Carry the book into the other four themes.
+2. Prototype tapping the book to open it into the detail screen.
+3. Motion pass on the reveal entrance and exit.
+4. Get a Google Books API key and test bigger cover sources.

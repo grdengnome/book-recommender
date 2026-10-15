@@ -1,6 +1,6 @@
 # Design System
 
-*How Worm looks and why. Decisions behind it are in [`decisions.md`](./decisions.md) §13; what each screen does is in [`spec.md`](./spec.md) §4. Mockups live on the design canvas (private link, held by the owner). Last updated October 12, 2026.*
+*How Worm looks and why. Decisions behind it are in [`decisions.md`](./decisions.md) §13; what each screen does is in [`spec.md`](./spec.md) §4. Mockups live on the design canvas (private link, held by the owner). Last updated October 14, 2026.*
 
 ---
 
@@ -195,7 +195,34 @@ Settled in tappable prototypes, done for all five themes (sources: [`mockups/mot
 - **Backdrop (Café Bookshop):** bookshelves down both edges, string lights, and a pendant lamp lighting the cover.
 - **Reduced motion:** when the device's reduced-motion setting is on, skip straight to the revealed cover.
 
-## 10. Motion: the loading screen
+## 10. The reveal book
+
+Designed for Café Bookshop on October 14; the other four themes are next. Where it differs from §9, this section wins.
+
+- **A 3D book, not a flat card.** A flat card was tested; the book wins on the phone, which is what matters. The cover dominates the screen and is never edited.
+- **Format follows the edition's data:** paperback by default, hardcover when the edition says so (spec §4b).
+  - **Paperback:** flush, slim cover, rounded corners, a scored hinge crease.
+  - **Hardcover:** covers overhang the page block, a rounded spine with head and tail bands, a hinge groove.
+- **Thickness** comes from the page count.
+- **The spine is a designed surface,** not an afterthought: coloured from the cover's own left edge, the title reading top to bottom, the author's surname near the foot (dropped on thin spines), and a small worm "publisher mark" at the foot.
+- **Rarity tiers:** Staff pick → First edition → Holy grail. How a tier is assigned is still open (decisions §12).
+
+| Tier | Page edges | Cover foil |
+|---|---|---|
+| Staff pick | Natural paper | None |
+| First edition | Gilded gold, with a travelling sheen | Gold foil sheen |
+| Holy grail | Sprayed holographic rainbow, with glitter and a travelling sheen | Iridescent foil |
+
+  The cover foil is a light band that follows the tilt, plus a soft colour bloom where the light hits. Never dots, and it never alters the art. Page edges are the showcase for rarity and should stay vivid.
+- **Page edges look like real paper:** shading toward the covers, uneven fine page lines, slight grain.
+- **Camera:** level, flat perspective, a gentle resting turn. Dragging turns the book to show the spine and edges.
+- **Under the book:** a rarity badge with a diamond, then title, author, and a stats row (Year, Pages, Mood, Format: "Paperback" or "Hardcover"). Tight, even spacing.
+- **Glow, rays and backdrop** take their colours from the cover.
+- **Motion (first pass):** the book lands with a "slam" (in the real flow, after the theme's unwrap). To exit, it turns to its spine and slides away as if shelved. A full motion pass is still to come.
+- **Next screen (idea to prototype):** tapping the book opens it into the detail screen.
+- **Ongoing:** keep developing the holographic sheen in future passes.
+
+## 11. Motion: the loading screen
 
 Settled in prototypes, done for all five themes (sources: [`mockups/motion-loading.html`](./mockups/motion-loading.html) for Café Bookshop, and `motion-loading-mystery.html`, `-fantasy`, `-superhero`, `-scifi` in [`mockups/`](./mockups/)). Layout is in §3.
 
@@ -216,7 +243,7 @@ Settled in prototypes, done for all five themes (sources: [`mockups/motion-loadi
 - **Hand-off:** when the last bar fills, the text fades out, the room dims, and the first wrapped book appears (the start of the reveal, §9).
 - **Reduced motion:** when the device's reduced-motion setting is on, nothing animates.
 
-## 11. Status
+## 12. Status
 
 | Screen | Café Bookshop | Fantasy | Superhero | Mystery | Sci-fi |
 |---|---|---|---|---|---|
@@ -229,9 +256,9 @@ Settled in prototypes, done for all five themes (sources: [`mockups/motion-loadi
 | Rejection read-back | Mocked | Mocked | Mocked | Mocked | Mocked |
 | Error | Mocked | Mocked | Mocked | Mocked | Mocked |
 
-Mockups use placeholder covers and bracketed placeholder text. Real covers come from the catalogs (spec §4c). Reveal motion (§9) and loading motion (§10) are done for all five themes. Answer formats (§8) and question-screen motion (§7) are prototyped for all five themes. Superhero's length question is good for now but flagged for a later pass.
+Mockups use placeholder covers and bracketed placeholder text. Real covers come from the catalogs (spec §4c). Reveal motion (§9) and loading motion (§11) are done for all five themes. The reveal book (§10) is designed for Café Bookshop; the other four themes are next. Answer formats (§8) and question-screen motion (§7) are prototyped for all five themes. Superhero's length question is good for now but flagged for a later pass.
 
-## 12. Building it
+## 13. Building it
 
 - Build each screen once against the shared structure. A theme is a set of values (fonts, colors, shapes, scene art, wording) applied to that structure.
 - Adding a theme must not require changing any screen's layout.

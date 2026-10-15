@@ -1,6 +1,6 @@
 # Decision Log
 
-*Covers decisions through the v0 engine, v0 product planning, and the start of the build (October 13, 2026). Further build decisions will be added as they're made.*
+*Covers decisions through the v0 engine, v0 product planning, and the start of the build (October 14, 2026). Further build decisions will be added as they're made.*
 
 The product and architecture decisions behind this recommender, and the paths I rejected. The [progress log](./progress-log.md) is the session-by-session diary; this file is the story told by decision. Each entry gives the decision and why, with a link to the full detail.
 
@@ -460,6 +460,7 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 - **Reveal-prompt wording for Fantasy, Superhero, Mystery and Sci-fi.** Every theme's wrapping is decided; only the café's "Tap to unwrap" wording is settled, and the other four are placeholders. ([design §9](./design.md))
 - **How to keep the question flow fresh:** wording variety (answer formats settled in 13.35, scenes in 13.45; longer-term ideas in [spec §6](./spec.md)). The existing first-question template stays. ([design §7](./design.md))
 - **How much book detail to show on the reveal screen versus the detail screen.** ([design §9](./design.md))
+- **How rarity tiers are assigned** (Staff pick, First edition, Holy grail). ([design §10](./design.md))
 
 ---
 
@@ -575,11 +576,11 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 
 ### 13.28 Loading progress shows real engine stages, without wording
 **Decision:** The loading screen shows three progress bars tied to real engine stages, with no stage wording.
-**Why:** Visible progress is reassuring, naming the steps adds words nobody needs, and progress must never be faked. ([design §10](./design.md))
+**Why:** Visible progress is reassuring, naming the steps adds words nobody needs, and progress must never be faked. ([design §11](./design.md))
 
 ### 13.29 On the loading screen, the scene leads
 **Decision:** The scene leads the loading screen; the order ticket and headline are small.
-**Why:** The wait is the longest moment in the app, and a living scene is better company than large text. ([design §10](./design.md))
+**Why:** The wait is the longest moment in the app, and a living scene is better company than large text. ([design §11](./design.md))
 
 ### 13.30 Scene props fade once the cover is revealed
 **Decision:** The worm and small scene objects fade out once the cover lands.
@@ -680,3 +681,23 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 ### 13.54 Google Images is not a cover source
 **Decision:** Google Images is not used for covers.
 **Why:** There's no supported access (Google's search API is closed to new users and shuts down January 1, 2027), and no way to verify it's the right book. ([progress log, Oct 13](./progress-log.md))
+
+### 13.55 The reveal is a 3D book, not a card
+**Decision:** The revealed pick is a 3D book. This replaces the card frame from 13.52; the cover is still never edited.
+**Why:** On a phone the book reads as a book and makes rarity physical. The card only looked better on desktop. ([progress log, Oct 14](./progress-log.md))
+
+### 13.56 Paperback by default, format from edition data
+**Decision:** The book is a paperback unless the edition's data says hardcover. Thickness comes from the page count.
+**Why:** Most books today are paperbacks, and realism builds trust. ([progress log, Oct 14](./progress-log.md))
+
+### 13.57 The spine is designed, with a worm publisher mark
+**Decision:** The spine takes its colour from the cover's left edge, carries the title and author's surname, and has a small worm "publisher mark" at the foot.
+**Why:** Users will see spines often (exits, later a collection shelf), so it's a brand moment. ([progress log, Oct 14](./progress-log.md))
+
+### 13.58 Rarity tiers: Staff pick, First edition, Holy grail
+**Decision:** The tiers are Staff pick, First edition and Holy grail. Holographic is the top tier, above gold.
+**Why:** Bookshop and collector language; holographic reads as rarer than gold. ([progress log, Oct 14](./progress-log.md))
+
+### 13.59 Rarity shows on page edges and a cover foil sheen
+**Decision:** Rarity shows on the page edges and as a foil sheen over the cover that never alters the art.
+**Why:** It makes rarity visible on the book itself while keeping the publisher's art intact (13.52). ([progress log, Oct 14](./progress-log.md))
