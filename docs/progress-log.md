@@ -723,3 +723,23 @@ Ran the identical `cult novel` query against Open Library side by side for direc
 2. Prototype tapping the book to open it into the detail screen.
 3. Motion pass on the reveal entrance and exit.
 4. Get a Google Books API key and test bigger cover sources.
+
+---
+
+## October 15, 2026 — The reveal book in all five themes
+
+**Conclusion:** The reveal book is now carried into all five themes and built as the full reveal screen (390 × 844) in one private prototype, "Worm Themed Reveal Book". The link stays private because it embeds publisher covers. The book is identical everywhere; the room, badge, type, buttons, details panel and spine worm change per theme. Written up in `design.md` §10 and §12; decisions 13.60–13.69.
+
+**Checks run:** a stress set of labelled test covers plus the 8 samples, in every theme.
+- Cover-to-room separation: 17 of 90 flagged → 0, using a soft light inside the book (no flat shapes behind it).
+- Text contrast: 405 checks against 4.5:1, all pass.
+- Wrapping-to-book handoff within 0.1px.
+- At least 17px above the buttons for every cover.
+- Checked at 358px phone width.
+- Mystery resting frame rate ~45 → ~58fps (CPU slowed 4×).
+
+**Next:**
+1. Grim's phone check of the three-pick flow, plus the glance test with 3–5 readers.
+2. Prototype the detail screen ("Tell me more").
+3. Motion pass bringing the three reveal styles into the flow.
+4. Get a Google Books API key.

@@ -1,6 +1,6 @@
 # Design System
 
-*How Worm looks and why. Decisions behind it are in [`decisions.md`](./decisions.md) §13; what each screen does is in [`spec.md`](./spec.md) §4. Mockups live on the design canvas (private link, held by the owner). Last updated October 14, 2026.*
+*How Worm looks and why. Decisions behind it are in [`decisions.md`](./decisions.md) §13; what each screen does is in [`spec.md`](./spec.md) §4. Mockups live on the design canvas (private link, held by the owner). Last updated October 15, 2026.*
 
 ---
 
@@ -182,7 +182,7 @@ Settled in tappable prototypes, done for all five themes (sources: [`mockups/mot
 
   Fantasy's wrapping uses only the theme's own colours (violet, ivory, crimson, gold).
 - **Starting the reveal:** the user taps the wrapped book itself; there is no button. The book wobbles every few seconds as an invitation, and a "Tap to unwrap" line shows on the first pick only. The prompt wording may vary by theme; only the café wording is decided, and the other four themes' wording is still a placeholder.
-- **Suspense build (about 3s):** the room darkens, the light pulses, and three clue chips fade in one at a time: year, page count, and a one-word mood.
+- **Suspense build (3s for pick 1, 1.8s for picks 2 and 3; see §10):** the room darkens, the light pulses, and three clue chips fade in one at a time: year, page count, and a one-word mood.
 - **Reveal styles:** three for v0, one per pick. More will be added over time; never play the same one twice in a row.
   - **Pinball:** the book ricochets around the screen, spinning.
   - **Coin spin:** it lifts and spins on its axis, accelerating.
@@ -197,7 +197,7 @@ Settled in tappable prototypes, done for all five themes (sources: [`mockups/mot
 
 ## 10. The reveal book
 
-Designed for Café Bookshop on October 14; the other four themes are next. Where it differs from §9, this section wins.
+Designed for Café Bookshop on October 14 and carried into all five themes on October 15, as the full reveal screen (390 × 844) in one private prototype, "Worm Themed Reveal Book" (private because it embeds publisher covers). Where it differs from §9, this section wins.
 
 - **A 3D book, not a flat card.** A flat card was tested; the book wins on the phone, which is what matters. The cover dominates the screen and is never edited.
 - **Format follows the edition's data:** paperback by default, hardcover when the edition says so (spec §4b).
@@ -219,6 +219,26 @@ Designed for Café Bookshop on October 14; the other four themes are next. Where
 - **Under the book:** a rarity badge with a diamond, then title, author, and a stats row (Year, Pages, Mood, Format: "Paperback" or "Hardcover"). Tight, even spacing.
 - **Glow, rays and backdrop** take their colours from the cover.
 - **Motion (first pass):** the book lands with a "slam" (in the real flow, after the theme's unwrap). To exit, it turns to its spine and slides away as if shelved. A full motion pass is still to come.
+- **Five themes, one book:** the book is identical in every theme. The room, rarity badge, type, buttons, details panel and spine worm change per theme.
+- **One slot for wrapping and book:** both sit in the same 284 × 426 slot, centred 275px down the screen. The wrapping is sized to the cover, so nothing jumps at the reveal.
+- **Suspense length:** pick 1 builds for 3s, picks 2 and 3 for 1.8s. Tapping during any build tears the wrapping off.
+- **Details arrive in stages** after the book lands: title and author at about 1s, stats at about 2s, "why it's for you" at about 3.5s, buttons at about 4.5s. The reveal gets full attention first.
+- **Details panel per theme,** separating the cover from the words:
+
+| Theme | Details panel |
+|---|---|
+| Café Bookshop | Jar-label card |
+| Mystery | Noir title card |
+| Fantasy | Manuscript panel with the title ribbon across it |
+| Superhero | Comic panel |
+| Sci-fi | Cut-corner readout |
+
+- **Dark covers in dark rooms:** when a cover's edge matches the room, the book gets a soft light inside it, in the theme's light source. Mystery adds a wet-street glint; Superhero uses an ink line on the book's edges. Never a flat shape behind the 3D book: flat shapes looked boxy and lagged when the book turned.
+- **Missing cover:** a themed placeholder in each theme's light material. A dark placeholder vanished into the dark rooms.
+- **Spine worm:** wears its theme costume on spines 16px and up, plain worm below (props don't read on thin spines). Fantasy: wizard's hat; Superhero: cape at mid-body (§6).
+- **Fantasy type:** book titles stay in Uncial Antiqua; stats use Alegreya. Title legibility is still to be checked with the glance test.
+- **Glance test:** a check built into the prototype that shows a random reveal for one second, then asks a reader which book it was and how rare it looked.
+- **How a pass is checked:** against a stress set of labelled test covers plus the 8 samples, in every theme; measured cover-to-room separation and text contrast (4.5:1); and the phone's real width (358px). These catch problems the best-case samples hide.
 - **Next screen (idea to prototype):** tapping the book opens it into the detail screen.
 - **Ongoing:** keep developing the holographic sheen in future passes.
 
@@ -256,7 +276,7 @@ Settled in prototypes, done for all five themes (sources: [`mockups/motion-loadi
 | Rejection read-back | Mocked | Mocked | Mocked | Mocked | Mocked |
 | Error | Mocked | Mocked | Mocked | Mocked | Mocked |
 
-Mockups use placeholder covers and bracketed placeholder text. Real covers come from the catalogs (spec §4c). Reveal motion (§9) and loading motion (§11) are done for all five themes. The reveal book (§10) is designed for Café Bookshop; the other four themes are next. Answer formats (§8) and question-screen motion (§7) are prototyped for all five themes. Superhero's length question is good for now but flagged for a later pass.
+Mockups use placeholder covers and bracketed placeholder text. Real covers come from the catalogs (spec §4c). Reveal motion (§9) and loading motion (§11) are done for all five themes. The reveal book (§10) is designed for all five themes; tapping into the detail screen and its entrance and exit motion are next. Answer formats (§8) and question-screen motion (§7) are prototyped for all five themes. Superhero's length question is good for now but flagged for a later pass.
 
 ## 13. Building it
 

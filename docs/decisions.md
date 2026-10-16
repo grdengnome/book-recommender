@@ -1,6 +1,6 @@
 # Decision Log
 
-*Covers decisions through the v0 engine, v0 product planning, and the start of the build (October 14, 2026). Further build decisions will be added as they're made.*
+*Covers decisions through the v0 engine, v0 product planning, and the start of the build (October 15, 2026). Further build decisions will be added as they're made.*
 
 The product and architecture decisions behind this recommender, and the paths I rejected. The [progress log](./progress-log.md) is the session-by-session diary; this file is the story told by decision. Each entry gives the decision and why, with a link to the full detail.
 
@@ -701,3 +701,43 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 ### 13.59 Rarity shows on page edges and a cover foil sheen
 **Decision:** Rarity shows on the page edges and as a foil sheen over the cover that never alters the art.
 **Why:** It makes rarity visible on the book itself while keeping the publisher's art intact (13.52). ([progress log, Oct 14](./progress-log.md))
+
+### 13.60 The reveal book in all five themes
+**Decision:** The book itself is identical in every theme; the room, rarity badge, type, buttons, details panel and spine worm change per theme.
+**Why:** It follows the shared-structure rule (13.4): one layout, and only the skin changes per theme. ([progress log, Oct 15](./progress-log.md))
+
+### 13.61 Wrapping and book share one slot
+**Decision:** The wrapping and the book share one 284 × 426 slot, centred 275px down the screen; the wrapping is sized to the cover.
+**Why:** No jump at the reveal: the handoff from wrapping to book lands within 0.1px. ([progress log, Oct 15](./progress-log.md))
+
+### 13.62 Details arrive in stages
+**Decision:** After the book lands: title and author at about 1s, stats at about 2s, "why it's for you" at about 3.5s, buttons at about 4.5s.
+**Why:** The reveal gets the user's full attention first. ([progress log, Oct 15](./progress-log.md))
+
+### 13.63 Every theme has its own details panel
+**Decision:** The details sit on a panel in each theme's style: Café jar-label card, Mystery noir title card, Fantasy manuscript panel with the title ribbon across it, Superhero comic panel, Sci-fi cut-corner readout.
+**Why:** It cleanly separates the cover from the words. ([progress log, Oct 15](./progress-log.md))
+
+### 13.64 Dark covers get light inside the book, never a shape behind it
+**Decision:** When a cover's edge matches the room, the book gets a soft light inside it in the theme's light source; Mystery adds a wet-street glint, and Superhero uses an ink line on the book's edges. Never a flat shape behind the 3D book.
+**Why:** Flat shapes looked boxy and lagged when the book turned. Measured separation went from 17 of 90 flagged to 0. ([progress log, Oct 15](./progress-log.md))
+
+### 13.65 Missing cover uses each theme's light material
+**Decision:** A missing cover shows a themed placeholder made in each theme's light material.
+**Why:** A dark placeholder vanished into the dark rooms. ([progress log, Oct 15](./progress-log.md))
+
+### 13.66 Spine worm costume only on spines 16px and up
+**Decision:** The spine worm wears its theme costume on spines 16px wide and up, and is a plain worm below that. Fantasy: wizard's hat; Superhero: cape at mid-body (design §6).
+**Why:** Props don't read on thin spines. ([progress log, Oct 15](./progress-log.md))
+
+### 13.67 Fantasy titles stay in Uncial Antiqua
+**Decision:** Fantasy book titles stay in Uncial Antiqua; stats use Alegreya.
+**Why:** Grim prefers Uncial for titles; its legibility is still to be checked with the glance test. ([progress log, Oct 15](./progress-log.md))
+
+### 13.68 Shorter suspense for picks 2 and 3, tap to skip
+**Decision:** Pick 1 builds suspense for 3s, picks 2 and 3 for 1.8s. Tapping during any build tears the wrapping off.
+**Why:** It stops the third unwrap feeling like waiting. ([progress log, Oct 15](./progress-log.md))
+
+### 13.69 Design passes are checked against a stress set
+**Decision:** Design passes are checked against a stress set of test covers, measured cover-to-room separation and text contrast, and the phone's real width (358px), not just the best-case samples.
+**Why:** It catches problems the best-case samples hide. ([progress log, Oct 15](./progress-log.md))
