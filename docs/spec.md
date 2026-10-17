@@ -1,6 +1,6 @@
 # Book Recommender — Spec
 
-*Current state of the product and its design. Decisions, reversals, and rejected paths are in [`decisions.md`](./decisions.md); this file says what the product is and how it works. Last updated October 13, 2026.*
+*Current state of the product and its design. Decisions, reversals, and rejected paths are in [`decisions.md`](./decisions.md); this file says what the product is and how it works. Last updated October 17, 2026.*
 
 ---
 
@@ -225,7 +225,7 @@ A second, taste-shaped pool built from reader-applied tags. Fetched once per req
 
 ## 7. Flags
 
-**Flag A — the core conviction fights how LLMs behave by default. [most important]** An LLM asked for book recommendations gravitates toward popular, frequently discussed titles. Solving that visibly is the point of the project. Current levers: grounding in real catalogs (§5), bias controls in code (§5b, §5f, §5g), the "first-guess" test for non-obviousness (§4d), and evals that measure it (§4e).
+**Flag A — the core conviction fights how LLMs behave by default. [most important]** An LLM asked for book recommendations gravitates toward generic, predictable picks: the first title anyone would think of for the request. The goal is the most interesting and relevant books for this reader, familiar or not; obscurity is one possible angle, not the aim (decision 4.5). Solving that visibly is the point of the project. Current levers: grounding in real catalogs (§5), bias controls in code (§5b, §5f, §5g), the "first-guess" test for non-obviousness (§4d), and evals that measure it (§4e).
 
 **Flag B — "rich visuals" vs. "simple interface."** Resolved: simple layout and flow, rich moments (§4j).
 

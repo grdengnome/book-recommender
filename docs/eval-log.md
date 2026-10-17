@@ -4,6 +4,24 @@ Running log of quality findings, known limitations, and decisions made while eva
 
 ---
 
+## 2026-10-17 — First engine trace run (cases 1, 5, 6, 8, 9, 10)
+
+**Run:** the first run with the per-request debug trace (`ENGINE_TRACE=1`, PR #9). Six cases through the live route, all HTTP 200 on the first attempt. **$0.44 total** (about $0.07 a case), 18–32s each. Cost is measured, not estimated: the trace prices every model call. Not scored against the rubric; this records what each stage does.
+
+**Findings by stage:**
+- **Open Library search:** the free-text search returned 0–2 books in all 12 searches (0 in 6). Three subject lookups came back empty: `translated_literature`, `place_fiction`, `atmospheric_fiction`. Apart from three thin ones (3–7 books), every other subject hit the 100-book cap.
+- **Model loop:** every case made one round of 2 parallel searches, then answered. It never searched again, even after empty results.
+- **The same table across cases:** 203 books were in the candidate pool of 4 or more of the 6 cases, mostly canon titles from broad subjects like `literary_fiction`.
+- **Hardcover:** 2–13% of the pool and 0 of 18 picks. Relevance scores ran 1–5; most retrieved books scored 1 and were cut below the floor of 2. Cases 1 and 6 got the identical 18-book Hardcover pool (case 8's 5 books were all in case 10's too).
+- **Final call:** reads 375–520 distinct candidates across its two searches and is about 87% of each case's cost.
+- **Output:** code fences in 4 of 6 answers (cases 1, 6, 8, 9).
+- **Accuracy:** no wrong-book blurbs. All 18 were checked against their catalog descriptions and subjects; *Black Wings Has My Angel* has no catalog description, so it couldn't be checked. The description check never ran (no pick carried the criticism hint). No emoji echo: case 10's emoji didn't come back in the output.
+- **Trace quirk:** a model call that fails returns no token usage, and the trace then lists the model under `unpricedModels` even though it is priced. Totals are unaffected.
+
+Traces and the driver output: `scratchpad/traces/` and `scratchpad/eval-run-trace-2026-10-17.json` (local, not committed).
+
+---
+
 ## 2026-09-29 — Candidate catalog hidden from the model (`fix/hide-pick-sources`)
 
 **Change:** `sources` is no longer in the `search_books` tool result; the model now sees `{ title, author, subjects }` per candidate. `sources` stays on the internal merged record, so grounding, pick-source logging, and ID tracing are unchanged.

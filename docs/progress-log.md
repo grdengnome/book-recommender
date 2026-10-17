@@ -766,3 +766,18 @@ Ran the identical `cult novel` query against Open Library side by side for direc
 2. Grim's phone check, plus the glance test.
 3. Motion pass.
 4. Get a Google Books API key.
+
+---
+
+## October 17, 2026 — Engine trace and the north-star reframe
+
+**Conclusion:** The engine now has a per-request debug trace, and its first run shows where retrieval is thin. The product goal is reframed: the most interesting and relevant books for this reader, familiar or not, rather than obscure ones (decision 4.5, `spec.md` §7 Flag A).
+
+**What happened:**
+- Built the debug trace (`ENGINE_TRACE=1`: stages A–I with timings, tokens and dollar cost) and merged it as PR #9. An offline check showed the model's input is byte-identical with the trace on and off.
+- Set up a separate dev API workspace.
+- First trace run on cases 1, 5, 6, 8, 9 and 10: $0.44 total, all on the first attempt. Free-text search barely returns anything, three subjects return nothing, the model never searches again, and the same 203 books recur across cases. Details in the eval log, Oct 17.
+
+**Next:**
+1. Output-format spec.
+2. Research taste-curated candidate sources.

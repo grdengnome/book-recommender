@@ -211,6 +211,10 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 **Decision:** The model can't assert a book's fame or obscurity unless it's confident.
 **Why:** It called *Say Nothing*, one of the decade's most decorated books, "overshadowed." A rule against one bias had taught it to write false disclaimers. ([eval log, Aug 2](./eval-log.md))
 
+### 4.5 North star reframe
+**Decision:** The goal is the most interesting and relevant books for this reader: authentically intriguing, familiar or not (the "wow" reaction). Obscurity is one possible angle, not a requirement. The guard is against the generic: the predictable, first-thing-you'd-think-of pick. The three picks are deliberately varied (for example familiar-but-fresh, discovery, wildcard), all within the mood and feeling the reader asked for; relevance is weighed but doesn't decide alone. This reframes Flag A (`spec.md` §7) from mainstream picks to generic, predictable ones, and moves the rubric's non-obviousness dimension toward intrigue.
+**Why:** The early "obscure" direction biased the engine; readers want intrigue, not rarity. ([progress log, Oct 17](./progress-log.md))
+
 ---
 
 ## 5. Grounding: real books only
