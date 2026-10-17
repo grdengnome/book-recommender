@@ -769,15 +769,20 @@ Ran the identical `cult novel` query against Open Library side by side for direc
 
 ---
 
-## October 17, 2026 — Engine trace and the north-star reframe
+## October 17, 2026 — Session close: engine trace, north-star reframe, source research
 
-**Conclusion:** The engine now has a per-request debug trace, and its first run shows where retrieval is thin. The product goal is reframed: the most interesting and relevant books for this reader, familiar or not, rather than obscure ones (decision 4.5, `spec.md` §7 Flag A).
+**Conclusion:** The engine now has a per-request trace, the product goal is reframed around intrigue rather than obscurity, and Wikidata checks out as a first taste-curated source, as a booster rather than a main source.
 
-**What happened:**
-- Built the debug trace (`ENGINE_TRACE=1`: stages A–I with timings, tokens and dollar cost) and merged it as PR #9. An offline check showed the model's input is byte-identical with the trace on and off.
-- Set up a separate dev API workspace.
-- First trace run on cases 1, 5, 6, 8, 9 and 10: $0.44 total, all on the first attempt. Free-text search barely returns anything, three subjects return nothing, the model never searches again, and the same 203 books recur across cases. Details in the eval log, Oct 17.
+- Designed the book detail screen in all five themes (decisions 13.70–13.76; entry above).
+- Built and merged the per-request engine trace (PR #9); an offline check showed the model's input is byte-identical with the trace on and off. Set up a separate dev API workspace.
+- First trace run (cases 1, 5, 6, 8, 9, 10; $0.44): free-text search barely returns anything, three subjects return nothing, the model never searches again, and 203 books recur across cases (eval log, Oct 17).
+- Reframed the north star: the most interesting and relevant books for this reader, familiar or not (decision 4.5, `spec.md` §7 Flag A).
+- Source research: Wikidata is usable as a "prize shelf" booster; Hardcover curated lists are blocked on token scope; other sources are held or skipped (eval log, Oct 17).
 
 **Next:**
-1. Output-format spec.
-2. Research taste-curated candidate sources.
+1. Output-format spec (stage I) in spec §4b.
+2. Comparison experiment (AI proposes, catalogs verify, plus Wikidata prize shelf).
+3. Hardcover curated lists, once Grim creates a token with `read:lists` (he adds it to `.env.local` himself in the editor).
+4. Then: decide whether Hardcover tag search stays, review the remaining stages, run the blind reader test (and settle the rubric's "intrigue" wording), then build.
+
+Alongside: Grim's phone check and glance test; motion pass; Google Books key.

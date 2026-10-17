@@ -22,6 +22,32 @@ Traces and the driver output: `scratchpad/traces/` and `scratchpad/eval-run-trac
 
 ---
 
+## 2026-10-17 — Taste-curated source research
+
+**Question:** are there sources picked by people with taste that we could add to what the final step chooses from?
+
+**Wikidata** (free, CC0):
+- About 374 prize books from 2012–2026. Good coverage for the Booker (~80% of longlists) and Hugo (~90%); partial for the International Booker (~60%); thin for the National Book Award, Women's Prize and Edgar.
+- 105 non-English books, which fills the empty `translated_literature` subject.
+- Original-language title on 85%, language on 95%, Open Library ID on 63%.
+- Queries take 0.1–0.7s; the slowest took 5.5s.
+- Some award dates are wrong.
+- **Verdict:** use it as a "prize shelf" booster, not a main source. Longlists fit the north star better than winners.
+
+**Hardcover curated lists:** blocked, because the current token lacks the `read:lists` scope. Lists carry a name, description, follower count, featured/ranked flags and a curator's reason for each book.
+
+**Held or skipped:**
+- **Indie Next and LibraryReads:** good taste, but no data feed found, so maybe a hand-picked shelf later, after a terms check.
+- **NPR Books We Love and Bookshop.org lists:** no public data access, so hold.
+- **NYT Books API:** mostly bestsellers, which means popularity, and its terms aren't read yet, so skip.
+- **Curated publishers** such as NYRB, New Directions, Persephone, Pushkin and Archipelago: no feed, so maybe a hand-written "trusted publishers" boost later.
+
+**Principle:** keep where candidates come from (taste) separate from where facts come from (Open Library and Hardcover, for covers, year, pages and ISBN).
+
+**Next experiment:** rerun cases 1, 5, 6, 8, 9 and 10 with "AI proposes about 20–30 candidates within the reader's mood, catalogs verify (the existing grounding check)", plus the Wikidata prize shelf and a varied-trio rule. Compare against the Oct 17 traces on repeats across cases, table size, cost and time. Readers judge intrigue later.
+
+---
+
 ## 2026-09-29 — Candidate catalog hidden from the model (`fix/hide-pick-sources`)
 
 **Change:** `sources` is no longer in the `search_books` tool result; the model now sees `{ title, author, subjects }` per candidate. `sources` stays on the internal merged record, so grounding, pick-source logging, and ID tracing are unchanged.
