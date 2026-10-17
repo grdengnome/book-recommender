@@ -13,6 +13,7 @@
 // not to rank or filter anything.
 import type { BookCandidate } from "../tools/searchBooks";
 import type { HardcoverBookCandidate } from "../hardcover/preparePool";
+import { noopTrace, type RequestTrace } from "../trace/requestTrace";
 
 // Step 1: shape check. BookCandidate is { title, author, subjects } and
 // HardcoverBookCandidate is { title, author, subjects, usersCount } — the three
@@ -157,6 +158,7 @@ function logMergeStats(stats: MergeStats): void {
 export function mergeCandidatePools(
   openLibraryPool: BookCandidate[],
   hardcoverPool: HardcoverBookCandidate[],
+  trace: RequestTrace = noopTrace,
 ): MergeCandidatePoolsResult {
   // Step 2: dedup on exact normalized title + author-lastname; merge metadata across
   // both sources on a match rather than discarding either record. Building the index
@@ -165,6 +167,7 @@ export function mergeCandidatePools(
   // after the Open Library entries. That positional split is corrected below
   // (step 4), not here.
   const byKey = new Map<string, MergeEntry>();
+  const overlaps: Record<string, unknown>[] = []; // trace only: books found in both sources
 
   for (const c of openLibraryPool) {
     const key = dedupKey(c.title, c.author);
@@ -189,6 +192,14 @@ export function mergeCandidatePools(
       // for ranking or filtering the pool itself. Open Library is treated as 0,
       // so Hardcover's formatting wins whenever it has a nonzero count.
       const hcWins = c.usersCount > existing.usersCount;
+      if (trace.enabled) {
+        overlaps.push({
+          dedupKey: key,
+          openLibrary: { title: existing.record.title, author: existing.record.author },
+          hardcover: { title: c.title, author: c.author, usersCount: c.usersCount },
+          spellingKept: hcWins ? "hardcover" : "openlibrary",
+        });
+      }
       if (hcWins) {
         existing.record.title = c.title;
         existing.record.author = c.author;
@@ -216,6 +227,8 @@ export function mergeCandidatePools(
   logMergeStats(stats);
 
   const pool = shuffleMergedPool(combinedPool);
+
+  trace.add("E", { kind: "result", stats, overlaps, pool });
 
   return { pool, stats };
 }

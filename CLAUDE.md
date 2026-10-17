@@ -23,6 +23,7 @@ One API route, `app/api/recommend/route.ts`: POST `{ tasteDescription }` → `{ 
 - `lib/hardcover/`: maps the taste description to reader tags (one model call), then fetches a tag-matched pool. Runs once per request, in parallel with the Open Library loop.
 - `lib/merge/`: `mergeCandidatePools.ts` dedups, merges, and shuffles the pools; `pickGrounding.ts` checks every pick against the pools the model was shown.
 - `lib/verify/`: looks up each final pick in its catalog and checks flagged descriptions (Haiku).
+- `lib/trace/`: debug-only request trace. With `ENGINE_TRACE=1` each request writes `scratchpad/traces/<time>-<tag>-<id>.json` (stages A–I, tokens, dollar cost). The trace object is passed down as an argument, is watch-only, and is ignored on Vercel. Don't let trace data feed back into the engine or the model's input; `scratchpad/trace-equivalence-check.mts` checks this.
 
 ## Rules the code enforces (don't weaken them)
 
@@ -34,7 +35,7 @@ One API route, `app/api/recommend/route.ts`: POST `{ tasteDescription }` → `{ 
 
 - **Next.js** (App Router); the engine is a co-located API route, not a separate service.
 - Plain `fetch` to the Anthropic `/v1/messages` endpoint; no SDK unless there's a concrete need.
-- Env vars in `.env.local` (gitignored): `ANTHROPIC_API_KEY` (required), `HARDCOVER_API_TOKEN` (optional; without it the engine runs on Open Library alone).
+- Env vars in `.env.local` (gitignored): `ANTHROPIC_API_KEY` (required), `HARDCOVER_API_TOKEN` (optional; without it the engine runs on Open Library alone), `ENGINE_TRACE` (optional, local only; `1` turns on the debug trace).
 - No database. v0 is stateless by design.
 - Hosted on Vercel (Hobby plan), project `book-recommender` under `grdengnome`. Deployment Protection is on for all deployments. Production keys are Vercel Secrets (separate, spend-capped Console workspace); never copy them into the repo or chat. The recommend route sets `maxDuration = 300`.
 - `scratchpad/` holds experiment scripts and two live logs the app writes to (`query-log.json`, `hardcover-failure-log.json`). It's excluded from the app's type check; see `scratchpad/README.md` before deleting anything there.

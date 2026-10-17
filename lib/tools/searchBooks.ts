@@ -9,6 +9,7 @@
 // below. Remove once the query-log.json results have been reviewed.
 import { appendFileSync, mkdirSync } from "fs";
 import path from "path";
+import { noopTrace, type RequestTrace } from "../trace/requestTrace";
 
 let currentLogTag: string | null = null;
 
@@ -79,6 +80,19 @@ interface RawCandidate {
   subjects: string[];
 }
 
+// How one Open Library request went — reported to the trace only (searchBooks passes a
+// reporter only when tracing is on). Failures still return [] to the caller as before.
+interface LookupReport {
+  lookup: string; // "search" or "subject:<slug>"
+  status: "ok" | "http_error" | "failed";
+  httpStatus?: number;
+  error?: string;
+  ms: number;
+  rawCount: number; // records returned before dropping ones with no title or author
+  results: RawCandidate[];
+}
+type LookupReporter = (report: LookupReport) => void;
+
 // olWorkKey is internal plumbing (e.g. "/works/OL1174972W"), carried so a final pick can
 // be traced back to its Open Library work record. Never model-facing: route.ts strips it
 // (via mergeCandidatePools.ts's toModelPool) before the pool goes into a tool_result.
@@ -99,18 +113,24 @@ export interface SearchBooksInput {
   subjects: string[];
 }
 
-async function fetchSearchResults(query: string): Promise<RawCandidate[]> {
+async function fetchSearchResults(query: string, report?: LookupReporter): Promise<RawCandidate[]> {
   const url = new URL(OPEN_LIBRARY_SEARCH_URL);
   url.searchParams.set("q", query);
   url.searchParams.set("fields", "key,title,author_name,subject");
   url.searchParams.set("limit", String(RESULTS_PER_CALL));
+  const start = performance.now();
+  const done = (r: Omit<LookupReport, "lookup" | "ms">) =>
+    report?.({ lookup: "search", ms: Math.round(performance.now() - start), ...r });
 
   try {
     const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
-    if (!res.ok) return [];
+    if (!res.ok) {
+      done({ status: "http_error", httpStatus: res.status, rawCount: 0, results: [] });
+      return [];
+    }
     const data = await res.json();
     const docs: unknown[] = Array.isArray(data?.docs) ? data.docs : [];
-    return docs
+    const results = docs
       .map((doc): RawCandidate | null => {
         const d = doc as {
           key?: string;
@@ -127,22 +147,31 @@ async function fetchSearchResults(query: string): Promise<RawCandidate[]> {
         };
       })
       .filter((c): c is RawCandidate => c !== null);
-  } catch {
+    done({ status: "ok", httpStatus: res.status, rawCount: docs.length, results });
+    return results;
+  } catch (err) {
+    done({ status: "failed", error: err instanceof Error ? err.message : String(err), rawCount: 0, results: [] });
     return [];
   }
 }
 
-async function fetchSubjectResults(subject: string): Promise<RawCandidate[]> {
+async function fetchSubjectResults(subject: string, report?: LookupReporter): Promise<RawCandidate[]> {
   const slug = subject.trim().toLowerCase().replace(/\s+/g, "_");
   if (!slug) return [];
   const url = `${OPEN_LIBRARY_SUBJECTS_URL}/${encodeURIComponent(slug)}.json?limit=${RESULTS_PER_CALL}`;
+  const start = performance.now();
+  const done = (r: Omit<LookupReport, "lookup" | "ms">) =>
+    report?.({ lookup: `subject:${slug}`, ms: Math.round(performance.now() - start), ...r });
 
   try {
     const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
-    if (!res.ok) return [];
+    if (!res.ok) {
+      done({ status: "http_error", httpStatus: res.status, rawCount: 0, results: [] });
+      return [];
+    }
     const data = await res.json();
     const works: unknown[] = Array.isArray(data?.works) ? data.works : [];
-    return works
+    const results = works
       .map((work): RawCandidate | null => {
         const w = work as {
           key?: string;
@@ -158,7 +187,10 @@ async function fetchSubjectResults(subject: string): Promise<RawCandidate[]> {
         };
       })
       .filter((c): c is RawCandidate => c !== null);
-  } catch {
+    done({ status: "ok", httpStatus: res.status, rawCount: works.length, results });
+    return results;
+  } catch (err) {
+    done({ status: "failed", error: err instanceof Error ? err.message : String(err), rawCount: 0, results: [] });
     return [];
   }
 }
@@ -190,10 +222,14 @@ function shuffle<T>(items: T[]): T[] {
 
 export async function searchBooks(
   input: SearchBooksInput,
+  trace: RequestTrace = noopTrace,
 ): Promise<SearchBooksResult> {
+  const start = performance.now();
+  const reports: LookupReport[] = [];
+  const report: LookupReporter | undefined = trace.enabled ? (r) => reports.push(r) : undefined;
   const [searchResults, ...subjectResultGroups] = await Promise.all([
-    fetchSearchResults(input.query),
-    ...input.subjects.map(fetchSubjectResults),
+    fetchSearchResults(input.query, report),
+    ...input.subjects.map((subject) => fetchSubjectResults(subject, report)),
   ]);
 
   const merged = mergeAndDedupe([searchResults, ...subjectResultGroups]);
@@ -210,6 +246,28 @@ export async function searchBooks(
   }));
 
   logSearchBooksCall(input, pool);
+
+  if (trace.enabled) {
+    // Which lookup(s) found each book — the attribution scratchpad/attribute-pool-sources.mjs
+    // otherwise has to reconstruct by re-running queries.
+    const foundBy = new Map<string, string[]>();
+    for (const r of reports) {
+      for (const c of r.results) {
+        const labels = foundBy.get(dedupeKey(c)) ?? [];
+        if (!labels.includes(r.lookup)) labels.push(r.lookup);
+        foundBy.set(dedupeKey(c), labels);
+      }
+    }
+    trace.add("D", {
+      kind: "result",
+      input,
+      ms: Math.round(performance.now() - start),
+      lookups: reports.map(({ results, ...rest }) => ({ ...rest, keptCount: results.length })),
+      keptBeforeDedup: reports.reduce((n, r) => n + r.results.length, 0),
+      poolSize: pool.length,
+      pool: shuffled.map((c, i) => ({ ...pool[i], foundBy: foundBy.get(dedupeKey(c)) ?? [] })),
+    });
+  }
 
   return { pool, poolSize: pool.length };
 }
