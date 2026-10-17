@@ -239,8 +239,21 @@ Designed for Café Bookshop on October 14 and carried into all five themes on Oc
 - **Fantasy type:** book titles stay in Uncial Antiqua; stats use Alegreya. Title legibility is still to be checked with the glance test.
 - **Glance test:** a check built into the prototype that shows a random reveal for one second, then asks a reader which book it was and how rare it looked.
 - **How a pass is checked:** against a stress set of labelled test covers plus the 8 samples, in every theme; measured cover-to-room separation and text contrast (4.5:1); and the phone's real width (358px). These catch problems the best-case samples hide.
-- **Next screen (idea to prototype):** tapping the book opens it into the detail screen.
 - **Ongoing:** keep developing the holographic sheen in future passes.
+
+## 10a. The book detail screen
+
+Designed for all five themes on October 17, in the same private prototype, "Worm Themed Reveal Book", against the engine's real text from saved runs (not placeholders).
+
+- **Opening it:** "Open the book", or tapping the landed book. The cover swings open over 1.5s and the detail sheet grows partway through, so the detail feels like part of the reveal. ("Tell me more" was unclear.)
+- **Layout, top to bottom:** cover; English title, with the original-language title below it; subtitle on its own line; author; year, pages and format; rarity. Then three sections:
+  - **Why it's for you.**
+  - **The story:** a 2–3 sentence summary the engine writes from the catalog description, verified by the description check. Left out when the catalog has nothing usable.
+  - **A third section** whose heading the engine writes per pick (about 5 words at most). The angle isn't always obscurity; many users will know these books.
+- **Actions, pinned at the bottom:** Love it; Not for me (reveals "Show me another"); Read it (swaps in another pick immediately). See spec §4c.
+- **"Find this book"** has the commission disclosure directly under it, hidden on the Open Library fallback.
+- **Engine fields it needs:** listed in spec §4b (card-ready output).
+- **Checks:** 1,275 detail-screen contrast checks against 4.5:1, all pass; no tap target under 44px; nothing clipped.
 
 ## 11. Motion: the loading screen
 
@@ -276,7 +289,7 @@ Settled in prototypes, done for all five themes (sources: [`mockups/motion-loadi
 | Rejection read-back | Mocked | Mocked | Mocked | Mocked | Mocked |
 | Error | Mocked | Mocked | Mocked | Mocked | Mocked |
 
-Mockups use placeholder covers and bracketed placeholder text. Real covers come from the catalogs (spec §4c). Reveal motion (§9) and loading motion (§11) are done for all five themes. The reveal book (§10) is designed for all five themes; tapping into the detail screen and its entrance and exit motion are next. Answer formats (§8) and question-screen motion (§7) are prototyped for all five themes. Superhero's length question is good for now but flagged for a later pass.
+Mockups use placeholder covers and bracketed placeholder text. Real covers come from the catalogs (spec §4c). Reveal motion (§9) and loading motion (§11) are done for all five themes. The reveal book (§10) and the book detail screen (§10a) are designed for all five themes, with the detail screen checked against real engine text; motion is the remaining design step. Answer formats (§8) and question-screen motion (§7) are prototyped for all five themes. Superhero's length question is good for now but flagged for a later pass.
 
 ## 13. Building it
 

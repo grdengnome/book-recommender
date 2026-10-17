@@ -743,3 +743,26 @@ Ran the identical `cult novel` query against Open Library side by side for direc
 2. Prototype the detail screen ("Tell me more").
 3. Motion pass bringing the three reveal styles into the flow.
 4. Get a Google Books API key.
+
+---
+
+## October 17, 2026 — The book detail screen
+
+**Conclusion:** The book detail screen is designed in all five themes in the private prototype "Worm Themed Reveal Book", using the engine's real text rather than placeholders. The book opens into the detail screen; the layout, actions and commission disclosure are settled, and the engine owes the screen new card-ready fields. Working app name: "The Worm". Written up in `design.md` §10a and §12 and `spec.md` §4b; decisions 13.70–13.76, plus a new open question on the final app name (`decisions.md` §12).
+
+**Method:** designed against real engine text pulled from saved runs into `scratchpad/detail-screen-samples.json` (not committed), so text lengths are real.
+
+**Checks run:**
+- Text contrast: 1,275 detail-screen checks against 4.5:1, all pass.
+- No tap target under 44px.
+- Nothing clipped.
+
+**Engine problems found (for the engine review, `spec.md` §4b):** code fences in 13 of 36 saved runs, emoji echoed from the input, and the description check's rewrite made *Los informantes* worse.
+
+**Keep in mind:** what made Goodreads, StoryGraph and Bookly stand out.
+
+**Next:**
+1. Engine review step zero (per-stage log capture), then the output-format stage.
+2. Grim's phone check, plus the glance test.
+3. Motion pass.
+4. Get a Google Books API key.

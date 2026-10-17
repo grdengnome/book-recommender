@@ -1,6 +1,6 @@
 # Decision Log
 
-*Covers decisions through the v0 engine, v0 product planning, and the start of the build (October 15, 2026). Further build decisions will be added as they're made.*
+*Covers decisions through the v0 engine, v0 product planning, and the start of the build (October 17, 2026). Further build decisions will be added as they're made.*
 
 The product and architecture decisions behind this recommender, and the paths I rejected. The [progress log](./progress-log.md) is the session-by-session diary; this file is the story told by decision. Each entry gives the decision and why, with a link to the full detail.
 
@@ -459,8 +459,8 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 - **Does Café Bookshop stay in the random theme rotation** now that it's also the home theme? ([design §5](./design.md))
 - **Reveal-prompt wording for Fantasy, Superhero, Mystery and Sci-fi.** Every theme's wrapping is decided; only the café's "Tap to unwrap" wording is settled, and the other four are placeholders. ([design §9](./design.md))
 - **How to keep the question flow fresh:** wording variety (answer formats settled in 13.35, scenes in 13.45; longer-term ideas in [spec §6](./spec.md)). The existing first-question template stays. ([design §7](./design.md))
-- **How much book detail to show on the reveal screen versus the detail screen.** ([design §9](./design.md))
 - **How rarity tiers are assigned** (Staff pick, First edition, Holy grail). ([design §10](./design.md))
+- **The final app name.** "The Worm" is a working name (13.70); the final name needs a clearance search before public launch.
 
 ---
 
@@ -741,3 +741,31 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 ### 13.69 Design passes are checked against a stress set
 **Decision:** Design passes are checked against a stress set of test covers, measured cover-to-room separation and text contrast, and the phone's real width (358px), not just the best-case samples.
 **Why:** It catches problems the best-case samples hide. ([progress log, Oct 15](./progress-log.md))
+
+### 13.70 Working app name "The Worm"
+**Decision:** The working app name is "The Worm". The final name is decided before public launch, after a clearance search.
+**Why:** Two book apps already use "Worm", and "The" doesn't distinguish a trademark; the worm mascot survives any rename. ([progress log, Oct 17](./progress-log.md))
+
+### 13.71 The book opens into the detail screen
+**Decision:** "Open the book", or tapping the landed book, opens the detail screen: the cover swings open over 1.5s and the detail sheet grows partway through.
+**Why:** "Tell me more" was unclear, and opening the book makes the detail feel like part of the reveal. ([progress log, Oct 17](./progress-log.md))
+
+### 13.72 Detail screen layout
+**Decision:** Cover; English title, with the original-language title below; subtitle separate; author; year, pages and format; rarity. Then "Why it's for you", "The story", and a third section, with the actions pinned at the bottom.
+**Why:** Taken from the mockups and checked with real engine text lengths. Resolves the open question of how much detail goes on the reveal screen versus the detail screen. ([design §10a](./design.md); [progress log, Oct 17](./progress-log.md))
+
+### 13.73 "The story" is an engine-written summary
+**Decision:** "The story" is a 2–3 sentence summary the engine writes from the catalog description, verified by the description check. It is left out when the catalog has nothing usable.
+**Why:** Raw catalog text ranges from empty to 1,700 characters of junk. ([spec §4b](./spec.md); [progress log, Oct 17](./progress-log.md))
+
+### 13.74 The third section's heading follows the pick
+**Decision:** The engine writes the third section's heading for each pick, about 5 words at most.
+**Why:** Many users will know these books, so the angle isn't always obscurity. ([progress log, Oct 17](./progress-log.md))
+
+### 13.75 Detail actions: Love it, Not for me, Read it
+**Decision:** Love it is recorded; Not for me is recorded and reveals "Show me another"; Read it swaps in a reserve immediately.
+**Why:** They carry the 👍 / 👎 / "Already read it" actions from spec §4c. ([progress log, Oct 17](./progress-log.md))
+
+### 13.76 Commission disclosure sits directly under "Find this book"
+**Decision:** The commission disclosure sits directly under "Find this book", and is hidden when the link falls back to Open Library.
+**Why:** The FTC wants disclosure close to the link, and Bookshop.org requires it. ([progress log, Oct 17](./progress-log.md))
