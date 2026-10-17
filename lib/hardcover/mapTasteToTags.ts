@@ -13,6 +13,7 @@
 // to the model carries tag names only (no counts, shuffled order) — count literally
 // isn't visible input to the selection, so it can't be leaned on even by accident.
 import { HARDCOVER_TAG_VOCABULARY } from "./tagVocabulary";
+import { noopTrace, type RequestTrace } from "../trace/requestTrace";
 
 const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
 const MODEL = "claude-sonnet-5";
@@ -111,6 +112,7 @@ function parseSelectedTags(responseText: string): string[] {
 
 export async function mapTasteToHardcoverTags(
   tasteDescription: string,
+  trace: RequestTrace = noopTrace,
 ): Promise<MapTasteToTagsResult> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error("ANTHROPIC_API_KEY is not set");
@@ -119,6 +121,12 @@ export async function mapTasteToHardcoverTags(
   const shuffledVocabulary = shuffle([...HARDCOVER_TAG_VOCABULARY]);
   const prompt = buildPrompt(tasteDescription, shuffledVocabulary.map((t) => t.tag));
 
+  const requestBody = {
+    model: MODEL,
+    max_tokens: 300,
+    messages: [{ role: "user", content: prompt }],
+  };
+  const callStart = performance.now();
   const res = await fetch(ANTHROPIC_API_URL, {
     method: "POST",
     headers: {
@@ -126,14 +134,18 @@ export async function mapTasteToHardcoverTags(
       "x-api-key": apiKey,
       "anthropic-version": "2023-06-01",
     },
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: 300,
-      messages: [{ role: "user", content: prompt }],
-    }),
+    body: JSON.stringify(requestBody),
   });
 
   const data = await res.json();
+  // Recorded before parsing, so a call whose answer can't be parsed still shows its cost.
+  trace.modelCall("A", {
+    model: MODEL,
+    request: requestBody,
+    response: data,
+    httpStatus: res.status,
+    ms: Math.round(performance.now() - callStart),
+  });
   if (!res.ok) throw new Error(`Anthropic API error: ${JSON.stringify(data)}`);
 
   const textBlock = data.content?.find((block: { type: string }) => block.type === "text");
@@ -146,6 +158,13 @@ export async function mapTasteToHardcoverTags(
   const matched = selected
     .map((name) => byName.get(name))
     .filter((t): t is (typeof HARDCOVER_TAG_VOCABULARY)[number] => t !== undefined);
+
+  trace.add("A", {
+    kind: "result",
+    selectedByModel: selected,
+    matched: matched.map((t) => ({ id: t.id, tag: t.tag })),
+    droppedNotInVocabulary: selected.filter((name) => !byName.has(name)),
+  });
 
   return {
     tagIds: matched.map((t) => t.id),

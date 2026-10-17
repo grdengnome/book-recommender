@@ -18,6 +18,7 @@ import {
 } from "@/lib/merge/pickGrounding";
 import { formatPickMetadata, lookupPickMetadata } from "@/lib/verify/lookupPickMetadata";
 import { checkPickDescriptions, formatPickCheck } from "@/lib/verify/checkPickDescriptions";
+import { createRequestTrace, type RequestTrace } from "@/lib/trace/requestTrace";
 
 // Engine runs take up to ~2 min; 300s is the Vercel Hobby maximum.
 export const maxDuration = 300;
@@ -98,34 +99,48 @@ function logHardcoverFailure(
 async function fetchHardcoverPool(
   tasteDescription: string,
   evalTag: string | null,
+  trace: RequestTrace,
 ): Promise<HardcoverBookCandidate[]> {
   let tagIds: number[];
   try {
-    tagIds = (await mapTasteToHardcoverTags(tasteDescription)).tagIds;
+    tagIds = (await mapTasteToHardcoverTags(tasteDescription, trace)).tagIds;
   } catch (err) {
     console.error("Hardcover tag mapping failed, degrading to Open-Library-only:", err);
     logHardcoverFailure(evalTag, "tag_mapping_error", err);
+    trace.add("A", { kind: "error", category: "tag_mapping_error", error: errorText(err) });
+    trace.add("B", { kind: "skipped", reason: "tag mapping failed" });
     return [];
   }
 
   if (tagIds.length === 0) {
     console.error("Hardcover tag mapping matched zero tags, degrading to Open-Library-only");
     logHardcoverFailure(evalTag, "empty_tag_mapping", null);
+    trace.add("B", { kind: "skipped", reason: "tag mapping matched zero tags" });
     return [];
   }
 
   try {
-    const { pool } = await prepareHardcoverPool(tagIds);
+    const { pool } = await prepareHardcoverPool(tagIds, trace);
     return pool;
   } catch (err) {
     console.error("Hardcover pre-fetch failed, degrading to Open-Library-only:", err);
-    logHardcoverFailure(
-      evalTag,
-      process.env.HARDCOVER_API_TOKEN ? "hardcover_api_error" : "missing_token",
-      err,
-    );
+    const category = process.env.HARDCOVER_API_TOKEN ? "hardcover_api_error" : "missing_token";
+    logHardcoverFailure(evalTag, category, err);
+    trace.add("B", { kind: "error", category, error: errorText(err) });
     return [];
   }
+}
+
+function errorText(err: unknown): string {
+  return err instanceof Error ? err.message : String(err);
+}
+
+// Every response after the engine starts goes out through here, so the debug trace records
+// it (stage I) and writes its file exactly once. A no-op passthrough when tracing is off.
+function respond(trace: RequestTrace, body: Record<string, unknown>, status = 200): NextResponse {
+  trace.add("I", { kind: "result", httpStatus: status, body });
+  trace.finish();
+  return NextResponse.json(body, { status });
 }
 
 // Encodes spec.md Section 4d ("What 'good' means") as explicit model instructions.
@@ -176,15 +191,21 @@ export async function POST(request: NextRequest) {
   const evalTag = typeof body?.evalTag === "string" ? body.evalTag : null;
   setSearchBooksLogTag(evalTag);
 
+  // Debug-only trace (lib/trace/requestTrace.ts): one per request, passed down explicitly.
+  // A no-op unless ENGINE_TRACE=1, and never on Vercel. Requests rejected above (no API key,
+  // no taste description) never reach the engine and aren't traced.
+  const trace = createRequestTrace({ evalTag, tasteDescription });
+
   // Branch 2 (Hardcover) starts now, concurrently with branch 1 (the OL tool-use loop
   // below) — both start from tasteDescription and don't depend on each other's output.
-  const hardcoverPoolPromise = fetchHardcoverPool(tasteDescription, evalTag);
+  const hardcoverPoolPromise = fetchHardcoverPool(tasteDescription, evalTag, trace);
 
   // Each attempt is a full fresh generation (new conversation, new search_books calls);
   // the Hardcover pre-fetch is shared since it depends only on tasteDescription.
   for (let attempt = 1; attempt <= MAX_GENERATION_ATTEMPTS; attempt++) {
-    const generation = await generateOnce(apiKey, tasteDescription, hardcoverPoolPromise);
-    if (!generation.ok) return generation.response;
+    const attemptTrace = trace.with({ attempt });
+    const generation = await generateOnce(apiKey, tasteDescription, hardcoverPoolPromise, attemptTrace);
+    if (!generation.ok) return respond(trace, generation.body, generation.status);
 
     const { grounding } = generation;
     if (grounding.status === "grounded") {
@@ -203,15 +224,19 @@ export async function POST(request: NextRequest) {
       const pickMetadata = await lookupPickMetadata(grounding.picks);
       const lookupMs = Math.round(performance.now() - verifyStart);
       console.log(formatPickMetadata(pickMetadata, lookupMs));
+      attemptTrace.add("G", { kind: "result", ms: lookupMs, picks: pickMetadata });
       const checked = await checkPickDescriptions(
         apiKey,
         tasteDescription,
         generation.recommendations,
         pickMetadata,
+        attemptTrace,
       );
-      console.log(formatPickCheck(checked, lookupMs, Math.round(performance.now() - verifyStart)));
+      const verifyMs = Math.round(performance.now() - verifyStart);
+      console.log(formatPickCheck(checked, lookupMs, verifyMs));
+      attemptTrace.add("H", { kind: "result", ...checked, lookupPlusCheckMs: verifyMs });
 
-      return NextResponse.json({
+      return respond(trace, {
         recommendations: checked.recommendations,
         raw: generation.data,
       });
@@ -230,18 +255,19 @@ export async function POST(request: NextRequest) {
   console.error(
     `recommend: grounding check failed on all ${MAX_GENERATION_ATTEMPTS} attempts — returning error, no picks returned`,
   );
-  return NextResponse.json(
+  return respond(
+    trace,
     {
       error: "Could not produce recommendations grounded in the retrieved candidate pool",
       attempts: MAX_GENERATION_ATTEMPTS,
     },
-    { status: 502 },
+    502,
   );
 }
 
 type GenerationResult =
   | { ok: true; data: unknown; recommendations: string; grounding: GroundingResult }
-  | { ok: false; response: NextResponse };
+  | { ok: false; status: number; body: Record<string, unknown> };
 
 // One full generation: the OL tool-use loop (with Hardcover merged into each
 // search_books result) followed by the grounding check on the final answer. Returns the
@@ -250,6 +276,7 @@ async function generateOnce(
   apiKey: string,
   tasteDescription: string,
   hardcoverPoolPromise: Promise<HardcoverBookCandidate[]>,
+  trace: RequestTrace,
 ): Promise<GenerationResult> {
   const messages: Array<{ role: "user" | "assistant"; content: unknown }> = [
     { role: "user", content: tasteDescription },
@@ -262,7 +289,16 @@ async function generateOnce(
   let data;
   for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
     const allowToolUse = round < MAX_TOOL_ROUNDS;
+    const roundTrace = trace.with({ round });
 
+    const requestBody = {
+      model: MODEL,
+      max_tokens: 4000,
+      system: SYSTEM_PROMPT,
+      messages,
+      ...(allowToolUse ? { tools: toolDefinitions } : {}),
+    };
+    const callStart = performance.now();
     const anthropicResponse = await fetch(ANTHROPIC_API_URL, {
       method: "POST",
       headers: {
@@ -270,24 +306,24 @@ async function generateOnce(
         "x-api-key": apiKey,
         "anthropic-version": "2023-06-01",
       },
-      body: JSON.stringify({
-        model: MODEL,
-        max_tokens: 4000,
-        system: SYSTEM_PROMPT,
-        messages,
-        ...(allowToolUse ? { tools: toolDefinitions } : {}),
-      }),
+      body: JSON.stringify(requestBody),
     });
 
     data = await anthropicResponse.json();
+    // Snapshotted now, before `messages` grows: this is exactly what this call sent.
+    roundTrace.modelCall("C", {
+      model: MODEL,
+      request: requestBody,
+      response: data,
+      httpStatus: anthropicResponse.status,
+      ms: Math.round(performance.now() - callStart),
+    });
 
     if (!anthropicResponse.ok) {
       return {
         ok: false,
-        response: NextResponse.json(
-          { error: "Anthropic API error", detail: data },
-          { status: anthropicResponse.status },
-        ),
+        status: anthropicResponse.status,
+        body: { error: "Anthropic API error", detail: data },
       };
     }
 
@@ -301,15 +337,16 @@ async function generateOnce(
 
     const toolResults = await Promise.all(
       toolUseBlocks.map(async (block) => {
+        const toolTrace = roundTrace.with({ toolUseId: block.id });
         let result: unknown;
         try {
-          result = await callTool(block.name, block.input);
+          result = await callTool(block.name, block.input, toolTrace);
           // Merge Hardcover in here, not once before the loop: this is the point
           // where an OL pool from this specific call actually exists to merge against.
           if (block.name === "search_books") {
             const olResult = result as SearchBooksResult;
             const hardcoverPool = await hardcoverPoolPromise;
-            const { pool } = mergeCandidatePools(olResult.pool, hardcoverPool);
+            const { pool } = mergeCandidatePools(olResult.pool, hardcoverPool, toolTrace);
             recordSeenCandidates(seenCandidates, pool);
             // Sources and internal IDs (olWorkKey, hcBookId) stop here: the model's
             // tool_result shape is { title, author, subjects }.
@@ -319,6 +356,7 @@ async function generateOnce(
           result = {
             error: err instanceof Error ? err.message : "Tool call failed",
           };
+          toolTrace.add("D", { kind: "error", tool: block.name, input: block.input, error: errorText(err) });
         }
         return {
           type: "tool_result",
@@ -335,11 +373,19 @@ async function generateOnce(
     (block: { type: string }) => block.type === "text",
   );
   const recommendations = textBlock?.text ?? "";
+  const grounding = checkPickGrounding(recommendations, seenCandidates);
+  trace.add("F", {
+    kind: "result",
+    status: grounding.status,
+    candidatesShown: seenCandidates.size,
+    answerText: recommendations,
+    picks: grounding.status === "unparseable" ? [] : grounding.picks,
+  });
 
   return {
     ok: true,
     data,
     recommendations,
-    grounding: checkPickGrounding(recommendations, seenCandidates),
+    grounding,
   };
 }

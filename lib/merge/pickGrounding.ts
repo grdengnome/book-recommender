@@ -83,6 +83,7 @@ export interface CheckedPick {
   author: string;
   sources: PoolSource[]; // empty = not found in any retrieved pool
   record: MergedBookCandidate | null; // the matched pool record (with IDs); null = not found
+  groundingKey: string | null; // the tolerant key the pick was looked up by (shown in the debug trace)
 }
 
 // "unparseable" is a failure too: a response that can't be verified can't be returned.
@@ -110,7 +111,7 @@ export function checkPickGrounding(
     const author = typeof p?.author === "string" ? p.author : "";
     const key = groundingKey(title, author);
     const record = key === null ? null : (seen.get(key) ?? null);
-    return { title, author, sources: record ? [...record.sources] : [], record };
+    return { title, author, sources: record ? [...record.sources] : [], record, groundingKey: key };
   });
   const allGrounded = picks.every((p) => p.sources.length > 0);
   return { status: allGrounded ? "grounded" : "ungrounded", picks };

@@ -5,6 +5,8 @@ Working folder for experiments, eval drivers, and diagnostics — not part of th
 - `query-log.json` — every `search_books` call (query, subject, pool contents), appended by `lib/tools/searchBooks.ts`.
 - `hardcover-failure-log.json` — Hardcover failures (missing token, API error, empty or failed tag mapping), appended by `app/api/recommend/route.ts`. Gitignored.
 
+With `ENGINE_TRACE=1` in `.env.local`, the app also writes one debug trace per request to `traces/` (`lib/trace/requestTrace.ts`): every stage's inputs, outputs, scores, timings, tokens and dollar cost, under fixed stage keys `A_tag_picking` … `I_response`. Off by default, never on Vercel, gitignored. Traces hold the full taste description; don't share them outside the project.
+
 Most other `.json` output here is gitignored run output. Finished experiments have been removed; any of them can be recovered with `git log --all -- scratchpad/<name>`.
 
 ## Critical — don't delete
@@ -15,6 +17,7 @@ Most other `.json` output here is gitignored run output. Finished experiments ha
 
 ## Tools — still in use
 
+- `trace-equivalence-check.mts` — offline proof that the debug trace only watches: runs eval case 1's input through the real route with tracing off and on (canned catalog and model replies, seeded shuffles, no API spend) and checks every model input is byte-identical, plus the off/Vercel/secrets/cost rules. `node scratchpad/trace-equivalence-check.mts` (no `--env-file`).
 - `run-eval-grounded.mjs` — runs all 11 eval cases against the live `/api/recommend` route and parses the dev-server log for attempt counts, pick sources (OL/HC), and pool sizes.
 - `run-eval-narrow.mjs` — same driver as `run-eval.mjs`, limited to cases 3, 4, 6, 8 (the ones that showed title clustering).
 - `classify-grounding-rejections.cjs` — sorts grounding-check rejections from an eval run into causes, using tolerant title/author matching against the logged pools.

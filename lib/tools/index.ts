@@ -9,19 +9,27 @@ import {
   setSearchBooksLogTag,
   type SearchBooksInput,
 } from "./searchBooks";
+import { noopTrace, type RequestTrace } from "../trace/requestTrace";
 
 export const toolDefinitions = [searchBooksToolDefinition];
 
-const toolImplementations: Record<string, (input: never) => Promise<unknown>> = {
-  search_books: searchBooks as (input: never) => Promise<unknown>,
+type ToolImplementation = (input: never, trace: RequestTrace) => Promise<unknown>;
+
+const toolImplementations: Record<string, ToolImplementation> = {
+  search_books: searchBooks as ToolImplementation,
 };
 
-export async function callTool(name: string, input: unknown): Promise<unknown> {
+// `trace` is the request's debug trace (lib/trace/requestTrace.ts); a no-op unless tracing is on.
+export async function callTool(
+  name: string,
+  input: unknown,
+  trace: RequestTrace = noopTrace,
+): Promise<unknown> {
   const impl = toolImplementations[name];
   if (!impl) {
     throw new Error(`Unknown tool: ${name}`);
   }
-  return impl(input as never);
+  return impl(input as never, trace);
 }
 
 export type { SearchBooksInput };

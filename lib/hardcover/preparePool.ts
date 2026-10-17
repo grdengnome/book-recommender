@@ -14,6 +14,8 @@
 // the actual query rather than platform-wide or single-axis noise. Decided, not
 // re-litigated here.
 //
+import { noopTrace, type RequestTrace } from "../trace/requestTrace";
+
 const HARDCOVER_ENDPOINT = "https://api.hardcover.app/v1/graphql";
 const RAW_FETCH_LIMIT = 100; // taggable_counts rows pulled before summing/dedup — matches the depth used in the ordering test
 
@@ -49,6 +51,7 @@ interface RankedBook {
   title: string;
   author: string;
   matchedTags: string[];
+  tagCounts: Record<string, number>; // per matched tag, the count summed into tagRelevanceSum (trace only)
   tagRelevanceSum: number;
   usersCount: number;
 }
@@ -166,12 +169,14 @@ function rankByTagRelevance(rows: TaggableCountRow[]): RankedBook[] {
     if (existing) {
       existing.tagRelevanceSum += row.count;
       if (tagName && !existing.matchedTags.includes(tagName)) existing.matchedTags.push(tagName);
+      if (tagName) existing.tagCounts[tagName] = (existing.tagCounts[tagName] ?? 0) + row.count;
     } else {
       byBook.set(key, {
         hcBookId: row.book.id,
         title: row.book.title,
         author,
         matchedTags: tagName ? [tagName] : [],
+        tagCounts: tagName ? { [tagName]: row.count } : {},
         tagRelevanceSum: row.count,
         usersCount: row.book.users_count,
       });
@@ -196,8 +201,13 @@ function shuffle<T>(items: T[]): T[] {
   return result;
 }
 
-export async function prepareHardcoverPool(tagIds: number[]): Promise<PreparePoolResult> {
+export async function prepareHardcoverPool(
+  tagIds: number[],
+  trace: RequestTrace = noopTrace,
+): Promise<PreparePoolResult> {
+  const fetchStart = performance.now();
   const rows = await fetchTaggableCounts(tagIds); // 1: retrieve
+  const fetchMs = Math.round(performance.now() - fetchStart);
   const ranked = rankByTagRelevance(rows); // 2: rank by tag-match relevance
   // 3: fill up to WORKING_POOL_SIZE with candidates clearing RELEVANCE_FLOOR, in ranked
   // order — `ranked` is already sorted descending, so filter-then-slice stops early
@@ -215,6 +225,37 @@ export async function prepareHardcoverPool(tagIds: number[]): Promise<PreparePoo
     usersCount: b.usersCount,
     hcBookId: b.hcBookId,
   }));
+
+  if (trace.enabled) {
+    // The ranking metadata stripped above, kept for the trace only: every ranked book with
+    // its score, and why it did or didn't make the pool.
+    const kept = new Set(truncated);
+    trace.add("B", {
+      kind: "result",
+      tagIds,
+      catalogCall: { endpoint: HARDCOVER_ENDPOINT, rowLimit: RAW_FETCH_LIMIT, ms: fetchMs },
+      rawRowCount: rows.length,
+      rowsDroppedNoAuthor: rows.filter((r) => r.book?.title && !r.book.contributions[0]?.author?.name).length,
+      relevanceFloor: RELEVANCE_FLOOR,
+      workingPoolSize: WORKING_POOL_SIZE,
+      ranked: ranked.map((b, i) => ({
+        rank: i + 1,
+        title: b.title,
+        author: b.author,
+        hcBookId: b.hcBookId,
+        tagRelevanceSum: b.tagRelevanceSum,
+        tagCounts: b.tagCounts,
+        usersCount: b.usersCount,
+        outcome: kept.has(b)
+          ? "in_pool"
+          : b.tagRelevanceSum < RELEVANCE_FLOOR
+            ? "below_relevance_floor"
+            : "past_working_pool_size",
+      })),
+      poolSize: pool.length,
+      pool, // in the shuffled order merge receives
+    });
+  }
 
   return { pool, poolSize: pool.length };
 }
