@@ -4,6 +4,38 @@ Running log of quality findings, known limitations, and decisions made while eva
 
 ---
 
+## 2026-10-18 — Table-setting experiments (runs 1 and 2)
+
+**Question:** does a smaller, better-aimed table give less predictable picks that are still relevant (decision 4.5)? Same six cases (1, 5, 6, 8, 9, 10). Separate test scripts on the unmerged branch `experiment/table-setting`; the live engine wasn't changed. **Total spend: $4.94** ($2.01 run 1, $2.93 run 2, from the spend ledgers).
+
+**Run 1 — AI proposes + Wikidata prize shelf vs today's engine** (arm A once more, arm B twice per case):
+- **Canon on the tables gone:** 202 books in 4+ of 6 cases' tables → 0. The table shrinks from about 495 books to 25.
+- **AI suggestions are real:** 0 of 225 invented and no near misses, checked against Open Library and Hardcover.
+- **Picks not less popular:** median Hardcover readers per pick 153–162 vs 167; Open Library editions 8–10 vs 14.
+- **Slower and dearer:** 74–99s vs 23–30s per case; $0.11–0.12 vs $0.075.
+- **Blind read** (Claude's, same model family, so one opinion): roughly a tie. Today's engine found gems from its big pool (*A Beleaguered City*, *The Jakarta Method*); AI picks reached for safe famous books (*Say Nothing*) and sometimes hedged ("should land well").
+
+**Run 2 — hybrid** (today's catalog table + about 25 AI suggestions, canon dampened to 40, deep-cut rule, no-hedging rule; arm C twice per case, compared with run 1's arm A):
+- **AI books take over:** about 6% of the table but about 75% of the picks (26 of 36). Canon picks: 0 of 36 (A: 7 of 18).
+- **Picks more popular, not less:** median Hardcover readers 214–279 vs 167.
+- **"Skip the obvious" didn't hold:** *Stoner* (case 1, both runs) and *Say Nothing* (case 9, both runs) repeated.
+- **Slower:** 114–116s and about $0.24 per run. The AI proposal call (about 68s) is the bottleneck; the catalog branch (about 23s) runs inside it.
+- **Reliability:** 4 of 267 suggestions were near misses (two Japanese authors filed under Japanese-script names, two title variants), none invented. 2 proposal replies were malformed JSON. No book was marked "not confident", so the hedge-swap safety net never ran.
+- **Spec output:** write-ups parsed cleanly in 11 of 12 runs; 9 of 60 headings ran over 30 characters.
+
+**Hardcover lists** (looked at, not used): matching lists are small (mostly 1–15 books), have 0 followers and carry no curator reasons. The most-followed list on all of Hardcover has 50 followers, and the featured lists are canon lists. Parked.
+
+**Prize shelf:** 341 works from Wikidata. Hugo is complete, but Booker 2023–24 and International Booker 2023–26 are nearly empty. A minor booster at best.
+
+**Lessons:**
+- The AI is strong on relevance, weak on surprise.
+- Prompt instructions don't counter its pull toward popular books, so rules that matter must be enforced in code.
+- Canon dampening works on its own.
+
+Results, blind files and spend ledgers: `scratchpad/experiments/2026-10-18-table-setting/` and `2026-10-18-hybrid/` (local, not committed).
+
+---
+
 ## 2026-10-17 — First engine trace run (cases 1, 5, 6, 8, 9, 10)
 
 **Run:** the first run with the per-request debug trace (`ENGINE_TRACE=1`, PR #9). Six cases through the live route, all HTTP 200 on the first attempt. **$0.44 total** (about $0.07 a case), 18–32s each. Cost is measured, not estimated: the trace prices every model call. Not scored against the rubric; this records what each stage does.

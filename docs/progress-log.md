@@ -789,6 +789,18 @@ Alongside: Grim's phone check and glance test; motion pass; Google Books key.
 
 ---
 
-## October 18, 2026 — App renamed to Squirmly
+## October 18, 2026 — Squirmly, the output-format spec, and two table-setting experiments
 
-Working app name changed from "The Worm" to "Squirmly" after finding a conflicting iPhone book app called "Worm" (decision 13.77); trademark search, domain and handles still open before launch.
+**Conclusion:** Neither AI-proposes table beat today's engine on surprise: the AI is strong on relevance but pulls toward popular books, and prompt rules don't stop it. Canon dampening works on its own, so the next test enforces a popularity band in code with no AI suggestions.
+
+- Working app name changed from "The Worm" to "Squirmly" after finding a conflicting iPhone book app called "Worm" (decision 13.77); trademark search, domain and handles still open before launch.
+- Output-format spec committed (9ab2968): the engine-to-screens contract in `spec.md` §4b, with a gap list for the build.
+- New Hardcover key with catalog, lists, social and users access; list search works through Hardcover's search (the lists table blocks `_ilike`).
+- Ran two experiments on the unmerged branch `experiment/table-setting`, $4.94 total: AI proposes + prize shelf (run 1), and a hybrid of today's table + AI suggestions with canon dampened (run 2). Results in the eval log, Oct 18.
+
+**Next:**
+1. Run 3: today's engine + canon dampening + a popularity band enforced in code (one familiar pick allowed; the other two under a Hardcover reader-count line), no AI suggestions. Blind look vs today's engine.
+2. If it wins: decide whether AI suggestions stay as an optional extra (small fast batch of deep cuts, or reruns only).
+3. Speed and structured output for the build; description check covers story text for every pick, flag-and-hide, never rewrite (the ungated rewrite was rejected before).
+
+Alongside: check whether Vercel uses the old Hardcover key before deleting it; claim @squirmly handles and getsquirmly.com; phone check and glance test.
