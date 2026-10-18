@@ -67,14 +67,57 @@ Built and grounded; see §5. The engine takes one input, the taste description, 
 - **Exclude list:** reruns and swaps never return a book the user has already seen this session.
 - **Widen mode:** deliberately varied picks for the final step of the rejection path.
 - **Stage reporting:** the engine reports when it moves between its three stages (searching, choosing, double-checking), so the loading screen's three bars show real progress, never an estimate ([`design.md`](./design.md) §11).
-- **Card-ready output:** cover image, cleaned-up title and author text (no raw catalog artifacts like "Last, First" or untransliterated names), the "find this book" link, the three pre-reveal clue values (year, page count, one-word mood; §4c), and the edition's format (paperback or hardcover, from Open Library's `physical_format` or Hardcover's edition format; paperback by default). The page count also sets the book's thickness on the reveal ([`design.md`](./design.md) §10).
-- **Card-ready output, detail-screen fields** ([`design.md`](./design.md) §10a):
-  - **Reveal hook:** a short line, about 90 characters, separate from "why it's for you".
-  - **Story summary:** 2–3 sentences written from the catalog description and verified by the description check (§5e); omitted when the catalog has nothing usable.
-  - **Third-section heading:** written per pick, about 5 words at most.
-  - **Titles as separate fields:** English title, original-language title, and subtitle.
-  - **Clean author name.**
-- **Known output problems (for the engine review):** code fences in 13 of 36 saved runs; emoji echoed from the input; and the description check's rewrite made *Los informantes* worse.
+- **Card-ready output:** see "Output format (stage I)" below.
+
+#### Output format (stage I)
+
+The contract between the engine and the screens. One format for every pick, whichever source it came from (catalog search, AI suggestion, Wikidata prize shelf, curated lists).
+
+**Response shape:** `picks` (exactly 3) and `reserves` (2–3, same fields, grounded and verified the same way), preceded by the stage events above (searching, choosing, double-checking). Structured data only: no code fences, no raw model text, nothing the screens have to clean up. A grounding failure stays a clean 502 with no picks (§5c).
+
+**Fields per pick** ("catalog" = the grounded pick's Open Library or Hardcover records; "final step" = written by the engine's last model step):
+
+| Field | What it is | Required | From | Length | When missing |
+|---|---|---|---|---|---|
+| `title` | English display title, cleaned: no series or edition noise like "(Penguin Classics)". Always in English, even when the catalog has only the original (case 1's Обломов → *Oblomov*) | Yes | Catalog's English title; otherwise supplied by the final step | — | Never missing: the engine always supplies one |
+| `originalTitle` | Title in the original language and script, e.g. Обломов; only when it differs from `title` | No | Catalog | — | Not shown |
+| `subtitle` | Subtitle, on its own line | No | Catalog | — | Not shown |
+| `author` | "First Last": no "Last, First", sensible transliteration, no stress marks | Yes | Catalog, cleaned | — | Never missing (grounded) |
+| `year` | Original publication year, not the edition's year | No | Catalog | 4 digits | Year chip hidden |
+| `pages` | Page count; also sets the book's thickness (design §10) | No | Catalog (edition) | — | Pages chip hidden; default thickness |
+| `format` | "paperback" or "hardcover" | Yes | Catalog (OL `physical_format`, HC edition format) | — | "paperback" |
+| `coverUrl` | Best cover after the fallback chain and fake-cover check (§5d) | No | Catalog / cover chain | — | Themed placeholder |
+| `isbn` | ISBN for the link | No | Catalog (edition) | — | Open Library link |
+| `findLink` | Bookshop.org with the ISBN; Open Library when there's no ISBN (§4c) | Yes | Built from `isbn` + config | — | — |
+| `hook` | The short line on the revealed book | Yes | Final step | ~90 chars | — |
+| `why` | Why it's for this reader | Yes | Final step | ~2 sentences | — |
+| `story` | What the book is about, written from the catalog description; never invented plot | No | Final step, from catalog description | 2–3 sentences | Section hidden |
+| `angleHeading` | Third detail-screen section's heading, written for this pick (e.g. "Shelved in the wrong aisle"), not a fixed label | Yes | Final step | ~30 chars (about 5 words, 13.74) | — |
+| `angleText` | That section's body | Yes | Final step | ~2 sentences | — |
+| `mood` | One word, for the pre-reveal clue chip | Yes | Final step | 1 word | — |
+| `source` | Where the book came from, in reader-friendly words, e.g. "International Booker longlist, 2019" | No | The source that supplied it; never invented | Short phrase | Not shown |
+| `rarity` | Staff pick / First edition / Holy grail | — | Open question ([`decisions.md` §12](./decisions.md#12-open-questions-im-carrying)) | — | — |
+
+**Fallbacks:**
+- No cover → designed placeholder (themed, §5d).
+- No pages → hide the pages clue chip; default book thickness.
+- No ISBN → Open Library link; the commission line is hidden.
+- No usable description → no `story`; the screen hides "The story".
+- No year → hide the year chip.
+
+**Today vs. this contract** (from `route.ts` and the Oct 17 traces; the build to-do list):
+- **High priority:** the response sends the full model message (`raw`, including thinking) to the client. It must stop at the server.
+- The response is `{ recommendations, raw }`. `recommendations` is the model's text as a string, not parsed objects: wrapped in a ```` ```json ```` fence in 4 of the 6 Oct 17 traces (13 of 36 earlier saved runs).
+- Exactly 3 picks; no reserves.
+- No stage events: one JSON response at the end.
+- Fields today: `title`, `author`, `why`, `nonObvious`. Everything else in the table is missing, and `nonObvious` has no slot in this contract.
+- Title and author are copied exactly from the pool, so catalog noise reaches the screen: case 1 returned "Обломов" by "Ива́н Алекса́ндрович Гончаро́в" (no English title, untransliterated, stress marks). The engine must supply an English `title` for every pick.
+- The pick lookup (stage G) fetches only descriptions and subjects (plus Hardcover genres and moods), with no year, pages, format, cover or ISBN, and none of it is returned to the client.
+- Catalog descriptions are raw blurbs (e.g. *Ladder of Years*: "A NEW YORK TIMES NOTABLE BOOKBALTIMORE WOMAN DISAPPEARS…"), so `story` has to be written, not passed through.
+- **Build requirement:** the description check must cover the `story` text for every pick, not just flagged ones (decision 13.73). Today it runs only on gated picks (§5e).
+- No `findLink`; the cover chain (§5d) isn't wired into the engine.
+- Emoji echoed from the input; the description check's rewrite made *Los informantes* worse.
+- Nothing supplies `source` yet (Wikidata and curated lists aren't built).
 
 ### 4c. The card UX
 
