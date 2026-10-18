@@ -1,6 +1,6 @@
 # Design System
 
-*How Worm looks and why. Decisions behind it are in [`decisions.md`](./decisions.md) §13; what each screen does is in [`spec.md`](./spec.md) §4. Mockups live on the design canvas (private link, held by the owner). Last updated October 15, 2026.*
+*How Squirmly looks and why. Decisions behind it are in [`decisions.md`](./decisions.md) §13; what each screen does is in [`spec.md`](./spec.md) §4. Mockups live on the design canvas (private link, held by the owner). Last updated October 18, 2026.*
 
 ---
 
@@ -10,7 +10,7 @@ The design is not locked. Current screens will keep being refined, and more them
 
 ## 1. Brief
 
-- **Product name (working):** Worm / The Worm.
+- **Product name (working):** Squirmly (renamed from "The Worm" on October 18; decision 13.77).
 - **For:** readers first. The book nerd who cares about the whole presentation of a book, not just the story.
 - **Feeling:** Epic, Clean, Colorful.
 - **The idea:** getting a book should feel like an event, in a world built from great book covers.

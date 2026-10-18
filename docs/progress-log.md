@@ -786,3 +786,9 @@ Ran the identical `cult novel` query against Open Library side by side for direc
 4. Then: decide whether Hardcover tag search stays, review the remaining stages, run the blind reader test (and settle the rubric's "intrigue" wording), then build.
 
 Alongside: Grim's phone check and glance test; motion pass; Google Books key.
+
+---
+
+## October 18, 2026 — App renamed to Squirmly
+
+Working app name changed from "The Worm" to "Squirmly" after finding a conflicting iPhone book app called "Worm" (decision 13.77); trademark search, domain and handles still open before launch.

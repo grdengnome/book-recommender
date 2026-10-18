@@ -4,7 +4,7 @@ Read automatically by Claude Code at the start of every session in this repo. De
 
 ## What this project is
 
-An AI book recommender whose core problem is resisting the model's pull toward famous, obvious picks. Start here:
+Squirmly (working name) is an AI book recommender whose core problem is resisting the model's pull toward famous, obvious picks. Start here:
 - `docs/decisions.md`: every product and architecture decision and why. Check it before questioning something that looks odd; it's usually deliberate.
 - `docs/spec.md`: product spec. `docs/question-bank.md`: question wording and flow mechanics.
 - `docs/design.md`: the design system. All UI follows its shared structure and theme rules.

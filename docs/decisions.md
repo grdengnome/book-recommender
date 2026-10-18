@@ -1,6 +1,6 @@
 # Decision Log
 
-*Covers decisions through the v0 engine, v0 product planning, and the start of the build (October 17, 2026). Further build decisions will be added as they're made.*
+*Covers decisions through the v0 engine, v0 product planning, and the start of the build (October 18, 2026). Further build decisions will be added as they're made.*
 
 The product and architecture decisions behind this recommender, and the paths I rejected. The [progress log](./progress-log.md) is the session-by-session diary; this file is the story told by decision. Each entry gives the decision and why, with a link to the full detail.
 
@@ -464,7 +464,7 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 - **Reveal-prompt wording for Fantasy, Superhero, Mystery and Sci-fi.** Every theme's wrapping is decided; only the café's "Tap to unwrap" wording is settled, and the other four are placeholders. ([design §9](./design.md))
 - **How to keep the question flow fresh:** wording variety (answer formats settled in 13.35, scenes in 13.45; longer-term ideas in [spec §6](./spec.md)). The existing first-question template stays. ([design §7](./design.md))
 - **How rarity tiers are assigned** (Staff pick, First edition, Holy grail). ([design §10](./design.md))
-- **The final app name.** "The Worm" is a working name (13.70); the final name needs a clearance search before public launch.
+- **The final app name.** "Squirmly" is the working name (13.77); before public launch it still needs a proper trademark search, a domain, and the Instagram and TikTok handles.
 
 ---
 
@@ -746,9 +746,10 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 **Decision:** Design passes are checked against a stress set of test covers, measured cover-to-room separation and text contrast, and the phone's real width (358px), not just the best-case samples.
 **Why:** It catches problems the best-case samples hide. ([progress log, Oct 15](./progress-log.md))
 
-### 13.70 Working app name "The Worm"
+### 13.70 Working app name "The Worm" (superseded)
 **Decision:** The working app name is "The Worm". The final name is decided before public launch, after a clearance search.
 **Why:** Two book apps already use "Worm", and "The" doesn't distinguish a trademark; the worm mascot survives any rename. ([progress log, Oct 17](./progress-log.md))
+**Superseded** on October 18 by 13.77.
 
 ### 13.71 The book opens into the detail screen
 **Decision:** "Open the book", or tapping the landed book, opens the detail screen: the cover swings open over 1.5s and the detail sheet grows partway through.
@@ -773,3 +774,7 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 ### 13.76 Commission disclosure sits directly under "Find this book"
 **Decision:** The commission disclosure sits directly under "Find this book", and is hidden when the link falls back to Open Library.
 **Why:** The FTC wants disclosure close to the link, and Bookshop.org requires it. ([progress log, Oct 17](./progress-log.md))
+
+### 13.77 Working app name changes to "Squirmly"
+**Decision:** The working app name changes from "The Worm" to "Squirmly". Backups: Squirmi, Luciole, Matita, Aldus, Smudge. Still open before launch: a proper trademark search, buying a domain, and claiming the handles (§12).
+**Why:** An existing iPhone app called "Worm" (Books category, a social reading app) is a direct conflict. Squirmly is distinctive, spelled the way it sounds, two syllables, and easy to pass on by word of mouth (Beli-style), and it keeps the worm mascot and spine marks. Quick checks on Oct 18: no app named Squirmly on the App Store or Google Play; no trademark filed for SQUIRMLY; live SQUIRMY marks cover audio recordings, toys and infant products, not book apps; squirmly.com is for sale ($2,299) and getsquirmly.com looks available. Instagram and TikTok handles not yet checked. ([progress log, Oct 18](./progress-log.md))

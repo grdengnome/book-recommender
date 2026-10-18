@@ -1,6 +1,6 @@
 # Book Recommender
 
-An AI book recommender built to beat the obvious pick. It turns a description of your taste into three recommendations drawn from real catalogs, chosen for fit rather than fame. Built as a portfolio project in product thinking around AI: grounding, evaluation, and honest handling of the model's pull toward mainstream answers.
+Squirmly (working name) is an AI book recommender built to beat the obvious pick. It turns a description of your taste into three recommendations drawn from real catalogs, chosen for fit rather than fame. Built as a portfolio project in product thinking around AI: grounding, evaluation, and honest handling of the model's pull toward mainstream answers.
 
 ## The problem
 
