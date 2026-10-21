@@ -4,6 +4,31 @@ Running log of quality findings, known limitations, and decisions made while eva
 
 ---
 
+## 2026-10-20 — Run 3: canon dampening ± one discovery slot
+
+**Question:** with no AI suggestions, does today's catalog table give more intriguing picks if code dampens the canon (D1), or dampens it and requires 1 of 3 picks from a "deeper shelf" (D2)? Deeper = under 20 Open Library editions and under 250 Hardcover readers, using counts the engine already fetches. Same six cases, one run each. D1 and D2 shared one table per case and were compared with run 1's arm A. Branch `experiment/table-setting`; live engine unchanged. **Spend: $1.36**, plus $0.55 for a stricter version (2 of 3 picks and both reserves from the deeper shelf) that was stopped after three cases. Those results are kept separately and not compared.
+
+| Arm | Canon picks | Median HC readers / OL editions per pick | Picks under the line | Picks repeated across cases | Median cost | Median time |
+|---|---|---|---|---|---|---|
+| A (today's engine) | 7 of 18 | 167 / 14 | 8 of 18 | 1 | $0.076 | 25s |
+| D1: dampening only | 4 of 18 | 195 / 18 | 6 of 18 | 0 | $0.153 | 66s |
+| D2: + 1 deeper pick | 7 of 18 | 186.5 / 15.5 | 8 of 18 | 1 | $0.159 | 66s |
+
+- **Neither variant changed popularity meaningfully.** D1 picked fewer canon books, but its picks had slightly more readers and editions than A's.
+- **D2's rule rarely bound.** Today's engine already picks about 8 of 18 under the line. The rule never forced a retry, the lower line always had enough books, and the two free picks were also deeper 4 of 12 times.
+- **Repeats were already rare:** today's engine repeated one pick across cases (*Sátántangó*).
+- **Canon on the table mostly doesn't reach the picks:** about 200 canon books sit on A's tables, but only 7 of 18 picks are canon.
+- **Slower and dearer:** most of the gap is the separate write step (about 25s for one call writing five books). Five parallel write-ups would bring the total to about 50s (estimate).
+- **Spec output:** no hedge swaps and no hedge phrases. Write-ups parsed cleanly in 11 of 12 runs; 13 small length issues (headings over 30 characters, hooks over 90, one-sentence summaries).
+- **Blind read** (Claude's; not fully blind, since it recognized arm A's sets from run 1): a tie. The variants read slightly better in cases 1, 5 and 8, and today's engine in 6, 9 and 10. Every set was a good recommendation. Recurring weakness: some generic "why" lines.
+- **Open Library lookup issue:** Open Library's search no longer matches `q=<work id>`. The experiment scripts used that to fill year, cover and pages, so catalog picks in runs 2–3 lost them; run 2's validity counts for catalog picks are affected. Fixed in the script (`key:/works/...`). The live engine is unaffected: its pick lookup reads `/works/<id>.json` directly.
+
+**Lesson:** relevance first. Pushing for less-known picks in code doesn't buy intrigue that today's engine lacks, and it costs speed.
+
+Results and blind files: `scratchpad/experiments/2026-10-20-band/` (local, not committed).
+
+---
+
 ## 2026-10-18 — Table-setting experiments (runs 1 and 2)
 
 **Question:** does a smaller, better-aimed table give less predictable picks that are still relevant (decision 4.5)? Same six cases (1, 5, 6, 8, 9, 10). Separate test scripts on the unmerged branch `experiment/table-setting`; the live engine wasn't changed. **Total spend: $4.94** ($2.01 run 1, $2.93 run 2, from the spend ledgers).

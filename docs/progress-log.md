@@ -804,3 +804,19 @@ Alongside: Grim's phone check and glance test; motion pass; Google Books key.
 3. Speed and structured output for the build; description check covers story text for every pick, flag-and-hide, never rewrite (the ungated rewrite was rejected before).
 
 Alongside: check whether Vercel uses the old Hardcover key before deleting it; claim @squirmly handles and getsquirmly.com; phone check and glance test.
+
+---
+
+## October 20, 2026 — Run 3 closes the table-setting experiments
+
+**Conclusion:** Today's engine keeps its table-setting (decision 6.9), and stays iterative: every change is tested blind against it and kept only if it wins (6.10). Canon dampening, with or without a code-enforced discovery slot, didn't change pick popularity or clearly beat today's engine on intrigue, and it doubled the time and cost. Principle: relevance first; don't force less-known picks when the best fits are popular.
+
+- Run 3 on `experiment/table-setting`, $1.36 (plus $0.55 for a stricter version that was stopped and isn't compared): D1 (dampening only) and D2 (+ 1 of 3 picks under 20 editions / 250 Hardcover readers) vs today's engine. Today's engine already picks about 8 of 18 under that line, so D2's rule rarely bound. Blind read a tie. Details in the eval log, Oct 20.
+- Most of the extra time is the separate write step (about 25s); five parallel write-ups would cut the total to about 50s (estimate).
+- Found that Open Library search no longer matches `q=<work id>`, which cost the experiment scripts their year and cover. Fixed in the script; the live engine's pick lookup reads `/works/<id>.json` and is unaffected.
+
+**Next:**
+1. Build fixes from spec §4b's gap list: forced structured output, stop sending model thinking to the client, a story check that flags and hides (never rewrites), clean English titles and authors, sharper "why" lines.
+2. Then the café reveal on live picks and the real-reader test.
+
+Alongside: claim @squirmly handles and getsquirmly.com; put the new Hardcover key in Vercel before deleting the old one; phone check and glance test.

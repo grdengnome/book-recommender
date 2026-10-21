@@ -1,6 +1,6 @@
 # Decision Log
 
-*Covers decisions through the v0 engine, v0 product planning, and the start of the build (October 18, 2026). Further build decisions will be added as they're made.*
+*Covers decisions through the v0 engine, v0 product planning, and the start of the build (October 20, 2026). Further build decisions will be added as they're made.*
 
 The product and architecture decisions behind this recommender, and the paths I rejected. The [progress log](./progress-log.md) is the session-by-session diary; this file is the story told by decision. Each entry gives the decision and why, with a link to the full detail.
 
@@ -286,6 +286,14 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 ### 6.8 Don't test on a known-bad foundation
 **Decision:** Paused the first merge run when I found its prerequisite was never built.
 **Why:** Results on a pool I knew was too narrow would mislead. ([progress log, Aug 16](./progress-log.md))
+
+### 6.9 Keep today's table-setting
+**Decision:** The engine keeps building its candidate table as it does today. I tested three alternatives: the AI proposes the table (run 1), a hybrid of today's table plus AI suggestions (run 2), and code-enforced canon dampening with or without a discovery slot (run 3). None was adopted. I'll revisit with real-reader data (hit rate by source). Principle: relevance first. Don't force less-known picks when the best fits are popular.
+**Why:** None of the three clearly beat today's engine on intrigue, and all were slower or costlier. The canon on the table mostly doesn't reach the picks. ([eval log, Oct 18 and Oct 20](./eval-log.md))
+
+### 6.10 The engine is iterative
+**Decision:** Today's engine is the current version, not the final one. Every change is measured with the trace, tested blind against the current version on the eval set, and kept only if it wins. The experiment scripts on `experiment/table-setting` can be reused for this. Once the engine is live, real-reader data drives what to try next: 👍/👎, "Find this book" taps, already-read, fail-path use and hit rate by source. Speed and output quality come first, then boosting books that land and retesting AI suggestions or new sources.
+**Why:** Run 3 showed that ideas which sound better don't reliably beat today's engine, so a change has to prove itself. Real readers are the only test of whether picks actually land. ([progress log, Oct 20](./progress-log.md))
 
 ---
 
