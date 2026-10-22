@@ -40,6 +40,9 @@ yarn-error.log*
 # debug traces (ENGINE_TRACE=1, lib/trace/requestTrace.ts): full request data, never committed
 /scratchpad/traces/
 
+# experiment run output (blind files, keys, results, spend ledgers): local only
+/scratchpad/experiments/
+
 # cover research: cover images, the pages that display them, and working files
 /scratchpad/cover-research/samples/
 /scratchpad/cover-research/samples-2x/

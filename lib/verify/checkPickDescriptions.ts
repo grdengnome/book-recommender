@@ -1,7 +1,7 @@
 // Final-pick description check + rewrite — step 3 of verifying pick descriptions (branch
 // feat/verify-pick-descriptions). Step 2 (lookupPickMetadata.ts) fetches each validated
 // pick's own source records; this makes one model call that compares the recommender's
-// `why` / `nonObvious` text for the gated picks (see below) against those facts, and
+// `why` / `angleText` text for the gated picks (see below) against those facts, and
 // rewrites the text for any pick it contradicts (e.g. the Sept 23 case-8 pick describing Izzo's essay
 // collection "Garlic, Mint & Sweet Basil" as a noir novel).
 //
@@ -15,12 +15,15 @@
 // for every pick: they compute the hint, and their data will be reused for cards.
 //
 // Scope limits, deliberate:
-// - Never changes which book was picked — only `why` and `nonObvious` are ever replaced,
-//   and only on the pick at the index the checker returned.
+// - Never changes which book was picked — only `why` and `angleText` are ever replaced,
+//   and only on the pick at the index the checker returned. (`angleText` took over from
+//   `nonObvious` when the output moved to the spec §4b contract, fix PR 1, 2026-10-21.)
 // - Never breaks a response: any failure (timeout, API error, unparseable or malformed
-//   output) returns the original recommendations text unchanged, byte for byte. The text
-//   is only re-serialized when at least one pick was actually rewritten.
+//   output) returns the original picks unchanged. A rewrite that would break the length
+//   ceilings (lib/output/validatePicks.ts) is dropped the same way.
 import type { PickMetadata } from "./lookupPickMetadata";
+import type { ModelPick } from "../output/pickSchema";
+import { LENGTH_CEILINGS } from "../output/validatePicks";
 import { noopTrace, type RequestTrace } from "../trace/requestTrace";
 
 const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
@@ -41,24 +44,16 @@ export interface PickCheckResult {
   author: string;
   status: PickCheckStatus;
   reason: string; // checker's reason, or why the pick went unchecked
-  before: { why: string; nonObvious: string };
-  after: { why: string; nonObvious: string }; // equals `before` unless rewritten
+  before: { why: string; angleText: string };
+  after: { why: string; angleText: string }; // equals `before` unless rewritten
 }
 
 export interface CheckPickDescriptionsResult {
-  recommendations: string; // text to send to the user — the original unless something was rewritten
-  picks: PickCheckResult[];
+  picks: ModelPick[]; // what goes to the user — the originals unless something was rewritten
+  results: PickCheckResult[];
   checkMs: number; // time spent in the model call (0 when no call was made)
   checkCalled: boolean; // false when no pick had a hard signal (or the input couldn't be used)
   error?: string; // set when the whole check fell back to the original text
-}
-
-interface ParsedPick {
-  title?: unknown;
-  author?: unknown;
-  why?: unknown;
-  nonObvious?: unknown;
-  [key: string]: unknown;
 }
 
 interface PickFacts {
@@ -101,7 +96,7 @@ interface CheckerVerdict {
   catalogFact?: unknown;
   reason?: unknown;
   why?: unknown;
-  nonObvious?: unknown;
+  angleText?: unknown;
 }
 
 // The only error kinds that justify a rewrite. A "contradicts" verdict must name one of
@@ -111,8 +106,8 @@ interface CheckerVerdict {
 // ("a character study rather than a plotted novel" on Brookner's Strangers) 3/3 runs.
 const FACTUAL_ERROR_TYPES = ["form", "genre", "subject_or_setting", "plot", "different_book"] as const;
 
-// Same tolerant parse as pickGrounding.ts's checkPickGrounding: the JSON array between the
-// first "[" and the last "]", ignoring any code fence or prose around it.
+// Tolerant parse of the checker's answer: the JSON array between the first "[" and the
+// last "]", ignoring any code fence or prose around it.
 function parseJsonArray(text: string): unknown[] | null {
   try {
     const start = text.indexOf("[");
@@ -182,15 +177,15 @@ function hasFacts(f: PickFacts): boolean {
 
 function buildPrompt(
   tasteDescription: string,
-  items: { index: number; pick: ParsedPick; facts: PickFacts }[],
+  items: { index: number; pick: ModelPick; facts: PickFacts }[],
 ): string {
   const blocks = items.map(({ index, pick, facts }) => {
     const lines = [
       `<pick index="${index}">`,
-      `title: ${str(pick.title)}`,
-      `author: ${str(pick.author)}`,
-      `why (recommender's text): ${str(pick.why)}`,
-      `nonObvious (recommender's text): ${str(pick.nonObvious)}`,
+      `title: ${pick.title}`,
+      `author: ${pick.author}`,
+      `why (recommender's text): ${pick.why}`,
+      `angleText (recommender's text): ${pick.angleText}`,
       "facts from catalog records:",
     ];
     for (const d of facts.descriptions) lines.push(`- ${d.source} description: ${d.text}`);
@@ -209,7 +204,7 @@ The reader asked for:
 ${tasteDescription}
 </taste>
 
-For each pick below, a recommender wrote a "why" and a "nonObvious" blurb. Your job is to catch factual errors about the book — not to judge the recommender's interpretation of it.
+For each pick below, a recommender wrote a "why" and an "angleText" blurb. Your job is to catch factual errors about the book — not to judge the recommender's interpretation of it.
 
 ${blocks.join("\n\n")}
 
@@ -228,14 +223,14 @@ Library subject headings can state a book's form directly. Subdivisions such as 
 
 To mark a pick "contradicts" you must be able to fill in all of: which error type it is (one of the five above), the wrong claim quoted word for word from that pick's blurbs, and the catalog fact quoted word for word from that pick's facts. Both quotes are checked against the text; a paraphrase, an inference, or a quote from the wrong place does not count. If you can't quote a specific catalog fact, it is not a contradiction.
 
-If a pick contradicts the facts, rewrite both "why" and "nonObvious" so they are accurate to the catalog facts while still connecting the book to the reader's taste. Every claim in a rewrite about what the book is or contains must be supported by the facts provided. That rules out two things: details from your own knowledge of the book, and details kept from the original blurb that the facts don't support — once a blurb has been shown wrong about the book, treat the rest of its specifics as unverified. If the facts only support a modest description, write a modest one; it is fine for a rewrite to be shorter than the original. Never suggest a different book.
+If a pick contradicts the facts, rewrite both "why" and "angleText" so they are accurate to the catalog facts while still connecting the book to the reader's taste. Every claim in a rewrite about what the book is or contains must be supported by the facts provided. That rules out two things: details from your own knowledge of the book, and details kept from the original blurb that the facts don't support — once a blurb has been shown wrong about the book, treat the rest of its specifics as unverified. If the facts only support a modest description, write a modest one; it is fine for a rewrite to be shorter than the original. Never suggest a different book.
 
 Catalog records can be noisy (odd subject tags, a description that is only a page count); ignore noise rather than treating it as a contradiction.
 
 Respond with ONLY a JSON array, one object per pick, no prose before or after. For a consistent pick:
 {"index": <pick index>, "verdict": "consistent", "reason": "<one short sentence>"}
 For a pick that contradicts the facts — all fields required, including both rewrites:
-{"index": <pick index>, "verdict": "contradicts", "errorType": "form" | "genre" | "subject_or_setting" | "plot" | "different_book", "blurbClaim": "<the wrong claim, quoted from the blurb>", "catalogFact": "<the catalog fact that contradicts it, quoted from the facts>", "reason": "<one short sentence>", "why": "<rewritten why>", "nonObvious": "<rewritten nonObvious>"}`;
+{"index": <pick index>, "verdict": "contradicts", "errorType": "form" | "genre" | "subject_or_setting" | "plot" | "different_book", "blurbClaim": "<the wrong claim, quoted from the blurb>", "catalogFact": "<the catalog fact that contradicts it, quoted from the facts>", "reason": "<one short sentence>", "why": "<rewritten why>", "angleText": "<rewritten angleText>"}`;
 }
 
 async function callChecker(apiKey: string, prompt: string, trace: RequestTrace): Promise<string> {
@@ -278,37 +273,35 @@ function errorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }
 
-// `metadata` must be index-aligned with the pick array in `recommendations` — route.ts
-// builds it from grounding.picks, which checkPickGrounding parses from that same text in
-// the same order. A length mismatch is treated as a failure (nothing is rewritten).
+// `metadata` must be index-aligned with `picks` — route.ts builds it from grounding.picks,
+// which checkPickGrounding builds from these same picks in the same order. A length
+// mismatch is treated as a failure (nothing is rewritten).
 export async function checkPickDescriptions(
   apiKey: string,
   tasteDescription: string,
-  recommendations: string,
+  picks: ModelPick[],
   metadata: PickMetadata[],
   trace: RequestTrace = noopTrace,
 ): Promise<CheckPickDescriptionsResult> {
-  const parsed = parseJsonArray(recommendations) as ParsedPick[] | null;
-  const unchanged = (picks: PickCheckResult[], checkMs: number, error?: string) => ({
-    recommendations,
+  const unchanged = (results: PickCheckResult[], checkMs: number, error?: string) => ({
     picks,
+    results,
     checkMs,
     checkCalled: checkMs > 0,
     ...(error ? { error } : {}),
   });
 
-  if (!parsed) return unchanged([], 0, "recommendations text could not be parsed");
-  const base: PickCheckResult[] = parsed.map((p) => {
-    const text = { why: str(p?.why), nonObvious: str(p?.nonObvious) };
-    return { title: str(p?.title), author: str(p?.author), status: "unchecked", reason: "", before: text, after: { ...text } };
+  const base: PickCheckResult[] = picks.map((p) => {
+    const text = { why: p.why, angleText: p.angleText };
+    return { title: p.title, author: p.author, status: "unchecked", reason: "", before: text, after: { ...text } };
   });
-  if (parsed.length !== metadata.length) {
+  if (picks.length !== metadata.length) {
     base.forEach((r) => (r.reason = "pick/metadata count mismatch"));
-    return unchanged(base, 0, `pick count ${parsed.length} != metadata count ${metadata.length}`);
+    return unchanged(base, 0, `pick count ${picks.length} != metadata count ${metadata.length}`);
   }
 
-  const toCheck: { index: number; pick: ParsedPick; facts: PickFacts }[] = [];
-  parsed.forEach((pick, index) => {
+  const toCheck: { index: number; pick: ModelPick; facts: PickFacts }[] = [];
+  picks.forEach((pick, index) => {
     const facts = collectFacts(metadata[index]);
     if (facts.formNote) toCheck.push({ index, pick, facts });
     else {
@@ -335,7 +328,7 @@ export async function checkPickDescriptions(
 
   const sent = new Set(toCheck.map((t) => t.index));
   const factsByIndex = new Map(toCheck.map((t) => [t.index, factsText(t.facts)]));
-  let rewroteAny = false;
+  const rewritten = picks.map((p) => ({ ...p }));
   for (const v of verdicts) {
     const index = typeof v?.index === "number" ? v.index : Number.NaN;
     if (!sent.has(index)) continue; // ignore verdicts for picks that weren't sent
@@ -346,9 +339,9 @@ export async function checkPickDescriptions(
       result.reason = reason;
     } else if (v.verdict === "contradicts") {
       const why = str(v.why).trim();
-      const nonObvious = str(v.nonObvious).trim();
+      const angleText = str(v.angleText).trim();
       const errorType = str(v.errorType);
-      const blurbText = `${result.before.why} ${result.before.nonObvious}`;
+      const blurbText = `${result.before.why} ${result.before.angleText}`;
       const problems = [
         (FACTUAL_ERROR_TYPES as readonly string[]).includes(errorType) ? "" : `errorType=${errorType || "none"}`,
         quoteAppearsIn(str(v.blurbClaim), blurbText) ? "" : "blurbClaim not found in blurb",
@@ -358,13 +351,14 @@ export async function checkPickDescriptions(
         // Unjustified flag: treated as consistent, per "when unsure, confirm".
         result.status = "confirmed";
         result.reason = `flag dropped (${problems.join("; ")}): ${reason}`;
-      } else if (why && nonObvious) {
+      } else if (why.length > LENGTH_CEILINGS.why || angleText.length > LENGTH_CEILINGS.angleText) {
+        result.reason = `flagged as contradicting but rewrite broke the length ceilings — kept original (${reason})`;
+      } else if (why && angleText) {
         result.status = "rewritten";
         result.reason = `${errorType}: "${str(v.blurbClaim)}" vs catalog "${str(v.catalogFact)}" — ${reason}`;
-        result.after = { why, nonObvious };
-        parsed[index].why = why;
-        parsed[index].nonObvious = nonObvious;
-        rewroteAny = true;
+        result.after = { why, angleText };
+        rewritten[index].why = why;
+        rewritten[index].angleText = angleText;
       } else {
         result.reason = `flagged as contradicting but rewrite was incomplete — kept original (${reason})`;
       }
@@ -379,8 +373,8 @@ export async function checkPickDescriptions(
   }
 
   return {
-    recommendations: rewroteAny ? JSON.stringify(parsed, null, 2) : recommendations,
-    picks: base,
+    picks: rewritten,
+    results: base,
     checkMs,
     checkCalled: true,
   };
@@ -390,7 +384,7 @@ export async function checkPickDescriptions(
 // caller around lookups + check together — the full latency verification adds.
 export function formatPickCheck(result: CheckPickDescriptionsResult, lookupMs: number, totalMs: number): string {
   const counts = { confirmed: 0, rewritten: 0, unchecked: 0, "not checked": 0 };
-  result.picks.forEach((p) => counts[p.status]++);
+  result.results.forEach((p) => counts[p.status]++);
   const check = result.checkCalled
     ? `check ${result.checkMs}ms, model ${CHECK_MODEL}, timeout ${CHECK_TIMEOUT_MS}ms`
     : "check skipped, no pick with a hard signal";
@@ -399,13 +393,13 @@ export function formatPickCheck(result: CheckPickDescriptionsResult, lookupMs: n
       `${counts["not checked"]} not checked — added wall time=${totalMs}ms (lookups ${lookupMs}ms + ${check})` +
       (result.error ? ` — FELL BACK TO ORIGINAL TEXT: ${result.error}` : ""),
   ];
-  for (const p of result.picks) {
+  for (const p of result.results) {
     lines.push(`  "${p.title}" — ${p.author}: ${p.status}${p.reason ? ` (${p.reason})` : ""}`);
     if (p.status === "rewritten") {
       lines.push(`    why BEFORE: ${p.before.why}`);
       lines.push(`    why AFTER:  ${p.after.why}`);
-      lines.push(`    nonObvious BEFORE: ${p.before.nonObvious}`);
-      lines.push(`    nonObvious AFTER:  ${p.after.nonObvious}`);
+      lines.push(`    angleText BEFORE: ${p.before.angleText}`);
+      lines.push(`    angleText AFTER:  ${p.after.angleText}`);
     }
   }
   return lines.join("\n");

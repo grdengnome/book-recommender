@@ -820,3 +820,23 @@ Alongside: check whether Vercel uses the old Hardcover key before deleting it; c
 2. Then the café reveal on live picks and the real-reader test.
 
 Alongside: claim @squirmly handles and getsquirmly.com; put the new Hardcover key in Vercel before deleting the old one; phone check and glance test.
+
+---
+
+## October 22, 2026 — Fix PR 1: structured output, card split and speed work
+
+**Conclusion:** Fix PR 1 is ready for review but not merged. The API now returns only the §4b picks, which are schema-checked, carry distinct moods and stay grounded. Speed is level with main (median 25.0s vs 24.6s), not better. Merging was conditional on beating main; the case for merging at parity is Next 1.
+
+- Built over Oct 21–22 on `fix/structured-output`: structured output and the contract-only response (decisions 8.7–8.9), separate choose and write calls (8.10), streamed selection (8.11), selection-assigned moods (8.12), and a 24h Open Library subject cache plus 5s deadlines (6.11).
+- Table-size experiment ($0.82): halving the table saved only about 2s; deeper pages won the blind read 4 of 6, so the table keeps its full breadth (6.12). Rejected: Hardcover cache, merging tag picking into the search-term call.
+- Six-case timing run, finished after the dev workspace's spend limit was raised ($0.50; $3.07 for the PR): the selection call's thinking (10.8–20.4s) sets the total, and streaming saved about 1s. Case 8 picked Izzo's essay collection again; the description check rewrote it as criticism (open question 8.6). Details in the eval log, Oct 21 and Oct 22.
+
+**Next:**
+1. Merge at speed parity: no slower than main, removes the 40–90s outliers, fixes the thinking leak and output format, and is the foundation for early table-setting, which is the main speed lever.
+2. Early table-setting PR (prepare / choose split), starting with the ~$0.50 blind test: tables prepared from the backbone answers only vs today's full description, six cases.
+3. Deeper Open Library pages (results 101–200) as a quality experiment, tested blind against today's table.
+4. Reserves and stage events PR (spec §4b gap list).
+5. When the description check finds a pick's catalog description contradicts the selector's reason (e.g. Izzo's essays picked as noir), swap in a reserve instead of rewriting the description. The planned story check must flag and hide, never rewrite.
+6. Parked product decision: show the first pick on screen before the other two.
+
+Alongside: claim @squirmly handles and getsquirmly.com; put the new Hardcover key in Vercel before deleting the old one; phone check and glance test.

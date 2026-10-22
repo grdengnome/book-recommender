@@ -18,14 +18,14 @@ const hc = [
 const { pool } = mergeCandidatePools(ol, hc);
 const seen = new Map();
 recordSeenCandidates(seen, pool);
-const picks = JSON.stringify([
+const picks = [
   { title: "American Gods", author: "Neil Gaiman" },
   { title: "Kokoro", author: "Natsume Sōseki" },
   { title: "Some HC Only Book", author: "A. Writer" },
-]);
+];
 const g = checkPickGrounding(picks, seen);
 console.log("status:", g.status);
-if (g.status !== "unparseable") console.log(formatPickSources(g.picks));
+console.log(formatPickSources(g.picks));
 
 const modelKeys = new Set(toModelPool(pool).map((c) => Object.keys(c).join(",")));
 console.log("toModelPool key sets:", [...modelKeys]);

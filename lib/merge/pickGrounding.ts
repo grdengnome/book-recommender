@@ -86,35 +86,24 @@ export interface CheckedPick {
   groundingKey: string | null; // the tolerant key the pick was looked up by (shown in the debug trace)
 }
 
-// "unparseable" is a failure too: a response that can't be verified can't be returned.
 export type GroundingResult =
   | { status: "grounded"; picks: CheckedPick[] }
-  | { status: "ungrounded"; picks: CheckedPick[] }
-  | { status: "unparseable" };
+  | { status: "ungrounded"; picks: CheckedPick[] };
 
+// `picks` are the pool strings the final step copied (poolTitle/poolAuthor), already parsed
+// and shape-checked by lib/output/validatePicks.ts — the structured answer replaced the old
+// scrape of the text between "[" and "]".
 export function checkPickGrounding(
-  recommendationsText: string,
+  picks: { title: string; author: string }[],
   seen: SeenCandidates,
 ): GroundingResult {
-  let parsed: unknown;
-  try {
-    const start = recommendationsText.indexOf("[");
-    const end = recommendationsText.lastIndexOf("]");
-    parsed = JSON.parse(recommendationsText.slice(start, end + 1));
-  } catch {
-    return { status: "unparseable" };
-  }
-  if (!Array.isArray(parsed) || parsed.length === 0) return { status: "unparseable" };
-
-  const picks: CheckedPick[] = parsed.map((p) => {
-    const title = typeof p?.title === "string" ? p.title : "";
-    const author = typeof p?.author === "string" ? p.author : "";
+  const checked: CheckedPick[] = picks.map(({ title, author }) => {
     const key = groundingKey(title, author);
     const record = key === null ? null : (seen.get(key) ?? null);
     return { title, author, sources: record ? [...record.sources] : [], record, groundingKey: key };
   });
-  const allGrounded = picks.every((p) => p.sources.length > 0);
-  return { status: allGrounded ? "grounded" : "ungrounded", picks };
+  const allGrounded = checked.every((p) => p.sources.length > 0);
+  return { status: allGrounded ? "grounded" : "ungrounded", picks: checked };
 }
 
 // Same per-call console convention as logMergeStats. Printed on every attempt, pass or

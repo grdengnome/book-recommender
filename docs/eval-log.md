@@ -4,6 +4,90 @@ Running log of quality findings, known limitations, and decisions made while eva
 
 ---
 
+## 2026-10-22 — Fix PR 1: card split, streaming, cache and mood (cases 1, 5, 6, 8, 9, 10)
+
+**Change:** since the Oct 21 run below, choosing and writing are separate calls (decision 8.10). The selection call is streamed, and each pick's lookup and card start as soon as it arrives (8.11). The selection call assigns distinct moods (8.12). Open Library subject lists are cached for 24h, Open Library calls time out at 5s, the Hardcover pool has a 5s deadline (6.11), and the fixed instructions use the prompt cache. Same table-setting, grounding check, pick lookup and description check. Cases 1, 5 and 6 ran Oct 22 (UTC, evening of Oct 21 Eastern), and 8, 9 and 10 the next evening, after the dev workspace's spend limit was raised. **Spend: $0.50** for the run ($3.07 for the whole PR, against a $4 cap). One run each; not scored against the rubric.
+
+| Case | main | Card split, not streamed (Oct 21) | This PR |
+|---|---|---|---|
+| 1 | 30.0s · $0.083 | 31.1s · $0.095 | 25.1s · $0.088 |
+| 5 | 25.2s · $0.062 | 22.9s · $0.074 | 23.6s · $0.073 |
+| 6 | 30.3s · $0.072 | 25.1s · $0.079 | 19.8s · $0.084 |
+| 8 | 24.0s · $0.069 | 31.8s · $0.111 | 31.0s · $0.089 |
+| 9 | 19.4s · $0.072 | 25.5s · $0.082 | 24.9s · $0.076 |
+| 10 | 18.3s · $0.077 | 22.3s · $0.083 | 29.3s · $0.086 |
+| **Median** | **24.6s** | 25.3s | **25.0s** |
+| **Mean** | 24.5s · $0.073 | 26.4s · $0.087 | 25.6s · $0.083 |
+
+Times are the trace's server-side totals (the Oct 21 table below used the driver's clock, a few tenths higher).
+
+**Findings:**
+- **Speed is level with main, not better.** The branch is faster in 3 of 6 cases and slower in 3. It's well ahead of the first structured-output run (mean 42.2s), but the condition set for merging, beating main, isn't met.
+- **The selection call's thinking sets the time.** It ran 10.8–20.4s, tracking its thinking (638–1,560 tokens). Cases 8 and 10 thought the most (1,406 and 1,560) and were the slowest. Main's single final call varied just as much (13.9–24.3s), so one run per case can't separate a 1–2s change from run-to-run noise.
+- **Streaming saved about 1s.** The model thinks first, then writes all three picks within its last ~2s, about 1s apart. The last card finished 3.9–5.1s after the selection ended (4.8s without streaming).
+- **Cache works:** subjects already fetched by an earlier request returned in 8–12ms (in case 6, all but one).
+- **Mood fix works:** distinct moods in all 6 cases (e.g. case 10: eerie, haunting, chilling).
+- **Hardcover deadline worked live:** in case 1 Hardcover's connection hung for 10s; the request went on without it at 5s and returned picks.
+- **Output:** 18 of 18 picks grounded on the first attempt; responses 2.5–2.9 KB. The shortening call never fired. Catalog descriptions reached 16 of 18 card writers.
+- **Case 8 picked Izzo's *Garlic, Mint & Sweet Basil* again** (the essay collection from the Sept 23 baseline). The description check caught it and rewrote `why` and `angleText` as criticism, adding 3.6s. The hook still calls it "weary noir", since the check doesn't read the hook. The pick is a poor fit for a reader who wants to inhabit a place; this is open question 8.6 (replace or re-describe).
+
+Traces: `scratchpad/traces/*stream1022*` (cases 1, 5, 6; the 8, 9, 10 files under that tag are the spend-limit failures) and `*stream1022b*` (cases 8, 9, 10); main is `*before1021*` and the card split is `*speed1021*` (local, not committed).
+
+---
+
+## 2026-10-21 — Table size: does a smaller table make selection faster?
+
+**Question:** the selection call reads about 400 books. Does showing it fewer make it think less, and what does that do to the picks? Each case made one search and one fetch of every list, then built three tables from those same lists, with one selection call per table. A (control) is each Open Library subject list's top 100, as today. B is a random 40 of each top 100. C is a random 30 of the top 100 plus a random 20 of results 101–200. Free-text results and the Hardcover pool were the same in all three. Cards weren't written. **Spend: $0.82.**
+
+| | A: top 100 (today) | B: random 40 | C: 30 + 20 deeper |
+|---|---|---|---|
+| Table size (median books) | 418 | 211 | 257 |
+| Selection thinking (median, range) | 1,019 (491–1,603) | 826 (488–982) | 1,064 (612–2,165) |
+| Selection call | 14.4s | 12.4s | 15.1s |
+| Estimated total (median) | 24.8s | 22.4s | 26.2s |
+| Grounded | 6/6 | 6/6 | 6/6 |
+| Canon picks (in 4+ of the six A tables) | 5/18 | 6/18 | 5/18 |
+
+The estimated total is a sum of measured parts plus the last run's median lookup and card times, not a timed request.
+
+**Findings:**
+- **Halving the table saved about 2s** and removed the slow tail of thinking. Thinking tracks table size only loosely.
+- **Deeper pages weren't faster.** C also needs more Open Library calls (a median 0.6s more; one timed out at 5s and was skipped).
+- **Pick popularity barely moved** in any version. The selector picks about the same mix from whatever it's shown.
+- **C reached books today's table never shows** (5 of 18 picks, e.g. *Felicia's Journey*, *This House of Grief*), and **won Grim's blind read 4 of 6.**
+- **Outcome:** the table keeps its full breadth (decision 6.12). Deeper pages are a quality experiment for later; speed comes from elsewhere.
+
+Driver output: `scratchpad/experiments/2026-10-21-table-sample/` (local, not committed).
+
+---
+
+## 2026-10-21 — Fix PR 1: structured engine output (cases 1, 5, 6, 8, 9, 10)
+
+**Change:** the final call is held to a JSON schema (structured outputs), and the response carries only the spec §4b picks. The prompt asks for `hook`, `why`, `angleHeading`, `angleText`, `mood`, cleaned English `title`/`author`, and the pool strings for grounding. `nonObvious` is gone. Same table-setting, grounding check, pick lookup and description check. **Spend: $1.23** ($0.44 before, $0.68 first after-run, $0.11 case 8 rerun, under $0.01 for shortening probes). One run each; not scored against the rubric.
+
+| Case | Before: status · time · KB sent · cost | After: status · time · KB sent · cost |
+|---|---|---|
+| 1 | 200 · 30.4s · 9.69 · $0.083 | 200 · 38.2s · 2.53 · $0.089 |
+| 5 | 200 · 25.2s · 8.07 · $0.062 | 200 · 37.0s · 2.63 · $0.092 |
+| 6 | 200 · 30.3s · 7.48 · $0.072 | 200 · 29.8s · 2.82 · $0.084 |
+| 8 | 200 · 24.0s · 7.33 · $0.069 | 200 · 88.6s · 2.62 · $0.106 (rerun) |
+| 9 | 200 · 19.4s · 6.57 · $0.072 | 200 · 32.7s · 2.71 · $0.076 |
+| 10 | 200 · 18.3s · 6.31 · $0.077 | 200 · 26.6s · 2.58 · $0.080 |
+| **Mean** | 24.6s · 7.58 KB · $0.072 | 42.2s · 2.65 KB · $0.088 |
+
+**Findings:**
+- **Output:** 6 of 6 parse; no thinking, raw model text or code fences in any response (before: thinking in 6 of 6, fences in 5 of 6). About 65% less sent to the browser.
+- **Grounding:** all 18 picks grounded on the first attempt.
+- **Length limits:** the first after-run reran on overflow at ceilings of 110/40. Case 8 broke them on all 3 attempts by 1–6 characters (hook 113, 116; angleHeading 41, 42) and returned a 502. Ceilings were widened to 120/45, and overflow now gets a shortening call instead of a rerun (decision 8.8). On the rerun, case 8 passed on the first attempt with no field over a ceiling. **The shortening call fired 0 times in the live runs.** Across all 24 picks written, hooks ran 74–116 characters and angleHeadings 22–42; no mood needed trimming.
+- **Shortening probe:** a direct call on case 8's real over-target text (Haiku 4.5, ~$0.0015 a call, 2.7–3.5s). It cut the 113-character hook to 82 and the 42-character heading to 35. A third, rejected only for adding "with", led to letting connecting words through. Three forced stress cases (2.5× over) were kept as originals, as designed. One cut shifted meaning slightly ("not hard-boiled cliche" → "not hard-boiled"); code can't catch that.
+- **Slower and a little dearer:** passing cases are about 8s slower (+$0.01). The final call writes more: about 1,900–2,600 output tokens against 1,200–2,100 before, for nine fields instead of four. Case 8's 88.6s also includes one Open Library search that took 30.7s.
+- **Pick lookup:** every pick with a catalog description got it (18 of 18 before; 17 of 18 after, the miss being *Black Wings Has My Angel*, which has none).
+- **Display titles:** case 1's Обломов-style issue didn't come up this run. Case 8 returned "Satantango" for *Sátántangó*: accents dropped from a title whose English edition keeps them.
+
+Traces and driver output: `scratchpad/traces/*before1021*`, `*after1021*`, `*after2-1021*` (local, not committed).
+
+---
+
 ## 2026-10-20 — Run 3: canon dampening ± one discovery slot
 
 **Question:** with no AI suggestions, does today's catalog table give more intriguing picks if code dampens the canon (D1), or dampens it and requires 1 of 3 picks from a "deeper shelf" (D2)? Deeper = under 20 Open Library editions and under 250 Hardcover readers, using counts the engine already fetches. Same six cases, one run each. D1 and D2 shared one table per case and were compared with run 1's arm A. Branch `experiment/table-setting`; live engine unchanged. **Spend: $1.36**, plus $0.55 for a stricter version (2 of 3 picks and both reserves from the deeper shelf) that was stopped after three cases. Those results are kept separately and not compared.

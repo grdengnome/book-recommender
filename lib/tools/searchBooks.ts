@@ -50,6 +50,19 @@ const OPEN_LIBRARY_SUBJECTS_URL = "https://openlibrary.org/subjects";
 const USER_AGENT = "book-recommender/0.1 (https://github.com/grdengnome/book-recommender)";
 const RESULTS_PER_CALL = 100;
 
+// Speed (fix PR 1, 2026-10-21): no lookup waits longer than this. Across 127 traced lookups
+// p95 was 3.0s, but one took 10.0s and one 30.7s, and the slowest lookup holds up the
+// whole request. A timed-out lookup is reported as failed and contributes no books, like
+// any other failed lookup; the rest of the call's lookups still count.
+const LOOKUP_TIMEOUT_MS = 5000;
+
+// Speed (fix PR 1, 2026-10-21): subject lists are cached for 24h in Next's Data Cache
+// (fetch `next.revalidate`; this app doesn't use Cache Components). They're ordered by
+// edition count and change slowly, and the same subjects recur across readers: over the
+// search log (Aug 20 – Oct 21), 56% of subject lookups repeated one from a different eval
+// case within 24h. Free-text search isn't cached; its queries rarely repeat.
+const SUBJECT_CACHE_SECONDS = 24 * 60 * 60;
+
 export const searchBooksToolDefinition = {
   name: "search_books",
   description:
@@ -113,6 +126,13 @@ export interface SearchBooksInput {
   subjects: string[];
 }
 
+function lookupError(err: unknown): string {
+  if (err instanceof Error && (err.name === "TimeoutError" || err.name === "AbortError")) {
+    return `timeout after ${LOOKUP_TIMEOUT_MS}ms`;
+  }
+  return err instanceof Error ? err.message : String(err);
+}
+
 async function fetchSearchResults(query: string, report?: LookupReporter): Promise<RawCandidate[]> {
   const url = new URL(OPEN_LIBRARY_SEARCH_URL);
   url.searchParams.set("q", query);
@@ -123,7 +143,7 @@ async function fetchSearchResults(query: string, report?: LookupReporter): Promi
     report?.({ lookup: "search", ms: Math.round(performance.now() - start), ...r });
 
   try {
-    const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
+    const res = await fetch(url, { headers: { "User-Agent": USER_AGENT }, signal: AbortSignal.timeout(LOOKUP_TIMEOUT_MS) });
     if (!res.ok) {
       done({ status: "http_error", httpStatus: res.status, rawCount: 0, results: [] });
       return [];
@@ -150,7 +170,7 @@ async function fetchSearchResults(query: string, report?: LookupReporter): Promi
     done({ status: "ok", httpStatus: res.status, rawCount: docs.length, results });
     return results;
   } catch (err) {
-    done({ status: "failed", error: err instanceof Error ? err.message : String(err), rawCount: 0, results: [] });
+    done({ status: "failed", error: lookupError(err), rawCount: 0, results: [] });
     return [];
   }
 }
@@ -164,7 +184,11 @@ async function fetchSubjectResults(subject: string, report?: LookupReporter): Pr
     report?.({ lookup: `subject:${slug}`, ms: Math.round(performance.now() - start), ...r });
 
   try {
-    const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
+    const res = await fetch(url, {
+      headers: { "User-Agent": USER_AGENT },
+      signal: AbortSignal.timeout(LOOKUP_TIMEOUT_MS),
+      next: { revalidate: SUBJECT_CACHE_SECONDS },
+    });
     if (!res.ok) {
       done({ status: "http_error", httpStatus: res.status, rawCount: 0, results: [] });
       return [];
@@ -190,7 +214,7 @@ async function fetchSubjectResults(subject: string, report?: LookupReporter): Pr
     done({ status: "ok", httpStatus: res.status, rawCount: works.length, results });
     return results;
   } catch (err) {
-    done({ status: "failed", error: err instanceof Error ? err.message : String(err), rawCount: 0, results: [] });
+    done({ status: "failed", error: lookupError(err), rawCount: 0, results: [] });
     return [];
   }
 }

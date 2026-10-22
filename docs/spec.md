@@ -106,11 +106,11 @@ The contract between the engine and the screens. One format for every pick, whic
 - No year → hide the year chip.
 
 **Today vs. this contract** (from `route.ts` and the Oct 17 traces; the build to-do list):
-- **High priority:** the response sends the full model message (`raw`, including thinking) to the client. It must stop at the server.
-- The response is `{ recommendations, raw }`. `recommendations` is the model's text as a string, not parsed objects: wrapped in a ```` ```json ```` fence in 4 of the 6 Oct 17 traces (13 of 36 earlier saved runs).
+- ~~**High priority:** the response sends the full model message (`raw`, including thinking) to the client.~~ Done in fix PR 1 (Oct 21, decision 8.7): the response is `{ picks }` or `{ error: { code, message } }`, and nothing else leaves the server.
+- ~~The response is `{ recommendations, raw }`, model text that's often fenced.~~ Done in fix PR 1: the final call is held to a JSON schema (structured outputs) and checked in code (decision 8.8 for lengths).
 - Exactly 3 picks; no reserves.
 - No stage events: one JSON response at the end.
-- Fields today: `title`, `author`, `why`, `nonObvious`. Everything else in the table is missing, and `nonObvious` has no slot in this contract.
+- Fields today (fix PR 1): `title` and `author` (cleaned English, written by the final step), `hook`, `why`, `angleHeading`, `angleText`, `mood`, and `format` ("paperback" fallback). Every other field is `null`. `nonObvious` is gone (decision 8.9).
 - Title and author are copied exactly from the pool, so catalog noise reaches the screen: case 1 returned "Обломов" by "Ива́н Алекса́ндрович Гончаро́в" (no English title, untransliterated, stress marks). The engine must supply an English `title` for every pick.
 - The pick lookup (stage G) fetches only descriptions and subjects (plus Hardcover genres and moods), with no year, pages, format, cover or ISBN, and none of it is returned to the client.
 - Catalog descriptions are raw blurbs (e.g. *Ladder of Years*: "A NEW YORK TIMES NOTABLE BOOKBALTIMORE WOMAN DISAPPEARS…"), so `story` has to be written, not passed through.

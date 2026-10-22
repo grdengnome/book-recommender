@@ -84,8 +84,9 @@ for (const c of RUN_CASES) {
     attemptCount: attempts.length,
     attempts,
     finalOutcome: status === 200 ? "returned" : status === 502 ? "clean-502" : "error",
-    recommendations: status === 200 ? body.recommendations : null,
-    finalRoundUsage: status === 200 ? body?.raw?.usage ?? null : null, // last API round only, NOT a per-request total
+    // Structured picks since fix PR 1 (2026-10-21). The route no longer sends the raw model
+    // message, so token usage comes from the ENGINE_TRACE=1 trace instead.
+    picks: status === 200 ? body.picks : null,
     errorBody: status === 200 ? null : body ?? null,
     logLines,
   };
