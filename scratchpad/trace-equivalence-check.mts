@@ -103,13 +103,21 @@ function cannedHardcover(body: { query: string; variables: Record<string, unknow
 // A streamed reply (the search loop streams since fix PR 1): the same message as server-sent
 // events, text and tool input split into small deltas so the route's pick scanner and
 // message rebuild are exercised.
-function sse(message: any): Response {
-  const events: unknown[] = [{ type: "message_start", message: { ...message, content: [], stop_reason: null, usage: { input_tokens: message.usage.input_tokens } } }];
+// The canned reply's shape, as far as sse() reads it.
+interface CannedBlock { type: string; text?: string; id?: string; name?: string; input?: unknown }
+interface CannedMessage {
+  id: string; type: string; role: string; model: unknown; content: CannedBlock[]; stop_reason: string;
+  usage: { input_tokens: number; output_tokens: number; output_tokens_details: unknown };
+}
+type SseEvent = { type: string } & Record<string, unknown>;
+
+function sse(message: CannedMessage): Response {
+  const events: SseEvent[] = [{ type: "message_start", message: { ...message, content: [], stop_reason: null, usage: { input_tokens: message.usage.input_tokens } } }];
   const chunks = (str: string) => str.match(/[\s\S]{1,17}/g) ?? [];
-  message.content.forEach((block: any, index: number) => {
+  message.content.forEach((block, index) => {
     if (block.type === "text") {
       events.push({ type: "content_block_start", index, content_block: { type: "text", text: "" } });
-      for (const c of chunks(block.text)) events.push({ type: "content_block_delta", index, delta: { type: "text_delta", text: c } });
+      for (const c of chunks(block.text ?? "")) events.push({ type: "content_block_delta", index, delta: { type: "text_delta", text: c } });
     } else if (block.type === "tool_use") {
       events.push({ type: "content_block_start", index, content_block: { type: "tool_use", id: block.id, name: block.name, input: {} } });
       for (const c of chunks(JSON.stringify(block.input))) events.push({ type: "content_block_delta", index, delta: { type: "input_json_delta", partial_json: c } });
@@ -118,13 +126,13 @@ function sse(message: any): Response {
   });
   events.push({ type: "message_delta", delta: { stop_reason: message.stop_reason }, usage: { output_tokens: message.usage.output_tokens, output_tokens_details: message.usage.output_tokens_details } });
   events.push({ type: "message_stop" });
-  const text = events.map((e: any) => `event: ${e.type}\ndata: ${JSON.stringify(e)}\n\n`).join("");
+  const text = events.map((e) => `event: ${e.type}\ndata: ${JSON.stringify(e)}\n\n`).join("");
   return new Response(text, { status: 200, headers: { "content-type": "text/event-stream" } });
 }
 
 function cannedAnthropic(body: any): Response {
   const usage = { input_tokens: Math.ceil(JSON.stringify(body).length / 4), output_tokens: 400, output_tokens_details: { thinking_tokens: 150 } };
-  const reply = (content: unknown[], stop_reason: string) =>
+  const reply = (content: CannedBlock[], stop_reason: string) =>
     body.stream
       ? sse({ id: "msg_offline", type: "message", role: "assistant", model: body.model, content, stop_reason, usage })
       : json({ id: "msg_offline", type: "message", role: "assistant", model: body.model, content, stop_reason, usage });
