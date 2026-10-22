@@ -1,6 +1,6 @@
 # Decision Log
 
-*Covers decisions through the v0 engine, v0 product planning, and the start of the build (October 21, 2026). Further build decisions will be added as they're made.*
+*Covers decisions through the v0 engine, v0 product planning, and the start of the build (October 22, 2026). Further build decisions will be added as they're made.*
 
 The product and architecture decisions behind this recommender, and the paths I rejected. The [progress log](./progress-log.md) is the session-by-session diary; this file is the story told by decision. Each entry gives the decision and why, with a link to the full detail.
 
@@ -295,6 +295,14 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 **Decision:** Today's engine is the current version, not the final one. Every change is measured with the trace, tested blind against the current version on the eval set, and kept only if it wins. The experiment scripts on `experiment/table-setting` can be reused for this. Once the engine is live, real-reader data drives what to try next: 👍/👎, "Find this book" taps, already-read, fail-path use and hit rate by source. Speed and output quality come first, then boosting books that land and retesting AI suggestions or new sources.
 **Why:** Run 3 showed that ideas which sound better don't reliably beat today's engine, so a change has to prove itself. Real readers are the only test of whether picks actually land. ([progress log, Oct 20](./progress-log.md))
 
+### 6.11 Open Library subject lists are cached for 24 hours
+**Decision:** Subject-list fetches are cached for a day (Next's fetch cache, `next: { revalidate: 86400 }`). Free-text search isn't cached. Every Open Library call times out at 5s, and the Hardcover pool is dropped if it isn't back within 5s, so a slow catalog can't hold up a request. Rejected: caching the Hardcover pool, and folding tag picking into the search-term call.
+**Why:** Subject lists are nearly static (6.1), and the same subjects come up again and again across readers. Cached subjects came back in 8–12ms. Hardcover is never what the request is waiting on, so caching it saves nothing, and merging the two calls saves about nothing while changing the tags and searches. ([eval log, Oct 22](./eval-log.md))
+
+### 6.12 The table keeps its full breadth
+**Decision:** The selector keeps seeing each subject list's top 100. Speed has to come from elsewhere. Adding deeper pages (results 101–200) is a quality experiment for later, not a speed lever.
+**Why:** Sampling 40 of each top 100 halved the table and saved only about 2s. The version that mixed in deeper pages wasn't faster, but it won the blind read 4 of 6. ([eval log, Oct 21](./eval-log.md))
+
 ---
 
 ## 7. Hardcover: using reader tags as a taste signal
@@ -378,6 +386,18 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 ### 8.9 `nonObvious` is dropped; the description check reads `why` + `angleText`
 **Decision:** The output has no `nonObvious` field. Its job (why this pick isn't the reflexive one) moves to the detail screen's angle section, `angleHeading` + `angleText`, and the description check now checks `why` + `angleText`.
 **Why:** The §4b contract has no slot for `nonObvious`, and the angle text carries the same claim to the reader, so it's the text that needs checking. ([eval log, Oct 21](./eval-log.md))
+
+### 8.10 Choosing and writing are separate calls
+**Decision:** The selection call picks three books from the pool, with thinking on, and returns only the pool strings, a one-line fit note and a mood for each. A second call per pick, with thinking off and the same model, writes the card text. It sees the reader's taste, the pick's catalog records, the fit note and the titles of the picks before it. The card writer can't change which book was picked.
+**Why:** Writing nine fields inside the thinking call made it about 8s slower than main (Oct 21). Writing to a brief doesn't need thinking, and with the catalog records in hand the card is grounded in what the book actually is. ([eval log, Oct 21 and Oct 22](./eval-log.md))
+
+### 8.11 The selection streams inside the server; the screen still gets all three picks
+**Decision:** The selection call is streamed. Each pick is grounded, looked up and sent to its card writer as soon as its JSON closes, while the other picks are still arriving. The response waits for all three picks, as before. Showing the first pick on screen before the others is parked as a product decision.
+**Why:** It overlaps the card writing with the rest of the selection. The gain was about 1s, not the 2–3s I expected, because the model thinks first and then writes all three picks in its last ~2s. ([eval log, Oct 22](./eval-log.md))
+
+### 8.12 The selection call assigns each pick a different mood
+**Decision:** `mood` is chosen by the selection call, which sees all three picks and is told to make the moods differ. Card writers don't choose it. A repeated mood is recorded in the trace and never fails a request.
+**Why:** Cards written separately repeated moods ("haunting" twice, Oct 21). The mood is the clue shown before each book is revealed, so a repeat wastes it. All 18 picks in the Oct 22 run got distinct moods within their case. ([eval log, Oct 22](./eval-log.md))
 
 ---
 

@@ -19,12 +19,12 @@ Don't build UI screens until the visual design pass is approved and you're expli
 
 One API route, `app/api/recommend/route.ts`: POST `{ tasteDescription }` → `{ picks }` (spec §4b contract; fields the engine can't fill yet are `null`). Errors are `{ error: { code, message } }`. Nothing else leaves the server: no model message, no thinking, no pool strings or IDs.
 
-- `lib/tools/`: the `search_books` tool (Open Library subjects + search) and the tool registry. The model calls it up to 3 rounds; the 4th call omits tools to force an answer.
-- `lib/hardcover/`: maps the taste description to reader tags (one model call), then fetches a tag-matched pool. Runs once per request, in parallel with the Open Library loop.
+- `lib/tools/`: the `search_books` tool (Open Library subjects + search) and the tool registry. The model calls it up to 3 rounds; the 4th call omits tools to force an answer. Subject lists are cached for 24h; every Open Library call times out at 5s.
+- `lib/hardcover/`: maps the taste description to reader tags (one model call), then fetches a tag-matched pool. Runs once per request, in parallel with the Open Library loop; dropped if not back within 5s.
 - `lib/merge/`: `mergeCandidatePools.ts` dedups, merges, and shuffles the pools; `pickGrounding.ts` checks every pick against the pools the model was shown.
-- `lib/output/`: the stage I contract. `pickSchema.ts` is the JSON schema the final call is held to (structured outputs, `output_config.format`) and the client `Pick` type; `validatePicks.ts` checks pick count, empty fields and length ceilings; `shortenFields.ts` repairs an over-limit field with one small Haiku call.
+- `lib/output/`: the stage I contract. Choosing and writing are separate calls. `pickSchema.ts` holds the selection schema (three pool picks, a fit note and a distinct mood each; structured outputs, `output_config.format`), the card schema and the client `Pick` type. `streamSelection.ts` streams the selection call so each pick's grounding, lookup and card start as soon as it arrives; the response still waits for all three. `writeCards.ts` writes one pick's card (thinking off) from its catalog records. `validatePicks.ts` checks pick count, empty fields and length ceilings; `shortenFields.ts` repairs an over-limit field with one small Haiku call.
 - `lib/verify/`: looks up each final pick in its catalog and checks flagged descriptions (Haiku), on `why` + `angleText`.
-- `lib/trace/`: debug-only request trace. With `ENGINE_TRACE=1` each request writes `scratchpad/traces/<time>-<tag>-<id>.json` (stages A–I, tokens, dollar cost). The trace object is passed down as an argument, is watch-only, and is ignored on Vercel. Don't let trace data feed back into the engine or the model's input; `scratchpad/trace-equivalence-check.mts` checks this.
+- `lib/trace/`: debug-only request trace. With `ENGINE_TRACE=1` each request writes `scratchpad/traces/<time>-<tag>-<id>.json` (stages A–I plus W for card writing, tokens, dollar cost). The trace object is passed down as an argument, is watch-only, and is ignored on Vercel. Don't let trace data feed back into the engine or the model's input; `scratchpad/trace-equivalence-check.mts` checks this.
 
 ## Rules the code enforces (don't weaken them)
 

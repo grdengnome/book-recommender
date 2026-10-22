@@ -1,12 +1,8 @@
 # scratchpad/
 
-## Where we stopped (Oct 22, fix PR 1, branch `fix/structured-output`, WIP commit, no PR yet)
+## Where we stopped (Oct 22, fix PR 1 open for review, not merged)
 
-1. **Blocked: dev workspace spend limit hit** during the timing run ("regain access on 2026-11-01 00:00 UTC"). Raise the limit in the Console or wait. Spend so far by the traces: $2.82 (cap set for this PR: $4).
-2. **Rerun cases 8, 9, 10 of the timing run** (cases 1, 5, 6 done: 25.1s / 23.6s / 19.8s; main's median 24.6s). The branch now has: streamed selection with per-pick lookup + card, selection-assigned distinct moods, 24h Open Library subject-list cache, Open Library 5s lookup timeout, Hardcover 5s deadline, prompt cache on the fixed instructions.
-3. **Then docs:** eval-log entry for the streaming/cache/mood run and the table-sampling experiment (D paused: C won the blind read 4 of 6); decisions for the cache, streaming, mood and card split; CLAUDE.md `lib/output/` line (writeCards, streamSelection); progress-log entry with the follow-ups (early table-setting; streaming results to the screen, parked as a product decision).
-4. **Then open the PR** with plain-language before/after numbers (don't merge).
-5. **Follow-up PR: early table-setting** (prepare / choose split), starting with the ~$0.50 blind test: prepare from backbone answers only vs today's full description, six cases.
+Timing run, docs and PR are done; see the progress log's Oct 22 entry for the Next list. The experiment drivers (`run-six.mjs`, `table-sample-experiment.mts`) were only in an Oct 21 temp folder and are gone; rebuild them from the eval log's Oct 21 entries if needed.
 
 ---
 
