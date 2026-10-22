@@ -13,17 +13,28 @@ import {
   checkPickGrounding,
   formatPickSources,
   recordSeenCandidates,
+  type CheckedPick,
   type GroundingResult,
   type SeenCandidates,
 } from "@/lib/merge/pickGrounding";
-import { formatPickMetadata, lookupPickMetadata } from "@/lib/verify/lookupPickMetadata";
+import { formatPickMetadata, lookupPickMetadata, type PickMetadata } from "@/lib/verify/lookupPickMetadata";
 import { checkPickDescriptions, formatPickCheck } from "@/lib/verify/checkPickDescriptions";
 import { createRequestTrace, type RequestTrace } from "@/lib/trace/requestTrace";
+import { SELECTION_FORMAT, toClientPick, type CardText, type ModelPick, type SelectedPick } from "@/lib/output/pickSchema";
+import {
+  duplicateMoods,
+  validateSelectedPick,
+  validateSelectionCount,
+  type LimitedField,
+  type OverLimitField,
+} from "@/lib/output/validatePicks";
+import { writeCard } from "@/lib/output/writeCards";
+import { createPickScanner, streamMessage } from "@/lib/output/streamSelection";
+import { formatShorten, shortenFields } from "@/lib/output/shortenFields";
 
 // Engine runs take up to ~2 min; 300s is the Vercel Hobby maximum.
 export const maxDuration = 300;
 
-const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
 const MODEL = "claude-sonnet-5";
 
 // Bounds the search_books retry loop (spec.md 5b leaves the retry judgment call
@@ -40,6 +51,10 @@ const MAX_TOOL_ROUNDS = 3;
 // than returning an ungrounded pick. Bounded so a persistent failure ends in a clean
 // error, never in an unverified answer. Deliberately no thin-pool recovery path beyond
 // this retry — that edge case is flagged for its own investigation, not designed here.
+// The same bound covers a selection that breaks the output contract (lib/output/
+// validatePicks.ts: pick count, empty fields), is cut off or refused, or whose cards can't
+// be written (lib/output/writeCards.ts). Length overflow is deliberately not a failure:
+// it's repaired after the cards are written (shortenFields below).
 const MAX_GENERATION_ATTEMPTS = 3;
 
 // Hardcover pre-fetch — spec.md 5b, architecture decided 2026-08-19 (docs/progress-log.md):
@@ -63,6 +78,7 @@ const MAX_GENERATION_ATTEMPTS = 3;
 // never break the actual request). Categorized rather than lumped into one bucket, since
 // "token misconfigured" and "Hardcover API had a bad day" point to different fixes.
 type HardcoverFailureCategory =
+  | "hardcover_timeout"
   | "missing_token"
   | "hardcover_api_error"
   | "empty_tag_mapping"
@@ -88,7 +104,9 @@ function logHardcoverFailure(
       detail:
         err instanceof Error
           ? err.message
-          : "mapTasteToHardcoverTags matched zero tags",
+          : category === "hardcover_timeout"
+            ? `pool not ready after ${HARDCOVER_DEADLINE_MS}ms`
+            : "mapTasteToHardcoverTags matched zero tags",
     };
     appendFileSync(HARDCOVER_FAILURE_LOG_PATH, JSON.stringify(entry) + "\n");
   } catch {
@@ -131,8 +149,40 @@ async function fetchHardcoverPool(
   }
 }
 
+// Speed (fix PR 1, 2026-10-21): the merge waits for the Hardcover pool, so a slow Hardcover
+// call held up the whole request (one of 12 traced runs took 10.1s; the median is ~1.2s).
+// Past this deadline from the start of the request, the engine goes on with Open Library
+// alone, the same path as any other Hardcover failure. The merge normally needs the pool at
+// ~6s, so a typical request never waits on this.
+const HARDCOVER_DEADLINE_MS = 5000;
+
+function withHardcoverDeadline(
+  pool: Promise<HardcoverBookCandidate[]>,
+  evalTag: string | null,
+  trace: RequestTrace,
+): Promise<HardcoverBookCandidate[]> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const deadline = new Promise<HardcoverBookCandidate[]>((resolve) => {
+    timer = setTimeout(() => {
+      console.error(`Hardcover pool not ready after ${HARDCOVER_DEADLINE_MS}ms, degrading to Open-Library-only`);
+      logHardcoverFailure(evalTag, "hardcover_timeout", null);
+      trace.add("B", { kind: "timeout", deadlineMs: HARDCOVER_DEADLINE_MS });
+      resolve([]);
+    }, HARDCOVER_DEADLINE_MS);
+  });
+  return Promise.race([pool.finally(() => clearTimeout(timer)), deadline]);
+}
+
 function errorText(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
+}
+
+// Error body for the screens (spec.md §4b): a stable code to pick the error state from, and
+// a plain message. Upstream detail (the Anthropic error, model text) stays in the server log
+// and the trace, never in the response.
+type ErrorCode = "misconfigured" | "bad_request" | "upstream_error" | "no_grounded_picks";
+function errorBody(code: ErrorCode, message: string) {
+  return { error: { code, message } };
 }
 
 // Every response after the engine starts goes out through here, so the debug trace records
@@ -153,36 +203,27 @@ Apply these rules to every recommendation:
 3. A pick fails on non-obviousness if it's the answer a well-read reader would already expect for this specific request — the one they'd land on after a five-minute search or find atop a "books like this" list. This has nothing to do with whether the book is decorated: a Booker winner can be a genuinely surprising, well-earned pick, and an award-free book can still be the most predictable possible answer. Before finalizing a pick, ask: would someone who already knows this territory shrug and say "well, obviously" — regardless of whether it happens to have won a prize?
 4. Multi-source, not single-source. Draw from many corners of literature — different decades, countries, presses, and traditions. Never lean on a single canon (mainstream or "counter-canon") as if it were the only source worth considering.
 
-You have access to a search_books tool, and you MUST call it before answering. All 3 recommendations MUST be selected from the candidate pools that search_books returned in this conversation. Do not recommend any book that is not present in a retrieved pool, under any circumstance — even if the pool is small, and even if you know of a better fit from your own knowledge. If a pool feels too narrow, call search_books again with different terms; never fill the gap from memory. Copy each pick's title and author exactly as they appear in the pool. Your final answer is checked in code against the retrieved pools, and any pick not found in them is rejected. The candidate list it returns is unordered — an accident of API response order, not a ranking — so never favor earlier entries over later ones. Restricting picks to the pool changes where candidates come from, not the judgment applied to them: still weigh every candidate against the taste-fit rules above.
+You have access to a search_books tool, and you MUST call it before answering. All 3 recommendations MUST be selected from the candidate pools that search_books returned in this conversation. Do not recommend any book that is not present in a retrieved pool, under any circumstance — even if the pool is small, and even if you know of a better fit from your own knowledge. If a pool feels too narrow, call search_books again with different terms; never fill the gap from memory. Copy each pick's title and author into "poolTitle" and "poolAuthor" exactly as they appear in the pool. Your final answer is checked in code against the retrieved pools, and any pick not found in them is rejected. The candidate list it returns is unordered — an accident of API response order, not a ranking — so never favor earlier entries over later ones. Restricting picks to the pool changes where candidates come from, not the judgment applied to them: still weigh every candidate against the taste-fit rules above.
 
 The user's taste description will typically include three categories of signal: an anchor (a book they loved), why it stuck with them, and their appetite (comfort vs. surprise) — these three are always present, though the exact wording of how each was asked may vary. It may also include mood, how much time/commitment they want, and specific turn-offs — genres or themes to avoid — when present. Treat a stated turn-off as a hard boundary, not a soft preference: never recommend against it. Focus on the substance of each answer, not the phrasing of the question that produced it. If the input is freeform or unlabeled, use your best judgment to identify these signals from context.
 
 Given this, return exactly 3 book recommendations.
 
 For each recommendation, include:
-- "title"
-- "author"
-- "why": a short reason tying the pick back to specifics in the user's stated taste (traceability)
-- "nonObvious": a one-line note on why this pick genuinely fits rather than being a reflexive/default choice. Don't state specific claims about a book's reception, fame, or obscurity unless you're confident they're accurate — if unsure, describe what makes the book fit rather than making a comparative claim about how well-known it is.
-
-Respond with ONLY a JSON array of 3 objects with those four keys — no prose before or after it.`;
+- "poolTitle" and "poolAuthor": copied exactly from the pool, as above.
+- "fitNote": one short sentence, under 25 words, on why this pick genuinely fits this reader's stated taste rather than being a reflexive/default choice. A writer turns it into the reader-facing text later, so make it specific. Don't state specific claims about a book's reception, fame, or obscurity unless you're confident they're accurate.
+- "mood": one word for the book's mood, shown to the reader as a clue before the book is revealed. Give each of the 3 picks a different mood word.`;
 
 export async function POST(request: NextRequest) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
-    return NextResponse.json(
-      { error: "ANTHROPIC_API_KEY is not set" },
-      { status: 500 },
-    );
+    return NextResponse.json(errorBody("misconfigured", "ANTHROPIC_API_KEY is not set"), { status: 500 });
   }
 
   const body = await request.json().catch(() => null);
   const tasteDescription = body?.tasteDescription;
   if (typeof tasteDescription !== "string" || !tasteDescription.trim()) {
-    return NextResponse.json(
-      { error: "tasteDescription (string) is required" },
-      { status: 400 },
-    );
+    return NextResponse.json(errorBody("bad_request", "tasteDescription (string) is required"), { status: 400 });
   }
 
   // TEMPORARY (query-tracing session, 2026-08-03): optional eval-case tag, only
@@ -198,7 +239,11 @@ export async function POST(request: NextRequest) {
 
   // Branch 2 (Hardcover) starts now, concurrently with branch 1 (the OL tool-use loop
   // below) — both start from tasteDescription and don't depend on each other's output.
-  const hardcoverPoolPromise = fetchHardcoverPool(tasteDescription, evalTag, trace);
+  const hardcoverPoolPromise = withHardcoverDeadline(
+    fetchHardcoverPool(tasteDescription, evalTag, trace),
+    evalTag,
+    trace,
+  );
 
   // Each attempt is a full fresh generation (new conversation, new search_books calls);
   // the Hardcover pre-fetch is shared since it depends only on tasteDescription.
@@ -207,71 +252,81 @@ export async function POST(request: NextRequest) {
     const generation = await generateOnce(apiKey, tasteDescription, hardcoverPoolPromise, attemptTrace);
     if (!generation.ok) return respond(trace, generation.body, generation.status);
 
-    const { grounding } = generation;
-    if (grounding.status === "grounded") {
+    if (generation.status === "ready") {
+      const { grounding, picks, pickMetadata, overLimit } = generation;
       console.log(
         `recommend: pick sources (attempt ${attempt}/${MAX_GENERATION_ATTEMPTS})\n${formatPickSources(grounding.picks)}`,
       );
 
-      // Pick description verification (feat/verify-pick-descriptions): look up each
-      // pick's catalog records (step 2), then one checker call compares the `why` /
-      // `nonObvious` text against them and rewrites any pick it contradicts (step 3).
-      // Neither step can fail the request: lookups cap at 5s each and never reject, and
-      // checkPickDescriptions returns the original text unchanged on any failure. Timed
-      // here, around both awaits, so the log shows the real latency verification adds.
-      // `raw` stays the unmodified model response; only `recommendations` can change.
-      const verifyStart = performance.now();
-      const pickMetadata = await lookupPickMetadata(grounding.picks);
-      const lookupMs = Math.round(performance.now() - verifyStart);
-      console.log(formatPickMetadata(pickMetadata, lookupMs));
-      attemptTrace.add("G", { kind: "result", ms: lookupMs, picks: pickMetadata });
+      // Length overflow (lib/output/shortenFields.ts): one small call shortens only the
+      // over-limit fields; on any failure the original text is kept.
+      const shortened = await shortenFields(apiKey, picks, overLimit, attemptTrace);
+      console.log(formatShorten(shortened));
+      attemptTrace.add("H", { kind: "shorten", ...shortened });
+
+      // Description check (feat/verify-pick-descriptions): one checker call compares the
+      // `why` / `angleText` text against the catalog records and rewrites any pick it
+      // contradicts. Never fails the request: it returns the original picks unchanged on
+      // any failure.
+      const checkStart = performance.now();
       const checked = await checkPickDescriptions(
         apiKey,
         tasteDescription,
-        generation.recommendations,
+        shortened.picks,
         pickMetadata,
         attemptTrace,
       );
-      const verifyMs = Math.round(performance.now() - verifyStart);
-      console.log(formatPickCheck(checked, lookupMs, verifyMs));
-      attemptTrace.add("H", { kind: "result", ...checked, lookupPlusCheckMs: verifyMs });
+      const checkMs = Math.round(performance.now() - checkStart);
+      console.log(formatPickCheck(checked, 0, checkMs));
+      attemptTrace.add("H", { kind: "result", ...checked, checkPlusOverheadMs: checkMs });
 
-      return respond(trace, {
-        recommendations: checked.recommendations,
-        raw: generation.data,
-      });
+      // Only the contract's fields leave the server: no model message, no thinking, no
+      // pool strings or catalog IDs.
+      return respond(trace, { picks: checked.picks.map(toClientPick) });
     }
 
-    const detail =
-      grounding.status === "unparseable"
-        ? "response could not be parsed into a pick list"
-        : `ungrounded picks:\n${formatPickSources(grounding.picks)}`;
     console.error(
-      `recommend: GROUNDING CHECK FAILED (attempt ${attempt}/${MAX_GENERATION_ATTEMPTS}) — ${detail}` +
+      `recommend: ATTEMPT REJECTED (attempt ${attempt}/${MAX_GENERATION_ATTEMPTS}) — ${generation.detail}` +
         (attempt < MAX_GENERATION_ATTEMPTS ? "\nrecommend: retrying" : ""),
     );
   }
 
   console.error(
-    `recommend: grounding check failed on all ${MAX_GENERATION_ATTEMPTS} attempts — returning error, no picks returned`,
+    `recommend: all ${MAX_GENERATION_ATTEMPTS} attempts rejected — returning error, no picks returned`,
   );
   return respond(
     trace,
-    {
-      error: "Could not produce recommendations grounded in the retrieved candidate pool",
-      attempts: MAX_GENERATION_ATTEMPTS,
-    },
+    errorBody("no_grounded_picks", "Could not produce recommendations grounded in the retrieved candidate pool"),
     502,
   );
 }
 
+// "rejected" = this attempt can't be used (selection cut off, breaks the output contract or
+// ungrounded, or a card couldn't be written); the caller re-runs the generation.
 type GenerationResult =
-  | { ok: true; data: unknown; recommendations: string; grounding: GroundingResult }
+  | {
+      ok: true;
+      status: "ready";
+      picks: ModelPick[];
+      grounding: GroundingResult;
+      pickMetadata: PickMetadata[];
+      overLimit: OverLimitField[];
+    }
+  | { ok: true; status: "rejected"; detail: string }
   | { ok: false; status: number; body: Record<string, unknown> };
 
-// One full generation: the OL tool-use loop (with Hardcover merged into each
-// search_books result) followed by the grounding check on the final answer. Returns the
-// Anthropic API error response as-is if a call fails — API failures are not retried here.
+// What happened to one pick between arriving in the selection stream and having its card.
+type PickOutcome =
+  | { ok: true; selected: SelectedPick; checked: CheckedPick; metadata: PickMetadata; card: CardText; overLimit: LimitedField[] }
+  | { ok: false; reason: string; checked?: CheckedPick };
+
+// One full generation: the OL tool-use loop (with Hardcover merged into each search_books
+// result), whose final answer is the selection. The selection is streamed: as each pick's
+// object completes, that pick is checked (contract, grounding), looked up in its catalog and
+// its card written, while the rest of the selection is still arriving. Once the stream ends,
+// the full answer is checked (finished, exactly 3 picks) and every pick's outcome collected.
+// An Anthropic API failure ends the request — API failures are not retried here — with a
+// generic error body; the detail goes to the server log and the trace.
 async function generateOnce(
   apiKey: string,
   tasteDescription: string,
@@ -287,47 +342,66 @@ async function generateOnce(
   const seenCandidates: SeenCandidates = new Map();
 
   let data;
+  let outcomes: Promise<PickOutcome>[] = [];
   for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
     const allowToolUse = round < MAX_TOOL_ROUNDS;
     const roundTrace = trace.with({ round });
 
     const requestBody = {
       model: MODEL,
-      max_tokens: 4000,
-      system: SYSTEM_PROMPT,
+      max_tokens: 8000,
+      // Cache breakpoint on the fixed instructions (tools render first, then system), ~3k
+      // tokens, above Sonnet 5's 1,024-token minimum. Later rounds and later requests within
+      // the cache TTL read this prefix from cache instead of re-processing it.
+      system: [{ type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } }],
       messages,
+      // On every round, not just the last: the model usually answers right after its first
+      // searches, while tools are still offered. Constrains only the final text; tool
+      // calls are unaffected.
+      output_config: { format: SELECTION_FORMAT },
       ...(allowToolUse ? { tools: toolDefinitions } : {}),
+      // Streamed so each pick's lookup and card can start as soon as it arrives.
+      stream: true,
     };
-    const callStart = performance.now();
-    const anthropicResponse = await fetch(ANTHROPIC_API_URL, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify(requestBody),
-    });
 
-    data = await anthropicResponse.json();
+    // Picks that arrive in this round's text start their pipeline at once. A round that
+    // ends in tool_use instead discards them (none observed: the text is the final answer).
+    const roundOutcomes: Promise<PickOutcome>[] = [];
+    const callStart = performance.now();
+    const arrivals: number[] = [];
+    const arrivedTitles: string[] = [];
+    const scan = createPickScanner((raw, index) => {
+      arrivals.push(Math.round(performance.now() - callStart));
+      const earlierTitles = arrivedTitles.slice();
+      const title = (raw as { poolTitle?: unknown } | null)?.poolTitle;
+      if (typeof title === "string" && title.trim()) arrivedTitles.push(title.trim());
+      roundOutcomes.push(runPick(apiKey, tasteDescription, raw, index, seenCandidates, earlierTitles, roundTrace));
+    });
+    const streamed = await streamMessage(apiKey, requestBody, scan);
+    data = streamed.data;
     // Snapshotted now, before `messages` grows: this is exactly what this call sent.
     roundTrace.modelCall("C", {
       model: MODEL,
       request: requestBody,
       response: data,
-      httpStatus: anthropicResponse.status,
+      httpStatus: streamed.status,
       ms: Math.round(performance.now() - callStart),
     });
+    if (arrivals.length) roundTrace.add("C", { kind: "pick_arrivals", msFromCallStart: arrivals });
 
-    if (!anthropicResponse.ok) {
+    if (!streamed.ok) {
+      console.error(`recommend: Anthropic API error ${streamed.status}: ${JSON.stringify(data?.error ?? data).slice(0, 300)}`);
       return {
         ok: false,
-        status: anthropicResponse.status,
-        body: { error: "Anthropic API error", detail: data },
+        status: 502,
+        body: errorBody("upstream_error", "The recommendation service is unavailable. Please try again."),
       };
     }
 
-    if (data.stop_reason !== "tool_use") break;
+    if (data.stop_reason !== "tool_use") {
+      outcomes = roundOutcomes;
+      break;
+    }
 
     const toolUseBlocks = (
       data.content as Array<{ type: string; id: string; name: string; input: unknown }>
@@ -369,23 +443,87 @@ async function generateOnce(
     messages.push({ role: "user", content: toolResults });
   }
 
+  // Every pick pipeline settles (they never reject), so nothing is left running unobserved.
+  const settled = await Promise.all(outcomes);
+
+  // Structured outputs only guarantee the schema on a finished answer: a cut-off or refused
+  // one is rejected.
+  if (data?.stop_reason !== "end_turn") {
+    const detail = `final call stopped with stop_reason=${data?.stop_reason}`;
+    trace.add("F", { kind: "rejected", reason: detail, candidatesShown: seenCandidates.size });
+    return { ok: true, status: "rejected", detail };
+  }
+
   const textBlock = data?.content?.find(
     (block: { type: string }) => block.type === "text",
   );
-  const recommendations = textBlock?.text ?? "";
-  const grounding = checkPickGrounding(recommendations, seenCandidates);
+  const answerText = String(textBlock?.text ?? "");
+  const countProblem = validateSelectionCount(answerText);
+  const checkedPicks = settled.map((o) => o.checked).filter((c): c is CheckedPick => !!c);
+  const grounding: GroundingResult = {
+    status: checkedPicks.length === settled.length && checkedPicks.every((c) => c.sources.length > 0) ? "grounded" : "ungrounded",
+    picks: checkedPicks,
+  };
+  const ready = settled.filter((o): o is Extract<PickOutcome, { ok: true }> => o.ok);
+  const selected = ready.map((o) => o.selected);
   trace.add("F", {
     kind: "result",
     status: grounding.status,
     candidatesShown: seenCandidates.size,
-    answerText: recommendations,
-    picks: grounding.status === "unparseable" ? [] : grounding.picks,
+    answerText,
+    picks: grounding.picks,
+    duplicateMoods: duplicateMoods(selected),
   });
+
+  const problems = [
+    ...(countProblem ? [countProblem] : []),
+    ...settled.map((o, i) => (o.ok ? "" : `pick ${i + 1}: ${o.reason}`)).filter(Boolean),
+  ];
+  if (problems.length) return { ok: true, status: "rejected", detail: problems.join("; ") };
 
   return {
     ok: true,
-    data,
-    recommendations,
+    status: "ready",
+    picks: ready.map((o) => ({ ...o.selected, ...o.card })),
     grounding,
+    pickMetadata: ready.map((o) => o.metadata),
+    overLimit: ready.flatMap((o, index) => o.overLimit.map((field) => ({ index, field, length: o.card[field].length }))),
   };
+}
+
+// One pick's pipeline, started the moment its object arrives in the selection stream:
+// contract check, grounding, catalog lookup, card. Never rejects; a failure is an outcome.
+// `earlierTitles` are the pool titles of picks that arrived before this one, taken straight
+// from the stream (never from their cards, so no card waits on another), so this card's
+// angle can differ from theirs.
+async function runPick(
+  apiKey: string,
+  tasteDescription: string,
+  raw: unknown,
+  index: number,
+  seen: SeenCandidates,
+  earlierTitles: string[],
+  trace: RequestTrace,
+): Promise<PickOutcome> {
+  const pickTrace = trace.with({ pick: index });
+  try {
+    const v = validateSelectedPick(raw);
+    if (v.status === "invalid") return { ok: false, reason: `breaks the output contract: ${v.problems.join("; ")}` };
+    const selected = v.pick;
+    const [checked] = checkPickGrounding([{ title: selected.poolTitle, author: selected.poolAuthor }], seen).picks;
+    if (checked.sources.length === 0) return { ok: false, reason: "ungrounded", checked };
+
+    const lookupStart = performance.now();
+    const [metadata] = await lookupPickMetadata([checked]);
+    const lookupMs = Math.round(performance.now() - lookupStart);
+    console.log(formatPickMetadata([metadata], lookupMs));
+    pickTrace.add("G", { kind: "result", ms: lookupMs, picks: [metadata] });
+
+    const card = await writeCard(apiKey, tasteDescription, selected, checked, metadata, earlierTitles, pickTrace);
+    pickTrace.add("W", { kind: "result", ...card });
+    if (!card.ok) return { ok: false, reason: `card writing failed: ${card.error}`, checked };
+    return { ok: true, selected, checked, metadata, card: card.card, overLimit: card.overLimit };
+  } catch (err) {
+    return { ok: false, reason: `pick pipeline failed: ${errorText(err)}` };
+  }
 }

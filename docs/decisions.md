@@ -1,6 +1,6 @@
 # Decision Log
 
-*Covers decisions through the v0 engine, v0 product planning, and the start of the build (October 20, 2026). Further build decisions will be added as they're made.*
+*Covers decisions through the v0 engine, v0 product planning, and the start of the build (October 21, 2026). Further build decisions will be added as they're made.*
 
 The product and architecture decisions behind this recommender, and the paths I rejected. The [progress log](./progress-log.md) is the session-by-session diary; this file is the story told by decision. Each entry gives the decision and why, with a link to the full detail.
 
@@ -366,6 +366,18 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 ### 8.6 Deferred: replace or re-describe?
 **Decision:** Undecided.
 **Why:** An honest rewrite can reveal a pick no longer fits the request. Worth a deliberate call, not a rushed one. ([eval log, Sep 26](./eval-log.md))
+
+### 8.7 The API enforces the output shape, and only the contract leaves the server
+**Decision:** The final call is held to a JSON schema with structured outputs (`output_config.format`), on every round. The response is `{ picks }` in the spec §4b shape, or `{ error: { code, message } }`. The model message, thinking, pool strings and catalog IDs stay on the server. The model writes the cleaned English `title`/`author` for display and copies the pool's strings separately (`poolTitle`/`poolAuthor`) for the grounding check. Rejected: a tool the model must call. The API won't force a tool while thinking is on, and a tool the model may skip guarantees nothing.
+**Why:** The client was receiving the full model message, including thinking, and a text answer fenced in ```` ```json ```` in 4 of 6 Oct 17 traces. ([eval log, Oct 21](./eval-log.md))
+
+### 8.8 Length overflow never fails a request
+**Decision:** The prompt states target lengths, and code allows slack (hook ≤ 120, angleHeading ≤ 45, why and angleText ≤ 350). An over-limit field gets one small Haiku call that shortens only that field. The result is used only if it fits and adds no new word (checked in code); otherwise the original is kept and logged. `mood` keeps its first word. Full reruns stay for real failures only: ungrounded picks, missing fields, refusals. Rejected: rerunning the final step on overflow, and trimming at a word boundary.
+**Why:** With rerun-on-overflow at 110/40, case 8 failed all 3 attempts on overflows of 1–6 characters and returned a 502. ([eval log, Oct 21](./eval-log.md))
+
+### 8.9 `nonObvious` is dropped; the description check reads `why` + `angleText`
+**Decision:** The output has no `nonObvious` field. Its job (why this pick isn't the reflexive one) moves to the detail screen's angle section, `angleHeading` + `angleText`, and the description check now checks `why` + `angleText`.
+**Why:** The §4b contract has no slot for `nonObvious`, and the angle text carries the same claim to the reader, so it's the text that needs checking. ([eval log, Oct 21](./eval-log.md))
 
 ---
 

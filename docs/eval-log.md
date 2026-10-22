@@ -4,6 +4,33 @@ Running log of quality findings, known limitations, and decisions made while eva
 
 ---
 
+## 2026-10-21 — Fix PR 1: structured engine output (cases 1, 5, 6, 8, 9, 10)
+
+**Change:** the final call is held to a JSON schema (structured outputs), and the response carries only the spec §4b picks. The prompt asks for `hook`, `why`, `angleHeading`, `angleText`, `mood`, cleaned English `title`/`author`, and the pool strings for grounding. `nonObvious` is gone. Same table-setting, grounding check, pick lookup and description check. **Spend: $1.23** ($0.44 before, $0.68 first after-run, $0.11 case 8 rerun, under $0.01 for shortening probes). One run each; not scored against the rubric.
+
+| Case | Before: status · time · KB sent · cost | After: status · time · KB sent · cost |
+|---|---|---|
+| 1 | 200 · 30.4s · 9.69 · $0.083 | 200 · 38.2s · 2.53 · $0.089 |
+| 5 | 200 · 25.2s · 8.07 · $0.062 | 200 · 37.0s · 2.63 · $0.092 |
+| 6 | 200 · 30.3s · 7.48 · $0.072 | 200 · 29.8s · 2.82 · $0.084 |
+| 8 | 200 · 24.0s · 7.33 · $0.069 | 200 · 88.6s · 2.62 · $0.106 (rerun) |
+| 9 | 200 · 19.4s · 6.57 · $0.072 | 200 · 32.7s · 2.71 · $0.076 |
+| 10 | 200 · 18.3s · 6.31 · $0.077 | 200 · 26.6s · 2.58 · $0.080 |
+| **Mean** | 24.6s · 7.58 KB · $0.072 | 42.2s · 2.65 KB · $0.088 |
+
+**Findings:**
+- **Output:** 6 of 6 parse; no thinking, raw model text or code fences in any response (before: thinking in 6 of 6, fences in 5 of 6). About 65% less sent to the browser.
+- **Grounding:** all 18 picks grounded on the first attempt.
+- **Length limits:** the first after-run reran on overflow at ceilings of 110/40. Case 8 broke them on all 3 attempts by 1–6 characters (hook 113, 116; angleHeading 41, 42) and returned a 502. Ceilings were widened to 120/45, and overflow now gets a shortening call instead of a rerun (decision 8.8). On the rerun, case 8 passed on the first attempt with no field over a ceiling. **The shortening call fired 0 times in the live runs.** Across all 24 picks written, hooks ran 74–116 characters and angleHeadings 22–42; no mood needed trimming.
+- **Shortening probe:** a direct call on case 8's real over-target text (Haiku 4.5, ~$0.0015 a call, 2.7–3.5s). It cut the 113-character hook to 82 and the 42-character heading to 35. A third, rejected only for adding "with", led to letting connecting words through. Three forced stress cases (2.5× over) were kept as originals, as designed. One cut shifted meaning slightly ("not hard-boiled cliche" → "not hard-boiled"); code can't catch that.
+- **Slower and a little dearer:** passing cases are about 8s slower (+$0.01). The final call writes more: about 1,900–2,600 output tokens against 1,200–2,100 before, for nine fields instead of four. Case 8's 88.6s also includes one Open Library search that took 30.7s.
+- **Pick lookup:** every pick with a catalog description got it (18 of 18 before; 17 of 18 after, the miss being *Black Wings Has My Angel*, which has none).
+- **Display titles:** case 1's Обломов-style issue didn't come up this run. Case 8 returned "Satantango" for *Sátántangó*: accents dropped from a title whose English edition keeps them.
+
+Traces and driver output: `scratchpad/traces/*before1021*`, `*after1021*`, `*after2-1021*` (local, not committed).
+
+---
+
 ## 2026-10-20 — Run 3: canon dampening ± one discovery slot
 
 **Question:** with no AI suggestions, does today's catalog table give more intriguing picks if code dampens the canon (D1), or dampens it and requires 1 of 3 picks from a "deeper shelf" (D2)? Deeper = under 20 Open Library editions and under 250 Hardcover readers, using counts the engine already fetches. Same six cases, one run each. D1 and D2 shared one table per case and were compared with run 1's arm A. Branch `experiment/table-setting`; live engine unchanged. **Spend: $1.36**, plus $0.55 for a stricter version (2 of 3 picks and both reserves from the deeper shelf) that was stopped after three cases. Those results are kept separately and not compared.

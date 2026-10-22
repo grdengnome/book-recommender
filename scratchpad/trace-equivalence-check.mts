@@ -9,7 +9,7 @@
 // directory, so the trace file and query-log.json writes don't touch the repo.
 //
 // Also checks: no file is written with tracing off, or on Vercel even with ENGINE_TRACE=1;
-// all nine stage keys are present; the model input the trace recorded equals what was sent;
+// all ten stage keys are present; the model input the trace recorded equals what was sent;
 // no key or header ends up in the file, and a leaked key value is redacted.
 //
 // Usage: node scratchpad/trace-equivalence-check.mts [copy-trace-to.json]
@@ -100,10 +100,34 @@ function cannedHardcover(body: { query: string; variables: Record<string, unknow
   return json({ errors: [{ message: "unexpected query" }] });
 }
 
+// A streamed reply (the search loop streams since fix PR 1): the same message as server-sent
+// events, text and tool input split into small deltas so the route's pick scanner and
+// message rebuild are exercised.
+function sse(message: any): Response {
+  const events: unknown[] = [{ type: "message_start", message: { ...message, content: [], stop_reason: null, usage: { input_tokens: message.usage.input_tokens } } }];
+  const chunks = (str: string) => str.match(/[\s\S]{1,17}/g) ?? [];
+  message.content.forEach((block: any, index: number) => {
+    if (block.type === "text") {
+      events.push({ type: "content_block_start", index, content_block: { type: "text", text: "" } });
+      for (const c of chunks(block.text)) events.push({ type: "content_block_delta", index, delta: { type: "text_delta", text: c } });
+    } else if (block.type === "tool_use") {
+      events.push({ type: "content_block_start", index, content_block: { type: "tool_use", id: block.id, name: block.name, input: {} } });
+      for (const c of chunks(JSON.stringify(block.input))) events.push({ type: "content_block_delta", index, delta: { type: "input_json_delta", partial_json: c } });
+    }
+    events.push({ type: "content_block_stop", index });
+  });
+  events.push({ type: "message_delta", delta: { stop_reason: message.stop_reason }, usage: { output_tokens: message.usage.output_tokens, output_tokens_details: message.usage.output_tokens_details } });
+  events.push({ type: "message_stop" });
+  const text = events.map((e: any) => `event: ${e.type}\ndata: ${JSON.stringify(e)}\n\n`).join("");
+  return new Response(text, { status: 200, headers: { "content-type": "text/event-stream" } });
+}
+
 function cannedAnthropic(body: any): Response {
   const usage = { input_tokens: Math.ceil(JSON.stringify(body).length / 4), output_tokens: 400, output_tokens_details: { thinking_tokens: 150 } };
   const reply = (content: unknown[], stop_reason: string) =>
-    json({ id: "msg_offline", type: "message", role: "assistant", model: body.model, content, stop_reason, usage });
+    body.stream
+      ? sse({ id: "msg_offline", type: "message", role: "assistant", model: body.model, content, stop_reason, usage })
+      : json({ id: "msg_offline", type: "message", role: "assistant", model: body.model, content, stop_reason, usage });
   const first = body.messages[0]?.content;
 
   if (body.model === "claude-haiku-4-5") {
@@ -112,6 +136,15 @@ function cannedAnthropic(body: any): Response {
   }
   if (typeof first === "string" && first.includes("book-tagging platform")) {
     return reply([{ type: "text", text: '["reflective", "Emotional", "not a real tag"]' }], "end_turn");
+  }
+  // Card writing (lib/output/writeCards.ts): one call per pick, thinking off.
+  if (typeof first === "string" && first.startsWith("<reader_taste>")) {
+    const title = String(first).match(/catalog title: (.*)/)?.[1] ?? "";
+    const author = String(first).match(/catalog author: (.*)/)?.[1] ?? "";
+    return reply([{ type: "text", text: JSON.stringify({
+      title, author, hook: "A quiet book that stays with you.", why: "Quiet and restrained.",
+      angleHeading: "Restraint as a key", angleText: "Fits the brief.",
+    }) }], "end_turn");
   }
   if (body.tools && body.messages.length === 1) {
     return reply([
@@ -122,8 +155,12 @@ function cannedAnthropic(body: any): Response {
   // Final answer: the first three candidates of the first pool the model was shown.
   const toolResults = body.messages[body.messages.length - 1].content;
   const pool = JSON.parse(toolResults[0].content).pool.slice(0, 3);
-  const picks = pool.map((c: { title: string; author: string }) => ({ title: c.title, author: c.author, why: "Quiet and restrained.", nonObvious: "Fits the brief." }));
-  return reply([{ type: "text", text: JSON.stringify(picks, null, 2) }], "end_turn");
+  // Same shape the selection schema enforces (lib/output/pickSchema.ts).
+  const moods = ["melancholic", "tender", "wistful"];
+  const picks = pool.map((c: { title: string; author: string }, i: number) => ({
+    poolTitle: c.title, poolAuthor: c.author, fitNote: "Quiet and restrained.", mood: moods[i],
+  }));
+  return reply([{ type: "text", text: JSON.stringify({ picks }) }], "end_turn");
 }
 
 // --- fetch stub + capture --------------------------------------------------------------------
@@ -209,8 +246,8 @@ check("no trace file on Vercel even with ENGINE_TRACE=1", vercel.newTraces.lengt
 const tracePath = path.join(traceDir, on.newTraces[0]);
 const traceText = readFileSync(tracePath, "utf8");
 const trace = JSON.parse(traceText);
-const expectedStages = ["A_tag_picking", "B_hardcover_pool", "C_model_search_loop", "D_open_library_search", "E_merge", "F_grounding_check", "G_pick_lookup", "H_description_check", "I_response"];
-check("all nine stage keys present, in order", JSON.stringify(Object.keys(trace.stages)) === JSON.stringify(expectedStages));
+const expectedStages = ["A_tag_picking", "B_hardcover_pool", "C_model_search_loop", "D_open_library_search", "E_merge", "F_grounding_check", "G_pick_lookup", "W_card_writing", "H_description_check", "I_response"];
+check("all ten stage keys present, in order", JSON.stringify(Object.keys(trace.stages)) === JSON.stringify(expectedStages));
 check("every stage recorded something", expectedStages.every((k) => trace.stages[k].length > 0),
   expectedStages.map((k) => `${k[0]}:${trace.stages[k].length}`).join(" "));
 

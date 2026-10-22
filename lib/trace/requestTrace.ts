@@ -31,6 +31,9 @@ export const TRACE_STAGES = {
   E: "E_merge",
   F: "F_grounding_check",
   G: "G_pick_lookup",
+  // Card writing (fix PR 1): after the lookup, before the description check. Keyed W, not a
+  // new letter in sequence, so H and I keep the names earlier traces used.
+  W: "W_card_writing",
   H: "H_description_check",
   I: "I_response",
 } as const;

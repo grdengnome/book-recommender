@@ -1,5 +1,15 @@
 # scratchpad/
 
+## Where we stopped (Oct 22, fix PR 1, branch `fix/structured-output`, WIP commit, no PR yet)
+
+1. **Blocked: dev workspace spend limit hit** during the timing run ("regain access on 2026-11-01 00:00 UTC"). Raise the limit in the Console or wait. Spend so far by the traces: $2.82 (cap set for this PR: $4).
+2. **Rerun cases 8, 9, 10 of the timing run** (cases 1, 5, 6 done: 25.1s / 23.6s / 19.8s; main's median 24.6s). The branch now has: streamed selection with per-pick lookup + card, selection-assigned distinct moods, 24h Open Library subject-list cache, Open Library 5s lookup timeout, Hardcover 5s deadline, prompt cache on the fixed instructions.
+3. **Then docs:** eval-log entry for the streaming/cache/mood run and the table-sampling experiment (D paused: C won the blind read 4 of 6); decisions for the cache, streaming, mood and card split; CLAUDE.md `lib/output/` line (writeCards, streamSelection); progress-log entry with the follow-ups (early table-setting; streaming results to the screen, parked as a product decision).
+4. **Then open the PR** with plain-language before/after numbers (don't merge).
+5. **Follow-up PR: early table-setting** (prepare / choose split), starting with the ~$0.50 blind test: prepare from backbone answers only vs today's full description, six cases.
+
+---
+
 Working folder for experiments, eval drivers, and diagnostics — not part of the app build. It can't be deleted, though: the app writes two live logs here while it runs:
 
 - `query-log.json` — every `search_books` call (query, subject, pool contents), appended by `lib/tools/searchBooks.ts`.
@@ -26,7 +36,8 @@ Most other `.json` output here is gitignored run output. Finished experiments ha
 - `check-tag-exclusions.mts` — runs `hardcover-tags-gt100.json` through `lib/hardcover/tagExclusions.ts` and reports what's excluded and kept (step 2: filter).
 - `capture-anthropic-requests.mjs` — dev-only preload that records every request sent to the Anthropic API, to see exactly what the model receives. No production logging needed.
 - `hc-single-book-lookup.mjs` — shows what Hardcover's API returns for one book ID (description, tags, cross-source IDs).
-- `prod-repro-check.mjs` — sends cases 1, 9, and 10 to the live `/api/recommend` route exactly as a normal client would.
+- `prod-repro-check.mjs` — sends cases 1, 9, and 10 to the live `/api/recommend` route exactly as a normal client would. Reads the response's `raw` model message, which the route stopped sending in fix PR 1 (Oct 21); it needs reworking against the trace before reuse.
+- `pick-check-replay.mts` and the `pick-check-build-*` scripts below replay frozen Sept 26 inputs through the old string interface of `checkPickDescriptions` (`why` + `nonObvious`). Since fix PR 1 it takes pick objects and checks `why` + `angleText`, so they need converting before the next checker-prompt experiment.
 - `pick-check-replay.mts` — replays the pick-description check N times on frozen inputs and scores each verdict; used to compare prompt/model changes on identical inputs.
 - `pick-check-build-live-inputs.mts` — freezes the Sept 26 live-run picks (cases 1 and 8) as replay inputs and writes the combined v2 input set.
 - `pick-check-build-replay-inputs.mts` — builds the original frozen input set (cases 1, 5, 8) for `pick-check-replay.mts`.

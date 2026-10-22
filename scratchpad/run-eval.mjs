@@ -113,13 +113,17 @@ async function runCase(c) {
     console.error(`[${c.id}] ERROR`, data);
     return { ...c, error: data };
   }
-  const titles = extractTitles(data.recommendations);
+  // Since fix PR 1 (2026-10-21) the route returns structured `picks`; older runs returned
+  // `recommendations` as model text, which extractTitles still parses.
+  const titles = data.picks
+    ? data.picks.map((p) => ({ title: p.title, author: p.author }))
+    : extractTitles(data.recommendations);
   if (!titles) {
     console.log(`[${c.id}] UNPARSED raw text:\n${data.recommendations}\n`);
   } else {
     console.log(`[${c.id}] done — ${titles.map((t) => t.title).join(" | ")}`);
   }
-  return { ...c, recommendations: data.recommendations, titles };
+  return { ...c, picks: data.picks ?? null, recommendations: data.recommendations ?? null, titles };
 }
 
 const fs = await import("fs");
