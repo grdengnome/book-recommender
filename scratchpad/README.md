@@ -1,5 +1,12 @@
 # scratchpad/
 
+## Early table-setting (branch `experiment/early-table-setting`)
+
+Early table-setting paused Oct 22. Finding: tables built without mood/length went wrong (case 5 epic war instead of light comedy; case 10 drifted to full horror) and choosing thought ~2x longer when the full description arrived as a second message. Resume after the question core is decided.
+
+- `early-table-test.mjs`: the step 1 blind test driver, with each case's hand-cut backbone text. Uses the route's experiment-only `prepareFrom` field (this branch only).
+- `early-table-compare.mjs`: compares its traces (`early1022-*`) with the Oct 22 timing-run traces (today's engine); writes `experiments/2026-10-22-early-table/compare.json`. The blind file and key are in that folder (gitignored).
+
 ## Where we stopped (Oct 22, fix PR 1 open for review, not merged)
 
 Timing run, docs and PR are done; see the progress log's Oct 22 entry for the Next list. The experiment drivers (`run-six.mjs`, `table-sample-experiment.mts`) were only in an Oct 21 temp folder and are gone; rebuild them from the eval log's Oct 21 entries if needed.

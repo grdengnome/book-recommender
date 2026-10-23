@@ -232,6 +232,16 @@ export async function POST(request: NextRequest) {
   const evalTag = typeof body?.evalTag === "string" ? body.evalTag : null;
   setSearchBooksLogTag(evalTag);
 
+  // EXPERIMENT ONLY (branch experiment/early-table-setting, 2026-10-22; never merged): the
+  // early table-setting blind test. With `prepareFrom` (the backbone answers only), tag picking
+  // and the first search call see only that text, as a background prepare call would; the full
+  // taste description is added after the first search results, and selection, cards and the
+  // description check use it. Local eval runs only.
+  const prepareFrom =
+    typeof body?.prepareFrom === "string" && body.prepareFrom.trim() && evalTag && !process.env.VERCEL
+      ? body.prepareFrom
+      : null;
+
   // Debug-only trace (lib/trace/requestTrace.ts): one per request, passed down explicitly.
   // A no-op unless ENGINE_TRACE=1, and never on Vercel. Requests rejected above (no API key,
   // no taste description) never reach the engine and aren't traced.
@@ -240,7 +250,7 @@ export async function POST(request: NextRequest) {
   // Branch 2 (Hardcover) starts now, concurrently with branch 1 (the OL tool-use loop
   // below) — both start from tasteDescription and don't depend on each other's output.
   const hardcoverPoolPromise = withHardcoverDeadline(
-    fetchHardcoverPool(tasteDescription, evalTag, trace),
+    fetchHardcoverPool(prepareFrom ?? tasteDescription, evalTag, trace),
     evalTag,
     trace,
   );
@@ -249,7 +259,7 @@ export async function POST(request: NextRequest) {
   // the Hardcover pre-fetch is shared since it depends only on tasteDescription.
   for (let attempt = 1; attempt <= MAX_GENERATION_ATTEMPTS; attempt++) {
     const attemptTrace = trace.with({ attempt });
-    const generation = await generateOnce(apiKey, tasteDescription, hardcoverPoolPromise, attemptTrace);
+    const generation = await generateOnce(apiKey, tasteDescription, hardcoverPoolPromise, attemptTrace, prepareFrom);
     if (!generation.ok) return respond(trace, generation.body, generation.status);
 
     if (generation.status === "ready") {
@@ -332,9 +342,10 @@ async function generateOnce(
   tasteDescription: string,
   hardcoverPoolPromise: Promise<HardcoverBookCandidate[]>,
   trace: RequestTrace,
+  prepareFrom: string | null = null,
 ): Promise<GenerationResult> {
   const messages: Array<{ role: "user" | "assistant"; content: unknown }> = [
-    { role: "user", content: tasteDescription },
+    { role: "user", content: prepareFrom ?? tasteDescription },
   ];
 
   // Every candidate the model was shown this generation (with its internal IDs), keyed by
@@ -440,7 +451,13 @@ async function generateOnce(
       }),
     );
 
-    messages.push({ role: "user", content: toolResults });
+    // EXPERIMENT ONLY (see prepareFrom above): the full description arrives after the first
+    // search results, without editing earlier turns.
+    const fullDescription =
+      prepareFrom && round === 0
+        ? [{ type: "text", text: `The reader has now finished answering. Their full taste description:\n\n${tasteDescription}` }]
+        : [];
+    messages.push({ role: "user", content: [...toolResults, ...fullDescription] });
   }
 
   // Every pick pipeline settles (they never reject), so nothing is left running unobserved.
