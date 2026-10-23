@@ -840,3 +840,21 @@ Alongside: claim @squirmly handles and getsquirmly.com; put the new Hardcover ke
 6. Parked product decision: show the first pick on screen before the other two.
 
 Alongside: claim @squirmly handles and getsquirmly.com; put the new Hardcover key in Vercel before deleting the old one; phone check and glance test.
+
+---
+
+## October 22, 2026 (evening) — PR #10 merged; question core redesigned
+
+**Conclusion:** The question core is redesigned on evidence (decision 2.20, plus `docs/question-flow-principles.md`). In real requests and in the engine alike, what the reader wants right now matters more than a favorite book, and the appetite question changed nothing. Early table-setting is paused until the new core exists.
+
+- **PR #10 merged:** at speed parity with main (median 25.0s vs 24.6s). It removes the 40–90s outliers and returns structured output only.
+- **Early table-setting test paused** ($0.52, branch `experiment/early-table-setting`). Tables built from the old backbone lacked mood and length and went wrong: case 5 got epic war novels instead of light comedy, and case 10 drifted to full horror. Choosing also thought about 2x longer when the full description arrived as a second message.
+- **Question core redesigned with evidence:** a 48-request audit of r/suggestmeabook (only ~1 in 4 requests starts from a favorite book) and a 28-run ablation test on the live engine ($2.37, branch `experiment/question-core`). Mood beats the anchor, appetite had no effect, and a turn-off is decisive when relevant. That led to decision 2.20 (adopted) and the question flow principles. Details in `docs/research/question-core-audit-2026-10-22.md` and the eval log, Oct 22.
+
+**Next:**
+1. Question flow v2 design: slot model, next-question policy, question bank v2, formats, read-back card.
+2. Interactive themed prototype of the adaptive flow.
+3. Engine question-chooser and taste profile, with simulated-reader testing and mood mappings.
+4. Rewrite spec §4a and `question-bank.md`.
+5. Resume early table-setting on the new core.
+6. Deeper Open Library pages experiment.
