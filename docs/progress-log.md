@@ -858,3 +858,5 @@ Alongside: claim @squirmly handles and getsquirmly.com; put the new Hardcover ke
 4. Rewrite spec §4a and `question-bank.md`.
 5. Resume early table-setting on the new core.
 6. Deeper Open Library pages experiment.
+
+Alongside: (a) reserves and stage events PR; (b) swap in a reserve when a pick's catalog description contradicts the selector's reason, plus the story check that flags and hides (never rewrites). Parked: "show the first pick early", to be judged in the question-flow prototype.
