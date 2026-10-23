@@ -93,6 +93,7 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 ### 2.2 A fixed backbone with rotating wording
 **Decision:** Always ask anchor → why → appetite, but rotate each question's wording through 4–5 phrasings.
 **Why:** The structure carries the signal; the wording is what feels stale. Appetite also puts the anti-mainstream dial in the user's hands. ([checkpoint #2](./checkpoint.md))
+**Superseded** on October 22 by decision 2.20 (new question core).
 
 ### 2.3 Creative prompts capped at about one per session
 **Decision:** Emoji and image prompts are alternate phrasings, not a separate step.
@@ -134,6 +135,7 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 ### 2.12 The read-back appears only on the rejection path
 **Decision:** Don't show the taste summary before every run.
 **Why:** It keeps the main flow fast, and the code check makes misreads rare. Revisit if first-result 👎 rates run high. ([spec §4g](./spec.md))
+**Superseded** on October 22 by decision 2.20: an editable read-back card comes before the reveal.
 
 ### 2.13 Reserve picks make swaps instant
 **Decision:** Each run returns 3 picks plus 2–3 grounded, verified reserves.
@@ -162,6 +164,29 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 ### 2.19 Unclear typed answers get one gentle nudge and never block
 **Decision:** If no answer is chosen and the typed text is obviously unusable, show one inline nudge and hold the page once; a second tap proceeds anyway. Subtler cases fall to the taste summary's code check and the rejection path.
 **Why:** Nothing is broken, so no error screen; keeping the flow smooth matters more than a perfect answer. ([spec §4a](./spec.md))
+
+### 2.20 New question core (adopted)
+**Decision:** The question flow is rebuilt around four parts:
+1. **"What are you after?"** with several entry points: a book, show or film they loved; a feeling; a topic, setting or character; or "surprise me". The anchor is optional, can be something other than a book, and can be more than one.
+2. **"Right now"** (required): mood, with an intensity, and an optional length.
+3. **"Anything to avoid?"** (optional): chips, enforced as hard rules by the choosing step.
+4. **Adaptive follow-ups.**
+
+Appetite is dropped as a question. Familiar ↔ surprising is calibrated through examples and by the engine.
+
+Design principles (part of the decision):
+- **Adaptive slot-filling:** each question targets the most uncertain taste slot, and the flow stops when the picture is clear.
+- **Every question must be likely to change the picks.**
+- **Time budget:** about 60–90 seconds, or 4–7 taps, with "just show me" always available.
+- **Engaging formats:** this-or-that comparisons, an intensity slider, avoid chips, a quick "would you read this?" cover game for calibration, and a live-updating taste line.
+- **A "here's what I'm hearing" read-back card before the reveal.** It's editable, and it also triggers early table-setting.
+- **Every option must map to something searchable.** Moods that map poorly to Open Library (cozy, quiet, dark, romantic) need tested mappings: Hardcover mood tags where they exist (reflective, dark, romance; "lighthearted" as the nearest to cozy) or tested subject sets.
+- **Offline testing first,** with simulated reader personas, before real users.
+- **Once live,** measure drop-off, time and pick impact for each question.
+
+The full operating principles are in [question-flow-principles.md](./question-flow-principles.md).
+
+**Why:** In the ablation test, the current mood decided the picks and overrode the anchor. Without it, case 5 ("light and quick") got *Les Misérables*. Removing appetite had no effect in any of five cases. A turn-off was decisive when the other answers leaned toward what the reader wanted to avoid (case 10 drifted to horror without "not full horror"). In the 48-request audit of real requests, only about 1 in 4 started from a favorite book, about a third of anchors were shows, films or comics, and most asked for a specific ingredient, a mood or an occasion. Supersedes 2.2 and 2.12; spec §4a and `question-bank.md` are to be rewritten in a question flow v2 design. ([research: question core audit](./research/question-core-audit-2026-10-22.md); [eval log, Oct 22](./eval-log.md))
 
 ---
 

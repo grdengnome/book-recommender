@@ -40,6 +40,8 @@ The original idea was three products in one: a recommender, a Beli-style ranking
 
 ### 4a. Core flow
 
+> **Superseded by decision 2.20** ([decisions](./decisions.md)); rewrite pending question flow v2 design. Principles for the rewrite: [question-flow-principles.md](./question-flow-principles.md).
+
 The opening page *is* the recommender (no landing or login wall). The flow:
 
 **Questions (3 backbone + 0–2 follow-ups) → loading → 3 cards → feedback / rejection path.**

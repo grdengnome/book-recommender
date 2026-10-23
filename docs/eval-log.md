@@ -4,6 +4,21 @@ Running log of quality findings, known limitations, and decisions made while eva
 
 ---
 
+## 2026-10-22 — Question core: what each question contributes (cases 1, 5, 6, 8, 10 + mood vs anchor)
+
+**Question:** which of today's questions actually move the picks? Each case was rewritten as structured answers (anchor, why, appetite, mood, length, turn-off; appetite inferred, since no case states it) and joined with spec §4f's fallback template. Each case ran twice with all answers, then once with each answer removed, on the live engine. Branch `experiment/question-core`. **Spend: $2.37** (28 runs). One run per removal; not scored against the rubric.
+
+**Findings:**
+- **Mood beats the anchor.** Without mood/length, case 5 ("light and quick") got *Les Misérables* and *And Quiet Flows the Don* (table overlap with the full runs 0.14, against 0.69 between the two full runs). With a cozy mood, the Blood Meridian anchor got *A Psalm for the Wild-Built*; without the mood, *Pincher Martin* and *Hunger*.
+- **Turn-off is decisive when relevant.** Without "not full horror", case 10's tags switched to Horror and the picks went to *The House on the Borderland* (overlap 0.46 vs 0.93). Case 6 picked no fantasy without "no fantasy", since "literary fiction" already steers away.
+- **Anchor, why and appetite had no effect beyond normal variation** in any case tested. Appetite had none in 5 of 5. Caveat: every appetite value was inferred and mid-scale.
+- **Mood-to-catalog check (free):** gripping, unsettling and funny map well to Open Library subjects. Cozy, quiet, dark and romantic don't (the "dark" subject is dark-romance erotica; cozy_mysteries holds 12 works). Page counts exist for 87–100% of books; edition counts don't separate modern familiar books from deep cuts.
+- **Outcome:** decision 2.20 (new question core).
+
+Full results: [research: question core audit](./research/question-core-audit-2026-10-22.md).
+
+---
+
 ## 2026-10-22 — Fix PR 1: card split, streaming, cache and mood (cases 1, 5, 6, 8, 9, 10)
 
 **Change:** since the Oct 21 run below, choosing and writing are separate calls (decision 8.10). The selection call is streamed, and each pick's lookup and card start as soon as it arrives (8.11). The selection call assigns distinct moods (8.12). Open Library subject lists are cached for 24h, Open Library calls time out at 5s, the Hardcover pool has a 5s deadline (6.11), and the fixed instructions use the prompt cache. Same table-setting, grounding check, pick lookup and description check. Cases 1, 5 and 6 ran Oct 22 (UTC, evening of Oct 21 Eastern), and 8, 9 and 10 the next evening, after the dev workspace's spend limit was raised. **Spend: $0.50** for the run ($3.07 for the whole PR, against a $4 cap). One run each; not scored against the rubric.

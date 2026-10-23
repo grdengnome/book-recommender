@@ -1,5 +1,7 @@
 # Question Bank
 
+> **Superseded by decision 2.20** ([decisions](./decisions.md)); rewrite pending question flow v2 design. Principles for the rewrite: [question-flow-principles.md](./question-flow-principles.md).
+
 The actual candidate wording, phrasing pools, and mechanics for the recommender's question flow. This is content, not architecture — the *decisions* about how this content behaves live in `spec.md` Section 4a; this file is the material itself, and is expected to grow (more phrasings per pool) independent of the spec.
 
 ---

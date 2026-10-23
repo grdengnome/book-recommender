@@ -13,7 +13,7 @@ Squirmly (working name) is an AI book recommender whose core problem is resistin
 
 **The v0 engine is complete** (Sept 2026). The full v0 product is designed (`docs/spec.md` §4) with a phased build plan (`docs/spec.md` §8). Phase 1: hosted on Vercel (private); the data store and rate limit are deferred to just before going public. Phase 2 (visual design) in progress: all five themes are mocked for all eight screens; motion is the remaining design step.
 
-Don't build UI screens until the visual design pass is approved and you're explicitly told to. All UI follows `docs/design.md`. When building UI, reuse the scene artwork from `docs/mockups/` rather than redrawing it. The data store and rate limit must be in place before the site is made public.
+Don't build UI screens until the visual design pass is approved and you're explicitly told to. All UI follows `docs/design.md`. Question flow work follows `docs/question-flow-principles.md`. When building UI, reuse the scene artwork from `docs/mockups/` rather than redrawing it. The data store and rate limit must be in place before the site is made public.
 
 ## How the engine works
 
