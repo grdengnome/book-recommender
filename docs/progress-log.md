@@ -874,13 +874,13 @@ Alongside: (a) reserves and stage events PR; (b) swap in a reserve when a pick's
 - **Read-only repo audit** (Oct 27): no redesign needed; the main engine fix is one AI gateway, since five files call Anthropic directly with hard-coded model names ([contracts and adapters](./engineering/contracts-and-adapters.md)).
 - **Idea brainstorm** (Oct 28): 51 ideas sorted into v0, Later and Vision ([roadmap and backlog](./product/roadmap-and-backlog.md)). v0 decisions: simple favourites doorway (2.23), stored anonymous feedback (10.6), rate limit + basic prompt-injection guard + privacy note (10.5), soft target end of 2026 (9.12).
 - **Repo restructure approved** (Oct 29): feature-based hybrid, repo name kept for now, no licence, prototypes kept (14.2). PRs can now run from a claude.ai session, with the owner reviewing and merging (11.5).
-- **This PR (restructure PR 1, docs only):** docs grouped by audience (product, design, engineering, quality, research, archive) with `git mv`; a [docs map](./README.md); a status line on every doc; Project-only docs brought into the repo; decisions 1.11–14.2. No code changed.
+- **Restructure PR 1 (#11, docs only, merged):** docs grouped by audience (product, design, engineering, quality, research, archive) with `git mv`; a [docs map](./README.md); a status line on every doc; Project-only docs brought into the repo; decisions 1.11–14.2. No code changed.
+- **Restructure PR 2 (docs only):** README rewritten as the product's front door (Squirmly, vision, status, engine, how it's built); CLAUDE.md rewritten for today's priority and rules, adding the top-professional check (11.6), the swappability and feature rules, plain-language working style, and every change through a PR (11.7). Added: no permanent model choices, with an ongoing engine-performance track (14.3).
 
 **Next:**
-1. Restructure PR 2: rewrite README and CLAUDE.md for today's product and rules.
-2. Restructure PR 3: hygiene and automatic checks (`.env.example`, logs out of the repo, `scratchpad/` split, `docs/mockups/` → `prototypes/`, first tests, GitHub Actions).
-3. Restructure PR 4: contracts, AI gateway and engine move into `lib/`; eval set proves behaviour unchanged.
-4. Restructure PRs 5–6: app skeleton; data store, feedback, rate limit, input guard.
-5. Image generator bake-off, Part A (style exploration), alongside, once the image tool accounts are set up.
+1. Restructure PR 3: hygiene and automatic checks (`.env.example`, logs out of the repo, `scratchpad/` split, `docs/mockups/` → `prototypes/`, first tests, GitHub Actions).
+2. Restructure PR 4: contracts, AI gateway and engine move into `lib/`; eval set proves behaviour unchanged.
+3. Restructure PRs 5–6: app skeleton; data store, feedback, rate limit, input guard.
+4. Image generator bake-off, Part A (style exploration), alongside, once the image tool accounts are set up.
 
 Alongside: claim @squirmly and getsquirmly.com; put the new Hardcover key in Vercel before deleting the old one.
