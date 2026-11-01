@@ -95,7 +95,7 @@ export async function hcGraphql<T>(
   });
 
   const bodyText = await res.text();
-  let json: any;
+  let json: { data?: T; errors?: unknown; error?: unknown; message?: unknown };
   try {
     json = JSON.parse(bodyText);
   } catch {

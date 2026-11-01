@@ -21,7 +21,7 @@ const DESCRIPTION_PREVIEW_CHARS = 150;
 // Hardcover `cached_tags` categories kept. "Tag" is skipped (mostly the forced-choice
 // rating-widget tags tagExclusions.ts already filters, plus shelf noise), as is
 // "Content Warning" (not a description of what the book is).
-const HARDCOVER_TAG_CATEGORIES = ["Genre", "Mood"] as const;
+type HardcoverTagCategory = "Genre" | "Mood";
 
 // "ok" = returned a description or at least one subject/genre; "empty" = the request
 // succeeded but carried neither; "failed" = error, non-200, or timeout.
@@ -132,7 +132,7 @@ async function lookupHardcover(bookId: number): Promise<HardcoverLookup> {
     );
     const book = data.books_by_pk;
     if (!book) throw new Error(`no book with id ${bookId}`);
-    const tagNames = (category: (typeof HARDCOVER_TAG_CATEGORIES)[number]) =>
+    const tagNames = (category: HardcoverTagCategory) =>
       (book.cached_tags?.[category] ?? [])
         .map((t) => t?.tag)
         .filter((t): t is string => typeof t === "string");
