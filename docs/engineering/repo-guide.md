@@ -46,8 +46,9 @@ Plus the swappability rule: app code never calls an outside service directly; it
 |---|---|---|
 | 1 | Docs restructure: docs by audience, docs map, status lines, archive, Project docs brought in | Done (#11) |
 | 2 | Rewrite README and CLAUDE.md for today's product and rules | Done (#12) |
-| 3 | Hygiene and automatic checks: `.env.example`, live logs out of the repo, `scratchpad/` split into `experiments/`, `evals/`, `scripts/`; `docs/mockups/` → `prototypes/`; first tests; GitHub Actions | Done |
-| 4 | Contracts, AI gateway and engine move into `lib/`; `route.ts` becomes thin; eval set proves behaviour unchanged | Next |
+| 3 | Hygiene and automatic checks: `.env.example`, live logs out of the repo, `scratchpad/` split into `experiments/`, `evals/`, `scripts/`; `docs/mockups/` → `prototypes/`; first tests; GitHub Actions | Done (#13) |
+| 4a | AI gateway: one front door for every model call, `lib/ai/slots.ts` settings sheet, per-job override settings; golden-request test proves behaviour unchanged | Done |
+| 4b | Engine moves into `lib/engine/`; `route.ts` becomes thin; one eval runner with cases as data | Next |
 | 5 | App skeleton: `features/`, `ui/`, `themes/`, `lib/config/`, "coming soon" tabs, privacy page | Planned |
 | 6 | Store and trust basics: data store, feedback, rate limit, input guard | Planned |
 

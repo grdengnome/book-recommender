@@ -876,11 +876,13 @@ Alongside: (a) reserves and stage events PR; (b) swap in a reserve when a pick's
 - **Repo restructure approved** (Oct 29): feature-based hybrid, repo name kept for now, no licence, prototypes kept (14.2). PRs can now run from a claude.ai session, with the owner reviewing and merging (11.5).
 - **Restructure PR 1 (#11, docs only, merged):** docs grouped by audience (product, design, engineering, quality, research, archive) with `git mv`; a [docs map](./README.md); a status line on every doc; Project-only docs brought into the repo; decisions 1.11–14.2. No code changed.
 - **Restructure PR 2 (docs only):** README rewritten as the product's front door (Squirmly, vision, status, engine, how it's built); CLAUDE.md rewritten for today's priority and rules, adding the top-professional check (11.6), the swappability and feature rules, plain-language working style, and every change through a PR (11.7). Added: no permanent model choices, with an ongoing engine-performance track (14.3). Merged as #12.
-- **Restructure PR 3 (hygiene + automatic checks):** `scratchpad/` split into `evals/`, `scripts/`, `tests/` and `experiments/`; `docs/mockups/` → `prototypes/`; live logs and traces moved to gitignored `.local/` (10.7); `.env.example`; first offline tests (grounding, merge, trace-equivalence: 11 passing) and GitHub Actions checks on every PR (3.7); two app lint issues fixed (types only).
+- **Restructure PR 3 (hygiene + automatic checks):** `scratchpad/` split into `evals/`, `scripts/`, `tests/` and `experiments/`; `docs/mockups/` → `prototypes/`; live logs and traces moved to gitignored `.local/` (10.7); `.env.example`; first offline tests (grounding, merge, trace-equivalence: 11 passing) and GitHub Actions checks on every PR (3.7); two app lint issues fixed (types only). Merged as #13; the first Actions run was green.
+- **Restructure PR 4a (AI gateway):** every model call now goes through `lib/ai/gateway.ts`, with `slots.ts` assigning each job's model and an `AI_SLOT_<JOB>` override for experiments (14.4). Proved unchanged by a golden copy of every request the engine sends, saved before the change: identical after it (17 offline tests passing). PR 4 was split into 4a and 4b to keep each reviewable.
 
 **Next:**
-1. Restructure PR 4: contracts, AI gateway and engine move into `lib/`; eval set proves behaviour unchanged.
-2. Restructure PRs 5–6: app skeleton; data store, feedback, rate limit, input guard.
-3. Image generator bake-off, Part A (style exploration), alongside, once the image tool accounts are set up.
+1. One paid eval run on the PR 4a branch to confirm the live connection; log it in the eval log.
+2. Restructure PR 4b: engine moves into `lib/engine/`, `route.ts` becomes thin, one eval runner with cases as data.
+3. Restructure PRs 5–6: app skeleton; data store, feedback, rate limit, input guard.
+4. Image generator bake-off, Part A (style exploration), alongside, once the image tool accounts are set up.
 
 Alongside: claim @squirmly and getsquirmly.com; put the new Hardcover key in Vercel before deleting the old one.

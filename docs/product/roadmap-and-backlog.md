@@ -42,6 +42,7 @@ Bucket: **v0** (in [scope](./v0-scope.md)) · **Later** (real app, after v0) · 
 | Faster recommendations | v0 | Swappable models make per-step model choice easy |
 | Engine performance track: running models more efficiently and creatively | Ongoing | Parallel calls, streaming, caching, routing small jobs to fast models, early table-setting; re-test model choices per job as new models ship (decision 14.3) |
 | Taste summary on the loading screen | v0 | "Looking for" line |
+| Eval on demand: a "Run eval" button in GitHub Actions, with the API key stored as a GitHub secret | Later | Worth it once model swaps become frequent (decision 14.3); today evals run by hand |
 | Avoid list / Nope shelf | Later | Low priority |
 | Influencer or curated reading lists | Vision | Fits the engine as another book source |
 
