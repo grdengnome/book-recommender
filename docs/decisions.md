@@ -1,6 +1,8 @@
 # Decision Log
 
-*Covers decisions through the v0 engine, v0 product planning, and the start of the build (October 22, 2026). Further build decisions will be added as they're made.*
+> **Status:** Living · Every product and architecture decision, and the paths rejected.
+
+*Covers decisions through the v0 engine, v0 product planning, the v0 scope and the repo restructure (November 1, 2026). Further decisions are added as they're made.*
 
 The product and architecture decisions behind this recommender, and the paths I rejected. The [progress log](./progress-log.md) is the session-by-session diary; this file is the story told by decision. Each entry gives the decision and why, with a link to the full detail.
 
@@ -25,6 +27,7 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 11. [How I work with AI tools](#11-how-i-work-with-ai-tools)
 12. [Open questions I'm carrying](#12-open-questions-im-carrying)
 13. [Visual design](#13-visual-design)
+14. [Architecture and repo structure](#14-architecture-and-repo-structure)
 
 ---
 
@@ -79,6 +82,10 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 ### 1.10 Author facts move from the cards to the loading screen
 **Decision:** A curated, source-verified library of facts about well-known authors plays during the wait, instead of facts about each pick on the cards.
 **Why:** Catalog lookups already cover the cards, and a 30–120 second wait needs something worth watching. General facts need no engine change, and verifying each once means the most visible moment can't show a false claim. ([spec §4h](./product/spec.md))
+
+### 1.11 v0 is a polished preview of the full Discover experience
+**Decision:** v0 is the whole Discover flow at production quality (adaptive questions, loading, three picks with "Not quite? Try again", themed unwrap, 3D reveal book with rarity and enhanced covers, detail screen) in all five themes at "satisfactory" polish, built café-first. Other tabs show "coming soon". Shared on a private link, no sign-in, as a web app first; app store later. Shelf, collection, ranking, profile and social come after v0. Full list: [v0 scope](./product/v0-scope.md).
+**Why:** A preview that feels finished is more useful for feedback and as a portfolio link than a half-built full app, and it keeps v0 from growing forever. Scope is frozen: new ideas default to "Later". ([progress log, Nov 1](./progress-log.md))
 
 ---
 
@@ -187,6 +194,18 @@ Design principles (part of the decision):
 The full operating principles are in [question-flow-principles.md](./product/question-flow/principles.md).
 
 **Why:** In the ablation test, the current mood decided the picks and overrode the anchor. Without it, case 5 ("light and quick") got *Les Misérables*. Removing appetite had no effect in any of five cases. A turn-off was decisive when the other answers leaned toward what the reader wanted to avoid (case 10 drifted to horror without "not full horror"). In the 48-request audit of real requests, only about 1 in 4 started from a favorite book, about a third of anchors were shows, films or comics, and most asked for a specific ingredient, a mood or an occasion. Supersedes 2.2 and 2.12; spec §4a and `question-bank.md` are to be rewritten in a question flow v2 design. ([research: question core audit](./research/question-core-audit-2026-10-22.md); [eval log, Oct 22](./quality/eval-log.md))
+
+### 2.21 Question flow v2: a taste profile with appeal factors, and formats separate from content
+**Decision:** The flow fills a taste profile (starting point, mood + intensity, and the librarians' appeal factors: pace, character ↔ plot, writing style, setting, ideas, ending feel), choosing each next question by the most valuable unclear slot. Question formats (the interaction) are kept separate from content (the scenes and wording), and the bank keeps growing so returning readers rarely see repeats. Details: [question flow v2](./product/question-flow/v2-design.md).
+**Why:** Appeal factors are how librarians match readers to books, and only search-shaping answers need catalog mappings. Content is cheap to add and formats are expensive, so variety comes from content. ([progress log, Nov 1](./progress-log.md))
+
+### 2.22 Leaner question screens; the correction path moves after the reveal
+**Decision:** The "just show me" shortcut, the live taste line on question screens and the shareable reader card are dropped. The loading screen shows a non-editable "Looking for" line; the correction path is "Not quite? Try again" after the reveal, replacing an editable read-back before it.
+**Why:** The flow is short enough that "just show me" invited an unnecessary step; the live line and a read-back before the reveal both clouded the reveal and could reroute the flow for no gain. ([progress log, Nov 1](./progress-log.md))
+
+### 2.23 A simple favourites doorway in v0
+**Decision:** "Something I loved" stays in v0 as one search box on the existing Open Library title search: one favourite required, up to three optional, books only at first (shows and films later).
+**Why:** A loved book is the most natural way many readers explain their taste, but full multi-media matching is hard. The simple version keeps the doorway without the hard part. ([progress log, Nov 1](./progress-log.md))
 
 ---
 
@@ -472,6 +491,10 @@ The full operating principles are in [question-flow-principles.md](./product/que
 **Decision:** All deployments stay behind Vercel login until the rate limit exists.
 **Why:** The moment it deploys, the engine is a public endpoint that spends money per call. ([progress log, Sep 30](./progress-log.md))
 
+### 9.12 A soft target of end of 2026 for v0
+**Decision:** v0 aims for the end of 2026, as a soft target, with a checkpoint in early December.
+**Why:** A date keeps the work moving, but quality matters more than an arbitrary deadline; the checkpoint allows a calm adjustment. ([progress log, Nov 1](./progress-log.md))
+
 ---
 
 ## 10. Identity, privacy, and security
@@ -491,6 +514,14 @@ The full operating principles are in [question-flow-principles.md](./product/que
 ### 10.4 Cap spending at the API, not the host
 **Decision:** A dedicated Console workspace with a $20 monthly limit and an alert; its key is used only by Vercel, separate from the development key.
 **Why:** On Vercel's free plan, hosting can't cost anything; the real risk is model calls. A hard cap at the source is the simplest guarantee. ([progress log, Sep 30](./progress-log.md))
+
+### 10.5 Trust basics before anyone outside sees v0
+**Decision:** v0 ships with a per-visitor rate limit (around 10 recommendations a day), a basic prompt-injection guard (typed answers treated as reader data, never instructions; a length cap; narrow tools; the existing grounding and description checks) and a short privacy note. A stronger security review comes before public launch.
+**Why:** Each run costs money against a capped monthly budget, so one visitor or bot could switch the app off for everyone; typed answers reach the model, so instructions hidden in them must not be obeyed. ([progress log, Nov 1](./progress-log.md))
+
+### 10.6 Feedback is stored, anonymously
+**Decision:** v0 stores thumbs up or down per pick, an optional short note, which picks were shown, and general "send feedback" messages, with no personal details.
+**Why:** Feedback is the main point of v0; anything not stored is lost when the reader closes the page. ([progress log, Nov 1](./progress-log.md))
 
 ---
 
@@ -513,6 +544,10 @@ The full operating principles are in [question-flow-principles.md](./product/que
 ### 11.4 Written records at two levels
 **Decision:** A concise progress entry per session, an eval log, and this file. Docs go straight to `main`; code goes through pull requests.
 **Why:** Anyone, including future me, can see what happened and why. ([CLAUDE.md](../CLAUDE.md))
+
+### 11.5 Pull requests can be made from a claude.ai session
+**Decision:** Repo work can run from a claude.ai session with push access: Claude plans, branches and opens the pull request, explaining each step; the owner reviews and merges every PR. The Codespace and Claude Code workflow remains available, and either can be used on any day, as long as each starts from the latest `main`.
+**Why:** It removes copying prompts and results between two windows while keeping the owner as the reviewer and keeping the learning in the review. ([progress log, Nov 1](./progress-log.md))
 
 ---
 
@@ -843,3 +878,23 @@ The full operating principles are in [question-flow-principles.md](./product/que
 ### 13.77 Working app name changes to "Squirmly"
 **Decision:** The working app name changes from "The Worm" to "Squirmly". Backups: Squirmi, Luciole, Matita, Aldus, Smudge. Still open before launch: a proper trademark search, buying a domain, and claiming the handles (§12).
 **Why:** An existing iPhone app called "Worm" (Books category, a social reading app) is a direct conflict. Squirmly is distinctive, spelled the way it sounds, two syllables, and easy to pass on by word of mouth (Beli-style), and it keeps the worm mascot and spine marks. Quick checks on Oct 18: no app named Squirmly on the App Store or Google Play; no trademark filed for SQUIRMLY; live SQUIRMY marks cover audio recordings, toys and infant products, not book apps; squirmly.com is for sale ($2,299) and getsquirmly.com looks available. Instagram and TikTok handles not yet checked. ([progress log, Oct 18](./progress-log.md))
+
+### 13.78 Art direction v1 from a full image review
+**Decision:** After reviewing all 67 question-flow drawings (keep 12, fix 23, cut 31) and eight fix batches (37 approved), the shared traits of the keepers became the [art direction](./design/art-direction.md): one clear subject, a real ground, layered depth, physically correct scenes, one quiet motion, subtle accents.
+**Why:** Inconsistent art was the weakest part of the prototype; written rules let every drawing, whoever or whatever makes it, be checked the same way. ([progress log, Nov 1](./progress-log.md))
+
+### 13.79 Test AI image generators before drawing more by hand
+**Decision:** Before more code-drawn SVG art, a small, low-cost bake-off tests image generators art-directed by Claude: first a style exploration on an open brief, then a consistency test on a set of scenes, plus an owned style model trained on approved images. Soft whole-scene motion is enough, so raster images are acceptable. Judged blind on a phone against today's drawings.
+**Why:** Three intensity scenes failed 3–4 times each, and the cuts were mostly the limits of hand-coded SVG; the rendering style itself may have been shaped by those limits. Concepts, themes and principles stay; only the drawing tool and style are in question. ([progress log, Nov 1](./progress-log.md))
+
+---
+
+## 14. Architecture and repo structure
+
+### 14.1 Everything swappable: contracts and adapters
+**Decision:** Every part likely to change (AI models, book sources, covers, image generation, storage, question flow, themes, the reveal renderer, security) talks to the rest of the app through a contract, with adapters that plug in and settings that choose them. Content lives as data; each contract has a test; feature flags let new parts run beside old ones. Guardrail (YAGNI): add a contract only when two options already exist, a swap is planned, an outside service is involved, or change would be expensive later. Details: [contracts and adapters](./engineering/contracts-and-adapters.md).
+**Why:** New models and tools appear constantly; swapping one must not break the app. The guardrail stops the opposite failure: layers built for a future that never comes. ([progress log, Nov 1](./progress-log.md))
+
+### 14.2 Feature folders for the app, shared folders for the infrastructure
+**Decision:** The repo is organized by feature (`features/discover`, `feedback`, `collection`, `you`, `privacy`) on shared infrastructure (`ui/`, `themes/`, `lib/`). A piece moves to shared only when a second feature needs it, and features never import from each other. Also decided: keep the repo name until Squirmly is claimed, no licence for now (all rights reserved), keep design prototypes in the repo. Details: [repo guide](./engineering/repo-guide.md).
+**Why:** The roadmap is a list of features, so feature folders mirror the product and keep changes contained, while shared infrastructure keeps the swappable parts in one place. A layer-based layout was considered first and rejected: it suits small apps but spreads one feature across many folders. ([progress log, Nov 1](./progress-log.md))

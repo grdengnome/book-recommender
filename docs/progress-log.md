@@ -1,5 +1,7 @@
 # Progress Log
 
+> **Status:** Living · One entry per session, oldest first.
+
 Running session-by-session log of what happened, what was decided, and what's next. Added to each time this project gets picked back up — see the bottom entry for where to start next.
 
 ---
@@ -860,3 +862,25 @@ Alongside: claim @squirmly handles and getsquirmly.com; put the new Hardcover ke
 6. Deeper Open Library pages experiment.
 
 Alongside: (a) reserves and stage events PR; (b) swap in a reserve when a pick's catalog description contradicts the selector's reason, plus the story check that flags and hides (never rewrites). Parked: "show the first pick early", to be judged in the question-flow prototype.
+
+---
+
+## November 1, 2026 — Oct 24–Nov 1 catch-up: question flow v2, v0 scope agreed, repo restructure begins
+
+**Conclusion:** v0 is scoped and the repo is being restructured to match it. v0 is a polished preview of the full Discover experience on a private link (decision 1.11; [v0 scope](./product/v0-scope.md)), soft target end of 2026. Every swappable part will sit behind a contract (14.1), and the repo moves to feature folders on shared infrastructure (14.2). This entry covers sessions held in claude.ai (no repo changes Oct 23–31).
+
+- **Question flow v2 designed and prototyped** (Oct 24–26): taste profile with appeal factors, formats separate from content (2.21); a themed café prototype went through five feedback rounds. "Just show me", the live taste line and the reader card were dropped; the correction path moved after the reveal (2.22). Docs: [principles](./product/question-flow/principles.md), [v2 design](./product/question-flow/v2-design.md).
+- **Art direction v1** from a review of 67 drawings, 37 approved (13.78; [art direction](./design/art-direction.md)). Three intensity scenes failed 3–4 times each, which led to a planned image generator bake-off before any more hand-drawn SVG (13.79).
+- **Read-only repo audit** (Oct 27): no redesign needed; the main engine fix is one AI gateway, since five files call Anthropic directly with hard-coded model names ([contracts and adapters](./engineering/contracts-and-adapters.md)).
+- **Idea brainstorm** (Oct 28): 51 ideas sorted into v0, Later and Vision ([roadmap and backlog](./product/roadmap-and-backlog.md)). v0 decisions: simple favourites doorway (2.23), stored anonymous feedback (10.6), rate limit + basic prompt-injection guard + privacy note (10.5), soft target end of 2026 (9.12).
+- **Repo restructure approved** (Oct 29): feature-based hybrid, repo name kept for now, no licence, prototypes kept (14.2). PRs can now run from a claude.ai session, with the owner reviewing and merging (11.5).
+- **This PR (restructure PR 1, docs only):** docs grouped by audience (product, design, engineering, quality, research, archive) with `git mv`; a [docs map](./README.md); a status line on every doc; Project-only docs brought into the repo; decisions 1.11–14.2. No code changed.
+
+**Next:**
+1. Restructure PR 2: rewrite README and CLAUDE.md for today's product and rules.
+2. Restructure PR 3: hygiene and automatic checks (`.env.example`, logs out of the repo, `scratchpad/` split, `docs/mockups/` → `prototypes/`, first tests, GitHub Actions).
+3. Restructure PR 4: contracts, AI gateway and engine move into `lib/`; eval set proves behaviour unchanged.
+4. Restructure PRs 5–6: app skeleton; data store, feedback, rate limit, input guard.
+5. Image generator bake-off, Part A (style exploration), alongside, once the image tool accounts are set up.
+
+Alongside: claim @squirmly and getsquirmly.com; put the new Hardcover key in Vercel before deleting the old one.
