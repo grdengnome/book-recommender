@@ -60,11 +60,11 @@ curl -X POST localhost:3000/api/recommend \
 ## Docs
 
 - [`docs/decisions.md`](./docs/decisions.md): every product and architecture decision, what was rejected, and why
-- [`docs/design.md`](./docs/design.md): the design system: brief, principles, and the five themes
-- [`docs/spec.md`](./docs/spec.md): product spec
-- [`docs/eval-set.md`](./docs/eval-set.md): rubric and test cases
-- [`docs/eval-log.md`](./docs/eval-log.md): quality findings from each eval run
+- [`docs/design/design-system.md`](./docs/design/design-system.md): the design system: brief, principles, and the five themes
+- [`docs/product/spec.md`](./docs/product/spec.md): product spec
+- [`docs/quality/eval-set.md`](./docs/quality/eval-set.md): rubric and test cases
+- [`docs/quality/eval-log.md`](./docs/quality/eval-log.md): quality findings from each eval run
 - [`docs/progress-log.md`](./docs/progress-log.md): session-by-session build log
-- [`docs/question-bank.md`](./docs/question-bank.md): question wording and flow mechanics
+- [`docs/product/question-flow/question-bank.md`](./docs/product/question-flow/question-bank.md): question wording and flow mechanics
 - [`scratchpad/README.md`](./scratchpad/README.md): index of the experiments behind the decisions
-- [`docs/checkpoint.md`](./docs/checkpoint.md), [`docs/capture-doc.md`](./docs/capture-doc.md): original design notes and idea capture (archival)
+- [`docs/archive/checkpoint.md`](./docs/archive/checkpoint.md), [`docs/archive/capture-doc.md`](./docs/archive/capture-doc.md): original design notes and idea capture (archival)

@@ -1,6 +1,6 @@
 # Question flow operating principles
 
-*Adopted Oct 22, 2026; [decision 2.20](./decisions.md). Evidence: [question core audit](./research/question-core-audit-2026-10-22.md).*
+*Adopted Oct 22, 2026; [decision 2.20](../../decisions.md). Evidence: [question core audit](../../research/question-core-audit-2026-10-22.md).*
 
 Goal: the questions get at what the reader is really after, adaptively teasing out the underlying request, while feeling intriguing, interactive and fun, never like a form. The question flow is part of the product's delight, not a toll before it.
 
@@ -8,7 +8,7 @@ Goal: the questions get at what the reader is really after, adaptively teasing o
 
 2. **Every question must earn its place, measured continuously.** More questions means more drop-off. A question is asked only if its answer is likely to change the picks (the Oct 22 ablation: mood/length moved picks most; appetite moved nothing). Time budget ~60–90 seconds, 4–7 taps, with "just show me" always available.
 
-3. **Make answering the fun part.** Comparisons beat absolute questions ("a storm at sea or a fire in a cabin?" beats "rate your mood 1–5"). Learn from examples: briefly show 2–3 real covers ("Would you read this? Yes / Seen it / Nope") to calibrate familiar vs surprising without asking it. Show the profile forming live in a small updating line ("Something gripping… short… nothing too dark"). Mix formats to fit each slot: autocomplete for an anchor, this-or-that for mood, a slider for intensity, chips for avoid, the cover game for calibration (the themed answer-format designs in [design §8](./design.md) cover most of these).
+3. **Make answering the fun part.** Comparisons beat absolute questions ("a storm at sea or a fire in a cabin?" beats "rate your mood 1–5"). Learn from examples: briefly show 2–3 real covers ("Would you read this? Yes / Seen it / Nope") to calibrate familiar vs surprising without asking it. Show the profile forming live in a small updating line ("Something gripping… short… nothing too dark"). Mix formats to fit each slot: autocomplete for an anchor, this-or-that for mood, a slider for intensity, chips for avoid, the cover game for calibration (the themed answer-format designs in [design §8](../../design/design-system.md) cover most of these).
 
 4. **The "here's what I'm hearing" moment.** Before the reveal, one editable card reflects the request back ("A short, gripping read with a quiet ending, nothing gory"). It builds trust, catches misunderstandings, and triggers early table-setting.
 

@@ -2,7 +2,7 @@
 
 Source files for the Worm design canvas: five themes, eight screens each (40 screens), plus `canvas.json` (the canvas layout).
 
-- These are a backup of the mockup artwork, not app code. The app is built from `docs/design.md`.
+- These are a backup of the mockup artwork, not app code. The app is built from `docs/design/design-system.md`.
 - File prefixes: `Main`/`A-` Café Bookshop, `B-` Fantasy, `C-` Superhero, `D-` Mystery, `E-` Sci-fi.
 - Each scene is inline SVG inside its file, so the artwork can be reused directly when the real screens are built.
 - The files load `support.js` from the design canvas, so they will not render by themselves in a browser.

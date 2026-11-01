@@ -1,6 +1,6 @@
 # Question core audit (October 22, 2026)
 
-The evidence behind [decision 2.20](../decisions.md) (new question core), and the basis for the [question flow principles](../question-flow-principles.md). Three parts: an audit of real requests, a question-value (ablation) test on the live engine, and a free check of how "right now" options map to catalog subjects. Run on branch `experiment/question-core`; scripts in `scratchpad/question-core-*.mjs` on that branch, raw output in `scratchpad/experiments/2026-10-23-question-core/` (local, not committed). Spend: $2.37.
+The evidence behind [decision 2.20](../decisions.md) (new question core), and the basis for the [question flow principles](../product/question-flow/principles.md). Three parts: an audit of real requests, a question-value (ablation) test on the live engine, and a free check of how "right now" options map to catalog subjects. Run on branch `experiment/question-core`; scripts in `scratchpad/question-core-*.mjs` on that branch, raw output in `scratchpad/experiments/2026-10-23-question-core/` (local, not committed). Spend: $2.37.
 
 **Bottom line:** only about 1 in 4 real requests starts from a favorite book; most ask for a specific ingredient, a mood or an occasion. In the engine, the current mood decides the picks, and it overrides the anchor. A turn-off is decisive when the reader's other answers point toward what they want to avoid. Removing the anchor, the why or appetite never moved the result beyond normal run-to-run variation, and appetite had no measurable effect in any case.
 
