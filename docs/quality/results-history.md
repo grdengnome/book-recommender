@@ -1,3 +1,7 @@
+# Eval results history
+
+> **Status:** Reference · Raw outputs and scoring from early eval runs (July–September 2026). Findings live in the [eval log](./eval-log.md).
+
 ## Prompt v2 — removed named calibration examples, softened bestseller stance, clarified taste-description categories (2026-07-08)
 
 _Note: while running this batch, discovered `max_tokens: 1500` in `route.ts` was letting extended-thinking tokens crowd out the actual response, causing truncated/empty output on 6 of 10 cases. Bumped to `max_tokens: 4000` (approved by user) before re-running; results below are from the fixed config, not the prompt change itself._

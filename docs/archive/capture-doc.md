@@ -1,5 +1,7 @@
 # Original Idea Capture (archival)
 
+> **Status:** Archived · The original idea capture (July 2026). Kept for history; superseded by the [roadmap and backlog](../product/roadmap-and-backlog.md) and [v0 scope](../product/v0-scope.md).
+
 *This is the raw, unedited capture doc that everything else in this repo was synthesized from — spec.md, question-bank.md, and eval-set.md are all downstream of this. Kept verbatim, fragments and all, so there's always a way to check "did I actually say that" against the source rather than trusting later summaries.*
 
 ---

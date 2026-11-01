@@ -1,5 +1,7 @@
 # Eval Log
 
+> **Status:** Living · Findings from each eval run, newest first. Last reviewed Nov 1, 2026.
+
 Running log of quality findings, known limitations, and decisions made while evaluating recommendation output against docs/quality/eval-set.md's rubric. Newest entries at the top.
 
 ---

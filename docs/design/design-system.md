@@ -1,5 +1,7 @@
 # Design System
 
+> **Status:** Living · The shared structure, five themes, motion and the reveal book. Illustration rules are in [art direction](./art-direction.md). Last reviewed Nov 1, 2026.
+
 *How Squirmly looks and why. Decisions behind it are in [`decisions.md`](../decisions.md) §13; what each screen does is in [`spec.md`](../product/spec.md) §4. Mockups live on the design canvas (private link, held by the owner). Last updated October 18, 2026.*
 
 ---

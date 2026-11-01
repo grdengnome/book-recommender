@@ -59,6 +59,8 @@ curl -X POST localhost:3000/api/recommend \
 
 ## Docs
 
+Full map of every doc, with status: [`docs/README.md`](./docs/README.md).
+
 - [`docs/decisions.md`](./docs/decisions.md): every product and architecture decision, what was rejected, and why
 - [`docs/design/design-system.md`](./docs/design/design-system.md): the design system: brief, principles, and the five themes
 - [`docs/product/spec.md`](./docs/product/spec.md): product spec

@@ -1,5 +1,7 @@
 # Checkpoint — Question Architecture & Eval Set Review
 
+> **Status:** Archived · A July 2026 checkpoint on question architecture and the eval set. Superseded by decision 2.20 and [question flow v2](../product/question-flow/v2-design.md).
+
 *Converted from the original session checkpoint doc. This is a decision log, not a spec — see `spec.md` for the current merged state. Kept here for historical traceability of *why* each decision was made.*
 
 ## Decisions locked this session

@@ -1,5 +1,7 @@
 # Book Recommender — Spec
 
+> **Status:** Reference · Partly superseded. The question flow in §4a is replaced by [question flow v2](./question-flow/v2-design.md), and the v0 scope by [v0 scope](./v0-scope.md). The engine sections (§4b, §5) are current. Full rewrite pending. Last reviewed Nov 1, 2026.
+
 *Current state of the product and its design. Decisions, reversals, and rejected paths are in [`decisions.md`](../decisions.md); this file says what the product is and how it works. Last updated October 17, 2026.*
 
 ---
