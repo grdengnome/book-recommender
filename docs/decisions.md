@@ -235,6 +235,10 @@ The full operating principles are in [question-flow-principles.md](./product/que
 **Decision:** Test a specific question on only the relevant cases.
 **Why:** Faster evidence at lower cost, while keeping full milestone comparisons. ([eval log, Aug 4](./quality/eval-log.md))
 
+### 3.7 Automatic checks on every pull request, with offline tests of the engine's rules
+**Decision:** GitHub Actions runs the type check, the linter and the tests on every pull request and push to `main`; checks must be green before merging. Tests use Node's built-in test runner and run fully offline (no API keys, no spend): grounding, merge and trace-equivalence first. Paid evals stay a deliberate step, and Vercel's own preview build covers the app build.
+**Why:** The engine is about to move behind the AI gateway (PR 4) and models will keep changing (14.3); rules like "picks come only from the pool" need a machine checking them on every change, not memory. The built-in runner needs nothing new installed; Vitest can join when screen tests arrive (PR 5). ([progress log, Nov 1](./progress-log.md))
+
 ---
 
 ## 4. Defining "non-obvious"
@@ -469,7 +473,7 @@ The full operating principles are in [question-flow-principles.md](./product/que
 
 ### 9.6 Clean the repo for a reviewer
 **Decision:** Index experiment scripts, remove finished ones, fix the build.
-**Why:** A portfolio repo should be navigable. The cleanup also found the app couldn't build from a fresh copy. ([scratchpad index](../scratchpad/README.md))
+**Why:** A portfolio repo should be navigable. The cleanup also found the app couldn't build from a fresh copy. ([scratchpad index](../experiments/README.md))
 
 ### 9.7 Plan the whole v0 flow before building any of it
 **Decision:** Sketch every screen and the engine changes each needs before building. Considered and set aside: shipping a text-box-only slice first, or starting with card design alone.
@@ -522,6 +526,10 @@ The full operating principles are in [question-flow-principles.md](./product/que
 ### 10.6 Feedback is stored, anonymously
 **Decision:** v0 stores thumbs up or down per pick, an optional short note, which picks were shown, and general "send feedback" messages, with no personal details.
 **Why:** Feedback is the main point of v0; anything not stored is lost when the reader closes the page. ([progress log, Nov 1](./progress-log.md))
+
+### 10.7 Local logs and traces never live in the repo
+**Decision:** The app's search log, Hardcover failure log and debug traces are written to a gitignored `.local/` folder instead of tracked files in the repo. The historical `query-log.json` stays in `experiments/` as evidence.
+**Why:** Once outside readers use v0, these logs can hold their answers, and the repo is public. Production logging moves to the data store (PR 6). ([progress log, Nov 1](./progress-log.md))
 
 ---
 
@@ -772,7 +780,7 @@ The full operating principles are in [question-flow-principles.md](./product/que
 
 ### 13.49 Coverage is fine; sharpness is the gap
 **Decision:** Cover work focuses on sharpness, not coverage.
-**Why:** 55 of 57 real picks had a real cover, but the typical one is about 326×500, against about 570px wide for a crisp phone reveal. Judged usable by eye on a phone. ([cover research summary](../scratchpad/cover-research/summary.md); [progress log, Oct 13](./progress-log.md))
+**Why:** 55 of 57 real picks had a real cover, but the typical one is about 326×500, against about 570px wide for a crisp phone reveal. Judged usable by eye on a phone. ([cover research summary](../experiments/cover-research/summary.md); [progress log, Oct 13](./progress-log.md))
 
 ### 13.50 Hardcover covers only with a strict title and author match
 **Decision:** A Hardcover cover is used only when its title and author strictly match the pick.

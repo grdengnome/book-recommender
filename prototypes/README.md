@@ -1,4 +1,6 @@
-# Design mockups (snapshot, October 7, 2026)
+# Design prototypes (snapshot, October 7, 2026)
+
+> **Status:** Reference · Moved from `docs/mockups/` on Nov 1, 2026. The illustration style is under review in the image generator bake-off ([art direction](../docs/design/art-direction.md)).
 
 Source files for the Worm design canvas: five themes, eight screens each (40 screens), plus `canvas.json` (the canvas layout).
 

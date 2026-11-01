@@ -223,7 +223,7 @@ Retrieval is a tool the model calls (Anthropic tool use), not instructions embed
 
 ### 5d. Cover images
 
-Covers are their own gated workstream: nothing moves toward launch until real covers pass a reveal check. Research: `scratchpad/cover-research/summary.md`.
+Covers are their own gated workstream: nothing moves toward launch until real covers pass a reveal check. Research: `experiments/cover-research/summary.md`.
 - **Sources:** Open Library → Hardcover (only with a strict title + author match) → Google Books (needs a free API key; not yet tested) → themed placeholder (§4c).
 - **Fake-cover detection (required):** labelled stand-ins ("This is not the actual book cover") and Project Gutenberg auto-generated covers count as no cover.
 - **Enhancement:** each cover is upscaled 2× with a faithful upscaler (EDSR-style: sharpens existing detail only, never redraws; text must stay intact). It runs on a hosted GPU while the loading screen runs. If it isn't ready in time, the original is shown and the enhanced version is saved for next time.

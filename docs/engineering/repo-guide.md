@@ -9,7 +9,8 @@
 README.md                 Front door
 CLAUDE.md                 Rules for AI coding sessions
 .env.example              Every setting name with a one-line purpose, no values
-.github/workflows/        Automatic checks on every pull request
+.github/workflows/        Automatic checks on every pull request (type check, lint, tests)
+.local/                   Local logs and debug traces (gitignored, never committed)
 
 app/                      Next.js routes only: tiny files that render a feature
 features/                 One folder per part of the product
@@ -29,8 +30,8 @@ lib/                      Shared infrastructure, no screens
 evals/                    Eval cases, rubric, one runner, reports
 tests/                    Cross-cutting automatic checks (contract tests, grounding, trace)
 scripts/                  Maintenance tools
-experiments/              One-off investigations (today's scratchpad/)
-prototypes/               Design prototypes (today's docs/mockups/)
+experiments/              One-off investigations and their evidence (was scratchpad/)
+prototypes/               Design prototypes (was docs/mockups/)
 docs/                     See docs/README.md
 ```
 
@@ -44,9 +45,9 @@ Plus the swappability rule: app code never calls an outside service directly; it
 | PR | What | Status |
 |---|---|---|
 | 1 | Docs restructure: docs by audience, docs map, status lines, archive, Project docs brought in | Done (#11) |
-| 2 | Rewrite README and CLAUDE.md for today's product and rules | Done |
-| 3 | Hygiene and automatic checks: `.env.example`, live logs out of the repo, `scratchpad/` split into `experiments/`, `evals/`, `scripts/`; `docs/mockups/` → `prototypes/`; first tests; GitHub Actions | Next |
-| 4 | Contracts, AI gateway and engine move into `lib/`; `route.ts` becomes thin; eval set proves behaviour unchanged | Planned |
+| 2 | Rewrite README and CLAUDE.md for today's product and rules | Done (#12) |
+| 3 | Hygiene and automatic checks: `.env.example`, live logs out of the repo, `scratchpad/` split into `experiments/`, `evals/`, `scripts/`; `docs/mockups/` → `prototypes/`; first tests; GitHub Actions | Done |
+| 4 | Contracts, AI gateway and engine move into `lib/`; `route.ts` becomes thin; eval set proves behaviour unchanged | Next |
 | 5 | App skeleton: `features/`, `ui/`, `themes/`, `lib/config/`, "coming soon" tabs, privacy page | Planned |
 | 6 | Store and trust basics: data store, feedback, rate limit, input guard | Planned |
 

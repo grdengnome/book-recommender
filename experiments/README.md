@@ -1,42 +1,23 @@
-# scratchpad/
+# experiments/
 
-## Where we stopped (Oct 22, fix PR 1 open for review, not merged)
+> **Status:** Reference · One-off investigations and the evidence behind past decisions. Not app code, not linted, not type-checked. Last updated Nov 1, 2026.
 
-Timing run, docs and PR are done; see the progress log's Oct 22 entry for the Next list. The experiment drivers (`run-six.mjs`, `table-sample-experiment.mts`) were only in an Oct 21 temp folder and are gone; rebuild them from the eval log's Oct 21 entries if needed.
+Formerly `scratchpad/`. In November 2026 it was split by purpose:
+- **`evals/`:** the eval runners (how recommendation quality is measured). See `evals/README.md`.
+- **`scripts/`:** maintenance tools, like refreshing the Hardcover tag list. See `scripts/README.md`.
+- **`tests/`:** automatic checks, run on every pull request (the old `trace-equivalence-check.mts` now lives there).
+- **`experiments/` (this folder):** everything else: investigations, their evidence, and cover research.
 
----
+The app no longer writes anything here. Its live logs (`query-log.json`, `hardcover-failure-log.json`) and debug traces now go to the gitignored `.local/` folder, so real readers' answers can never be committed. The `query-log.json` kept in this folder is the historical log up to Nov 1, 2026, and the evidence behind the Aug 4 narrow-pool investigation and the Sept 20 grounding checks.
 
-Working folder for experiments, eval drivers, and diagnostics — not part of the app build. It can't be deleted, though: the app writes two live logs here while it runs:
+Most `.json` output here is gitignored; evidence files are force-added (`git add -f`) and listed below. Finished experiments have been removed over time; any of them can be recovered with `git log --all -- scratchpad/<name>`.
 
-- `query-log.json` — every `search_books` call (query, subject, pool contents), appended by `lib/tools/searchBooks.ts`.
-- `hardcover-failure-log.json` — Hardcover failures (missing token, API error, empty or failed tag mapping), appended by `app/api/recommend/route.ts`. Gitignored.
-
-With `ENGINE_TRACE=1` in `.env.local`, the app also writes one debug trace per request to `traces/` (`lib/trace/requestTrace.ts`): every stage's inputs, outputs, scores, timings, tokens and dollar cost, under fixed stage keys `A_tag_picking` … `I_response`. Off by default, never on Vercel, gitignored. Traces hold the full taste description; don't share them outside the project.
-
-Most other `.json` output here is gitignored run output. Finished experiments have been removed; any of them can be recovered with `git log --all -- scratchpad/<name>`.
-
-## Critical — don't delete
-
-- `query-log.json` — the live search log above; also the raw evidence behind the Aug 4 narrow-pool investigation and the Sept 20 grounding-rejection checks.
-- `hardcover-tags-gt100.json` — the full Hardcover Tag-category list (count > 100). `lib/hardcover/tagVocabulary.ts` is generated from it.
-- `run-eval.mjs` — holds the 11 eval cases (verbatim from `docs/quality/eval-set.md`); `run-eval-grounded.mjs` reads its `CASES` array rather than retyping them.
-
-## Tools — still in use
-
-- `trace-equivalence-check.mts` — offline proof that the debug trace only watches: runs eval case 1's input through the real route with tracing off and on (canned catalog and model replies, seeded shuffles, no API spend) and checks every model input is byte-identical, plus the off/Vercel/secrets/cost rules. `node scratchpad/trace-equivalence-check.mts` (no `--env-file`).
-- `run-eval-grounded.mjs` — runs all 11 eval cases against the live `/api/recommend` route and parses the dev-server log for attempt counts, pick sources (OL/HC), and pool sizes.
-- `run-eval-narrow.mjs` — same driver as `run-eval.mjs`, limited to cases 3, 4, 6, 8 (the ones that showed title clustering).
-- `classify-grounding-rejections.cjs` — sorts grounding-check rejections from an eval run into causes, using tolerant title/author matching against the logged pools.
+## Tools still useful (they import app code from `../lib`)
+- `classify-grounding-rejections.cjs` — sorts grounding-check rejections from an eval run into causes, using tolerant title/author matching against the logged pools. Paths inside point at the old Codespace location; update before reuse.
 - `attribute-pool-sources.mjs` — re-runs each logged query against Open Library's two endpoints to work out which source each pool title came from; writes `pool-source-attribution.json`.
-- `hardcover-pull-tags.mjs` — re-pulls the Hardcover tag list into `hardcover-tags-gt100.json` (step 1 of refreshing the tag list).
-- `check-tag-exclusions.mts` — runs `hardcover-tags-gt100.json` through `lib/hardcover/tagExclusions.ts` and reports what's excluded and kept (step 2: filter).
-- `capture-anthropic-requests.mjs` — dev-only preload that records every request sent to the Anthropic API, to see exactly what the model receives. No production logging needed.
-- `hc-single-book-lookup.mjs` — shows what Hardcover's API returns for one book ID (description, tags, cross-source IDs).
-- `prod-repro-check.mjs` — sends cases 1, 9, and 10 to the live `/api/recommend` route exactly as a normal client would. Reads the response's `raw` model message, which the route stopped sending in fix PR 1 (Oct 21); it needs reworking against the trace before reuse.
-- `pick-check-replay.mts` and the `pick-check-build-*` scripts below replay frozen Sept 26 inputs through the old string interface of `checkPickDescriptions` (`why` + `nonObvious`). Since fix PR 1 it takes pick objects and checks `why` + `angleText`, so they need converting before the next checker-prompt experiment.
-- `pick-check-replay.mts` — replays the pick-description check N times on frozen inputs and scores each verdict; used to compare prompt/model changes on identical inputs.
-- `pick-check-build-live-inputs.mts` — freezes the Sept 26 live-run picks (cases 1 and 8) as replay inputs and writes the combined v2 input set.
-- `pick-check-build-replay-inputs.mts` — builds the original frozen input set (cases 1, 5, 8) for `pick-check-replay.mts`.
+- `prod-repro-check.mjs` — sends cases 1, 9 and 10 to the live `/api/recommend` route. Reads the response's `raw` model message, which the route stopped sending in Oct; needs reworking against the trace before reuse.
+- `pick-check-replay.mts` — replays the pick-description check N times on frozen inputs and scores each verdict; `pick-check-build-live-inputs.mts` and `pick-check-build-replay-inputs.mts` build those inputs. They use the old string interface of `checkPickDescriptions`; convert before the next checker experiment.
+- `cover-research/` — cover coverage, size and upscaling research (Oct 13); findings in `cover-research/summary.md`.
 
 ## Evidence — the basis for a past decision
 
