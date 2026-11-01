@@ -22,6 +22,8 @@ flowchart LR
   D --> OUT
 ```
 
+Every model call in this pipeline goes through the AI gateway (`lib/ai/gateway.ts`, decision 14.4). The models shown are today's settings in `lib/ai/slots.ts`, not fixed choices (decision 14.3).
+
 Rules enforced in code (see [CLAUDE.md](../../CLAUDE.md)): picks come only from the retrieved pools; the model sees only title, author and subjects, shuffled; tag selection never sees tag counts; length overflow never fails a request.
 
 ## Heading: features on shared infrastructure

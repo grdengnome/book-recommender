@@ -14,9 +14,8 @@
 // isn't visible input to the selection, so it can't be leaned on even by accident.
 import { HARDCOVER_TAG_VOCABULARY } from "./tagVocabulary";
 import { noopTrace, type RequestTrace } from "../trace/requestTrace";
+import { callModel, modelFor } from "../ai/gateway";
 
-const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
-const MODEL = "claude-sonnet-5";
 const MIN_TAGS = 2;
 const MAX_TAGS = 4;
 
@@ -114,33 +113,21 @@ export async function mapTasteToHardcoverTags(
   tasteDescription: string,
   trace: RequestTrace = noopTrace,
 ): Promise<MapTasteToTagsResult> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) throw new Error("ANTHROPIC_API_KEY is not set");
-
   // Shuffled every call: no positional bias toward whatever happened to be listed first.
   const shuffledVocabulary = shuffle([...HARDCOVER_TAG_VOCABULARY]);
   const prompt = buildPrompt(tasteDescription, shuffledVocabulary.map((t) => t.tag));
 
   const requestBody = {
-    model: MODEL,
+    model: modelFor("tagMapping"),
     max_tokens: 300,
     messages: [{ role: "user", content: prompt }],
   };
   const callStart = performance.now();
-  const res = await fetch(ANTHROPIC_API_URL, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-    },
-    body: JSON.stringify(requestBody),
-  });
-
-  const data = await res.json();
+  const res = await callModel(requestBody);
+  const data = res.data;
   // Recorded before parsing, so a call whose answer can't be parsed still shows its cost.
   trace.modelCall("A", {
-    model: MODEL,
+    model: requestBody.model,
     request: requestBody,
     response: data,
     httpStatus: res.status,

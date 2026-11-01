@@ -29,13 +29,12 @@ import {
   type OverLimitField,
 } from "@/lib/output/validatePicks";
 import { writeCard } from "@/lib/output/writeCards";
-import { createPickScanner, streamMessage } from "@/lib/output/streamSelection";
+import { createPickScanner } from "@/lib/output/streamSelection";
+import { aiConfigError, modelFor, streamModel } from "@/lib/ai/gateway";
 import { formatShorten, shortenFields } from "@/lib/output/shortenFields";
 
 // Engine runs take up to ~2 min; 300s is the Vercel Hobby maximum.
 export const maxDuration = 300;
-
-const MODEL = "claude-sonnet-5";
 
 // Bounds the search_books retry loop (spec.md 5b leaves the retry judgment call
 // to the model, but the code still needs a hard ceiling). The Nth+1 call below
@@ -215,9 +214,9 @@ For each recommendation, include:
 - "mood": one word for the book's mood, shown to the reader as a clue before the book is revealed. Give each of the 3 picks a different mood word.`;
 
 export async function POST(request: NextRequest) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    return NextResponse.json(errorBody("misconfigured", "ANTHROPIC_API_KEY is not set"), { status: 500 });
+  const configError = aiConfigError();
+  if (configError) {
+    return NextResponse.json(errorBody("misconfigured", configError), { status: 500 });
   }
 
   const body = await request.json().catch(() => null);
@@ -249,7 +248,7 @@ export async function POST(request: NextRequest) {
   // the Hardcover pre-fetch is shared since it depends only on tasteDescription.
   for (let attempt = 1; attempt <= MAX_GENERATION_ATTEMPTS; attempt++) {
     const attemptTrace = trace.with({ attempt });
-    const generation = await generateOnce(apiKey, tasteDescription, hardcoverPoolPromise, attemptTrace);
+    const generation = await generateOnce(tasteDescription, hardcoverPoolPromise, attemptTrace);
     if (!generation.ok) return respond(trace, generation.body, generation.status);
 
     if (generation.status === "ready") {
@@ -260,7 +259,7 @@ export async function POST(request: NextRequest) {
 
       // Length overflow (lib/output/shortenFields.ts): one small call shortens only the
       // over-limit fields; on any failure the original text is kept.
-      const shortened = await shortenFields(apiKey, picks, overLimit, attemptTrace);
+      const shortened = await shortenFields(picks, overLimit, attemptTrace);
       console.log(formatShorten(shortened));
       attemptTrace.add("H", { kind: "shorten", ...shortened });
 
@@ -270,7 +269,6 @@ export async function POST(request: NextRequest) {
       // any failure.
       const checkStart = performance.now();
       const checked = await checkPickDescriptions(
-        apiKey,
         tasteDescription,
         shortened.picks,
         pickMetadata,
@@ -328,7 +326,6 @@ type PickOutcome =
 // An Anthropic API failure ends the request — API failures are not retried here — with a
 // generic error body; the detail goes to the server log and the trace.
 async function generateOnce(
-  apiKey: string,
   tasteDescription: string,
   hardcoverPoolPromise: Promise<HardcoverBookCandidate[]>,
   trace: RequestTrace,
@@ -348,7 +345,7 @@ async function generateOnce(
     const roundTrace = trace.with({ round });
 
     const requestBody = {
-      model: MODEL,
+      model: modelFor("selection"),
       max_tokens: 8000,
       // Cache breakpoint on the fixed instructions (tools render first, then system), ~3k
       // tokens, above Sonnet 5's 1,024-token minimum. Later rounds and later requests within
@@ -375,13 +372,13 @@ async function generateOnce(
       const earlierTitles = arrivedTitles.slice();
       const title = (raw as { poolTitle?: unknown } | null)?.poolTitle;
       if (typeof title === "string" && title.trim()) arrivedTitles.push(title.trim());
-      roundOutcomes.push(runPick(apiKey, tasteDescription, raw, index, seenCandidates, earlierTitles, roundTrace));
+      roundOutcomes.push(runPick(tasteDescription, raw, index, seenCandidates, earlierTitles, roundTrace));
     });
-    const streamed = await streamMessage(apiKey, requestBody, scan);
+    const streamed = await streamModel(requestBody, scan);
     data = streamed.data;
     // Snapshotted now, before `messages` grows: this is exactly what this call sent.
     roundTrace.modelCall("C", {
-      model: MODEL,
+      model: requestBody.model,
       request: requestBody,
       response: data,
       httpStatus: streamed.status,
@@ -497,7 +494,6 @@ async function generateOnce(
 // from the stream (never from their cards, so no card waits on another), so this card's
 // angle can differ from theirs.
 async function runPick(
-  apiKey: string,
   tasteDescription: string,
   raw: unknown,
   index: number,
@@ -519,7 +515,7 @@ async function runPick(
     console.log(formatPickMetadata([metadata], lookupMs));
     pickTrace.add("G", { kind: "result", ms: lookupMs, picks: [metadata] });
 
-    const card = await writeCard(apiKey, tasteDescription, selected, checked, metadata, earlierTitles, pickTrace);
+    const card = await writeCard(tasteDescription, selected, checked, metadata, earlierTitles, pickTrace);
     pickTrace.add("W", { kind: "result", ...card });
     if (!card.ok) return { ok: false, reason: `card writing failed: ${card.error}`, checked };
     return { ok: true, selected, checked, metadata, card: card.card, overLimit: card.overLimit };

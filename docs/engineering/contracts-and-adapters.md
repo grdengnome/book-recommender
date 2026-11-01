@@ -1,6 +1,6 @@
 # Contracts and adapters: keeping every part swappable
 
-> **Status:** Living · Agreed Oct 28, 2026 ([decision 14.1](../decisions.md)). Describes the target design; the code moves to it in PR 4 of the [repo restructure](./repo-guide.md). Last updated Nov 1, 2026.
+> **Status:** Living · Agreed Oct 28, 2026 ([decision 14.1](../decisions.md)). Describes the target design; the AI gateway is built (PR 4a), and the other contracts arrive as their parts are built ([repo restructure](./repo-guide.md)). Last updated Nov 1, 2026.
 
 ## The principle
 New AI models and tools appear constantly, and Squirmly will keep changing. Changing the UI, data storage, question flow, a model, a book source or a theme must not break the rest of the app. Each part plugs into the wider infrastructure, and as many parts as reasonable follow this rule.
@@ -46,5 +46,6 @@ Otherwise keep plain code: a screen's layout, a button style, small helpers. If 
 
 ## Where the code stands (audit, Oct 27)
 - **Already close:** each AI job lives in its own file; Open Library and Hardcover are separate modules joined in one merge step; `lib/output/pickSchema.ts` defines the pick and card shapes; `lib/trace/` records which model ran each call, with tokens and cost (local only).
-- **To do:** five files each build their own raw request to Anthropic with a hard-coded model name; book sources return different shapes with no shared contract; there are no per-slot test sets; production doesn't record which engine made each output (arrives with the data store).
+- **Done (PR 4a):** every model call goes through `lib/ai/gateway.ts`; `slots.ts` picks each job's model, and an `AI_SLOT_<JOB>` setting can override one for an experiment. Requests still use Anthropic's message format; a provider-neutral format arrives with the first non-Anthropic adapter.
+- **To do:** book sources return different shapes with no shared contract; there are no per-slot test sets; production doesn't record which engine made each output (arrives with the data store).
 - **Not built yet, so built on contracts from day one:** the app screens, covers and the cover enhancer, illustration, the reveal renderer, storage and security.

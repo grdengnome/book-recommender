@@ -6,6 +6,30 @@ Running log of quality findings, known limitations, and decisions made while eva
 
 ---
 
+## 2026-11-01 — Restructure PR 4a: AI gateway live check (cases 1, 5, 6, 8, 9, 10)
+
+**Change:** every model call now goes through the AI gateway (decision 14.4). Same models, prompts and settings; the golden-request test shows every request the engine sends is identical to before. This run checks the live connection only (key, streaming, timeouts). Run by Grim in his Codespace on `feat/ai-gateway`, dev workspace (spend-capped at $20). **Spend: $0.54.** One run each; not scored against the rubric.
+
+| Case | Oct 22 (Fix PR 1) | This run | Picks |
+|---|---|---|---|
+| 1 | 25.1s · $0.088 | 27.6s · $0.093 | Gilead · Strangers · Sadler's Birthday |
+| 5 | 23.6s · $0.073 | 22.8s · $0.086 | Three Men in a Boat · The Thursday Murder Club · Good Omens |
+| 6 | 19.8s · $0.084 | 22.1s · $0.077 | Satantango · The Assault · Of Love and Other Demons |
+| 8 | 31.0s · $0.089 | 30.5s · $0.113 | Satantango · Garlic, Mint & Sweet Basil · Paris Trout |
+| 9 | 24.9s · $0.076 | 37.2s · $0.087 | ZeroZeroZero · The Radium Girls · Furious Hours |
+| 10 | 29.3s · $0.086 | 24.6s · $0.085 | Ghost Wall · The Prince of Mist · Lolly Willowes |
+| **Median** | **25.0s** | **26.1s** | |
+| **Mean** | 25.6s · $0.083 | 27.5s · $0.090 | |
+
+Times are the trace's server-side totals, as in the Oct 22 table.
+
+**Findings:**
+- **The gateway works live:** 6 of 6 cases returned 3 picks, with Sonnet 5 on every case and Haiku 4.5 where a later step fired (cases 8 and 9). The models column confirms the slots resolved to today's settings.
+- **Speed and cost are within run-to-run noise.** Faster in 3 cases, slower in 3. Case 9's 37.2s is the outlier; the Oct 22 run showed the selection call alone varying 10.8–20.4s with its thinking. Since the requests are byte-identical, the gateway itself can't change what the model does; one run per case can't separate a 1–2s difference from noise.
+- **Known quality issues, unchanged and not caused by this PR:** case 5 drifted to famous picks (*The Thursday Murder Club*, *Good Omens*), the core "obvious picks" problem; *Sátántangó* appeared in two cases (6 and 8); case 8 picked Izzo's *Garlic, Mint & Sweet Basil* again (open question 8.6).
+
+---
+
 ## 2026-10-22 — Question core: what each question contributes (cases 1, 5, 6, 8, 10 + mood vs anchor)
 
 **Question:** which of today's questions actually move the picks? Each case was rewritten as structured answers (anchor, why, appetite, mood, length, turn-off; appetite inferred, since no case states it) and joined with spec §4f's fallback template. Each case ran twice with all answers, then once with each answer removed, on the live engine. Branch `experiment/question-core`. **Spend: $2.37** (28 runs). One run per removal; not scored against the rubric.

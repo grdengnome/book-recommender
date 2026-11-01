@@ -20,6 +20,7 @@
 import { mkdirSync, writeFileSync } from "fs";
 import path from "path";
 import { randomUUID } from "crypto";
+import { MODELS, PRICES_CHECKED } from "../ai/models";
 
 // Fixed stage keys, in pipeline order, so traces line up across runs. Every key is always
 // present in the file; a stage that didn't run this request has an empty list.
@@ -40,17 +41,8 @@ export const TRACE_STAGES = {
 
 export type TraceStage = keyof typeof TRACE_STAGES;
 
-// USD per million tokens, Anthropic first-party rates (checked 2026-10-17). Cache writes are
-// billed at 1.25x input (5-minute TTL) and cache reads at 0.1x input; the engine doesn't use
-// prompt caching today, so those terms are normally zero. Thinking tokens are already
-// counted inside output_tokens. A model missing here is recorded with costUsd: null and
-// flagged in the cost summary rather than guessed.
-const PRICES_PER_MTOK: Record<string, { input: number; output: number }> = {
-  "claude-sonnet-5": { input: 2, output: 10 },
-  "claude-haiku-4-5": { input: 1, output: 5 },
-};
-const PRICES_CHECKED = "2026-10-17";
-
+// Prices come from the shared model list (lib/ai/models.ts). A model missing there is recorded
+// with costUsd: null and flagged in the cost summary rather than guessed.
 export interface ModelUsage {
   input_tokens?: number;
   output_tokens?: number;
@@ -60,7 +52,7 @@ export interface ModelUsage {
 }
 
 export function modelCallCostUsd(model: string, usage: ModelUsage | undefined): number | null {
-  const price = PRICES_PER_MTOK[model];
+  const price = MODELS[model]?.pricePerMTok;
   if (!price || !usage) return null;
   const input = usage.input_tokens ?? 0;
   const output = usage.output_tokens ?? 0;
