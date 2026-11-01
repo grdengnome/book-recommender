@@ -549,6 +549,14 @@ The full operating principles are in [question-flow-principles.md](./product/que
 **Decision:** Repo work can run from a claude.ai session with push access: Claude plans, branches and opens the pull request, explaining each step; the owner reviews and merges every PR. The Codespace and Claude Code workflow remains available, and either can be used on any day, as long as each starts from the latest `main`.
 **Why:** It removes copying prompts and results between two windows while keeping the owner as the reviewer and keeping the learning in the review. ([progress log, Nov 1](./progress-log.md))
 
+### 11.6 The top-professional check, shown in every plan and PR
+**Decision:** Before a plan, feature, engine change or design decision, ask how a top professional would do it and go deeper, not bigger: what they'd do that wasn't asked for (ask before adding), what raw material they'd start from, which established methods and tools they'd use, and what outside check (eval, test, source, blind comparison, real reader) would show it's right. Every plan and PR description includes a short "Pro check" section. It pairs with the YAGNI guardrail and scales to the task.
+**Why:** The question has improved almost every major decision so far, but a habit only lasts if it's written where every session reads it (CLAUDE.md) and visible enough to review. Without the YAGNI pairing it would drift into gold-plating. ([progress log, Nov 1](./progress-log.md))
+
+### 11.7 Every change goes through a pull request, docs included
+**Decision:** All changes, including doc-only ones, go on a branch and through a pull request that the owner reviews and merges. Replaces the earlier rule that doc-only changes could go straight to `main`.
+**Why:** `main` is always something the owner approved, every change is a chance to learn from the review, and the cost is a few extra clicks on small fixes. ([progress log, Nov 1](./progress-log.md))
+
 ---
 
 ## 12. Open questions I'm carrying

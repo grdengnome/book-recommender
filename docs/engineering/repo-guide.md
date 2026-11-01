@@ -43,9 +43,9 @@ Plus the swappability rule: app code never calls an outside service directly; it
 ## Restructure progress
 | PR | What | Status |
 |---|---|---|
-| 1 | Docs restructure: docs by audience, docs map, status lines, archive, Project docs brought in | This PR |
-| 2 | Rewrite README and CLAUDE.md for today's product and rules | Next |
-| 3 | Hygiene and automatic checks: `.env.example`, live logs out of the repo, `scratchpad/` split into `experiments/`, `evals/`, `scripts/`; `docs/mockups/` → `prototypes/`; first tests; GitHub Actions | Planned |
+| 1 | Docs restructure: docs by audience, docs map, status lines, archive, Project docs brought in | Done (#11) |
+| 2 | Rewrite README and CLAUDE.md for today's product and rules | Done |
+| 3 | Hygiene and automatic checks: `.env.example`, live logs out of the repo, `scratchpad/` split into `experiments/`, `evals/`, `scripts/`; `docs/mockups/` → `prototypes/`; first tests; GitHub Actions | Next |
 | 4 | Contracts, AI gateway and engine move into `lib/`; `route.ts` becomes thin; eval set proves behaviour unchanged | Planned |
 | 5 | App skeleton: `features/`, `ui/`, `themes/`, `lib/config/`, "coming soon" tabs, privacy page | Planned |
 | 6 | Store and trust basics: data store, feedback, rate limit, input guard | Planned |
