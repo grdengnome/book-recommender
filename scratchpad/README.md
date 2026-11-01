@@ -19,7 +19,7 @@ Most other `.json` output here is gitignored run output. Finished experiments ha
 
 - `query-log.json` — the live search log above; also the raw evidence behind the Aug 4 narrow-pool investigation and the Sept 20 grounding-rejection checks.
 - `hardcover-tags-gt100.json` — the full Hardcover Tag-category list (count > 100). `lib/hardcover/tagVocabulary.ts` is generated from it.
-- `run-eval.mjs` — holds the 11 eval cases (verbatim from `docs/eval-set.md`); `run-eval-grounded.mjs` reads its `CASES` array rather than retyping them.
+- `run-eval.mjs` — holds the 11 eval cases (verbatim from `docs/quality/eval-set.md`); `run-eval-grounded.mjs` reads its `CASES` array rather than retyping them.
 
 ## Tools — still in use
 
@@ -40,7 +40,7 @@ Most other `.json` output here is gitignored run output. Finished experiments ha
 
 ## Evidence — the basis for a past decision
 
-- `eval-run-grounded-2026-09-20.json` — raw output of the Sept 20 full 11-case run of the grounded-picks change (PR #5); see `docs/eval-log.md`, 2026-09-20.
+- `eval-run-grounded-2026-09-20.json` — raw output of the Sept 20 full 11-case run of the grounded-picks change (PR #5); see `docs/quality/eval-log.md`, 2026-09-20.
 - `eval-run-grounded-fix-verify-2026-09-20.json` — raw output of the re-run of cases 3, 4, 1, 8 that verified the grounding-validator fix.
 - `pool-source-attribution.json` — per-title source attribution (search vs subject endpoint) from the Aug 4 run; showed the clustering came from the subject endpoint, not the model.
 - `hardcover-ol-overlap-test.mjs` — showed Hardcover's tag-matched pool genuinely differs from Open Library's, validating Hardcover as a supplement (Aug 15).

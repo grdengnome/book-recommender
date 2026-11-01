@@ -1,6 +1,8 @@
 # Eval Log
 
-Running log of quality findings, known limitations, and decisions made while evaluating recommendation output against docs/eval-set.md's rubric. Newest entries at the top.
+> **Status:** Living · Findings from each eval run, newest first. Last reviewed Nov 1, 2026.
+
+Running log of quality findings, known limitations, and decisions made while evaluating recommendation output against docs/quality/eval-set.md's rubric. Newest entries at the top.
 
 ---
 
@@ -15,7 +17,7 @@ Running log of quality findings, known limitations, and decisions made while eva
 - **Mood-to-catalog check (free):** gripping, unsettling and funny map well to Open Library subjects. Cozy, quiet, dark and romantic don't (the "dark" subject is dark-romance erotica; cozy_mysteries holds 12 works). Page counts exist for 87–100% of books; edition counts don't separate modern familiar books from deep cuts.
 - **Outcome:** decision 2.20 (new question core).
 
-Full results: [research: question core audit](./research/question-core-audit-2026-10-22.md).
+Full results: [research: question core audit](../research/question-core-audit-2026-10-22.md).
 
 ---
 
@@ -255,7 +257,7 @@ Replay scripts, frozen inputs, and results: `scratchpad/pick-check-*` (local, no
 
 ## 2026-09-23 — v0 baseline scoring (post grounding fix, PR #5)
 
-Rubric scoring of the Sept 23 baseline run (raw output: `docs/eval-results.md`, "v0 baseline — Sept 23, 2026 — post grounding fix (PR #5)"). Same 4-point scale and dimensions as prior scorings (fail/weak/good/excellent).
+Rubric scoring of the Sept 23 baseline run (raw output: `docs/quality/results-history.md`, "v0 baseline — Sept 23, 2026 — post grounding fix (PR #5)"). Same 4-point scale and dimensions as prior scorings (fail/weak/good/excellent).
 
 | Case | Relevance | Non-obvious | Range | Real & correct | Traceability | Variety |
 |---|---|---|---|---|---|---|
@@ -291,7 +293,7 @@ Rubric scoring of the Sept 23 baseline run (raw output: `docs/eval-results.md`, 
 
 ## 2026-09-20 — Grounded-picks enforcement — full eval-set re-run: 10/11 delivered, but the new validation falsely rejected legitimately grounded picks (accents, subtitles) — one case returned a 502
 
-Full 11-case re-run of `docs/eval-set.md` (same inputs, same sequential method as the 2026-08-04 run) against branch `feat/enforce-grounded-picks` (PR #5, commit 939cb46): prompt now requires all 3 picks to come from the retrieved pools, and `lib/merge/pickGrounding.ts` checks every pick with the merge's own `dedupKey`, retrying up to 3 attempts, then a clean 502. Every pick's source (OL/HC) comes from the route's per-attempt console log, parsed per case by `scratchpad/run-eval-grounded.mjs`. Raw output: `scratchpad/eval-run-grounded-2026-09-20.json`; rejection classification: `scratchpad/classify-grounding-rejections.cjs`.
+Full 11-case re-run of `docs/quality/eval-set.md` (same inputs, same sequential method as the 2026-08-04 run) against branch `feat/enforce-grounded-picks` (PR #5, commit 939cb46): prompt now requires all 3 picks to come from the retrieved pools, and `lib/merge/pickGrounding.ts` checks every pick with the merge's own `dedupKey`, retrying up to 3 attempts, then a clean 502. Every pick's source (OL/HC) comes from the route's per-attempt console log, parsed per case by `scratchpad/run-eval-grounded.mjs`. Raw output: `scratchpad/eval-run-grounded-2026-09-20.json`; rejection classification: `scratchpad/classify-grounding-rejections.cjs`.
 
 **Headline: the prompt change worked; the validation check is the problem.** Across all 14 generation attempts (42 picks) there were **0 truly ungrounded picks** — the model kept to the candidate pool. But the check rejected **5 picks, all 5 of which were legitimately in that attempt's pool** (false rejections). That cost one retry in case 4 and produced a **502 in case 3 with a fully grounded answer withheld**.
 
@@ -373,7 +375,7 @@ Status: hypothesis tested and weakened. Root cause still open — needs the pool
 
 ## 2026-08-02 — Narrow-pool finding reframed: a general clustering tendency, not a fixed offender list
 
-While rescoring the Prompt v4 run (docs/eval-results.md), found *The Memory of Love* (Aminatta Forna) clustering across 4 of 11 cases. Ran the same 11 `eval-set.md` cases a second time, back to back, against the identical Prompt v4 SYSTEM_PROMPT (no prompt changes between the two runs) specifically to check whether that clustering was a one-off artifact of a single `search_books` call or a repeatable pattern.
+While rescoring the Prompt v4 run (docs/quality/results-history.md), found *The Memory of Love* (Aminatta Forna) clustering across 4 of 11 cases. Ran the same 11 `eval-set.md` cases a second time, back to back, against the identical Prompt v4 SYSTEM_PROMPT (no prompt changes between the two runs) specifically to check whether that clustering was a one-off artifact of a single `search_books` call or a repeatable pattern.
 
 It's repeatable, but the specific title isn't fixed:
 
@@ -400,7 +402,7 @@ Status: flagged, not investigated. Worth watching for recurrence in future runs;
 
 ## 2026-08-02 — Case 9 (Say Nothing): factually inaccurate non-obviousness justification, a reliability problem not a taste call
 
-Found while scoring the 2026-08-01 run against the full rubric (docs/eval-results.md). Distinct from the broader non-obviousness pattern documented in the entry below — this one isn't a judgment call about where the "obvious" line sits, it's a factual claim in the model's own output that doesn't hold up.
+Found while scoring the 2026-08-01 run against the full rubric (docs/quality/results-history.md). Distinct from the broader non-obviousness pattern documented in the entry below — this one isn't a judgment call about where the "obvious" line sits, it's a factual claim in the model's own output that doesn't hold up.
 
 Case 9's top pick, *Say Nothing* (Patrick Radden Keefe), justifies its `nonObvious` field with: "it's well-regarded but often gets overshadowed by flashier true-crime picks." Checked against actual reception: it won the National Book Critics Circle Award for Nonfiction, the Orwell Prize for Political Writing, and the Arthur Ross Gold Medal; it was named to the New York Times's 20 Best Books of the 21st Century and a Kirkus Best Nonfiction Book of the Century; it was a Barack Obama favorite book of the year; and it was adapted into a 2024 FX/Hulu series. It is not overshadowed by anything in this genre — it's one of the most decorated and widely-cited narrative nonfiction titles of the last decade.
 
@@ -414,7 +416,7 @@ Status: documented, not yet fixed. Good candidate to check for recurrence in fut
 
 ## 2026-08-02 — Non-obviousness bar clarified: the test is "first-guess answer to the brief," not "won an award"
 
-Scoring the 2026-08-01 run against the full rubric (docs/eval-results.md) surfaced weak non-obviousness scores in cases 6, 8, and 10. Worth being precise about the actual failure mode here, since it's easy to over-apply the Prompt v3 fix in the wrong direction: **the bar isn't "avoid decorated or famous books."** A Booker winner or a Hugo/Nebula sweep can still be a genuinely non-obvious pick for a specific brief. The real test is narrower — would a reasonably well-read person already have this exact book on their radar as *the* answer to this exact ask, the kind of thing a quick search or a "best of [genre/mood]" list would surface first? Fame and decoration correlate with that failure mode; they aren't the same thing as it, and a pick shouldn't be downgraded just for being decorated if it still wouldn't be most people's first guess.
+Scoring the 2026-08-01 run against the full rubric (docs/quality/results-history.md) surfaced weak non-obviousness scores in cases 6, 8, and 10. Worth being precise about the actual failure mode here, since it's easy to over-apply the Prompt v3 fix in the wrong direction: **the bar isn't "avoid decorated or famous books."** A Booker winner or a Hugo/Nebula sweep can still be a genuinely non-obvious pick for a specific brief. The real test is narrower — would a reasonably well-read person already have this exact book on their radar as *the* answer to this exact ask, the kind of thing a quick search or a "best of [genre/mood]" list would surface first? Fame and decoration correlate with that failure mode; they aren't the same thing as it, and a pick shouldn't be downgraded just for being decorated if it still wouldn't be most people's first guess.
 
 Reframing cases 6, 8, and 10 through that lens specifically:
 
@@ -422,7 +424,7 @@ Reframing cases 6, 8, and 10 through that lens specifically:
 - **Case 8 — reassess.** Neither *The Garden of Evening Mists* nor *The Yiddish Policemen's Union* is the obvious first-guess answer to "granular sense of place + morally ambiguous characters, genre doesn't matter." Both are decorated (Walter Scott Prize / Man Asian Prize / Booker shortlist for the former; Hugo/Nebula/Locus/Sidewise for the latter), but neither is what most well-read people would name first for this specific brief — a search for "immersive sense of place, moral ambiguity" surfaces things like *The English Patient*, *Blood Meridian*, or *All the Light We Cannot See* long before either of these. Under the first-guess test rather than the was-it-decorated test, this case reads closer to good than weak — worth revisiting if this case is rescored.
 - **Case 10 — still weak, but for a specific and different reason than originally scored.** *We Have Always Lived in the Castle* and *The Little Stranger* aren't weak because of an undisclosed Booker shortlist (*Little Stranger*) or because Jackson is famous generally — they're weak because both are genuine staples of exactly the "atmospheric, moody, unsettling-not-horror" list this brief describes. They're the first-guess answer to this specific emoji-coded vibe, not a discovery. *Kit's Wilderness* holds up fine under this test — genuinely off the radar for this brief despite its own award (Printz), because that award sits in a different genre bucket (YA) this specific ask wouldn't surface it from.
 
-Net: cases 6 and 10 hold up as weak under the corrected test; case 8 likely doesn't, and may be worth rescoring on a future pass. Flagging rather than silently changing the already-reviewed scoring table in docs/eval-results.md.
+Net: cases 6 and 10 hold up as weak under the corrected test; case 8 likely doesn't, and may be worth rescoring on a future pass. Flagging rather than silently changing the already-reviewed scoring table in docs/quality/results-history.md.
 
 Status: documented. Good candidate to fold into a future SYSTEM_PROMPT revision alongside the award-bias rule — the instruction should probably target "is this the reflexive/first-guess answer to the specific brief" rather than naming specific award bodies, since the award-naming approach is exactly what let cases 8 and 10 slip through un-triggered.
 
@@ -430,7 +432,7 @@ Status: documented. Good candidate to fold into a future SYSTEM_PROMPT revision 
 
 ## 2026-08-01 — Grounding reduced repetition but didn't eliminate it: same pattern, new title
 
-First full eval run (docs/eval-results.md, 2026-08-01) since `search_books` was wired into the live recommend call. Checked directly against the three titles named in the 2026-07-08 "repeated picks across structurally distinct inputs" finding below:
+First full eval run (docs/quality/results-history.md, 2026-08-01) since `search_books` was wired into the live recommend call. Checked directly against the three titles named in the 2026-07-08 "repeated picks across structurally distinct inputs" finding below:
 
 - "So Long, See You Tomorrow" (Maxwell) — does not appear anywhere in this 11-case run. Previously recurred in 3 cases (1, 2, 6).
 - "Independent People" (Laxness) — does not appear anywhere. Previously recurred in 2 cases (1, 6).
@@ -446,7 +448,7 @@ Status: documented, not yet investigated further. Full 6-dimension rubric scorin
 
 ## 2026-07-08 — Known limitation: prestige/award status treated as "non-obvious"
 
-Observed in the Prompt v2 eval run (docs/eval-results.md): across cases 6, 7b, 8, and 9, non-obviousness scored weak specifically because picks were major literary award winners — Disgrace (Booker Prize, contributed to Coetzee's Nobel), Lincoln in the Bardo (Booker Prize, #1 NYT bestseller), The Sympathizer (Pulitzer Prize, 2024 HBO adaptation), and Black Hawk Down (bestseller, major film adaptation).
+Observed in the Prompt v2 eval run (docs/quality/results-history.md): across cases 6, 7b, 8, and 9, non-obviousness scored weak specifically because picks were major literary award winners — Disgrace (Booker Prize, contributed to Coetzee's Nobel), Lincoln in the Bardo (Booker Prize, #1 NYT bestseller), The Sympathizer (Pulitzer Prize, 2024 HBO adaptation), and Black Hawk Down (bestseller, major film adaptation).
 
 This is a distinct failure mode from the repeated-titles finding above (same day) — not the model drawing from too small a pool, but the model's working definition of "non-obvious" being too narrow. The system prompt instructs against bestseller/bandwagon picks, and the model appears to interpret that as specifically "not on a commercial bestseller list" — while treating major literary prizes (Booker, Pulitzer, Nobel) as evidence of genuine, uncommon quality rather than as their own, equally well-known form of "safe, expected" recommendation. A prize winner is just as much an institutionally-endorsed, widely-known pick as a bestseller — swapping commercial fame for critical fame still isn't the surprising, personal-friend-recommendation quality the prompt is aiming for.
 
@@ -460,7 +462,7 @@ Status: documented, not yet fixed. Good candidate for the next SYSTEM_PROMPT rev
 
 ## 2026-07-08 — Known limitation: repeated picks across structurally distinct inputs
 
-Observed in the Prompt v2 eval run (docs/eval-results.md): several titles recur across multiple, meaningfully different test cases rather than being confined to one:
+Observed in the Prompt v2 eval run (docs/quality/results-history.md): several titles recur across multiple, meaningfully different test cases rather than being confined to one:
 
 - "So Long, See You Tomorrow" (Maxwell) — cases 1, 2, 6
 - "Convenience Store Woman" (Murata) — cases 3, 5, 7b

@@ -1,6 +1,8 @@
 # Book Recommender — Spec
 
-*Current state of the product and its design. Decisions, reversals, and rejected paths are in [`decisions.md`](./decisions.md); this file says what the product is and how it works. Last updated October 17, 2026.*
+> **Status:** Reference · Partly superseded. The question flow in §4a is replaced by [question flow v2](./question-flow/v2-design.md), and the v0 scope by [v0 scope](./v0-scope.md). The engine sections (§4b, §5) are current. Full rewrite pending. Last reviewed Nov 1, 2026.
+
+*Current state of the product and its design. Decisions, reversals, and rejected paths are in [`decisions.md`](../decisions.md); this file says what the product is and how it works. Last updated October 17, 2026.*
 
 ---
 
@@ -40,7 +42,7 @@ The original idea was three products in one: a recommender, a Beli-style ranking
 
 ### 4a. Core flow
 
-> **Superseded by decision 2.20** ([decisions](./decisions.md)); rewrite pending question flow v2 design. Principles for the rewrite: [question-flow-principles.md](./question-flow-principles.md).
+> **Superseded by decision 2.20** ([decisions](../decisions.md)); rewrite pending question flow v2 design. Principles for the rewrite: [question-flow-principles.md](./question-flow/principles.md).
 
 The opening page *is* the recommender (no landing or login wall). The flow:
 
@@ -50,14 +52,14 @@ The opening page *is* the recommender (no landing or login wall). The flow:
 - **Backbone (always asked):** anchor ("a book you loved") → why ("what stuck with you?": the writing / the world / the characters / the ideas / the feeling) → appetite (comfort ↔ strange). Fixed structure, rotating wording: 2–3 phrasings per question at launch, growing toward 4–5.
 - **Anchor entry:** autocomplete against a catalog as the user types, with a "use what I typed" escape. Suggestions appear after 3+ characters and a short typing pause, target under ~1 second, and never block progress. Source (Open Library or Hardcover search) is chosen by measured speed.
 - **Adaptive follow-ups:** after the backbone, one small model call judges whether the signal is enough. If not, it asks 1–2 targeted follow-ups (mood, length, turn-off) aimed at the thin category. No fixed question count; a guardrail stops the loop if confidence isn't improving (threshold TBD from usage data).
-- **Answer formats:** pick one, open text, this or that, pick a few, and scale. Each question uses one; a run mixes them ([`design.md`](./design.md) §8).
+- **Answer formats:** pick one, open text, this or that, pick a few, and scale. Each question uses one; a run mixes them ([`design.md`](../design/design-system.md) §8).
 - **Length:** four bands: One sitting (under 120 pages), A weekend (120–300), A few weeks (300–500), The long haul (500+). Length acts as a direct filter on page count, which is already fetched for the reveal clues. "One sitting" stops at 120, not 100, so the pool isn't too thin. Labels vary by theme (for example Sci-fi: A quick hop / Across the system / Interstellar / Another galaxy); the bands stay fixed.
-- **Rule out:** a pick-any follow-up in the pool for turn-offs (gore, sad endings, long series and so on; full list in [`question-bank.md`](./question-bank.md)). Its picks act as hard filters.
+- **Rule out:** a pick-any follow-up in the pool for turn-offs (gore, sad endings, long series and so on; full list in [`question-bank.md`](./question-flow/question-bank.md)). Its picks act as hard filters.
 - **Unclear typed answers:** never block. If no answer is chosen and the typed text is obviously unusable (fewer than 3 characters, or no real letters), show one gentle inline nudge under the field ("Tell me a little more? Or tap an answer above.") and keep the page from turning once. Ask once, then move on: a second tap proceeds anyway. Subtler unclear answers are handled by the taste summary's code check and template fallback (§4f); an unusable answer is dropped quietly, and the rejection path (§4g) catches a miss.
 - **Creative framing:** emoji-style prompts woven into the pools, about one per session.
 - **Stateless:** no memory of users across sessions. The one exception is anonymous feedback events (§4i), which identify no one.
 
-Full question wording and pools: [`question-bank.md`](./question-bank.md).
+Full question wording and pools: [`question-bank.md`](./question-flow/question-bank.md).
 
 ### 4b. The recommendation engine
 
@@ -68,7 +70,7 @@ Built and grounded; see §5. The engine takes one input, the taste description, 
 - **Reserves:** each run returns 3 picks plus 2–3 reserves, all grounded and verified the same way, so swaps are instant.
 - **Exclude list:** reruns and swaps never return a book the user has already seen this session.
 - **Widen mode:** deliberately varied picks for the final step of the rejection path.
-- **Stage reporting:** the engine reports when it moves between its three stages (searching, choosing, double-checking), so the loading screen's three bars show real progress, never an estimate ([`design.md`](./design.md) §11).
+- **Stage reporting:** the engine reports when it moves between its three stages (searching, choosing, double-checking), so the loading screen's three bars show real progress, never an estimate ([`design.md`](../design/design-system.md) §11).
 - **Card-ready output:** see "Output format (stage I)" below.
 
 #### Output format (stage I)
@@ -98,7 +100,7 @@ The contract between the engine and the screens. One format for every pick, whic
 | `angleText` | That section's body | Yes | Final step | ~2 sentences | — |
 | `mood` | One word, for the pre-reveal clue chip | Yes | Final step | 1 word | — |
 | `source` | Where the book came from, in reader-friendly words, e.g. "International Booker longlist, 2019" | No | The source that supplied it; never invented | Short phrase | Not shown |
-| `rarity` | Staff pick / First edition / Holy grail | — | Open question ([`decisions.md` §12](./decisions.md#12-open-questions-im-carrying)) | — | — |
+| `rarity` | Staff pick / First edition / Holy grail | — | Open question ([`decisions.md` §12](../decisions.md#12-open-questions-im-carrying)) | — | — |
 
 **Fallbacks:**
 - No cover → designed placeholder (themed, §5d).
@@ -123,12 +125,12 @@ The contract between the engine and the screens. One format for every pick, whic
 
 ### 4c. The card UX
 
-Each pick is revealed alone on its own screen, then all three are shown together; tapping one opens its detail screen (decision 13.8). Layouts: [`design.md`](./design.md) §3.
+Each pick is revealed alone on its own screen, then all three are shown together; tapping one opens its detail screen (decision 13.8). Layouts: [`design.md`](../design/design-system.md) §3.
 
-- **Reveal:** each pick arrives wrapped and is revealed by tapping the wrapped book. Before it is revealed, it shows three clue chips: year, page count, and a one-word mood. The engine's card-ready output (§4b) needs to supply these three values. Motion: [`design.md`](./design.md) §9.
-- **Revealed pick:** shown as a 3D book ([`design.md`](./design.md) §10): cover image, title, author, and a one-line hook (why it's for you). Designed placeholder when there's no cover.
-- **Rarity:** each pick shows a rarity tier (Staff pick, First edition, Holy grail). How a tier is assigned is an open question ([`decisions.md` §12](./decisions.md#12-open-questions-im-carrying)).
-- **Detail screen:** cover, why it's for you, "The story" (a 2–3 sentence summary the engine writes from the catalog description, verified by the description check; left out when the catalog has nothing usable), a third section whose heading the engine writes per pick, and a "find this book" link. Layout: [`design.md`](./design.md) §10a. **No ratings in v0**: no reliable source is confirmed, and thin rating counts on obscure books work against the product.
+- **Reveal:** each pick arrives wrapped and is revealed by tapping the wrapped book. Before it is revealed, it shows three clue chips: year, page count, and a one-word mood. The engine's card-ready output (§4b) needs to supply these three values. Motion: [`design.md`](../design/design-system.md) §9.
+- **Revealed pick:** shown as a 3D book ([`design.md`](../design/design-system.md) §10): cover image, title, author, and a one-line hook (why it's for you). Designed placeholder when there's no cover.
+- **Rarity:** each pick shows a rarity tier (Staff pick, First edition, Holy grail). How a tier is assigned is an open question ([`decisions.md` §12](../decisions.md#12-open-questions-im-carrying)).
+- **Detail screen:** cover, why it's for you, "The story" (a 2–3 sentence summary the engine writes from the catalog description, verified by the description check; left out when the catalog has nothing usable), a third section whose heading the engine writes per pick, and a "find this book" link. Layout: [`design.md`](../design/design-system.md) §10a. **No ratings in v0**: no reliable source is confirmed, and thin rating counts on obscure books work against the product.
 - **"Find this book" link:** destination and affiliate tag are configuration, not code. v0: Bookshop.org (affiliate) → Open Library fallback when no ISBN. Amazon may be added later as a secondary option. A short commission disclosure is shown.
 - **Per-book actions (on the detail screen):**
   - **Love it (👍):** recorded.
@@ -147,7 +149,7 @@ Each pick is revealed alone on its own screen, then all three are shown together
 
 ### 4e. Evaluation
 
-- **Rubric:** 6 dimensions (relevance, non-obviousness, range, real & correct, traceability, variety across sessions), fail / weak / good / excellent, scored against external sources. Test cases: [`eval-set.md`](./eval-set.md). Findings: [`eval-log.md`](./eval-log.md).
+- **Rubric:** 6 dimensions (relevance, non-obviousness, range, real & correct, traceability, variety across sessions), fail / weak / good / excellent, scored against external sources. Test cases: [`eval-set.md`](../quality/eval-set.md). Findings: [`eval-log.md`](../quality/eval-log.md).
 - **New for v0:**
   - **Taste summary fidelity:** about 10 answer sets, scored on two questions: was anything dropped, and was anything added?
   - **"Enough signal?" decisions:** cases for when to ask more vs. recommend. Cases 3, 7a, and 7b stop being single-message stand-ins once the flow exists.
@@ -188,7 +190,7 @@ Anonymous events (question completion, 👍/👎, already-read, swaps, reruns) a
 
 ### 4k. Supporting pages
 
-A short "How it works" page, linked from the footer, explaining the approach and linking to [`decisions.md`](./decisions.md).
+A short "How it works" page, linked from the footer, explaining the approach and linking to [`decisions.md`](../decisions.md).
 
 ---
 
@@ -281,7 +283,7 @@ A second, taste-shaped pool built from reader-applied tags. Fetched once per req
 ## 8. Build plan (v0)
 
 1. **Foundation:** choose hosting and confirm its request-time limit (engine runs take up to ~2 minutes); add a monthly spend cap. (Hosting: Vercel Hobby, done Sept 30.) The hosted data store for logs and the rate limit are deferred to just before public launch.
-2. **Visual design pass (in progress):** mockups of the question screens and cards together (§4j). Design system: [`design.md`](./design.md).
+2. **Visual design pass (in progress):** mockups of the question screens and cards together (§4j). Design system: [`design.md`](../design/design-system.md).
 3. **Results:** cards, loading screen, error states; engine reserves and card-ready output.
 4. **Question flow:** backbone and follow-ups, anchor autocomplete, taste summary with its check and eval set, the "enough signal?" call.
 5. **Feedback loop:** per-card actions, rejection path, exclude list, widen mode, feedback logging.
@@ -293,4 +295,4 @@ A second, taste-shaped pool built from reader-applied tags. Fetched once per req
 - Exact wording for each phrasing pool beyond the drafts in `question-bank.md`.
 - The "confidence isn't improving" guardrail threshold; needs usage data.
 - Author facts: famous authors only, or a mix with lesser-known ones.
-- Engine-level open questions: [`decisions.md` §12](./decisions.md#12-open-questions-im-carrying).
+- Engine-level open questions: [`decisions.md` §12](../decisions.md#12-open-questions-im-carrying).

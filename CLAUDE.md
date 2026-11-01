@@ -6,14 +6,14 @@ Read automatically by Claude Code at the start of every session in this repo. De
 
 Squirmly (working name) is an AI book recommender whose core problem is resisting the model's pull toward famous, obvious picks. Start here:
 - `docs/decisions.md`: every product and architecture decision and why. Check it before questioning something that looks odd; it's usually deliberate.
-- `docs/spec.md`: product spec. `docs/question-bank.md`: question wording and flow mechanics.
-- `docs/design.md`: the design system. All UI follows its shared structure and theme rules.
+- `docs/product/spec.md`: product spec. `docs/product/question-flow/question-bank.md`: question wording and flow mechanics.
+- `docs/design/design-system.md`: the design system. All UI follows its shared structure and theme rules.
 
 ## Current build priority
 
-**The v0 engine is complete** (Sept 2026). The full v0 product is designed (`docs/spec.md` §4) with a phased build plan (`docs/spec.md` §8). Phase 1: hosted on Vercel (private); the data store and rate limit are deferred to just before going public. Phase 2 (visual design) in progress: all five themes are mocked for all eight screens; motion is the remaining design step.
+**The v0 engine is complete** (Sept 2026). The full v0 product is designed (`docs/product/spec.md` §4) with a phased build plan (`docs/product/spec.md` §8). Phase 1: hosted on Vercel (private); the data store and rate limit are deferred to just before going public. Phase 2 (visual design) in progress: all five themes are mocked for all eight screens; motion is the remaining design step.
 
-Don't build UI screens until the visual design pass is approved and you're explicitly told to. All UI follows `docs/design.md`. Question flow work follows `docs/question-flow-principles.md`. When building UI, reuse the scene artwork from `docs/mockups/` rather than redrawing it. The data store and rate limit must be in place before the site is made public.
+Don't build UI screens until the visual design pass is approved and you're explicitly told to. All UI follows `docs/design/design-system.md`. Question flow work follows `docs/product/question-flow/principles.md`. When building UI, reuse the scene artwork from `docs/mockups/` rather than redrawing it. The data store and rate limit must be in place before the site is made public.
 
 ## How the engine works
 
@@ -53,7 +53,7 @@ Secrets go directly into `.env.local` through the editor, never through chat or 
 
 ## Eval discipline
 
-Any change to prompts or recommendation logic is checked against `docs/eval-set.md` (6 dimensions, fail/weak/good/excellent). Use a narrow case subset to test a hypothesis; run all 11 cases for milestones. Record findings in `docs/eval-log.md`, and note what changed and why in the commit message.
+Any change to prompts or recommendation logic is checked against `docs/quality/eval-set.md` (6 dimensions, fail/weak/good/excellent). Use a narrow case subset to test a hypothesis; run all 11 cases for milestones. Record findings in `docs/quality/eval-log.md`, and note what changed and why in the commit message.
 
 ## Progress log
 
@@ -82,11 +82,11 @@ One entry per session in `docs/progress-log.md`, written at session close:
 - **Most picks skip the description check.** It only runs when a pick's catalog subjects flag it as criticism of its genre; everything else passes through unchanged by design.
 - **The Open Library search call contributes very little to pools** (about 1% when measured in August). Deliberately deprioritized, not broken; subject lists and Hardcover carry retrieval.
 - **No fixed question count** in the (planned) question flow; it uses a confidence-based stopping rule. The turn-off question not always appearing is also intended.
-- **Cover images fall back** Open Library → Hardcover (strict title + author match only) → Google Books (needs an API key) → themed placeholder by design (`docs/spec.md` §5d). Fake covers (labelled stand-ins, Project Gutenberg auto-covers) count as no cover.
+- **Cover images fall back** Open Library → Hardcover (strict title + author match only) → Google Books (needs an API key) → themed placeholder by design (`docs/product/spec.md` §5d). Fake covers (labelled stand-ins, Project Gutenberg auto-covers) count as no cover.
 
 ## Open questions (do not resolve unilaterally)
 
-- Product-level open questions: `docs/spec.md` "Still open".
+- Product-level open questions: `docs/product/spec.md` "Still open".
 - Engine-level open questions: `docs/decisions.md` §12.
 
 Flag these rather than picking an answer.
