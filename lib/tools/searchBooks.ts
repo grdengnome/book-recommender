@@ -272,7 +272,7 @@ export async function searchBooks(
   logSearchBooksCall(input, pool);
 
   if (trace.enabled) {
-    // Which lookup(s) found each book — the attribution scratchpad/attribute-pool-sources.mjs
+    // Which lookup(s) found each book — the attribution experiments/attribute-pool-sources.mjs
     // otherwise has to reconstruct by re-running queries.
     const foundBy = new Map<string, string[]>();
     for (const r of reports) {

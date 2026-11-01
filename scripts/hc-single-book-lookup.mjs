@@ -1,8 +1,8 @@
 // Read-only diagnostic (2026-09-26): what does Hardcover's GraphQL API return for a
 // single-book lookup by ID? Checks description, tag/genre sources (cached_tags,
 // taggable_counts with tag category), and book_mappings (possible cross-source IDs).
-// Book ID 657 comes from scratchpad/hardcover-candidate-groups-deep.json.
-// Usage: node --env-file=.env.local scratchpad/hc-single-book-lookup.mjs [bookId]
+// Book ID 657 comes from experiments/hardcover-candidate-groups-deep.json.
+// Usage: node --env-file=.env.local scripts/hc-single-book-lookup.mjs [bookId]
 const BOOK_ID = Number(process.argv[2] ?? 657);
 const token = process.env.HARDCOVER_API_TOKEN;
 if (!token) throw new Error("HARDCOVER_API_TOKEN not set");

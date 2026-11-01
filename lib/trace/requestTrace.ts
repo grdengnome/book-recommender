@@ -1,11 +1,11 @@
 // Debug-only per-request trace (feat/engine-trace). With ENGINE_TRACE=1 in .env.local, each
-// /api/recommend request writes one JSON file to scratchpad/traces/ holding every stage's
+// /api/recommend request writes one JSON file to .local/traces/ holding every stage's
 // inputs, outputs, scores, timings, tokens, and dollar cost. Off by default.
 //
 // Watch-only by construction: nothing here is ever read back by the engine, and every entry
 // is deep-copied when it's added, so later mutation of engine data can't change what was
 // recorded (and recording can't change the engine data). What the model sees is built
-// exactly as before; scratchpad/trace-equivalence-check.mts checks this byte for byte.
+// exactly as before; tests/trace-equivalence.test.mts checks this byte for byte.
 //
 // Off means off: noopTrace's methods return immediately and nothing is written or printed.
 // Callers guard any extra work done only for the trace with `trace.enabled`.

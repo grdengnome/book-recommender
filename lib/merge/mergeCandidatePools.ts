@@ -66,7 +66,7 @@ export interface MergeCandidatePoolsResult {
 }
 
 // Same normalization as the Aug 15 dedup decision and its validating test
-// (scratchpad/hardcover-ol-overlap-test.mjs) — exact match, not fuzzy.
+// (experiments/hardcover-ol-overlap-test.mjs) — exact match, not fuzzy.
 function normTitle(title: string): string {
   return (title ?? "")
     .toLowerCase()

@@ -70,7 +70,7 @@ interface PickFacts {
 // signal is computed in code and stated to the checker explicitly. Deliberately narrow —
 // only these two subdivisions: across the 31 unique Sept 23 baseline picks, Izzo carried
 // 4/8 such subjects and no other pick carried any
-// (scratchpad/ol-pick-metadata-check-results.json). Other form patterns (biography,
+// (experiments/ol-pick-metadata-check-results.json). Other form patterns (biography,
 // drama, ...) showed up as one-off noise on real novels there, so they're excluded.
 // Thresholds are provisional: that data has only one positive example.
 const CRITICISM_SUBJECT_PATTERN = /history and criticism|criticism and interpretation/i;

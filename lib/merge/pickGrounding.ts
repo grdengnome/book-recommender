@@ -109,7 +109,7 @@ export function checkPickGrounding(
 // Same per-call console convention as logMergeStats. Printed on every attempt, pass or
 // fail, so source attribution stays visible for every run. Each matched pick's IDs go on
 // their own following line, so the pick line itself keeps the exact format the eval
-// driver parses (scratchpad/run-eval-grounded.mjs, PICK_LINE).
+// driver parses (evals/run-eval-grounded.mjs, PICK_LINE).
 export function formatPickSources(picks: CheckedPick[]): string {
   return picks
     .map((p) => {
