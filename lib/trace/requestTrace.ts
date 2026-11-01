@@ -120,7 +120,7 @@ export function createRequestTrace(meta: TraceMeta): RequestTrace {
   return isTraceEnabled() ? new FileTrace(meta) : noopTrace;
 }
 
-const TRACE_DIR = path.join(process.cwd(), "scratchpad", "traces");
+const TRACE_DIR = path.join(process.cwd(), ".local", "traces");
 const SECRET_NAME_PATTERN = /KEY|TOKEN|SECRET|PASSWORD|CREDENTIAL/i;
 const MIN_SECRET_LENGTH = 8;
 

@@ -1,6 +1,6 @@
 // Full eval-set re-run for the grounded-picks enforcement change (2026-09-20,
 // branch feat/enforce-grounded-picks). Same 11 cases and same sequential, evalTag-per-case
-// method as scratchpad/run-eval.mjs — the CASES array is read out of that file rather than
+// method as evals/run-eval.mjs — the CASES array is read out of that file rather than
 // retyped, so the inputs are guaranteed identical to prior runs.
 //
 // Additionally parses the dev server's console log (route.ts's grounding-check output and
@@ -8,10 +8,10 @@
 // (openlibrary / hardcover), any grounding-check failure detail, and pool sizes.
 //
 // Usage: dev server must be running with its stdout redirected to DEV_LOG.
-//   DEV_LOG=/path/to/dev.log node scratchpad/run-eval-grounded.mjs
+//   DEV_LOG=/path/to/dev.log node evals/run-eval-grounded.mjs
 // Optional: CASE_IDS=case-3,case-4 (subset, run in that order), TAG_PREFIX=groundedfix
 // (evalTag prefix, keeps query-log entries separable from other runs), OUT=<file name in
-// scratchpad/> (results file; default eval-run-grounded-2026-09-20.json).
+// evals/results/> (results file; default eval-run-grounded-2026-09-20.json).
 import fs from "fs";
 
 const PORT = process.env.PORT || 3000;
@@ -52,7 +52,8 @@ function parseAttempts(lines) {
   return attempts;
 }
 
-const outPath = new URL(`./${process.env.OUT || "eval-run-grounded-2026-09-20.json"}`, import.meta.url);
+fs.mkdirSync(new URL("./results/", import.meta.url), { recursive: true });
+const outPath = new URL(`./results/${process.env.OUT || "eval-run-grounded-2026-09-20.json"}`, import.meta.url);
 const results = [];
 const runStart = Date.now();
 
@@ -97,4 +98,4 @@ for (const c of RUN_CASES) {
     (last ? last.picks.map((p) => `${p.title} <${p.source}>`).join(" | ") : "(no attempt records parsed)"));
 }
 
-console.log(`\nDONE total ${Math.round((Date.now() - runStart) / 1000)}s — wrote scratchpad/${process.env.OUT || "eval-run-grounded-2026-09-20.json"}`);
+console.log(`\nDONE total ${Math.round((Date.now() - runStart) / 1000)}s — wrote evals/results/${process.env.OUT || "eval-run-grounded-2026-09-20.json"}`);

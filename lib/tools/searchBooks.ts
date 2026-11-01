@@ -20,7 +20,7 @@ export function setSearchBooksLogTag(tag: string | null): void {
   currentLogTag = tag;
 }
 
-const QUERY_LOG_PATH = path.join(process.cwd(), "scratchpad", "query-log.json");
+const QUERY_LOG_PATH = path.join(process.cwd(), ".local", "query-log.json");
 
 // Newline-delimited JSON, not a single JSON array — search_books calls within a
 // round can run concurrently (route.ts fires tool_use blocks via Promise.all), and

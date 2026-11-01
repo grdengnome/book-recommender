@@ -6,7 +6,7 @@
 //
 // Does not touch retrieval/dedupe/shuffle logic — this only drives requests
 // and records the final recommendations per case for cross-referencing
-// against scratchpad/query-log.json.
+// against .local/query-log.json.
 
 const PORT = process.env.PORT || 3000;
 const API_URL = `http://localhost:${PORT}/api/recommend`;
@@ -84,7 +84,8 @@ async function runCase(c) {
 }
 
 const fs = await import("fs");
-const outPath = new URL("./eval-run-narrow-results.json", import.meta.url);
+fs.mkdirSync(new URL("./results/", import.meta.url), { recursive: true });
+const outPath = new URL("./results/eval-run-narrow-results.json", import.meta.url);
 
 const results = [];
 for (const c of CASES) {
@@ -96,4 +97,4 @@ for (const c of CASES) {
   fs.writeFileSync(outPath, JSON.stringify(results, null, 2));
 }
 
-console.log("\nWrote scratchpad/eval-run-narrow-results.json");
+console.log("\nWrote evals/results/eval-run-narrow-results.json");

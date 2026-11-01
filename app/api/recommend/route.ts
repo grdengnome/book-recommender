@@ -86,7 +86,7 @@ type HardcoverFailureCategory =
 
 const HARDCOVER_FAILURE_LOG_PATH = path.join(
   process.cwd(),
-  "scratchpad",
+  ".local",
   "hardcover-failure-log.json",
 );
 
