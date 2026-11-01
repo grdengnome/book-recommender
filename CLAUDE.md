@@ -52,6 +52,7 @@ Rules for all new code:
 - **Features never import from each other.** They talk only through `lib/contracts` and shared code.
 - **A piece lives inside its feature until a second feature needs it;** then it moves to `ui/`, `themes/` or `lib/`.
 - **Content as data.** Questions, themes, rarity rules and copy live as data files where practical.
+- **No permanent model choices (decision 14.3).** Each AI job picks the model with the best speed–quality balance, proven by its eval and timing. How models run (in parallel, streamed, cached, routed by job size) is part of that choice and is improved continuously.
 
 ## How the engine works (today)
 
@@ -63,7 +64,7 @@ One API route, `app/api/recommend/route.ts`: POST `{ tasteDescription }` → `{ 
 - `lib/output/`: the stage I contract. Choosing and writing are separate calls. `pickSchema.ts` holds the selection schema (three pool picks, a fit note and a distinct mood each; structured outputs, `output_config.format`), the card schema and the client `Pick` type. `streamSelection.ts` streams the selection call so each pick's grounding, lookup and card start as soon as it arrives; the response still waits for all three. `writeCards.ts` writes one pick's card (thinking off) from its catalog records. `validatePicks.ts` checks pick count, empty fields and length ceilings; `shortenFields.ts` repairs an over-limit field with one small Haiku call.
 - `lib/verify/`: looks up each final pick in its catalog and checks flagged descriptions (Haiku), on `why` + `angleText`.
 - `lib/trace/`: debug-only request trace. With `ENGINE_TRACE=1` each request writes `scratchpad/traces/<time>-<tag>-<id>.json` (stages A–I plus W for card writing, tokens, dollar cost). The trace object is passed down as an argument, is watch-only, and is ignored on Vercel. Don't let trace data feed back into the engine or the model's input; `scratchpad/trace-equivalence-check.mts` checks this.
-- Models today: Sonnet 5 for tag mapping, selection and card writing; Haiku 4.5 for field shortening and the description check. Each file currently names its model directly; PR 4 moves them behind one AI gateway (`lib/ai/`).
+- Models today: Sonnet 5 for tag mapping, selection and card writing; Haiku 4.5 for field shortening and the description check. **These are current choices, not permanent ones** (decision 14.3): every AI job can use whichever model gives the best balance of speed and quality, and is re-evaluated when better options appear. Each file currently names its model directly; PR 4 moves them behind one AI gateway (`lib/ai/slots.ts`), so a change is one setting plus that job's eval.
 
 ## Rules the code enforces (don't weaken them)
 

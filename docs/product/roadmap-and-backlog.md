@@ -40,6 +40,7 @@ Bucket: **v0** (in [scope](./v0-scope.md)) · **Later** (real app, after v0) · 
 | Three varied picks | v0 | Variety without predefined pick types |
 | "Not quite? Try again" | v0 | The correction path after the reveal |
 | Faster recommendations | v0 | Swappable models make per-step model choice easy |
+| Engine performance track: running models more efficiently and creatively | Ongoing | Parallel calls, streaming, caching, routing small jobs to fast models, early table-setting; re-test model choices per job as new models ship (decision 14.3) |
 | Taste summary on the loading screen | v0 | "Looking for" line |
 | Avoid list / Nope shelf | Later | Low priority |
 | Influencer or curated reading lists | Vision | Fits the engine as another book source |

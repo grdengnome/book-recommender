@@ -14,6 +14,13 @@ New AI models and tools appear constantly, and Squirmly will keep changing. Chan
 - **Feature flags.** New or experimental parts (a new question format, a Three.js book) can run alongside the old version until they prove themselves.
 - **Every output records which engine made it,** so a card or recommendation can always be traced to the model and source behind it.
 
+## Model choice is never permanent (decision 14.3)
+- **Every AI job has its own slot,** and each slot can use any model or provider. Today's choices (Sonnet 5 and Haiku 4.5) are where we are, not where we stop.
+- **The rule is the best balance of speed and quality** for that job. A heavy judgment call (choosing the three picks) may justify a larger model; a quick check may not.
+- **Changes are proven, not assumed:** each slot's eval and timing must hold or improve before a new model goes live.
+- **How models run is part of the choice.** Running jobs in parallel, streaming partial results, caching repeated work, routing small jobs to fast models, and starting work early (preparing the table while the reader is still answering) are all levers. The engine already streams the selection and writes the three cards in parallel; finding more of these is an ongoing track (see the [roadmap](../product/roadmap-and-backlog.md)).
+- **Re-checked when the field moves:** new models are logged in the Tool Radar and tested against a slot when that slot is next worked on.
+
 ## The guardrail: YAGNI ("You Aren't Gonna Need It")
 A contract has costs: an extra layer, a guess about the future, and upkeep. Add one only when at least one of these is true:
 1. **Two or more options already exist** (Open Library and Hardcover; the five themes).
