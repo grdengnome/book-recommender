@@ -8,6 +8,13 @@
 // and records the final recommendations per case for later cross-referencing
 // against .local/query-log.json.
 
+// Options (environment settings):
+//   CASE_IDS=case-1,case-5   run only these cases, in this order
+//   TAG_PREFIX=gateway1101    prefix for each request's eval tag, so its logs and traces are separable
+//   OUT=eval-run-x.json       results file name in evals/results/ (default eval-run-results.json)
+// With the dev server started as ENGINE_TRACE=1 npm run dev, each case's server-side time and
+// dollar cost are read from its trace in .local/traces/ and printed in the summary at the end.
+
 const PORT = process.env.PORT || 3000;
 const API_URL = `http://localhost:${PORT}/api/recommend`;
 
@@ -99,19 +106,39 @@ function extractTitles(recommendationsText) {
   return null;
 }
 
+const TAG_PREFIX = process.env.TAG_PREFIX ? `${process.env.TAG_PREFIX}-` : "";
+const TRACE_DIR = new URL("../.local/traces/", import.meta.url);
+
+// The newest trace written for this eval tag, if tracing was on: { totalMs, totalUsd, models }.
+async function readTrace(evalTag) {
+  const fs = await import("fs");
+  try {
+    const name = fs.readdirSync(TRACE_DIR).filter((f) => f.includes(`-${evalTag}-`)).sort().pop();
+    if (!name) return null;
+    const trace = JSON.parse(fs.readFileSync(new URL(name, TRACE_DIR), "utf8"));
+    return { totalMs: trace.totalMs, totalUsd: trace.cost?.totalUsd ?? null, models: Object.keys(trace.cost?.byModel ?? {}) };
+  } catch {
+    return null;
+  }
+}
+
 async function runCase(c) {
+  const evalTag = `${TAG_PREFIX}${c.id}`;
+  const start = performance.now();
   const res = await fetch(API_URL, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({
       tasteDescription: c.tasteDescription,
-      evalTag: c.id,
+      evalTag,
     }),
   });
   const data = await res.json();
+  const driverMs = Math.round(performance.now() - start);
+  const trace = await readTrace(evalTag);
   if (!res.ok) {
     console.error(`[${c.id}] ERROR`, data);
-    return { ...c, error: data };
+    return { ...c, error: data, driverMs, trace };
   }
   // Since fix PR 1 (2026-10-21) the route returns structured `picks`; older runs returned
   // `recommendations` as model text, which extractTitles still parses.
@@ -123,15 +150,21 @@ async function runCase(c) {
   } else {
     console.log(`[${c.id}] done — ${titles.map((t) => t.title).join(" | ")}`);
   }
-  return { ...c, picks: data.picks ?? null, recommendations: data.recommendations ?? null, titles };
+  return { ...c, picks: data.picks ?? null, recommendations: data.recommendations ?? null, titles, driverMs, trace };
 }
 
 const fs = await import("fs");
 fs.mkdirSync(new URL("./results/", import.meta.url), { recursive: true });
-const outPath = new URL("./results/eval-run-results.json", import.meta.url);
+const outName = process.env.OUT || "eval-run-results.json";
+const outPath = new URL(`./results/${outName}`, import.meta.url);
+
+const wanted = process.env.CASE_IDS ? process.env.CASE_IDS.split(",").map((id) => id.trim()) : null;
+const unknown = (wanted ?? []).filter((id) => !CASES.some((c) => c.id === id));
+if (unknown.length) throw new Error(`Unknown CASE_IDS: ${unknown.join(", ")}`);
+const toRun = wanted ? wanted.map((id) => CASES.find((c) => c.id === id)) : CASES;
 
 const results = [];
-for (const c of CASES) {
+for (const c of toRun) {
   // Sequential on purpose: keeps the module-level log tag in searchBooks.ts
   // unambiguous — no two cases' search_books calls are ever in flight at once.
   const result = await runCase(c);
@@ -140,4 +173,18 @@ for (const c of CASES) {
   fs.writeFileSync(outPath, JSON.stringify(results, null, 2));
 }
 
-console.log("\nWrote evals/results/eval-run-results.json");
+// Summary: no reader data and no keys, safe to paste into a PR or chat.
+const secs = (ms) => (typeof ms === "number" ? `${(ms / 1000).toFixed(1)}s` : "–");
+console.log("\nSummary");
+console.log("case      | status | picks | server time | driver time | cost   | models");
+for (const r of results) {
+  const status = r.error ? "ERROR" : "ok";
+  const picks = r.picks ? r.picks.length : 0;
+  const cost = typeof r.trace?.totalUsd === "number" ? `$${r.trace.totalUsd.toFixed(3)}` : "–";
+  console.log(`${r.id.padEnd(9)} | ${status.padEnd(6)} | ${String(picks).padEnd(5)} | ${secs(r.trace?.totalMs).padEnd(11)} | ${secs(r.driverMs).padEnd(11)} | ${cost.padEnd(6)} | ${(r.trace?.models ?? []).join(", ")}`);
+}
+const times = results.map((r) => r.trace?.totalMs ?? r.driverMs).sort((a, b) => a - b);
+const median = times.length ? times[Math.floor((times.length - 1) / 2)] + (times.length % 2 ? 0 : (times[times.length / 2] - times[Math.floor((times.length - 1) / 2)]) / 2) : null;
+const costs = results.map((r) => r.trace?.totalUsd).filter((x) => typeof x === "number");
+console.log(`\n${results.filter((r) => !r.error && r.picks?.length === 3).length}/${results.length} cases returned 3 picks · median time ${secs(median)}` + (costs.length ? ` · total cost $${costs.reduce((a, b) => a + b, 0).toFixed(3)}` : " · cost: start the dev server with ENGINE_TRACE=1 to see it"));
+console.log(`Wrote evals/results/${outName}`);
