@@ -8,6 +8,7 @@ Run them all with `npm test`, or everything GitHub runs with `npm run check` (ty
 |---|---|
 | `grounding.test.mts` | Every pick must come from a pool the model was shown; accents, subtitles and non-Latin names still match; an empty author is never a wildcard |
 | `merge.test.mts` | Books found in both catalogs appear once with both IDs; the model sees only title, author and subjects; nothing is silently dropped |
+| `ai-gateway.test.mts` | Every AI job has a slot with a known, priced model; an override setting changes only its own job and a bad one falls back; a missing key is reported before any call; nothing outside `lib/ai/` talks to a provider or names a model |
 | `engine-golden.test.mts` | A refactor changes nothing the outside world sees: every request the engine sends (address, headers, timeout, body) and its response match the saved copy in `golden/engine-requests.json`. A deliberate change refreshes the copy with `UPDATE_GOLDEN=1 npm test`, and its diff is reviewed in the PR |
 | `trace-equivalence.test.mts` | The debug trace only watches: model inputs, catalog requests and the response are byte-identical with tracing on and off; no secrets in the trace; never writes on Vercel |
 
