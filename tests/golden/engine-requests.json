@@ -1,0 +1,683 @@
+{
+  "requests": [
+    {
+      "url": "https://api.anthropic.com/v1/messages",
+      "method": "POST",
+      "headers": {
+        "anthropic-version": "2023-06-01",
+        "content-type": "application/json",
+        "x-api-key": "<anthropic key>"
+      },
+      "hasTimeout": false,
+      "body": {
+        "model": "claude-sonnet-5",
+        "max_tokens": 300,
+        "messages": [
+          {
+            "role": "user",
+            "content": "A reader described the kind of book they want like this:\n\n\"My favorite book is 'The Remains of the Day' by Kazuo Ishiguro — I loved how restrained and heartbreaking it was, the way so much emotion stayed unspoken beneath the surface. I'm in the mood for something similarly quiet and melancholic, character-driven rather than plot-heavy. I have plenty of time and want to sit with a slow, immersive book.\"\n\nHere is a list of tags from a book-tagging platform. Pick 2-4 tags from this exact list that best represent this reader's taste:\n\n- Star Trek\n- China\n- Second Chance\n- Seinen\n- BDSM\n- General\n- Aliens\n- read\n- Young adult\n- Literature\n- memoir\n- English\n- Female MC\n- Paranormal\n- philosophy\n- dark\n- explicit sexual content\n- Fated Mates\n- speculative fiction\n- Tense\n- insta-love\n- third person POV\n- hurt/comfort\n- Urban Fantasy\n- romance\n- self-improvement\n- Fae\n- humor\n- polyamory\n- adventurous\n- breeding\n- Short Stories\n- why choose\n- Small Town\n- filosofia\n- epic\n- fictiune\n- feminism\n- Detektive & Spannung\n- Explicit\n- manga\n- first-person-pov\n- dragons\n- standalone\n- angst\n- anal sex\n- grumpy sunshine\n- open-door spice\n- Action & Adventure\n- graphic novel\n- non-human-hero\n- friends to lovers\n- thriller\n- Crime Mystery & Thriller\n- comics\n- m-m\n- Paranormal & Urban\n- Smut\n- USA\n- classics\n- self-help\n- pirates\n- forbidden love\n- mental-trauma\n- christianity\n- caretaking\n- dual-pov\n- Space Opera\n- Kinder-Hörbücher\n- Computers\n- adventure\n- male author\n- Sapphic\n- female author\n- Business & Economics\n- psihologie\n- Male MC\n- found family\n- Contemporary\n- mystery\n- age gap\n- Childrens & Young Adult\n- Japanese\n- Christian Book\n- Novel\n- Multiple POV's\n- informative\n- WD\n- Shifters\n- queer\n- Literatur & Belletristik\n- forced proximity\n- male-pov\n- History\n- fake relationship\n- slow burn\n- funny\n- fiction\n- Fantasy & Magie\n- Cyberpunk\n- witches\n- Written by Women\n- animals\n- fantezie\n- psychology\n- suspense\n- chicklit\n- Emotional\n- regency\n- Need to Tag\n- science fiction\n- bisexual\n- Middle grade\n- Identity\n- lighthearted\n- sappy\n- Abduction\n- Horror\n- Time Travel\n- United States\n- Bi awakening\n- Shapeshifters\n- Death\n- non-fiction\n- nonfiction\n- Sports Romance\n- past-abuse\n- MF\n- Science Fiction & Fantasy\n- hurt-comfort\n- Sci-fi\n- challenging\n- nonfictiune\n- Futuristic\n- Military\n- Science\n- library\n- owned\n- Shōnen\n- Open Door\n- Reverse Harem\n- mysterious\n- Magic\n- demons\n- vampires\n- Monsters\n- spicy\n- British\n- LGBTQ+\n- Historical romance\n- enemies to lovers\n- reflective\n- fantasy\n\nMany of these tags are broad, generic descriptors (\"dark\", \"mysterious\", \"fiction\") that could technically apply to a huge range of books. Others are much more specific to a particular texture, theme, or trope. When a more specific tag on the list genuinely fits the reader's description, prefer it over a broader one that only loosely applies — the goal is tags that distinguish this taste input from a different one, not tags that are safe to apply to almost anything. Don't force a fit: if nothing on the list is a good match for some aspect of the description, it's fine to leave that aspect unrepresented rather than reaching for a loosely-related tag.\n\nRespond with ONLY a JSON array of the tag strings you picked, copied exactly as they appear in the list above — no prose before or after it."
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://api.anthropic.com/v1/messages",
+      "method": "POST",
+      "headers": {
+        "anthropic-version": "2023-06-01",
+        "content-type": "application/json",
+        "x-api-key": "<anthropic key>"
+      },
+      "hasTimeout": false,
+      "body": {
+        "model": "claude-sonnet-5",
+        "max_tokens": 8000,
+        "system": [
+          {
+            "type": "text",
+            "text": "You are a book recommendation engine. Your entire value proposition is taste, not popularity — you recommend books based on genuine fit and quality, actively resisting the pull toward safe, over-recommended picks. Popularity itself is never a mark against a book — only defaulting to a pick because it's popular, rather than because it genuinely fits, is a failure.\n\nApply these rules to every recommendation:\n\n1. Impression over popularity. Target books that leave a mark — ones a reader would be itching to recommend afterward, chosen because they're genuinely great and genuinely fit the reader's stated taste, not because they're famous or because they're obscure. Obscurity is not the goal; genuine quality and fit are.\n2. Resist the reflex toward the bandwagon. Before finalizing a pick, ask whether you're reaching for it because it's the first familiar answer that comes to mind, rather than because it's the best fit for this specific reader. A widely-read book that authentically matches the reader's taste is a legitimate, even ideal, recommendation — the failure mode is defaulting to a familiar pick out of habit, not recommending a popular book on its merits. Reward range: vary era, author, and genre across your picks rather than giving three flavors of the same thing.\n3. A pick fails on non-obviousness if it's the answer a well-read reader would already expect for this specific request — the one they'd land on after a five-minute search or find atop a \"books like this\" list. This has nothing to do with whether the book is decorated: a Booker winner can be a genuinely surprising, well-earned pick, and an award-free book can still be the most predictable possible answer. Before finalizing a pick, ask: would someone who already knows this territory shrug and say \"well, obviously\" — regardless of whether it happens to have won a prize?\n4. Multi-source, not single-source. Draw from many corners of literature — different decades, countries, presses, and traditions. Never lean on a single canon (mainstream or \"counter-canon\") as if it were the only source worth considering.\n\nYou have access to a search_books tool, and you MUST call it before answering. All 3 recommendations MUST be selected from the candidate pools that search_books returned in this conversation. Do not recommend any book that is not present in a retrieved pool, under any circumstance — even if the pool is small, and even if you know of a better fit from your own knowledge. If a pool feels too narrow, call search_books again with different terms; never fill the gap from memory. Copy each pick's title and author into \"poolTitle\" and \"poolAuthor\" exactly as they appear in the pool. Your final answer is checked in code against the retrieved pools, and any pick not found in them is rejected. The candidate list it returns is unordered — an accident of API response order, not a ranking — so never favor earlier entries over later ones. Restricting picks to the pool changes where candidates come from, not the judgment applied to them: still weigh every candidate against the taste-fit rules above.\n\nThe user's taste description will typically include three categories of signal: an anchor (a book they loved), why it stuck with them, and their appetite (comfort vs. surprise) — these three are always present, though the exact wording of how each was asked may vary. It may also include mood, how much time/commitment they want, and specific turn-offs — genres or themes to avoid — when present. Treat a stated turn-off as a hard boundary, not a soft preference: never recommend against it. Focus on the substance of each answer, not the phrasing of the question that produced it. If the input is freeform or unlabeled, use your best judgment to identify these signals from context.\n\nGiven this, return exactly 3 book recommendations.\n\nFor each recommendation, include:\n- \"poolTitle\" and \"poolAuthor\": copied exactly from the pool, as above.\n- \"fitNote\": one short sentence, under 25 words, on why this pick genuinely fits this reader's stated taste rather than being a reflexive/default choice. A writer turns it into the reader-facing text later, so make it specific. Don't state specific claims about a book's reception, fame, or obscurity unless you're confident they're accurate.\n- \"mood\": one word for the book's mood, shown to the reader as a clue before the book is revealed. Give each of the 3 picks a different mood word.",
+            "cache_control": {
+              "type": "ephemeral"
+            }
+          }
+        ],
+        "messages": [
+          {
+            "role": "user",
+            "content": "My favorite book is 'The Remains of the Day' by Kazuo Ishiguro — I loved how restrained and heartbreaking it was, the way so much emotion stayed unspoken beneath the surface. I'm in the mood for something similarly quiet and melancholic, character-driven rather than plot-heavy. I have plenty of time and want to sit with a slow, immersive book."
+          },
+          {
+            "role": "assistant",
+            "content": [
+              {
+                "type": "tool_use",
+                "id": "toolu_offline_1",
+                "name": "search_books",
+                "input": {
+                  "query": "quiet restrained novel",
+                  "subjects": [
+                    "psychological_fiction",
+                    "literary_fiction"
+                  ]
+                }
+              },
+              {
+                "type": "tool_use",
+                "id": "toolu_offline_2",
+                "name": "search_books",
+                "input": {
+                  "query": "melancholic character study",
+                  "subjects": [
+                    "english_fiction"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "tool_result",
+                "tool_use_id": "toolu_offline_1",
+                "content": "{\"pool\":[{\"title\":\"Sample Book 14\",\"author\":\"Sample Author 14\",\"subjects\":[\"reflective\",\"Emotional\"]},{\"title\":\"Stoner\",\"author\":\"John Williams\",\"subjects\":[\"Fiction\",\"Psychological fiction\",\"reflective\"]},{\"title\":\"Sample Book 08\",\"author\":\"Sample Author 8\",\"subjects\":[\"psychological_fiction\",\"reflective\",\"Emotional\"]},{\"title\":\"Sample Book 09\",\"author\":\"Sample Author 9\",\"subjects\":[\"psychological_fiction\",\"reflective\"]},{\"title\":\"Sample Book 02\",\"author\":\"Sample Author 2\",\"subjects\":[\"Fiction\",\"Psychological fiction\",\"reflective\",\"Emotional\"]},{\"title\":\"Kokoro\",\"author\":\"Natsume Sōseki\",\"subjects\":[\"psychological_fiction\",\"reflective\",\"Emotional\"]},{\"title\":\"A Month in the Country\",\"author\":\"J. L. Carr\",\"subjects\":[\"psychological_fiction\",\"reflective\"]},{\"title\":\"Sample Book 04\",\"author\":\"Sample Author 4\",\"subjects\":[\"Fiction\",\"Psychological fiction\",\"reflective\"]},{\"title\":\"Sample Book 07\",\"author\":\"Sample Author 7\",\"subjects\":[\"psychological_fiction\",\"reflective\"]},{\"title\":\"Gilead\",\"author\":\"Marilynne Robinson\",\"subjects\":[\"Fiction\",\"Psychological fiction\"]},{\"title\":\"Hotel du Lac\",\"author\":\"Anita Brookner\",\"subjects\":[\"psychological_fiction\",\"reflective\"]},{\"title\":\"The Leopard\",\"author\":\"Giuseppe Tomasi di Lampedusa\",\"subjects\":[\"psychological_fiction\",\"reflective\"]},{\"title\":\"Sample Book 10\",\"author\":\"Sample Author 10\",\"subjects\":[\"psychological_fiction\",\"reflective\"]},{\"title\":\"Sample Book 01\",\"author\":\"Sample Author 1\",\"subjects\":[\"Fiction\",\"Psychological fiction\",\"reflective\"]},{\"title\":\"Sample Book 12\",\"author\":\"Sample Author 12\",\"subjects\":[\"literary_fiction\"]},{\"title\":\"Sample Book 06\",\"author\":\"Sample Author 6\",\"subjects\":[\"Fiction\",\"Psychological fiction\",\"reflective\"]},{\"title\":\"Our Souls at Night\",\"author\":\"Kent Haruf\",\"subjects\":[\"Fiction\",\"Psychological fiction\",\"reflective\",\"Emotional\"]},{\"title\":\"Train Dreams\",\"author\":\"Denis Johnson\",\"subjects\":[\"psychological_fiction\",\"reflective\"]},{\"title\":\"Sample Book 11\",\"author\":\"Sample Author 11\",\"subjects\":[\"literary_fiction\",\"reflective\",\"Emotional\"]},{\"title\":\"Sample Book 05\",\"author\":\"Sample Author 5\",\"subjects\":[\"Fiction\",\"Psychological fiction\",\"reflective\",\"Emotional\"]},{\"title\":\"The Blue Flower\",\"author\":\"Penelope Fitzgerald\",\"subjects\":[\"psychological_fiction\",\"reflective\",\"Emotional\"]},{\"title\":\"The Go-Between\",\"author\":\"L. P. Hartley\",\"subjects\":[\"Fiction\",\"Psychological fiction\"]},{\"title\":\"Sample Book 03\",\"author\":\"Sample Author 3\",\"subjects\":[\"Fiction\",\"Psychological fiction\",\"reflective\"]}],\"poolSize\":23}"
+              },
+              {
+                "type": "tool_result",
+                "tool_use_id": "toolu_offline_2",
+                "content": "{\"pool\":[{\"title\":\"A Month in the Country\",\"author\":\"J. L. Carr\",\"subjects\":[\"english_fiction\",\"reflective\"]},{\"title\":\"Sample Book 08\",\"author\":\"Sample Author 8\",\"subjects\":[\"english_fiction\",\"reflective\",\"Emotional\"]},{\"title\":\"Train Dreams\",\"author\":\"Denis Johnson\",\"subjects\":[\"english_fiction\",\"reflective\"]},{\"title\":\"Gilead\",\"author\":\"Marilynne Robinson\",\"subjects\":[\"Fiction\",\"Psychological fiction\"]},{\"title\":\"Sample Book 11\",\"author\":\"Sample Author 11\",\"subjects\":[\"english_fiction\",\"reflective\",\"Emotional\"]},{\"title\":\"The Leopard\",\"author\":\"Giuseppe Tomasi di Lampedusa\",\"subjects\":[\"english_fiction\",\"reflective\"]},{\"title\":\"Sample Book 10\",\"author\":\"Sample Author 10\",\"subjects\":[\"english_fiction\",\"reflective\"]},{\"title\":\"Stoner\",\"author\":\"John Williams\",\"subjects\":[\"Fiction\",\"Psychological fiction\",\"reflective\"]},{\"title\":\"Kokoro\",\"author\":\"Natsume Sōseki\",\"subjects\":[\"english_fiction\",\"reflective\",\"Emotional\"]},{\"title\":\"Our Souls at Night\",\"author\":\"Kent Haruf\",\"subjects\":[\"Fiction\",\"Psychological fiction\",\"reflective\",\"Emotional\"]},{\"title\":\"Sample Book 05\",\"author\":\"Sample Author 5\",\"subjects\":[\"Fiction\",\"Psychological fiction\",\"reflective\",\"Emotional\"]},{\"title\":\"Sample Book 06\",\"author\":\"Sample Author 6\",\"subjects\":[\"Fiction\",\"Psychological fiction\",\"reflective\"]},{\"title\":\"The Go-Between\",\"author\":\"L. P. Hartley\",\"subjects\":[\"Fiction\",\"Psychological fiction\"]},{\"title\":\"Sample Book 01\",\"author\":\"Sample Author 1\",\"subjects\":[\"Fiction\",\"Psychological fiction\",\"reflective\"]},{\"title\":\"Sample Book 14\",\"author\":\"Sample Author 14\",\"subjects\":[\"reflective\",\"Emotional\"]},{\"title\":\"Hotel du Lac\",\"author\":\"Anita Brookner\",\"subjects\":[\"english_fiction\",\"reflective\"]},{\"title\":\"Sample Book 09\",\"author\":\"Sample Author 9\",\"subjects\":[\"english_fiction\",\"reflective\"]},{\"title\":\"Sample Book 02\",\"author\":\"Sample Author 2\",\"subjects\":[\"Fiction\",\"Psychological fiction\",\"reflective\",\"Emotional\"]},{\"title\":\"Sample Book 07\",\"author\":\"Sample Author 7\",\"subjects\":[\"english_fiction\",\"reflective\"]},{\"title\":\"Sample Book 03\",\"author\":\"Sample Author 3\",\"subjects\":[\"Fiction\",\"Psychological fiction\",\"reflective\"]},{\"title\":\"The Blue Flower\",\"author\":\"Penelope Fitzgerald\",\"subjects\":[\"english_fiction\",\"reflective\",\"Emotional\"]},{\"title\":\"Sample Book 04\",\"author\":\"Sample Author 4\",\"subjects\":[\"Fiction\",\"Psychological fiction\",\"reflective\"]}],\"poolSize\":22}"
+              }
+            ]
+          }
+        ],
+        "output_config": {
+          "format": {
+            "type": "json_schema",
+            "schema": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "picks"
+              ],
+              "properties": {
+                "picks": {
+                  "type": "array",
+                  "description": "Exactly 3 picks, each selected from the retrieved candidate pools.",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "poolTitle",
+                      "poolAuthor",
+                      "fitNote",
+                      "mood"
+                    ],
+                    "properties": {
+                      "poolTitle": {
+                        "type": "string",
+                        "description": "The title exactly as it appears in the candidate pool."
+                      },
+                      "poolAuthor": {
+                        "type": "string",
+                        "description": "The author exactly as it appears in the candidate pool."
+                      },
+                      "fitNote": {
+                        "type": "string",
+                        "description": "One short sentence on why this book fits this reader."
+                      },
+                      "mood": {
+                        "type": "string",
+                        "description": "One word for this book's mood, different from the other picks' moods."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tools": [
+          {
+            "name": "search_books",
+            "description": "Search for real, existing books and get back a candidate pool. Every recommendation you make must be selected from a pool returned by this tool — a book that is not in a returned pool cannot be recommended. Runs a free-text relevance search plus a controlled-vocabulary subject search against every subject you list, then merges everything into one deduplicated, shuffled, unordered candidate pool — order carries no meaning and must not influence which picks you favor. Call it again with broader or different terms if the pool comes back thin (under ~15-20 candidates); never fill a thin pool from trained knowledge.",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "query": {
+                  "type": "string",
+                  "description": "Free-text search terms describing the kind of book to find, e.g. \"quiet character study morally ambiguous\". Passed to Open Library's relevance-ranked search. Keep it short — 2-5 keywords, not a full descriptive sentence: Open Library's matching is stricter than a general web search, and longer, more sentence-like phrases tend to return zero results."
+                },
+                "subjects": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "One or more genre/subject guesses in Open Library's controlled vocabulary, e.g. [\"psychological_fiction\", \"translated_literature\"]. Lowercase, underscores instead of spaces. Each is queried separately and merged into the pool — list a few different angles on the taste input (2-3 is usually enough) rather than just one, since a single subject guess tends to produce a narrower, more repetitive pool. Give your best guesses even if uncertain."
+                }
+              },
+              "required": [
+                "query",
+                "subjects"
+              ]
+            }
+          }
+        ],
+        "stream": true
+      }
+    },
+    {
+      "url": "https://api.anthropic.com/v1/messages",
+      "method": "POST",
+      "headers": {
+        "anthropic-version": "2023-06-01",
+        "content-type": "application/json",
+        "x-api-key": "<anthropic key>"
+      },
+      "hasTimeout": false,
+      "body": {
+        "model": "claude-sonnet-5",
+        "max_tokens": 8000,
+        "system": [
+          {
+            "type": "text",
+            "text": "You are a book recommendation engine. Your entire value proposition is taste, not popularity — you recommend books based on genuine fit and quality, actively resisting the pull toward safe, over-recommended picks. Popularity itself is never a mark against a book — only defaulting to a pick because it's popular, rather than because it genuinely fits, is a failure.\n\nApply these rules to every recommendation:\n\n1. Impression over popularity. Target books that leave a mark — ones a reader would be itching to recommend afterward, chosen because they're genuinely great and genuinely fit the reader's stated taste, not because they're famous or because they're obscure. Obscurity is not the goal; genuine quality and fit are.\n2. Resist the reflex toward the bandwagon. Before finalizing a pick, ask whether you're reaching for it because it's the first familiar answer that comes to mind, rather than because it's the best fit for this specific reader. A widely-read book that authentically matches the reader's taste is a legitimate, even ideal, recommendation — the failure mode is defaulting to a familiar pick out of habit, not recommending a popular book on its merits. Reward range: vary era, author, and genre across your picks rather than giving three flavors of the same thing.\n3. A pick fails on non-obviousness if it's the answer a well-read reader would already expect for this specific request — the one they'd land on after a five-minute search or find atop a \"books like this\" list. This has nothing to do with whether the book is decorated: a Booker winner can be a genuinely surprising, well-earned pick, and an award-free book can still be the most predictable possible answer. Before finalizing a pick, ask: would someone who already knows this territory shrug and say \"well, obviously\" — regardless of whether it happens to have won a prize?\n4. Multi-source, not single-source. Draw from many corners of literature — different decades, countries, presses, and traditions. Never lean on a single canon (mainstream or \"counter-canon\") as if it were the only source worth considering.\n\nYou have access to a search_books tool, and you MUST call it before answering. All 3 recommendations MUST be selected from the candidate pools that search_books returned in this conversation. Do not recommend any book that is not present in a retrieved pool, under any circumstance — even if the pool is small, and even if you know of a better fit from your own knowledge. If a pool feels too narrow, call search_books again with different terms; never fill the gap from memory. Copy each pick's title and author into \"poolTitle\" and \"poolAuthor\" exactly as they appear in the pool. Your final answer is checked in code against the retrieved pools, and any pick not found in them is rejected. The candidate list it returns is unordered — an accident of API response order, not a ranking — so never favor earlier entries over later ones. Restricting picks to the pool changes where candidates come from, not the judgment applied to them: still weigh every candidate against the taste-fit rules above.\n\nThe user's taste description will typically include three categories of signal: an anchor (a book they loved), why it stuck with them, and their appetite (comfort vs. surprise) — these three are always present, though the exact wording of how each was asked may vary. It may also include mood, how much time/commitment they want, and specific turn-offs — genres or themes to avoid — when present. Treat a stated turn-off as a hard boundary, not a soft preference: never recommend against it. Focus on the substance of each answer, not the phrasing of the question that produced it. If the input is freeform or unlabeled, use your best judgment to identify these signals from context.\n\nGiven this, return exactly 3 book recommendations.\n\nFor each recommendation, include:\n- \"poolTitle\" and \"poolAuthor\": copied exactly from the pool, as above.\n- \"fitNote\": one short sentence, under 25 words, on why this pick genuinely fits this reader's stated taste rather than being a reflexive/default choice. A writer turns it into the reader-facing text later, so make it specific. Don't state specific claims about a book's reception, fame, or obscurity unless you're confident they're accurate.\n- \"mood\": one word for the book's mood, shown to the reader as a clue before the book is revealed. Give each of the 3 picks a different mood word.",
+            "cache_control": {
+              "type": "ephemeral"
+            }
+          }
+        ],
+        "messages": [
+          {
+            "role": "user",
+            "content": "My favorite book is 'The Remains of the Day' by Kazuo Ishiguro — I loved how restrained and heartbreaking it was, the way so much emotion stayed unspoken beneath the surface. I'm in the mood for something similarly quiet and melancholic, character-driven rather than plot-heavy. I have plenty of time and want to sit with a slow, immersive book."
+          }
+        ],
+        "output_config": {
+          "format": {
+            "type": "json_schema",
+            "schema": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "picks"
+              ],
+              "properties": {
+                "picks": {
+                  "type": "array",
+                  "description": "Exactly 3 picks, each selected from the retrieved candidate pools.",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "poolTitle",
+                      "poolAuthor",
+                      "fitNote",
+                      "mood"
+                    ],
+                    "properties": {
+                      "poolTitle": {
+                        "type": "string",
+                        "description": "The title exactly as it appears in the candidate pool."
+                      },
+                      "poolAuthor": {
+                        "type": "string",
+                        "description": "The author exactly as it appears in the candidate pool."
+                      },
+                      "fitNote": {
+                        "type": "string",
+                        "description": "One short sentence on why this book fits this reader."
+                      },
+                      "mood": {
+                        "type": "string",
+                        "description": "One word for this book's mood, different from the other picks' moods."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tools": [
+          {
+            "name": "search_books",
+            "description": "Search for real, existing books and get back a candidate pool. Every recommendation you make must be selected from a pool returned by this tool — a book that is not in a returned pool cannot be recommended. Runs a free-text relevance search plus a controlled-vocabulary subject search against every subject you list, then merges everything into one deduplicated, shuffled, unordered candidate pool — order carries no meaning and must not influence which picks you favor. Call it again with broader or different terms if the pool comes back thin (under ~15-20 candidates); never fill a thin pool from trained knowledge.",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "query": {
+                  "type": "string",
+                  "description": "Free-text search terms describing the kind of book to find, e.g. \"quiet character study morally ambiguous\". Passed to Open Library's relevance-ranked search. Keep it short — 2-5 keywords, not a full descriptive sentence: Open Library's matching is stricter than a general web search, and longer, more sentence-like phrases tend to return zero results."
+                },
+                "subjects": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "One or more genre/subject guesses in Open Library's controlled vocabulary, e.g. [\"psychological_fiction\", \"translated_literature\"]. Lowercase, underscores instead of spaces. Each is queried separately and merged into the pool — list a few different angles on the taste input (2-3 is usually enough) rather than just one, since a single subject guess tends to produce a narrower, more repetitive pool. Give your best guesses even if uncertain."
+                }
+              },
+              "required": [
+                "query",
+                "subjects"
+              ]
+            }
+          }
+        ],
+        "stream": true
+      }
+    },
+    {
+      "url": "https://api.anthropic.com/v1/messages",
+      "method": "POST",
+      "headers": {
+        "anthropic-version": "2023-06-01",
+        "content-type": "application/json",
+        "x-api-key": "<anthropic key>"
+      },
+      "hasTimeout": true,
+      "body": {
+        "model": "claude-haiku-4-5",
+        "max_tokens": 2000,
+        "messages": [
+          {
+            "role": "user",
+            "content": "You are fact-checking short book-recommendation blurbs against catalog records.\n\nThe reader asked for:\n<taste>\nMy favorite book is 'The Remains of the Day' by Kazuo Ishiguro — I loved how restrained and heartbreaking it was, the way so much emotion stayed unspoken beneath the surface. I'm in the mood for something similarly quiet and melancholic, character-driven rather than plot-heavy. I have plenty of time and want to sit with a slow, immersive book.\n</taste>\n\nFor each pick below, a recommender wrote a \"why\" and an \"angleText\" blurb. Your job is to catch factual errors about the book — not to judge the recommender's interpretation of it.\n\n<pick index=\"1\">\ntitle: Stoner\nauthor: John Williams\nwhy (recommender's text): Quiet and restrained.\nangleText (recommender's text): Fits the brief.\nfacts from catalog records:\n- openlibrary description: A quiet novel about memory and restraint.\n- hardcover description: Hardcover's description.\n- Open Library subjects: Fiction; English fiction -- History and criticism; Psychological fiction -- History and criticism\n- Hardcover genres: Literary\n- Hardcover moods: reflective\n- Catalog note: this work's subjects indicate it is criticism or commentary about its genre, not a work of fiction in that genre.\n</pick>\n\n<pick index=\"2\">\ntitle: Sample Book 08\nauthor: Sample Author 8\nwhy (recommender's text): Quiet and restrained.\nangleText (recommender's text): Fits the brief.\nfacts from catalog records:\n- openlibrary description: A quiet novel about memory and restraint.\n- hardcover description: Hardcover's description.\n- Open Library subjects: Fiction; English fiction -- History and criticism; Psychological fiction -- History and criticism\n- Hardcover genres: Literary\n- Hardcover moods: reflective\n- Catalog note: this work's subjects indicate it is criticism or commentary about its genre, not a work of fiction in that genre.\n</pick>\n\nFor each pick, mark it \"contradicts\" only if the blurbs make a factual error that the catalog facts provided directly show is wrong. These are the only kinds of error that count:\n- Wrong form: e.g. calling an essay collection, story collection, or nonfiction work a novel, or the reverse.\n- Wrong genre.\n- Wrong subject or setting: e.g. the wrong place, period, or central topic.\n- Wrong plot facts: e.g. a protagonist, event, or relationship the facts rule out.\n- Describing a different book: e.g. another volume in the same series (a different installment, a different stage of the character's life) or another work by the same author.\n\nInterpretive characterizations are not errors: pacing, tone, mood, \"character study,\" \"slow,\" \"quiet,\" \"immersive,\" \"plot-light,\" how the book reads, and how it relates to the reader's taste. A catalog description that summarizes events does not contradict a blurb calling the book a character study or not plot-driven — that is a judgment about emphasis, not a fact. Treat such characterizations as errors only if the facts directly contradict them.\n\nMark every other pick \"consistent\". Claims the facts simply don't cover are fine. When unsure whether something is a factual error, mark it \"consistent\" rather than rewriting.\n\nLibrary subject headings can state a book's form directly. Subdivisions such as \"History and criticism\", \"Criticism and interpretation\", \"Biography\", or \"Juvenile literature\" mean the book is that kind of work (criticism, biography, etc.), so they are valid evidence of the form.\n\nTo mark a pick \"contradicts\" you must be able to fill in all of: which error type it is (one of the five above), the wrong claim quoted word for word from that pick's blurbs, and the catalog fact quoted word for word from that pick's facts. Both quotes are checked against the text; a paraphrase, an inference, or a quote from the wrong place does not count. If you can't quote a specific catalog fact, it is not a contradiction.\n\nIf a pick contradicts the facts, rewrite both \"why\" and \"angleText\" so they are accurate to the catalog facts while still connecting the book to the reader's taste. Every claim in a rewrite about what the book is or contains must be supported by the facts provided. That rules out two things: details from your own knowledge of the book, and details kept from the original blurb that the facts don't support — once a blurb has been shown wrong about the book, treat the rest of its specifics as unverified. If the facts only support a modest description, write a modest one; it is fine for a rewrite to be shorter than the original. Never suggest a different book.\n\nCatalog records can be noisy (odd subject tags, a description that is only a page count); ignore noise rather than treating it as a contradiction.\n\nRespond with ONLY a JSON array, one object per pick, no prose before or after. For a consistent pick:\n{\"index\": <pick index>, \"verdict\": \"consistent\", \"reason\": \"<one short sentence>\"}\nFor a pick that contradicts the facts — all fields required, including both rewrites:\n{\"index\": <pick index>, \"verdict\": \"contradicts\", \"errorType\": \"form\" | \"genre\" | \"subject_or_setting\" | \"plot\" | \"different_book\", \"blurbClaim\": \"<the wrong claim, quoted from the blurb>\", \"catalogFact\": \"<the catalog fact that contradicts it, quoted from the facts>\", \"reason\": \"<one short sentence>\", \"why\": \"<rewritten why>\", \"angleText\": \"<rewritten angleText>\"}"
+          }
+        ]
+      }
+    },
+    {
+      "url": "https://api.anthropic.com/v1/messages",
+      "method": "POST",
+      "headers": {
+        "anthropic-version": "2023-06-01",
+        "content-type": "application/json",
+        "x-api-key": "<anthropic key>"
+      },
+      "hasTimeout": true,
+      "body": {
+        "model": "claude-sonnet-5",
+        "max_tokens": 1000,
+        "thinking": {
+          "type": "disabled"
+        },
+        "system": "You write the card for one book recommendation. The book has already been chosen for this reader; your job is to tell them why, in a few short pieces of text.\n\nWrite these fields:\n- \"title\": the book's English display title, without series or edition notes such as \"(Penguin Classics)\". If the catalog title is in another language or script, give the book's established English title, keeping the accents that title uses in English.\n- \"author\": the author's name as \"First Last\", in a standard English transliteration, without stress marks.\n- \"hook\": one short line that makes the reader want to open the book, about 90 characters or fewer.\n- \"why\": why this book is for this reader, tied to specifics in their stated taste. About 2 sentences.\n- \"angleHeading\": a heading for a section on why this pick genuinely fits rather than being a reflexive/default choice, written for this book (e.g. \"Shelved in the wrong aisle\"), not a generic label. About 5 words, 30 characters at most.\n- \"angleText\": that section's body, about 2 sentences. Don't state specific claims about a book's reception, fame, or obscurity unless you're confident they're accurate — if unsure, describe what makes the book fit rather than making a comparative claim about how well-known it is.\n\nWhat you say the book is and contains must agree with the catalog records given. Where they are silent, keep claims general rather than inventing plot. The selector's note says why the book was chosen, and its mood word is shown on the card next to yours; build on both. Any other picks are listed only so your angle differs from theirs: don't mention them.\n\nDon't use emoji. Keep to the lengths above.",
+        "messages": [
+          {
+            "role": "user",
+            "content": "<reader_taste>\nMy favorite book is 'The Remains of the Day' by Kazuo Ishiguro — I loved how restrained and heartbreaking it was, the way so much emotion stayed unspoken beneath the surface. I'm in the mood for something similarly quiet and melancholic, character-driven rather than plot-heavy. I have plenty of time and want to sit with a slow, immersive book.\n</reader_taste>\n\n<book>\ncatalog title: Sample Book 08\ncatalog author: Sample Author 8\nselector's note: Quiet and restrained.\nmood: wistful\ncatalog description: A quiet novel about memory and restraint.\ncatalog description: Hardcover's description.\nsubjects: psychological_fiction; reflective; Emotional; Fiction; English fiction -- History and criticism; Psychological fiction -- History and criticism\nHardcover genres: Literary\nHardcover moods: reflective\n</book>\n\n<other_picks>Sample Book 14; Stoner</other_picks>"
+          }
+        ],
+        "output_config": {
+          "format": {
+            "type": "json_schema",
+            "schema": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "title",
+                "author",
+                "hook",
+                "why",
+                "angleHeading",
+                "angleText"
+              ],
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "description": "English display title, cleaned of series or edition notes."
+                },
+                "author": {
+                  "type": "string",
+                  "description": "Author as \"First Last\" in English transliteration, no stress marks."
+                },
+                "hook": {
+                  "type": "string",
+                  "description": "One short line for the revealed book, about 90 characters or fewer."
+                },
+                "why": {
+                  "type": "string",
+                  "description": "Why it's for this reader, tied to their stated taste. About 2 sentences."
+                },
+                "angleHeading": {
+                  "type": "string",
+                  "description": "Heading written for this pick, about 5 words (30 characters)."
+                },
+                "angleText": {
+                  "type": "string",
+                  "description": "That section's body. About 2 sentences."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "url": "https://api.anthropic.com/v1/messages",
+      "method": "POST",
+      "headers": {
+        "anthropic-version": "2023-06-01",
+        "content-type": "application/json",
+        "x-api-key": "<anthropic key>"
+      },
+      "hasTimeout": true,
+      "body": {
+        "model": "claude-sonnet-5",
+        "max_tokens": 1000,
+        "thinking": {
+          "type": "disabled"
+        },
+        "system": "You write the card for one book recommendation. The book has already been chosen for this reader; your job is to tell them why, in a few short pieces of text.\n\nWrite these fields:\n- \"title\": the book's English display title, without series or edition notes such as \"(Penguin Classics)\". If the catalog title is in another language or script, give the book's established English title, keeping the accents that title uses in English.\n- \"author\": the author's name as \"First Last\", in a standard English transliteration, without stress marks.\n- \"hook\": one short line that makes the reader want to open the book, about 90 characters or fewer.\n- \"why\": why this book is for this reader, tied to specifics in their stated taste. About 2 sentences.\n- \"angleHeading\": a heading for a section on why this pick genuinely fits rather than being a reflexive/default choice, written for this book (e.g. \"Shelved in the wrong aisle\"), not a generic label. About 5 words, 30 characters at most.\n- \"angleText\": that section's body, about 2 sentences. Don't state specific claims about a book's reception, fame, or obscurity unless you're confident they're accurate — if unsure, describe what makes the book fit rather than making a comparative claim about how well-known it is.\n\nWhat you say the book is and contains must agree with the catalog records given. Where they are silent, keep claims general rather than inventing plot. The selector's note says why the book was chosen, and its mood word is shown on the card next to yours; build on both. Any other picks are listed only so your angle differs from theirs: don't mention them.\n\nDon't use emoji. Keep to the lengths above.",
+        "messages": [
+          {
+            "role": "user",
+            "content": "<reader_taste>\nMy favorite book is 'The Remains of the Day' by Kazuo Ishiguro — I loved how restrained and heartbreaking it was, the way so much emotion stayed unspoken beneath the surface. I'm in the mood for something similarly quiet and melancholic, character-driven rather than plot-heavy. I have plenty of time and want to sit with a slow, immersive book.\n</reader_taste>\n\n<book>\ncatalog title: Sample Book 14\ncatalog author: Sample Author 14\nselector's note: Quiet and restrained.\nmood: melancholic\ncatalog description: Hardcover's description.\nsubjects: reflective; Emotional\nHardcover genres: Literary\nHardcover moods: reflective\n</book>"
+          }
+        ],
+        "output_config": {
+          "format": {
+            "type": "json_schema",
+            "schema": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "title",
+                "author",
+                "hook",
+                "why",
+                "angleHeading",
+                "angleText"
+              ],
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "description": "English display title, cleaned of series or edition notes."
+                },
+                "author": {
+                  "type": "string",
+                  "description": "Author as \"First Last\" in English transliteration, no stress marks."
+                },
+                "hook": {
+                  "type": "string",
+                  "description": "One short line for the revealed book, about 90 characters or fewer."
+                },
+                "why": {
+                  "type": "string",
+                  "description": "Why it's for this reader, tied to their stated taste. About 2 sentences."
+                },
+                "angleHeading": {
+                  "type": "string",
+                  "description": "Heading written for this pick, about 5 words (30 characters)."
+                },
+                "angleText": {
+                  "type": "string",
+                  "description": "That section's body. About 2 sentences."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "url": "https://api.anthropic.com/v1/messages",
+      "method": "POST",
+      "headers": {
+        "anthropic-version": "2023-06-01",
+        "content-type": "application/json",
+        "x-api-key": "<anthropic key>"
+      },
+      "hasTimeout": true,
+      "body": {
+        "model": "claude-sonnet-5",
+        "max_tokens": 1000,
+        "thinking": {
+          "type": "disabled"
+        },
+        "system": "You write the card for one book recommendation. The book has already been chosen for this reader; your job is to tell them why, in a few short pieces of text.\n\nWrite these fields:\n- \"title\": the book's English display title, without series or edition notes such as \"(Penguin Classics)\". If the catalog title is in another language or script, give the book's established English title, keeping the accents that title uses in English.\n- \"author\": the author's name as \"First Last\", in a standard English transliteration, without stress marks.\n- \"hook\": one short line that makes the reader want to open the book, about 90 characters or fewer.\n- \"why\": why this book is for this reader, tied to specifics in their stated taste. About 2 sentences.\n- \"angleHeading\": a heading for a section on why this pick genuinely fits rather than being a reflexive/default choice, written for this book (e.g. \"Shelved in the wrong aisle\"), not a generic label. About 5 words, 30 characters at most.\n- \"angleText\": that section's body, about 2 sentences. Don't state specific claims about a book's reception, fame, or obscurity unless you're confident they're accurate — if unsure, describe what makes the book fit rather than making a comparative claim about how well-known it is.\n\nWhat you say the book is and contains must agree with the catalog records given. Where they are silent, keep claims general rather than inventing plot. The selector's note says why the book was chosen, and its mood word is shown on the card next to yours; build on both. Any other picks are listed only so your angle differs from theirs: don't mention them.\n\nDon't use emoji. Keep to the lengths above.",
+        "messages": [
+          {
+            "role": "user",
+            "content": "<reader_taste>\nMy favorite book is 'The Remains of the Day' by Kazuo Ishiguro — I loved how restrained and heartbreaking it was, the way so much emotion stayed unspoken beneath the surface. I'm in the mood for something similarly quiet and melancholic, character-driven rather than plot-heavy. I have plenty of time and want to sit with a slow, immersive book.\n</reader_taste>\n\n<book>\ncatalog title: Stoner\ncatalog author: John Williams\nselector's note: Quiet and restrained.\nmood: tender\ncatalog description: A quiet novel about memory and restraint.\ncatalog description: Hardcover's description.\nsubjects: Fiction; Psychological fiction; reflective; English fiction -- History and criticism; Psychological fiction -- History and criticism\nHardcover genres: Literary\nHardcover moods: reflective\n</book>\n\n<other_picks>Sample Book 14</other_picks>"
+          }
+        ],
+        "output_config": {
+          "format": {
+            "type": "json_schema",
+            "schema": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "title",
+                "author",
+                "hook",
+                "why",
+                "angleHeading",
+                "angleText"
+              ],
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "description": "English display title, cleaned of series or edition notes."
+                },
+                "author": {
+                  "type": "string",
+                  "description": "Author as \"First Last\" in English transliteration, no stress marks."
+                },
+                "hook": {
+                  "type": "string",
+                  "description": "One short line for the revealed book, about 90 characters or fewer."
+                },
+                "why": {
+                  "type": "string",
+                  "description": "Why it's for this reader, tied to their stated taste. About 2 sentences."
+                },
+                "angleHeading": {
+                  "type": "string",
+                  "description": "Heading written for this pick, about 5 words (30 characters)."
+                },
+                "angleText": {
+                  "type": "string",
+                  "description": "That section's body. About 2 sentences."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "url": "https://api.hardcover.app/v1/graphql",
+      "method": "POST",
+      "headers": {
+        "authorization": "Bearer <hardcover token>",
+        "content-type": "application/json"
+      },
+      "hasTimeout": false,
+      "body": {
+        "query": "\n    query BooksByTags($tagIds: [Int!], $limit: Int!) {\n      taggable_counts(\n        where: { tag_id: { _in: $tagIds }, taggable_type: { _eq: \"Book\" } }\n        order_by: { count: desc }\n        limit: $limit\n      ) {\n        count\n        tag { tag }\n        book {\n          id\n          title\n          users_count\n          contributions(limit: 1) { author { name } }\n        }\n      }\n    }",
+        "variables": {
+          "tagIds": [
+            2157,
+            774
+          ],
+          "limit": 100
+        }
+      }
+    },
+    {
+      "url": "https://api.hardcover.app/v1/graphql",
+      "method": "POST",
+      "headers": {
+        "authorization": "Bearer <hardcover token>",
+        "content-type": "application/json"
+      },
+      "hasTimeout": true,
+      "body": {
+        "query": "query PickMetadata($id: Int!) {\n        books_by_pk(id: $id) { description cached_tags }\n      }",
+        "variables": {
+          "id": 5001
+        }
+      }
+    },
+    {
+      "url": "https://api.hardcover.app/v1/graphql",
+      "method": "POST",
+      "headers": {
+        "authorization": "Bearer <hardcover token>",
+        "content-type": "application/json"
+      },
+      "hasTimeout": true,
+      "body": {
+        "query": "query PickMetadata($id: Int!) {\n        books_by_pk(id: $id) { description cached_tags }\n      }",
+        "variables": {
+          "id": 5015
+        }
+      }
+    },
+    {
+      "url": "https://api.hardcover.app/v1/graphql",
+      "method": "POST",
+      "headers": {
+        "authorization": "Bearer <hardcover token>",
+        "content-type": "application/json"
+      },
+      "hasTimeout": true,
+      "body": {
+        "query": "query PickMetadata($id: Int!) {\n        books_by_pk(id: $id) { description cached_tags }\n      }",
+        "variables": {
+          "id": 5021
+        }
+      }
+    },
+    {
+      "url": "https://openlibrary.org/search.json?q=melancholic+character+study&fields=key%2Ctitle%2Cauthor_name%2Csubject&limit=100",
+      "method": "GET",
+      "headers": {
+        "user-agent": "book-recommender/0.1 (https://github.com/grdengnome/book-recommender)"
+      },
+      "hasTimeout": true,
+      "body": null
+    },
+    {
+      "url": "https://openlibrary.org/search.json?q=quiet+restrained+novel&fields=key%2Ctitle%2Cauthor_name%2Csubject&limit=100",
+      "method": "GET",
+      "headers": {
+        "user-agent": "book-recommender/0.1 (https://github.com/grdengnome/book-recommender)"
+      },
+      "hasTimeout": true,
+      "body": null
+    },
+    {
+      "url": "https://openlibrary.org/subjects/english_fiction.json?limit=100",
+      "method": "GET",
+      "headers": {
+        "user-agent": "book-recommender/0.1 (https://github.com/grdengnome/book-recommender)"
+      },
+      "hasTimeout": true,
+      "body": null
+    },
+    {
+      "url": "https://openlibrary.org/subjects/literary_fiction.json?limit=100",
+      "method": "GET",
+      "headers": {
+        "user-agent": "book-recommender/0.1 (https://github.com/grdengnome/book-recommender)"
+      },
+      "hasTimeout": true,
+      "body": null
+    },
+    {
+      "url": "https://openlibrary.org/subjects/psychological_fiction.json?limit=100",
+      "method": "GET",
+      "headers": {
+        "user-agent": "book-recommender/0.1 (https://github.com/grdengnome/book-recommender)"
+      },
+      "hasTimeout": true,
+      "body": null
+    },
+    {
+      "url": "https://openlibrary.org/works/OL1003W.json",
+      "method": "GET",
+      "headers": {
+        "user-agent": "book-recommender/0.1 (https://github.com/grdengnome/book-recommender)"
+      },
+      "hasTimeout": true,
+      "body": null
+    },
+    {
+      "url": "https://openlibrary.org/works/OL1017W.json",
+      "method": "GET",
+      "headers": {
+        "user-agent": "book-recommender/0.1 (https://github.com/grdengnome/book-recommender)"
+      },
+      "hasTimeout": true,
+      "body": null
+    }
+  ],
+  "response": {
+    "status": 200,
+    "body": {
+      "picks": [
+        {
+          "title": "Sample Book 14",
+          "originalTitle": null,
+          "subtitle": null,
+          "author": "Sample Author 14",
+          "year": null,
+          "pages": null,
+          "format": "paperback",
+          "coverUrl": null,
+          "isbn": null,
+          "findLink": null,
+          "hook": "A quiet book that stays with you.",
+          "why": "Quiet and restrained.",
+          "story": null,
+          "angleHeading": "Restraint as a key",
+          "angleText": "Fits the brief.",
+          "mood": "melancholic",
+          "source": null
+        },
+        {
+          "title": "Stoner",
+          "originalTitle": null,
+          "subtitle": null,
+          "author": "John Williams",
+          "year": null,
+          "pages": null,
+          "format": "paperback",
+          "coverUrl": null,
+          "isbn": null,
+          "findLink": null,
+          "hook": "A quiet book that stays with you.",
+          "why": "Quiet and restrained.",
+          "story": null,
+          "angleHeading": "Restraint as a key",
+          "angleText": "Fits the brief.",
+          "mood": "tender",
+          "source": null
+        },
+        {
+          "title": "Sample Book 08",
+          "originalTitle": null,
+          "subtitle": null,
+          "author": "Sample Author 8",
+          "year": null,
+          "pages": null,
+          "format": "paperback",
+          "coverUrl": null,
+          "isbn": null,
+          "findLink": null,
+          "hook": "A quiet book that stays with you.",
+          "why": "Quiet and restrained.",
+          "story": null,
+          "angleHeading": "Restraint as a key",
+          "angleText": "Fits the brief.",
+          "mood": "wistful",
+          "source": null
+        }
+      ]
+    }
+  }
+}
