@@ -12,7 +12,7 @@
 // all ten stage keys are present; the model input the trace recorded equals what was sent;
 // no key or header ends up in the file, and a leaked key value is redacted.
 //
-// Usage: node scratchpad/trace-equivalence-check.mts [copy-trace-to.json]
+// Usage: node tests/trace-equivalence.test.mts [copy-trace-to.json]
 // Run it WITHOUT --env-file: it sets fake keys itself and must not see the real ones.
 import { registerHooks } from "node:module";
 import { existsSync, mkdtempSync, readdirSync, readFileSync, copyFileSync, statSync } from "node:fs";
@@ -204,7 +204,7 @@ process.env.HARDCOVER_API_TOKEN = FAKE_HARDCOVER_TOKEN;
 delete process.env.VERCEL;
 delete process.env.VERCEL_ENV;
 
-const traceDir = path.join(workDir, "scratchpad", "traces");
+const traceDir = path.join(workDir, ".local", "traces");
 const traceFiles = () => (existsSync(traceDir) ? readdirSync(traceDir).sort() : []);
 
 // Quiet the engine's own console logging during the runs.

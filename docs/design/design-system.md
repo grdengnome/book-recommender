@@ -8,7 +8,7 @@
 
 ## A living design
 
-The design is not locked. Current screens will keep being refined, and more themes and screens will be added over time. What stays fixed is the shared structure (§3) and the principles (§2). Changes are made on the design canvas first, then recorded here. The artwork in the mockups (snapshot in [`mockups/`](../mockups/)) is strong: preserve and reuse it when screens are built, rather than redrawing from scratch.
+The design is not locked. Current screens will keep being refined, and more themes and screens will be added over time. What stays fixed is the shared structure (§3) and the principles (§2). Changes are made on the design canvas first, then recorded here. The artwork in the mockups (snapshot in [`prototypes/`](../../prototypes/)) is strong: preserve and reuse it when screens are built, rather than redrawing from scratch.
 
 ## 1. Brief
 
@@ -140,7 +140,7 @@ Rules: one worm per screen at most; drawn as a single thick wavy line with an ey
 
 ## 7. Motion: question screens
 
-Settled in a tappable prototype (source: [`mockups/motion-question-press.html`](../mockups/motion-question-press.html)).
+Settled in a tappable prototype (source: [`prototypes/motion-question-press.html`](../../prototypes/motion-question-press.html)).
 
 - **Entrance order:** the question first, then the answers one by one, then the free-text field. On the first question, the question settles in about 0.9s, the first answer starts at about 0.8s, and each answer fades in over about 0.4s, 0.1s apart; the whole entrance takes about 2s. Later questions run the same sequence at about 60% of those durations.
 - **Answer press:** the answer dips on press, stamps down with a small bounce, and fills with the theme's selected colour from the left. Its marker lights up, the scene's light source flares, and the other answers fade back. Under half a second in total.
@@ -151,7 +151,7 @@ Settled in a tappable prototype (source: [`mockups/motion-question-press.html`](
 
 ## 8. Motion: answer formats
 
-Prototyped for all five themes (sources: [`mockups/motion-question-formats.html`](../mockups/motion-question-formats.html) for Café Bookshop, and the `-mystery`, `-fantasy`, `-superhero` and `-scifi` versions beside it).
+Prototyped for all five themes (sources: [`prototypes/motion-question-formats.html`](../../prototypes/motion-question-formats.html) for Café Bookshop, and the `-mystery`, `-fantasy`, `-superhero` and `-scifi` versions beside it).
 
 - **Formats for v0:** pick one (existing), open text (existing), this or that, pick a few, and scale. Five is the cap for v0. Each question uses one format; a run mixes them so no two runs feel the same.
 - **This or that:** two illustrated cards with an "OR" badge between them, plus a small "in between" option (for example "Somewhere in between", "A bit of both"). The card art moves gently on a loop (rain, steam, drifting clouds, a flickering flame); nothing complex. Picking a card lifts and stamps it; the other dims and freezes, and the OR badge spins away.
@@ -169,7 +169,7 @@ Prototyped for all five themes (sources: [`mockups/motion-question-formats.html`
 
 ## 9. Motion: the reveal
 
-Settled in tappable prototypes, done for all five themes (sources: [`mockups/motion-reveal.html`](../mockups/motion-reveal.html) for Café Bookshop, and `motion-reveal-mystery.html`, `-fantasy`, `-superhero`, `-scifi` in [`mockups/`](../mockups/)). The rules below apply to every theme; the wrapping and how it opens are per theme.
+Settled in tappable prototypes, done for all five themes (sources: [`prototypes/motion-reveal.html`](../../prototypes/motion-reveal.html) for Café Bookshop, and `motion-reveal-mystery.html`, `-fantasy`, `-superhero`, `-scifi` in [`prototypes/`](../../prototypes/)). The rules below apply to every theme; the wrapping and how it opens are per theme.
 
 - **The cover is the main attraction.** It is the largest thing on screen, about 284 × 426 on a 390-wide phone. The clue chips, title, author, "why it's for you" line, and buttons are small and quiet.
 - **Wrapping:** each pick arrives wrapped. Each theme has one wrapping, and it comes off the same way whichever reveal plays:
@@ -259,7 +259,7 @@ Designed for all five themes on October 17, in the same private prototype, "Worm
 
 ## 11. Motion: the loading screen
 
-Settled in prototypes, done for all five themes (sources: [`mockups/motion-loading.html`](../mockups/motion-loading.html) for Café Bookshop, and `motion-loading-mystery.html`, `-fantasy`, `-superhero`, `-scifi` in [`mockups/`](../mockups/)). Layout is in §3.
+Settled in prototypes, done for all five themes (sources: [`prototypes/motion-loading.html`](../../prototypes/motion-loading.html) for Café Bookshop, and `motion-loading-mystery.html`, `-fantasy`, `-superhero`, `-scifi` in [`prototypes/`](../../prototypes/)). Layout is in §3.
 
 - **A living scene:** the scene stays alive for the whole wait. It is large and leaves little empty space above the progress bars.
 - **Entrance, in order:** the theme's small card enters (below); then the headline fades in; then the progress bars. The author fact comes last (see below).

@@ -12,7 +12,21 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Not app code: one-off investigations, design prototypes, maintenance and eval scripts.
+    "experiments/**",
+    "prototypes/**",
+    "scripts/**",
+    "evals/**",
+    ".local/**",
   ]),
+  // Tests may parse loose JSON and use short assertion expressions.
+  {
+    files: ["tests/**"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-unused-expressions": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

@@ -30,28 +30,28 @@ yarn-error.log*
 # vercel
 .vercel
 
-# scratchpad run output (regenerated per eval run — the driver script itself is
-# tracked, its output isn't)
-# Note: some files here (query-log.json, pool-source-attribution.json, etc.)
-# have been force-added (git add -f) despite this rule anyway, because they
-# captured real diagnostic findings worth preserving in git history.
-/scratchpad/*.json
+# local logs and debug traces the app writes while running (search log, Hardcover failures,
+# ENGINE_TRACE=1 traces). They can hold real readers' answers: never committed.
+/.local/
 
-# debug traces (ENGINE_TRACE=1, lib/trace/requestTrace.ts): full request data, never committed
-/scratchpad/traces/
+# eval run output (raw results; summaries go in evals/reports/ or docs/quality/eval-log.md)
+/evals/results/
 
-# experiment run output (blind files, keys, results, spend ledgers): local only
-/scratchpad/experiments/
+# experiment run output: kept local. Evidence files that back a past decision are
+# force-added (git add -f) and listed in experiments/README.md.
+/experiments/*.json
+/experiments/traces/
+/experiments/experiments/
 
 # cover research: cover images, the pages that display them, and working files
-/scratchpad/cover-research/samples/
-/scratchpad/cover-research/samples-2x/
-/scratchpad/cover-research/upscaled/
-/scratchpad/cover-research/work/
-/scratchpad/cover-research/contact-sheet.html
-/scratchpad/cover-research/reveal-preview.html
-/scratchpad/cover-research/upscale-compare.html
-/scratchpad/cover-research/upscale-blind.html
+/experiments/cover-research/samples/
+/experiments/cover-research/samples-2x/
+/experiments/cover-research/upscaled/
+/experiments/cover-research/work/
+/experiments/cover-research/contact-sheet.html
+/experiments/cover-research/reveal-preview.html
+/experiments/cover-research/upscale-compare.html
+/experiments/cover-research/upscale-blind.html
 
 # typescript
 *.tsbuildinfo

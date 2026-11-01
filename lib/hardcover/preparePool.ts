@@ -3,7 +3,7 @@
 // logged 2026-08-15 / memory project-hardcover-taste-signal-investigation).
 //
 // Ranking strategy: tag-match relevance, not `users_count desc`. The 2026-08-16
-// ordering investigation (scratchpad/hardcover-order-candidates-raw.json) tested
+// ordering investigation (experiments/hardcover-order-candidates-raw.json) tested
 // users_count desc, rating desc, release_date desc, no-sort+shuffle, and tag-match
 // relevance against the same 2 eval inputs — users_count desc reproduced the exact
 // platform-wide popularity convergence (1984, Harry Potter, Animal Farm...) that
@@ -19,7 +19,7 @@ import { noopTrace, type RequestTrace } from "../trace/requestTrace";
 const HARDCOVER_ENDPOINT = "https://api.hardcover.app/v1/graphql";
 const RAW_FETCH_LIMIT = 100; // taggable_counts rows pulled before summing/dedup — matches the depth used in the ordering test
 
-// PROVISIONAL — widened from 15 (2026-08-20) after scratchpad/hardcover-diag-ranks16-30.mjs
+// PROVISIONAL — widened from 15 (2026-08-20) after experiments/hardcover-diag-ranks16-30.mjs
 // confirmed ranks 16-30 are junk-free at the same depth RAW_FETCH_LIMIT already pulls.
 // Ranks 16-30 carry the same mainstream lean as the top 15, so this doesn't improve
 // obscurity on its own — it widens the pool available to shuffle within for a given
@@ -27,7 +27,7 @@ const RAW_FETCH_LIMIT = 100; // taggable_counts rows pulled before summing/dedup
 const WORKING_POOL_SIZE = 30;
 
 // A hard rank cutoff (old behavior) let low-relevance candidates through once a tag
-// combination ran thin on strong matches. scratchpad/step3b-relevance-distribution.mts
+// combination ran thin on strong matches. experiments/step3b-relevance-distribution.mts
 // (2026-08-20, all 4 Step 2 tag sets) showed relevance=1 is where composition breaks:
 // candidates matched through a single thinly-applied tag lose genre coherence (case-1's
 // `Emotional`-only tail was Grisham/Sanderson/Follett against a literary-classics brief;
@@ -95,7 +95,7 @@ export async function hcGraphql<T>(
   });
 
   const bodyText = await res.text();
-  let json: any;
+  let json: { data?: T; errors?: unknown; error?: unknown; message?: unknown };
   try {
     json = JSON.parse(bodyText);
   } catch {

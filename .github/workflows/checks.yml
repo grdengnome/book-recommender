@@ -1,0 +1,30 @@
+# Runs on every pull request and on every push to main: the type check, the linter on app
+# code, and the tests. No API keys are used; every test runs offline on canned data.
+# Paid evals are run deliberately, not here. Vercel builds and previews each PR separately.
+name: Checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Type check
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: Tests
+        run: npm test

@@ -17,9 +17,9 @@ Start here:
 
 **v0 is a polished preview of the full Discover experience on a private link** (decision 1.11), soft target end of 2026. The engine is complete and deployed privately.
 
-Now: the repo restructure, one pull request at a time (`docs/engineering/repo-guide.md`): PR 3 hygiene and automatic checks → PR 4 contracts, AI gateway and engine move → PR 5 app skeleton → PR 6 store, feedback, rate limit, input guard. Then the café vertical slice.
+Now: the repo restructure, one pull request at a time (`docs/engineering/repo-guide.md`): PR 4 contracts, AI gateway and engine move → PR 5 app skeleton → PR 6 store, feedback, rate limit, input guard. Then the café vertical slice. (PRs 1–3, docs, README/CLAUDE.md and hygiene + automatic checks, are done.)
 
-Don't build screens until explicitly asked. Screens follow `docs/design/design-system.md` and `docs/design/art-direction.md`; question flow work follows `docs/product/question-flow/principles.md` and `v2-design.md`. The illustration style and tool are under review in an image generator bake-off, so don't redraw scene artwork from scratch; the prototypes in `docs/mockups/` are the reference until that's decided. The data store, rate limit and input guard must be in place before anyone outside sees the app.
+Don't build screens until explicitly asked. Screens follow `docs/design/design-system.md` and `docs/design/art-direction.md`; question flow work follows `docs/product/question-flow/principles.md` and `v2-design.md`. The illustration style and tool are under review in an image generator bake-off, so don't redraw scene artwork from scratch; the prototypes in `prototypes/` are the reference until that's decided. The data store, rate limit and input guard must be in place before anyone outside sees the app.
 
 ## How we think: the top-professional check
 
@@ -63,7 +63,7 @@ One API route, `app/api/recommend/route.ts`: POST `{ tasteDescription }` → `{ 
 - `lib/merge/`: `mergeCandidatePools.ts` dedups, merges, and shuffles the pools; `pickGrounding.ts` checks every pick against the pools the model was shown.
 - `lib/output/`: the stage I contract. Choosing and writing are separate calls. `pickSchema.ts` holds the selection schema (three pool picks, a fit note and a distinct mood each; structured outputs, `output_config.format`), the card schema and the client `Pick` type. `streamSelection.ts` streams the selection call so each pick's grounding, lookup and card start as soon as it arrives; the response still waits for all three. `writeCards.ts` writes one pick's card (thinking off) from its catalog records. `validatePicks.ts` checks pick count, empty fields and length ceilings; `shortenFields.ts` repairs an over-limit field with one small Haiku call.
 - `lib/verify/`: looks up each final pick in its catalog and checks flagged descriptions (Haiku), on `why` + `angleText`.
-- `lib/trace/`: debug-only request trace. With `ENGINE_TRACE=1` each request writes `scratchpad/traces/<time>-<tag>-<id>.json` (stages A–I plus W for card writing, tokens, dollar cost). The trace object is passed down as an argument, is watch-only, and is ignored on Vercel. Don't let trace data feed back into the engine or the model's input; `scratchpad/trace-equivalence-check.mts` checks this.
+- `lib/trace/`: debug-only request trace. With `ENGINE_TRACE=1` each request writes `.local/traces/<time>-<tag>-<id>.json` (stages A–I plus W for card writing, tokens, dollar cost). The trace object is passed down as an argument, is watch-only, and is ignored on Vercel. Don't let trace data feed back into the engine or the model's input; `tests/trace-equivalence.test.mts` checks this.
 - Models today: Sonnet 5 for tag mapping, selection and card writing; Haiku 4.5 for field shortening and the description check. **These are current choices, not permanent ones** (decision 14.3): every AI job can use whichever model gives the best balance of speed and quality, and is re-evaluated when better options appear. Each file currently names its model directly; PR 4 moves them behind one AI gateway (`lib/ai/slots.ts`), so a change is one setting plus that job's eval.
 
 ## Rules the code enforces (don't weaken them)
@@ -81,7 +81,13 @@ One API route, `app/api/recommend/route.ts`: POST `{ tasteDescription }` → `{ 
 - Env vars in `.env.local` (gitignored): `ANTHROPIC_API_KEY` (required), `HARDCOVER_API_TOKEN` (optional; without it the engine runs on Open Library alone), `ENGINE_TRACE` (optional, local only; `1` turns on the debug trace).
 - No database yet. v0 adds a small data store for feedback, rate limits and the card bank (decisions 10.5, 10.6), behind a `Store` contract; it stores no personal details.
 - Hosted on Vercel (Hobby plan), project `book-recommender` under `grdengnome`. Deployment Protection is on for all deployments. Production keys are Vercel Secrets (separate, spend-capped Console workspace); never copy them into the repo or chat. The recommend route sets `maxDuration = 300`.
-- `scratchpad/` holds experiment scripts and two live logs the app writes to (`query-log.json`, `hardcover-failure-log.json`). It's excluded from the app's type check; see `scratchpad/README.md` before deleting anything there. PR 3 splits it into `experiments/`, `evals/` and `scripts/`.
+- The app's live logs (`query-log.json`, `hardcover-failure-log.json`) and debug traces go to `.local/`, which is gitignored: they can hold real readers' answers.
+- `evals/`: the eval runners (paid, run deliberately). `scripts/`: maintenance tools. `experiments/`: one-off investigations and evidence (not linted or type-checked; see its README before deleting anything). `prototypes/`: design prototypes.
+- `.env.example` lists every setting; copy it to `.env.local`.
+
+## Automatic checks
+
+`npm run check` runs the type check, the linter (app, lib, tests) and the tests; GitHub Actions runs the same on every pull request and push to `main` (`.github/workflows/checks.yml`). Every test runs offline with no API keys. **Checks must be green before a PR is merged**, and new engine rules get a test in `tests/`. Tests use Node's built-in test runner (`tests/README.md`).
 
 ## Security
 
@@ -92,6 +98,7 @@ Secrets go directly into `.env.local` through the editor, never through chat or 
 - Every change goes on a branch and through a pull request, docs included. The owner merges.
 - One decision per change. Show the plan, and the diff for anything substantial, before committing.
 - Keep commits reviewable: separate pure file moves from content edits.
+- Run `npm run check` before pushing.
 
 ## Eval discipline
 
@@ -104,7 +111,7 @@ One entry per session in `docs/progress-log.md`, written at session close:
 - Compress methodology to one line ("tested X via Y, found Z"). One example, not several.
 - Skip context that's already in the previous entry.
 - End with a numbered "Next" list.
-- Target: skimmable in under a minute; detail lives in scratchpad files or the eval log.
+- Target: skimmable in under a minute; detail lives in experiments, eval results or the eval log.
 - The container clock runs UTC; evening US Eastern sessions can roll past midnight. Confirm the local date before dating an entry.
 
 ## Decision log
@@ -119,7 +126,7 @@ One entry per session in `docs/progress-log.md`, written at session close:
 ## Things that look like bugs but aren't
 
 - **A 502 with no picks** when grounding fails 3 times: correct. Thin or empty pools fail closed rather than returning ungrounded picks.
-- **Hardcover failures are silent.** Missing token, API errors, or no matching tags degrade to Open Library only and are logged to `scratchpad/hardcover-failure-log.json`, never shown to the user.
+- **Hardcover failures are silent.** Missing token, API errors, or no matching tags degrade to Open Library only and are logged to `.local/hardcover-failure-log.json`, never shown to the user.
 - **Hardcover books rarely become final picks.** Proportional to their small share of the pool, not a bug (tested Sept 17).
 - **Most picks skip the description check.** It only runs when a pick's catalog subjects flag it as criticism of its genre; everything else passes through unchanged by design.
 - **The Open Library search call contributes very little to pools** (about 1% when measured in August). Deliberately deprioritized, not broken; subject lists and Hardcover carry retrieval.

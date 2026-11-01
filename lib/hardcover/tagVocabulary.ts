@@ -1,12 +1,12 @@
 // The cleaned Hardcover taste-tag vocabulary — spec.md Section 5b (Hardcover pool).
-// This is `scratchpad/hardcover-tags-gt100.json` (the count>100, category="Tag" pull
+// This is `scripts/hardcover-tags-gt100.json` (the count>100, category="Tag" pull
 // from the Aug 6 investigation) filtered through tagExclusions.ts's isExcludedTag().
 // 153 kept of 190 total, matching the count confirmed in docs/progress-log.md's
 // Aug 13 2026 entry. Checked in as a snapshot (not re-derived at runtime) per the
 // Aug 9 process fix — this data didn't survive an earlier environment reset when it
-// only lived in scratchpad.
+// only lived in the old scratchpad folder.
 //
-// Regenerate by filtering scratchpad/hardcover-tags-gt100.json through isExcludedTag
+// Regenerate by filtering scripts/hardcover-tags-gt100.json through isExcludedTag
 // if the underlying Hardcover pull is ever refreshed.
 export interface HardcoverTag {
   id: number;

@@ -6,7 +6,7 @@ import {
 } from "../lib/hardcover/tagExclusions";
 
 const tags: { tag: string; count: number }[] = JSON.parse(
-  readFileSync("scratchpad/hardcover-tags-gt100.json", "utf8"),
+  readFileSync("scripts/hardcover-tags-gt100.json", "utf8"),
 );
 
 const ratingHits = tags.filter((t) => isRatingWidgetTag(t.tag));

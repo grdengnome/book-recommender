@@ -30,7 +30,7 @@ Each doc starts with a status line:
 |---|---|---|
 | [Design system](./design/design-system.md) | Shared structure, the five themes, motion, the reveal book, the detail screen | Living |
 | [Art direction](./design/art-direction.md) | Illustration principles, rendering style, what's approved | Living |
-| [Mockups](./mockups/) | Design prototypes (moving to `prototypes/` in a later PR) | Reference |
+| [Prototypes](../prototypes/) | Tappable design prototypes: themes, motion, reveal, loading | Reference |
 
 ## Engineering
 | Doc | What it's for | Status |
