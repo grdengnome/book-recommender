@@ -25,11 +25,11 @@ import type { PickMetadata } from "./lookupPickMetadata";
 import type { ModelPick } from "../output/pickSchema";
 import { LENGTH_CEILINGS } from "../output/validatePicks";
 import { noopTrace, type RequestTrace } from "../trace/requestTrace";
+import { callModel, modelFor } from "../ai/gateway";
+import type { AiResponse } from "../contracts/ai";
 
-const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
-// Narrow fact-check, latency-sensitive (it sits in front of the response) — a small, fast
-// model. Kept in one constant so it's easy to swap.
-const CHECK_MODEL = "claude-haiku-4-5";
+// The model comes from the "descriptionCheck" slot (lib/ai/slots.ts). A narrow fact-check that
+// sits in front of the response, so that slot uses a small, fast model.
 const CHECK_TIMEOUT_MS = 8000;
 const CHECK_MAX_TOKENS = 2000;
 const DESCRIPTION_MAX_CHARS = 1000;
@@ -233,33 +233,23 @@ For a pick that contradicts the facts — all fields required, including both re
 {"index": <pick index>, "verdict": "contradicts", "errorType": "form" | "genre" | "subject_or_setting" | "plot" | "different_book", "blurbClaim": "<the wrong claim, quoted from the blurb>", "catalogFact": "<the catalog fact that contradicts it, quoted from the facts>", "reason": "<one short sentence>", "why": "<rewritten why>", "angleText": "<rewritten angleText>"}`;
 }
 
-async function callChecker(apiKey: string, prompt: string, trace: RequestTrace): Promise<string> {
+async function callChecker(prompt: string, trace: RequestTrace): Promise<string> {
   const requestBody = {
-    model: CHECK_MODEL,
+    model: modelFor("descriptionCheck"),
     max_tokens: CHECK_MAX_TOKENS,
     messages: [{ role: "user", content: prompt }],
   };
   const start = performance.now();
-  let res: Response;
-  let data;
+  let res: AiResponse;
   try {
-    res = await fetch(ANTHROPIC_API_URL, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify(requestBody),
-      signal: AbortSignal.timeout(CHECK_TIMEOUT_MS),
-    });
-    data = await res.json();
+    res = await callModel(requestBody, { timeoutMs: CHECK_TIMEOUT_MS });
   } catch (err) {
     // Timeout or network failure: no usage comes back, so the trace can't price the call.
-    trace.modelCall("H", { model: CHECK_MODEL, request: requestBody, ms: Math.round(performance.now() - start), error: errorMessage(err) });
+    trace.modelCall("H", { model: requestBody.model, request: requestBody, ms: Math.round(performance.now() - start), error: errorMessage(err) });
     throw err;
   }
-  trace.modelCall("H", { model: CHECK_MODEL, request: requestBody, response: data, httpStatus: res.status, ms: Math.round(performance.now() - start) });
+  const data = res.data;
+  trace.modelCall("H", { model: requestBody.model, request: requestBody, response: data, httpStatus: res.status, ms: Math.round(performance.now() - start) });
   if (!res.ok) throw new Error(`Anthropic API error ${res.status}: ${JSON.stringify(data?.error ?? data).slice(0, 200)}`);
   if (data?.stop_reason === "max_tokens") throw new Error("checker hit max_tokens");
   const textBlock = data?.content?.find((b: { type: string }) => b.type === "text");
@@ -277,7 +267,6 @@ function errorMessage(err: unknown): string {
 // which checkPickGrounding builds from these same picks in the same order. A length
 // mismatch is treated as a failure (nothing is rewritten).
 export async function checkPickDescriptions(
-  apiKey: string,
   tasteDescription: string,
   picks: ModelPick[],
   metadata: PickMetadata[],
@@ -314,7 +303,7 @@ export async function checkPickDescriptions(
   const start = performance.now();
   let verdicts: CheckerVerdict[];
   try {
-    const text = await callChecker(apiKey, buildPrompt(tasteDescription, toCheck), trace);
+    const text = await callChecker(buildPrompt(tasteDescription, toCheck), trace);
     const arr = parseJsonArray(text);
     if (!arr) throw new Error(`checker response not a JSON array: ${text.slice(0, 200)}`);
     verdicts = arr as CheckerVerdict[];
@@ -386,7 +375,7 @@ export function formatPickCheck(result: CheckPickDescriptionsResult, lookupMs: n
   const counts = { confirmed: 0, rewritten: 0, unchecked: 0, "not checked": 0 };
   result.results.forEach((p) => counts[p.status]++);
   const check = result.checkCalled
-    ? `check ${result.checkMs}ms, model ${CHECK_MODEL}, timeout ${CHECK_TIMEOUT_MS}ms`
+    ? `check ${result.checkMs}ms, model ${modelFor("descriptionCheck")}, timeout ${CHECK_TIMEOUT_MS}ms`
     : "check skipped, no pick with a hard signal";
   const lines = [
     `pickCheck: ${counts.confirmed} confirmed, ${counts.rewritten} rewritten, ${counts.unchecked} unchecked, ` +

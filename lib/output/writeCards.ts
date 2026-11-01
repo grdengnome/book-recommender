@@ -18,10 +18,9 @@ import type { PickMetadata } from "../verify/lookupPickMetadata";
 import { CARD_FORMAT, type CardText, type SelectedPick } from "./pickSchema";
 import { validateCard, type LimitedField } from "./validatePicks";
 import { noopTrace, type RequestTrace } from "../trace/requestTrace";
+import { callModel, modelFor } from "../ai/gateway";
 
-const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
-// Same model as the selection call; only thinking differs.
-const CARD_MODEL = "claude-sonnet-5";
+// The model comes from the "cardWriting" slot (lib/ai/slots.ts).
 const CARD_TIMEOUT_MS = 20000;
 const CARD_MAX_TOKENS = 1000;
 const CARD_TRIES = 2;
@@ -94,9 +93,9 @@ type CardAttempt =
   | { ok: true; card: CardText; overLimit: LimitedField[] }
   | { ok: false; error: string };
 
-async function callCard(apiKey: string, prompt: string, trace: RequestTrace): Promise<CardAttempt> {
+async function callCard(prompt: string, trace: RequestTrace): Promise<CardAttempt> {
   const requestBody = {
-    model: CARD_MODEL,
+    model: modelFor("cardWriting"),
     max_tokens: CARD_MAX_TOKENS,
     thinking: { type: "disabled" },
     system: CARD_SYSTEM_PROMPT,
@@ -106,18 +105,9 @@ async function callCard(apiKey: string, prompt: string, trace: RequestTrace): Pr
   const start = performance.now();
   let recorded = false;
   try {
-    const res = await fetch(ANTHROPIC_API_URL, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify(requestBody),
-      signal: AbortSignal.timeout(CARD_TIMEOUT_MS),
-    });
-    const data = await res.json();
-    trace.modelCall("W", { model: CARD_MODEL, request: requestBody, response: data, httpStatus: res.status, ms: Math.round(performance.now() - start) });
+    const res = await callModel(requestBody, { timeoutMs: CARD_TIMEOUT_MS });
+    const data = res.data;
+    trace.modelCall("W", { model: requestBody.model, request: requestBody, response: data, httpStatus: res.status, ms: Math.round(performance.now() - start) });
     recorded = true;
     if (!res.ok) return { ok: false, error: `Anthropic API error ${res.status}: ${JSON.stringify(data?.error ?? data).slice(0, 200)}` };
     if (data?.stop_reason !== "end_turn") return { ok: false, error: `stop_reason=${data?.stop_reason}` };
@@ -131,7 +121,7 @@ async function callCard(apiKey: string, prompt: string, trace: RequestTrace): Pr
       err instanceof Error && (err.name === "TimeoutError" || err.name === "AbortError")
         ? `timeout after ${CARD_TIMEOUT_MS}ms`
         : err instanceof Error ? err.message : String(err);
-    if (!recorded) trace.modelCall("W", { model: CARD_MODEL, request: requestBody, ms, error });
+    if (!recorded) trace.modelCall("W", { model: requestBody.model, request: requestBody, ms, error });
     return { ok: false, error };
   }
 }
@@ -140,7 +130,6 @@ export type WriteCardResult = (CardAttempt & { tries: number; ms: number });
 
 // `checked` and `metadata` describe this pick: its grounding record and catalog lookup.
 export async function writeCard(
-  apiKey: string,
   tasteDescription: string,
   pick: SelectedPick,
   checked: CheckedPick,
@@ -152,7 +141,7 @@ export async function writeCard(
   const prompt = cardPrompt(tasteDescription, pick, cardFacts(checked.record, metadata), otherTitles);
   let last: CardAttempt = { ok: false, error: "not run" };
   for (let tryNo = 1; tryNo <= CARD_TRIES; tryNo++) {
-    last = await callCard(apiKey, prompt, trace.with({ try: tryNo }));
+    last = await callCard(prompt, trace.with({ try: tryNo }));
     if (last.ok) return { ...last, tries: tryNo, ms: Math.round(performance.now() - start) };
   }
   return { ...last, tries: CARD_TRIES, ms: Math.round(performance.now() - start) };

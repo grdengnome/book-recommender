@@ -14,10 +14,10 @@
 import type { ModelPick } from "./pickSchema";
 import { LENGTH_CEILINGS, LENGTH_TARGETS, type LimitedField, type OverLimitField } from "./validatePicks";
 import { noopTrace, type RequestTrace } from "../trace/requestTrace";
+import { callModel, modelFor } from "../ai/gateway";
 
-const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
-// Same small, fast model as the description check; this sits in front of the response.
-const SHORTEN_MODEL = "claude-haiku-4-5";
+// The model comes from the "shortening" slot (lib/ai/slots.ts); this call sits in front of
+// the response, so that slot uses a small, fast model.
 const SHORTEN_TIMEOUT_MS = 8000;
 const SHORTEN_MAX_TOKENS = 1000;
 
@@ -102,7 +102,6 @@ Return one entry per field, with its id and the shortened text.`;
 }
 
 export async function shortenFields(
-  apiKey: string,
   picks: ModelPick[],
   overLimit: OverLimitField[],
   trace: RequestTrace = noopTrace,
@@ -119,7 +118,7 @@ export async function shortenFields(
 
   const items = results.map((r, i) => ({ id: String(i), field: r.field, text: r.before }));
   const requestBody = {
-    model: SHORTEN_MODEL,
+    model: modelFor("shortening"),
     max_tokens: SHORTEN_MAX_TOKENS,
     messages: [{ role: "user", content: buildPrompt(items) }],
     output_config: { format: SHORTEN_FORMAT },
@@ -129,18 +128,9 @@ export async function shortenFields(
   let recorded = false;
   let returned: { id?: unknown; text?: unknown }[];
   try {
-    const res = await fetch(ANTHROPIC_API_URL, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify(requestBody),
-      signal: AbortSignal.timeout(SHORTEN_TIMEOUT_MS),
-    });
-    const data = await res.json();
-    trace.modelCall("H", { model: SHORTEN_MODEL, request: requestBody, response: data, httpStatus: res.status, ms: Math.round(performance.now() - start) });
+    const res = await callModel(requestBody, { timeoutMs: SHORTEN_TIMEOUT_MS });
+    const data = res.data;
+    trace.modelCall("H", { model: requestBody.model, request: requestBody, response: data, httpStatus: res.status, ms: Math.round(performance.now() - start) });
     recorded = true;
     if (!res.ok) throw new Error(`Anthropic API error ${res.status}: ${JSON.stringify(data?.error ?? data).slice(0, 200)}`);
     if (data?.stop_reason !== "end_turn") throw new Error(`stop_reason=${data?.stop_reason}`);
@@ -154,7 +144,7 @@ export async function shortenFields(
         ? `timeout after ${SHORTEN_TIMEOUT_MS}ms`
         : err instanceof Error ? err.message : String(err);
     // Timeouts and network failures never reach modelCall above; record them here.
-    if (!recorded) trace.modelCall("H", { model: SHORTEN_MODEL, request: requestBody, ms, error });
+    if (!recorded) trace.modelCall("H", { model: requestBody.model, request: requestBody, ms, error });
     results.forEach((r) => (r.reason = `shortening call failed: ${error}`));
     return { picks, results, callMade: true, ms, error };
   }
@@ -180,7 +170,7 @@ export async function shortenFields(
 // Same per-call console convention as formatPickCheck.
 export function formatShorten(result: ShortenFieldsResult): string {
   if (!result.callMade) return "shortenFields: no field over its ceiling, no call";
-  const lines = [`shortenFields: ${result.results.length} field(s) over ceiling, call ${result.ms}ms, model ${SHORTEN_MODEL}` + (result.error ? ` — KEPT ORIGINALS: ${result.error}` : "")];
+  const lines = [`shortenFields: ${result.results.length} field(s) over ceiling, call ${result.ms}ms, model ${modelFor("shortening")}` + (result.error ? ` — KEPT ORIGINALS: ${result.error}` : "")];
   for (const r of result.results) {
     lines.push(`  pick ${r.index + 1} ${r.field}: ${r.status}${r.reason ? ` (${r.reason})` : ""} ${r.before.length}→${r.after.length} chars`);
   }
