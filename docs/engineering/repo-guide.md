@@ -23,11 +23,11 @@ themes/                   cafe/ mystery/ fantasy/ superhero/ scifi/ (one Theme c
 lib/                      Shared infrastructure, no screens
   contracts/              The plug shapes for every swappable part
   config/                 Feature flags and active adapters
-  engine/                 The recommendation pipeline and book-source adapters
+  engine/                 The recommendation pipeline: recommend.ts + sources/ pool/ picks/ cards/ verify/
   questions/              Question chooser, taste profile, question bank as data
   ai/                     AI gateway and slot settings (which model does which job)
   covers/ store/ security/ trace/
-evals/                    Eval cases, rubric, one runner, reports
+evals/                    One runner (run.mjs) and case sets as data (cases/)
 tests/                    Cross-cutting automatic checks (contract tests, grounding, trace)
 scripts/                  Maintenance tools
 experiments/              One-off investigations and their evidence (was scratchpad/)
@@ -47,9 +47,9 @@ Plus the swappability rule: app code never calls an outside service directly; it
 | 1 | Docs restructure: docs by audience, docs map, status lines, archive, Project docs brought in | Done (#11) |
 | 2 | Rewrite README and CLAUDE.md for today's product and rules | Done (#12) |
 | 3 | Hygiene and automatic checks: `.env.example`, live logs out of the repo, `scratchpad/` split into `experiments/`, `evals/`, `scripts/`; `docs/mockups/` → `prototypes/`; first tests; GitHub Actions | Done (#13) |
-| 4a | AI gateway: one front door for every model call, `lib/ai/slots.ts` settings sheet, per-job override settings; golden-request test proves behaviour unchanged | Done |
-| 4b | Engine moves into `lib/engine/`; `route.ts` becomes thin; one eval runner with cases as data | Next |
-| 5 | App skeleton: `features/`, `ui/`, `themes/`, `lib/config/`, "coming soon" tabs, privacy page | Planned |
+| 4a | AI gateway: one front door for every model call, `lib/ai/slots.ts` settings sheet, per-job override settings; golden-request test proves behaviour unchanged | Done (#14) |
+| 4b | Engine moves into `lib/engine/`, one folder per stage (`sources/`, `pool/`, `picks/`, `cards/`, `verify/`) plus `recommend.ts`; `route.ts` becomes a 26-line front door; one eval runner with case sets as data | Done |
+| 5 | App skeleton: `features/`, `ui/`, `themes/`, `lib/config/`, "coming soon" tabs, privacy page | Next |
 | 6 | Store and trust basics: data store, feedback, rate limit, input guard | Planned |
 
 ## Other repo decisions (Oct 29)

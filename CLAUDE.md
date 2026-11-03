@@ -17,7 +17,7 @@ Start here:
 
 **v0 is a polished preview of the full Discover experience on a private link** (decision 1.11), soft target end of 2026. The engine is complete and deployed privately.
 
-Now: the repo restructure, one pull request at a time (`docs/engineering/repo-guide.md`): PR 4b engine move into `lib/engine/` → PR 5 app skeleton → PR 6 store, feedback, rate limit, input guard. Then the café vertical slice. (PRs 1–3 and 4a, docs, README/CLAUDE.md, hygiene + automatic checks and the AI gateway, are done.)
+Now: the repo restructure, one pull request at a time (`docs/engineering/repo-guide.md`): PR 5 app skeleton → PR 6 store, feedback, rate limit, input guard. Then the café vertical slice, with a new eval case set in the question flow's input shape. (PRs 1–4b, docs, README/CLAUDE.md, hygiene + automatic checks, the AI gateway and the engine move, are done.)
 
 Don't build screens until explicitly asked. Screens follow `docs/design/design-system.md` and `docs/design/art-direction.md`; question flow work follows `docs/product/question-flow/principles.md` and `v2-design.md`. The illustration style and tool are under review in an image generator bake-off, so don't redraw scene artwork from scratch; the prototypes in `prototypes/` are the reference until that's decided. The data store, rate limit and input guard must be in place before anyone outside sees the app.
 
@@ -44,7 +44,7 @@ Before proposing a plan, building a feature, or changing the engine or design, a
 
 ## How the code is organized
 
-The repo is moving to **feature folders for the app on shared infrastructure** (decision 14.2; full layout in `docs/engineering/repo-guide.md`). Until PRs 3–6 land, the code still lives in the current layout described under "How the engine works".
+The repo is moving to **feature folders for the app on shared infrastructure** (decision 14.2; full layout in `docs/engineering/repo-guide.md`). The engine and shared infrastructure are in place (`lib/engine/`, `lib/ai/`, `lib/contracts/`, `lib/trace/`); `features/`, `ui/` and `themes/` arrive with PR 5.
 
 Rules for all new code:
 - **Everything swappable (decision 14.1).** A part that's likely to change talks to the rest of the app through a contract in `lib/contracts/`; adapters plug in; settings choose them. App code never calls an outside service (a model, catalog or database) directly.
@@ -56,13 +56,18 @@ Rules for all new code:
 
 ## How the engine works (today)
 
-One API route, `app/api/recommend/route.ts`: POST `{ tasteDescription }` → `{ picks }` (spec §4b contract; fields the engine can't fill yet are `null`). Errors are `{ error: { code, message } }`. Nothing else leaves the server: no model message, no thinking, no pool strings or IDs.
+One API route, `app/api/recommend/route.ts`: POST `{ tasteDescription }` → `{ picks }` (spec §4b contract; fields the engine can't fill yet are `null`). Errors are `{ error: { code, message } }`. Nothing else leaves the server: no model message, no thinking, no pool strings or IDs. The route is only the web front door (decision 14.5): it checks the request and the AI configuration, then calls `recommend()` in `lib/engine/recommend.ts`, which runs the whole pipeline and can also be called directly (tests, scripts, future routes).
 
-- `lib/tools/`: the `search_books` tool (Open Library subjects + search) and the tool registry. The model calls it up to 3 rounds; the 4th call omits tools to force an answer. Subject lists are cached for 24h; every Open Library call times out at 5s.
-- `lib/hardcover/`: maps the taste description to reader tags (one model call), then fetches a tag-matched pool. Runs once per request, in parallel with the Open Library loop; dropped if not back within 5s.
-- `lib/merge/`: `mergeCandidatePools.ts` dedups, merges, and shuffles the pools; `pickGrounding.ts` checks every pick against the pools the model was shown.
-- `lib/output/`: the stage I contract. Choosing and writing are separate calls. `pickSchema.ts` holds the selection schema (three pool picks, a fit note and a distinct mood each; structured outputs, `output_config.format`), the card schema and the client `Pick` type. The selection call is streamed; `streamSelection.ts` spots each complete pick in the stream so its grounding, lookup and card start as soon as it arrives; the response still waits for all three. `writeCards.ts` writes one pick's card (thinking off) from its catalog records. `validatePicks.ts` checks pick count, empty fields and length ceilings; `shortenFields.ts` repairs an over-limit field with one small Haiku call.
-- `lib/verify/`: looks up each final pick in its catalog and checks flagged descriptions (Haiku), on `why` + `angleText`.
+The engine lives in `lib/engine/`, one folder per pipeline stage:
+- `recommend.ts`: the recipe. The selection prompt, the search loop, the Hardcover deadline, the 3-attempt retry, starting each pick's work as it streams in, error codes.
+- `sources/openlibrary/`: the `search_books` tool (Open Library subjects + search) and the tool registry. The model calls it up to 3 rounds; the 4th call omits tools to force an answer. Subject lists are cached for 24h; every Open Library call times out at 5s.
+- `sources/hardcover/`: maps the taste description to reader tags (one model call), then fetches a tag-matched pool. Runs once per request, in parallel with the Open Library loop; dropped if not back within 5s.
+- `pool/`: `mergeCandidatePools.ts` dedups, merges, and shuffles the pools; `pickGrounding.ts` checks every pick against the pools the model was shown.
+- `picks/`: the stage I contract. Choosing and writing are separate calls. `pickSchema.ts` holds the selection schema (three pool picks, a fit note and a distinct mood each; structured outputs, `output_config.format`), the card schema and the client `Pick` type. The selection call is streamed; `streamSelection.ts` spots each complete pick in the stream so its grounding, lookup and card start as soon as it arrives; the response still waits for all three. `validatePicks.ts` checks pick count, empty fields and length ceilings.
+- `cards/`: `writeCards.ts` writes one pick's card (thinking off) from its catalog records; `shortenFields.ts` repairs an over-limit field with one small Haiku call.
+- `verify/`: looks up each final pick in its catalog and checks flagged descriptions (Haiku), on `why` + `angleText`.
+
+Shared infrastructure the engine uses:
 - `lib/ai/`: the AI gateway (decision 14.4). `gateway.ts` is the only way to call a model: `modelFor(job)`, `callModel`, `streamModel`. `slots.ts` says which model does each of the five jobs; `models.ts` lists each model's provider and price; `anthropic.ts` is the only code that talks to Anthropic (key, headers, timeouts, streaming). An `AI_SLOT_<JOB>` setting overrides one job's model for an experiment. The contract is `lib/contracts/ai.ts`.
 - `lib/trace/`: debug-only request trace. With `ENGINE_TRACE=1` each request writes `.local/traces/<time>-<tag>-<id>.json` (stages A–I plus W for card writing, tokens, dollar cost). The trace object is passed down as an argument, is watch-only, and is ignored on Vercel. Don't let trace data feed back into the engine or the model's input; `tests/trace-equivalence.test.mts` checks this.
 - Models today: Sonnet 5 for tag mapping, selection and card writing; Haiku 4.5 for field shortening and the description check. **These are current choices, not permanent ones** (decision 14.3): every AI job can use whichever model gives the best balance of speed and quality, and is re-evaluated when better options appear. A change is one line in `lib/ai/slots.ts` (or one override setting) plus that job's eval.
@@ -84,7 +89,7 @@ One API route, `app/api/recommend/route.ts`: POST `{ tasteDescription }` → `{ 
 - No database yet. v0 adds a small data store for feedback, rate limits and the card bank (decisions 10.5, 10.6), behind a `Store` contract; it stores no personal details.
 - Hosted on Vercel (Hobby plan), project `book-recommender` under `grdengnome`. Deployment Protection is on for all deployments. Production keys are Vercel Secrets (separate, spend-capped Console workspace); never copy them into the repo or chat. The recommend route sets `maxDuration = 300`.
 - The app's live logs (`query-log.json`, `hardcover-failure-log.json`) and debug traces go to `.local/`, which is gitignored: they can hold real readers' answers.
-- `evals/`: the eval runners (paid, run deliberately). `scripts/`: maintenance tools. `experiments/`: one-off investigations and evidence (not linted or type-checked; see its README before deleting anything). `prototypes/`: design prototypes.
+- `evals/`: one eval runner, `run.mjs` (paid, run deliberately), and case sets as data in `evals/cases/` (`legacy-v0.json` is the frozen original 11). `scripts/`: maintenance tools. `experiments/`: one-off investigations and evidence (not linted or type-checked; see its README before deleting anything). `prototypes/`: design prototypes.
 - `.env.example` lists every setting; copy it to `.env.local`.
 
 ## Automatic checks

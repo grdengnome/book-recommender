@@ -53,6 +53,10 @@ yarn-error.log*
 /experiments/cover-research/upscale-compare.html
 /experiments/cover-research/upscale-blind.html
 
+# the old scratchpad/ folder, still present in older working copies (e.g. a Codespace) after
+# PR 3 split it up; it can hold cover images, which are never committed
+/scratchpad/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
