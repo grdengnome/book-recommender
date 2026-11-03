@@ -1,5 +1,5 @@
 // Streaming for the search loop's model calls (fix PR 1, speed, 2026-10-21). The selection
-// answer arrives as {"picks":[{...},{...},{...}]}; streaming it lets route.ts start each
+// answer arrives as {"picks":[{...},{...},{...}]}; streaming it lets recommend.ts start each
 // pick's grounding, lookup and card as soon as that pick's object is complete, instead of
 // waiting for all three. The screen still gets all three together.
 //

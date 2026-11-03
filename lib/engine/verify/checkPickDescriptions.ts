@@ -20,7 +20,7 @@
 //   `nonObvious` when the output moved to the spec §4b contract, fix PR 1, 2026-10-21.)
 // - Never breaks a response: any failure (timeout, API error, unparseable or malformed
 //   output) returns the original picks unchanged. A rewrite that would break the length
-//   ceilings (lib/output/validatePicks.ts) is dropped the same way.
+//   ceilings (lib/engine/picks/validatePicks.ts) is dropped the same way.
 import type { PickMetadata } from "./lookupPickMetadata";
 import type { ModelPick } from "@/lib/engine/picks/pickSchema";
 import { LENGTH_CEILINGS } from "@/lib/engine/picks/validatePicks";
@@ -263,7 +263,7 @@ function errorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }
 
-// `metadata` must be index-aligned with `picks` — route.ts builds it from grounding.picks,
+// `metadata` must be index-aligned with `picks` — recommend.ts builds it from grounding.picks,
 // which checkPickGrounding builds from these same picks in the same order. A length
 // mismatch is treated as a failure (nothing is rewritten).
 export async function checkPickDescriptions(

@@ -52,13 +52,13 @@ const MAX_TOOL_ROUNDS = 3;
 // candidate pool — no trained-knowledge fallback, including for thin pools. The prompt
 // asks for this, but a prompt alone isn't a guarantee (a same-day test returned two
 // picks absent from both pools), so each generation is checked in code
-// (lib/merge/pickGrounding.ts) and a failed check re-runs the whole generation rather
+// (lib/engine/pool/pickGrounding.ts) and a failed check re-runs the whole generation rather
 // than returning an ungrounded pick. Bounded so a persistent failure ends in a clean
 // error, never in an unverified answer. Deliberately no thin-pool recovery path beyond
 // this retry — that edge case is flagged for its own investigation, not designed here.
-// The same bound covers a selection that breaks the output contract (lib/output/
+// The same bound covers a selection that breaks the output contract (lib/engine/picks/
 // validatePicks.ts: pick count, empty fields), is cut off or refused, or whose cards can't
-// be written (lib/output/writeCards.ts). Length overflow is deliberately not a failure:
+// be written (lib/engine/cards/writeCards.ts). Length overflow is deliberately not a failure:
 // it's repaired after the cards are written (shortenFields below).
 const MAX_GENERATION_ATTEMPTS = 3;
 
@@ -266,7 +266,7 @@ export async function recommend({ tasteDescription, evalTag = null }: RecommendI
         `recommend: pick sources (attempt ${attempt}/${MAX_GENERATION_ATTEMPTS})\n${formatPickSources(grounding.picks)}`,
       );
 
-      // Length overflow (lib/output/shortenFields.ts): one small call shortens only the
+      // Length overflow (lib/engine/cards/shortenFields.ts): one small call shortens only the
       // over-limit fields; on any failure the original text is kept.
       const shortened = await shortenFields(picks, overLimit, attemptTrace);
       console.log(formatShorten(shortened));

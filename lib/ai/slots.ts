@@ -19,7 +19,7 @@ export const AI_SLOTS: Record<AiJob, AiSlot> = {
   tagMapping: {
     model: "claude-sonnet-5",
     envOverride: "AI_SLOT_TAG_MAPPING",
-    purpose: "Maps the reader's taste to Hardcover reader tags (lib/hardcover/mapTasteToTags.ts)",
+    purpose: "Maps the reader's taste to Hardcover reader tags (lib/engine/sources/hardcover/mapTasteToTags.ts)",
   },
   selection: {
     model: "claude-sonnet-5",
@@ -29,16 +29,16 @@ export const AI_SLOTS: Record<AiJob, AiSlot> = {
   cardWriting: {
     model: "claude-sonnet-5",
     envOverride: "AI_SLOT_CARD_WRITING",
-    purpose: "Writes each pick's card text, thinking off (lib/output/writeCards.ts)",
+    purpose: "Writes each pick's card text, thinking off (lib/engine/cards/writeCards.ts)",
   },
   shortening: {
     model: "claude-haiku-4-5",
     envOverride: "AI_SLOT_SHORTENING",
-    purpose: "Shortens a card field that runs over its length limit (lib/output/shortenFields.ts)",
+    purpose: "Shortens a card field that runs over its length limit (lib/engine/cards/shortenFields.ts)",
   },
   descriptionCheck: {
     model: "claude-haiku-4-5",
     envOverride: "AI_SLOT_DESCRIPTION_CHECK",
-    purpose: "Checks flagged picks' card text against catalog facts (lib/verify/checkPickDescriptions.ts)",
+    purpose: "Checks flagged picks' card text against catalog facts (lib/engine/verify/checkPickDescriptions.ts)",
   },
 };

@@ -1,5 +1,5 @@
 // The merge must dedupe across catalogs and never pass popularity, source or IDs to the model.
-// These check lib/merge/mergeCandidatePools.ts with no network and no model calls.
+// These check lib/engine/pool/mergeCandidatePools.ts with no network and no model calls.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { mergeCandidatePools, toModelPool } from "@/lib/engine/pool/mergeCandidatePools";

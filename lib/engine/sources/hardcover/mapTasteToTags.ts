@@ -100,7 +100,7 @@ function parseSelectedTags(responseText: string): string[] {
   // The "no prose before or after" instruction isn't always followed — seen in
   // practice with leading reasoning text ahead of the array (2026-08-20, Step 4
   // real-merge run). Extract the first balanced [...] span rather than assuming the
-  // whole trimmed response is valid JSON, same tolerance route.ts already applies to
+  // whole trimmed response is valid JSON, same tolerance recommend.ts already applies to
   // the main recommendation response (strips code fences there; this goes one step
   // further since a bare fence strip isn't enough for leading prose).
   const span = extractJsonArraySpan(responseText);

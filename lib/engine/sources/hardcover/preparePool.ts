@@ -56,7 +56,7 @@ interface RankedBook {
   usersCount: number;
 }
 
-// Same shape as lib/tools/searchBooks.ts's BookCandidate (title, author, subjects) so
+// Same shape as lib/engine/sources/openlibrary/searchBooks.ts's BookCandidate (title, author, subjects) so
 // a later merge step can dedupe across sources without a translation layer. usersCount
 // is the one piece of ranking metadata kept — reserved for merge-time tiebreaking, not
 // exposed to the model as a visible ranking signal (see step 6 of this pipeline).
@@ -65,7 +65,7 @@ export interface HardcoverBookCandidate {
   author: string;
   subjects: string[];
   usersCount: number;
-  // Internal plumbing for pick tracing, like usersCount never model-facing (route.ts
+  // Internal plumbing for pick tracing, like usersCount never model-facing (recommend.ts
   // strips it via toModelPool). If one title+author appears under several Hardcover
   // book IDs in the raw rows, the first row's ID is the one kept (see rankByTagRelevance).
   hcBookId: number;
@@ -76,7 +76,7 @@ export interface PreparePoolResult {
   poolSize: number;
 }
 
-// Exported for lib/verify/lookupPickMetadata.ts. `signal` is optional so the pool
+// Exported for lib/engine/verify/lookupPickMetadata.ts. `signal` is optional so the pool
 // pre-fetch's behavior is unchanged; the pick lookup passes a timeout signal.
 export async function hcGraphql<T>(
   query: string,

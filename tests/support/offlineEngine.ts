@@ -139,7 +139,7 @@ function cannedAnthropic(body: any): Response {
   if (typeof first === "string" && first.includes("book-tagging platform")) {
     return reply([{ type: "text", text: '["reflective", "Emotional", "not a real tag"]' }], "end_turn");
   }
-  // Card writing (lib/output/writeCards.ts): one call per pick, thinking off.
+  // Card writing (lib/engine/cards/writeCards.ts): one call per pick, thinking off.
   if (typeof first === "string" && first.startsWith("<reader_taste>")) {
     const title = String(first).match(/catalog title: (.*)/)?.[1] ?? "";
     const author = String(first).match(/catalog author: (.*)/)?.[1] ?? "";
@@ -157,7 +157,7 @@ function cannedAnthropic(body: any): Response {
   // Final answer: the first three candidates of the first pool the model was shown.
   const toolResults = body.messages[body.messages.length - 1].content;
   const pool = JSON.parse(toolResults[0].content).pool.slice(0, 3);
-  // Same shape the selection schema enforces (lib/output/pickSchema.ts).
+  // Same shape the selection schema enforces (lib/engine/picks/pickSchema.ts).
   const moods = ["melancholic", "tender", "wistful"];
   const picks = pool.map((c: { title: string; author: string }, i: number) => ({
     poolTitle: c.title, poolAuthor: c.author, fitNote: "Quiet and restrained.", mood: moods[i],

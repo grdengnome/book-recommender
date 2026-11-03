@@ -1,5 +1,5 @@
 // Card writing (fix PR 1, speed, 2026-10-21). Once the selection call has picked a grounded
-// book, one call writes its card text. route.ts streams the selection and starts each
+// book, one call writes its card text. recommend.ts streams the selection and starts each
 // pick's lookup and card as soon as that pick arrives, so the three cards overlap the rest
 // of the selection and each other. Writing was ~10s of the combined final call.
 //
@@ -12,7 +12,7 @@
 //
 // A card that fails (API error, timeout, cut off, an empty field) is retried once on its
 // own. If it fails again the whole attempt fails, like any other missing required field,
-// and route.ts re-runs the generation. Length overflow is not a failure (validatePicks.ts).
+// and recommend.ts re-runs the generation. Length overflow is not a failure (validatePicks.ts).
 import type { CheckedPick } from "@/lib/engine/pool/pickGrounding";
 import type { PickMetadata } from "@/lib/engine/verify/lookupPickMetadata";
 import { CARD_FORMAT, type CardText, type SelectedPick } from "@/lib/engine/picks/pickSchema";

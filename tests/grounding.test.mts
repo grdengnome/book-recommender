@@ -1,5 +1,5 @@
 // The engine's core promise: every pick comes from a pool the model was actually shown.
-// These check lib/merge/pickGrounding.ts with no network and no model calls.
+// These check lib/engine/pool/pickGrounding.ts with no network and no model calls.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { checkPickGrounding, recordSeenCandidates, type SeenCandidates } from "@/lib/engine/pool/pickGrounding";
