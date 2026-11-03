@@ -1,7 +1,7 @@
 // Grounding enforcement for final picks — spec.md Section 5b/5c, tightened on 2026-09-20:
 // all 3 picks must come from a retrieved candidate pool, no trained-knowledge fallback.
 // A prompt instruction alone is not a guarantee (the same-day test request returned two
-// picks absent from both pools), so route.ts runs this check in code on every generation
+// picks absent from both pools), so recommend.ts runs this check in code on every generation
 // and retries rather than returning an ungrounded pick.
 //
 // Matching uses its OWN key (groundingKey below), deliberately more tolerant than the
@@ -91,7 +91,7 @@ export type GroundingResult =
   | { status: "ungrounded"; picks: CheckedPick[] };
 
 // `picks` are the pool strings the final step copied (poolTitle/poolAuthor), already parsed
-// and shape-checked by lib/output/validatePicks.ts — the structured answer replaced the old
+// and shape-checked by lib/engine/picks/validatePicks.ts — the structured answer replaced the old
 // scrape of the text between "[" and "]".
 export function checkPickGrounding(
   picks: { title: string; author: string }[],
@@ -108,8 +108,8 @@ export function checkPickGrounding(
 
 // Same per-call console convention as logMergeStats. Printed on every attempt, pass or
 // fail, so source attribution stays visible for every run. Each matched pick's IDs go on
-// their own following line, so the pick line itself keeps the exact format the eval
-// driver parses (evals/run-eval-grounded.mjs, PICK_LINE).
+// their own following line, keeping the pick line's format stable (an earlier eval runner
+// parsed it; the debug trace now records the same detail).
 export function formatPickSources(picks: CheckedPick[]): string {
   return picks
     .map((p) => {

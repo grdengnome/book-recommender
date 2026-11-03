@@ -1,0 +1,124 @@
+{
+  "set": "legacy-v0",
+  "description": "The original 11 eval cases (docs/quality/eval-set.md), frozen on Nov 2, 2026 so results stay comparable with every run since July. Inputs are verbatim from the earlier runners. focus lists the rubric dimensions each case mainly tests; status approximation marks cases that test question-flow behaviour the engine alone cannot show.",
+  "rubric": "docs/quality/eval-set.md",
+  "cases": [
+    {
+      "id": "case-1",
+      "label": "Rich, clear input",
+      "tests": "Easy case: anchor, why and mood all coherent",
+      "focus": [
+        "relevance",
+        "traceability"
+      ],
+      "status": "active",
+      "tasteDescription": "My favorite book is 'The Remains of the Day' by Kazuo Ishiguro — I loved how restrained and heartbreaking it was, the way so much emotion stayed unspoken beneath the surface. I'm in the mood for something similarly quiet and melancholic, character-driven rather than plot-heavy. I have plenty of time and want to sit with a slow, immersive book."
+    },
+    {
+      "id": "case-2",
+      "label": "Anti-mainstream profile",
+      "tests": "Anti-mainstream profile: a quiet, little-read favourite; no bestsellers",
+      "focus": [
+        "non-obviousness",
+        "relevance"
+      ],
+      "status": "active",
+      "tasteDescription": "There's a novel I read a few years back — quiet, character-driven, nothing anyone around me had heard of — and it turned out to be one of the best books I've ever read. It completely surprised me, because nothing about its low profile suggested it would hit that hard. I've been recommending it to people unprompted ever since. I want more like that: no bestsellers, no 'if you liked X' consensus picks — just books that are genuinely great regardless of how well-known they are."
+    },
+    {
+      "id": "case-3",
+      "label": "Vague input",
+      "tests": "Minimal signal; the full flow would ask a follow-up",
+      "focus": [
+        "relevance"
+      ],
+      "status": "approximation",
+      "tasteDescription": "Just something good to read."
+    },
+    {
+      "id": "case-4",
+      "label": "Explicit anti-mainstream demand",
+      "tests": "Acid test for non-obviousness",
+      "focus": [
+        "non-obviousness"
+      ],
+      "status": "active",
+      "tasteDescription": "I want book recommendations, but nothing everyone's already read. I'm tired of every list recommending the same five books."
+    },
+    {
+      "id": "case-5",
+      "label": "Contradictory signals",
+      "tests": "Reconciling a heavy anchor with a light, quick mood",
+      "focus": [
+        "relevance"
+      ],
+      "status": "active",
+      "tasteDescription": "My favorite book of all time is 'War and Peace' — I loved the sprawling scope and how deeply it got into every character's inner life. But right now I want something light and quick to read, nothing heavy or slow."
+    },
+    {
+      "id": "case-6",
+      "label": "Hard turn-off",
+      "tests": "A stated turn-off is a hard boundary",
+      "focus": [
+        "relevance"
+      ],
+      "status": "active",
+      "tasteDescription": "I love literary fiction — character studies, beautiful prose, morally complicated people. I will not read fantasy under any circumstances: no magic systems, no invented worlds."
+    },
+    {
+      "id": "case-7a",
+      "label": "Rejection → clarify",
+      "tests": "Second set after rejecting the first; single-message approximation",
+      "focus": [
+        "relevance",
+        "variety across sessions"
+      ],
+      "status": "approximation",
+      "tasteDescription": "I asked for recommendations similar to quiet, literary character studies, but the three you gave me last time were all too dark and bleak for what I wanted. I'd like something in a similar literary vein, but warmer and more hopeful in tone."
+    },
+    {
+      "id": "case-7b",
+      "label": "Rejection → clarify → widen escalation",
+      "tests": "Widen after two rejections; single-message approximation",
+      "focus": [
+        "range",
+        "variety across sessions"
+      ],
+      "status": "approximation",
+      "tasteDescription": "I've now rejected two rounds of recommendations for quiet literary character studies — the first round was too dark, and the second round (aiming for warmer and more hopeful) still didn't land, they felt flat and forgettable. At this point just show me your best editable read on what you think I'm actually after, and feel free to widen out and take some real chances rather than staying narrowly in that same lane."
+    },
+    {
+      "id": "case-8",
+      "label": "Texture-match, not genre-match",
+      "tests": "Match on texture (place, moral ambiguity), not genre",
+      "focus": [
+        "relevance",
+        "range"
+      ],
+      "status": "active",
+      "tasteDescription": "I'm looking for something with a really granular, immersive sense of place — I want to feel like I'm actually there — and characters who are morally ambiguous, not clearly good or bad. Genre doesn't matter much to me as long as it has that texture."
+    },
+    {
+      "id": "case-9",
+      "label": "Genre/category fidelity & adjacent expansion",
+      "tests": "Stay faithful to a narrow category; expand only to adjacent",
+      "focus": [
+        "relevance",
+        "non-obviousness"
+      ],
+      "status": "active",
+      "tasteDescription": "I love narrative nonfiction — real events told with the pacing and craft of a novel. Specifically deep-dive investigative journalism or historical accounts that read like thrillers. That's exactly what I'm looking for right now."
+    },
+    {
+      "id": "case-10",
+      "label": "Creative-framing-only input",
+      "tests": "Vibe alone, no anchor book",
+      "focus": [
+        "relevance",
+        "range"
+      ],
+      "status": "active",
+      "tasteDescription": "🌊🏚️👻🕯️ — moody, atmospheric, a little unsettling but not full horror. That's the vibe I want."
+    }
+  ]
+}

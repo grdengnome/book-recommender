@@ -3,7 +3,7 @@
 > **Status:** Living · Describes the engine as it runs today and where it's heading. Last updated Nov 1, 2026.
 
 ## Today: one engine behind one API route
-`app/api/recommend/route.ts` takes a taste description and returns three picks (the [spec §4b](../product/spec.md) contract). About 25 seconds and $0.08 per request.
+`app/api/recommend/route.ts` takes a taste description and returns three picks (the [spec §4b](../product/spec.md) contract). The route is only the front door; the pipeline itself is `recommend()` in `lib/engine/recommend.ts`, with one folder per stage (`sources/`, `pool/`, `picks/`, `cards/`, `verify/`; decision 14.5). About 25 seconds and $0.08 per request.
 
 ```mermaid
 flowchart LR

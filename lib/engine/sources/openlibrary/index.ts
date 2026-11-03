@@ -1,6 +1,6 @@
 // Central tool registry — spec.md Section 5a. Assembles tool definitions for
 // the Anthropic API and dispatches incoming tool_use calls to implementations.
-// Adding a tool: create lib/tools/yourTool.ts exporting its definition + impl,
+// Adding a tool: create a file next to this one (e.g. yourTool.ts) exporting its definition + impl,
 // then register it in the two maps below. No other file should need edits.
 
 import {
@@ -9,7 +9,7 @@ import {
   setSearchBooksLogTag,
   type SearchBooksInput,
 } from "./searchBooks";
-import { noopTrace, type RequestTrace } from "../trace/requestTrace";
+import { noopTrace, type RequestTrace } from "@/lib/trace/requestTrace";
 
 export const toolDefinitions = [searchBooksToolDefinition];
 
@@ -33,6 +33,6 @@ export async function callTool(
 }
 
 export type { SearchBooksInput };
-// TEMPORARY (query-tracing session, 2026-08-04) — re-exported so route.ts can tag
+// TEMPORARY (query-tracing session, 2026-08-04) — re-exported so recommend.ts can tag
 // search_books calls with the eval case that triggered them. See searchBooks.ts.
 export { setSearchBooksLogTag };

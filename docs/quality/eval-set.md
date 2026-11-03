@@ -1,6 +1,8 @@
 # Eval Set
 
-> **Status:** Living · The rubric and test cases every prompt or recommendation-logic change is checked against. Last reviewed Nov 1, 2026.
+> **Status:** Living · The rubric and test cases every prompt or recommendation-logic change is checked against. Last reviewed Nov 2, 2026.
+
+*The case inputs are data in [`evals/cases/legacy-v0.json`](../../evals/cases/legacy-v0.json), frozen Nov 2, 2026 (decision 14.5); run them with `evals/run.mjs` ([evals/README.md](../../evals/README.md)). New cases go in a new set file, not here.*
 
 *Status: 11 cases (10 scenarios, with #7 split into 7a/7b), used for every scored run to date, including the Sept 23 v0 baseline. Cases 3, 7a, and 7b test question-flow behavior that isn't built yet, so they're scored as single-message approximations. Expanding toward 20–30 cases is still pending.*
 

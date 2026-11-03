@@ -11,9 +11,9 @@
 // metadata merge + source tracking. The one exception is a final cross-source
 // shuffle (step 4 below), which exists purely to prevent source-clustering bias,
 // not to rank or filter anything.
-import type { BookCandidate } from "../tools/searchBooks";
-import type { HardcoverBookCandidate } from "../hardcover/preparePool";
-import { noopTrace, type RequestTrace } from "../trace/requestTrace";
+import type { BookCandidate } from "@/lib/engine/sources/openlibrary/searchBooks";
+import type { HardcoverBookCandidate } from "@/lib/engine/sources/hardcover/preparePool";
+import { noopTrace, type RequestTrace } from "@/lib/trace/requestTrace";
 
 // Step 1: shape check. BookCandidate is { title, author, subjects } and
 // HardcoverBookCandidate is { title, author, subjects, usersCount } — the three
@@ -34,7 +34,7 @@ export interface ModelPoolCandidate {
 // Internal merged record: the model-facing fields plus which catalogs it came from and each
 // source's ID, carried so a final pick can be traced to its records (e.g. to fetch a
 // description for verification). A book found in both sources keeps both IDs. Never sent to
-// the model — route.ts passes the pool through toModelPool first.
+// the model — recommend.ts passes the pool through toModelPool first.
 export interface MergedBookCandidate extends ModelPoolCandidate {
   sources: PoolSource[];
   olWorkKey?: string;
@@ -82,7 +82,7 @@ function normAuthorLastName(name: string): string {
   return parts[parts.length - 1].toLowerCase().replace(/[^\w]/g, "");
 }
 
-// Exported so route.ts can attribute final picks back to their pool source with the
+// Exported so recommend.ts can attribute final picks back to their pool source with the
 // exact same matching rule the merge used (dev-log visibility only).
 export function dedupKey(title: string, author: string): string {
   return `${normTitle(title)}|${normAuthorLastName(author)}`;

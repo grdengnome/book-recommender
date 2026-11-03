@@ -42,6 +42,7 @@ Bucket: **v0** (in [scope](./v0-scope.md)) · **Later** (real app, after v0) · 
 | Faster recommendations | v0 | Swappable models make per-step model choice easy |
 | Engine performance track: running models more efficiently and creatively | Ongoing | Parallel calls, streaming, caching, routing small jobs to fast models, early table-setting; re-test model choices per job as new models ship (decision 14.3) |
 | Taste summary on the loading screen | v0 | "Looking for" line |
+| Eval set refresh: a new case set in the exact shape the question flow sends the engine (favourites, appeal factors, mood, turn-offs), drawn from patterns in real readers' answers, 20–30 cases, with machine-scored checks (grounded, 3 picks, distinct moods, turn-offs respected, how famous the picks are) beside blind human scoring | Next (with the café slice) | `legacy-v0` stays frozen as the baseline (decision 14.5); cases worth adding sooner: an injection attempt, accented titles, the case 5 famous-picks drift |
 | Dependency checkup: review npm's 25 reported package vulnerabilities (Nov 1) and update safely, in its own PR | Later | Before anyone outside sees the app; checks must stay green |
 | Eval on demand: a "Run eval" button in GitHub Actions, with the API key stored as a GitHub secret | Later | Worth it once model swaps become frequent (decision 14.3); today evals run by hand |
 | Avoid list / Nope shelf | Later | Low priority |

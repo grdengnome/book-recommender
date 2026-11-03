@@ -6,7 +6,7 @@
 // and never re-runs the selection; only real failures do (an empty required field, a wrong
 // pick count, ungrounded picks, a cut-off or refused answer). The prompt states the target
 // lengths and code allows slack above them (LENGTH_CEILINGS). A field over its ceiling is
-// reported in `overLimit`, and route.ts sends it to one small shortening call
+// reported in `overLimit`, and recommend.ts sends it to one small shortening call
 // (shortenFields.ts); if that fails, the original text is kept. `mood` is the exception:
 // when it isn't one word, the first word is kept, a clean cut. The first after-run had
 // hook 113/116 against 110 and angleHeading 41/42 against 40, which is why the ceilings
@@ -55,7 +55,7 @@ function firstWord(mood: string): string {
   return mood.trim().match(/[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/u)?.[0] ?? "";
 }
 
-// One pick of the selection answer. Called per pick as the selection streams in (route.ts),
+// One pick of the selection answer. Called per pick as the selection streams in (recommend.ts),
 // so card writing can start before the whole answer has arrived; the pick count is checked
 // once the answer is complete (validateSelectionCount).
 export type SelectedPickValidation =

@@ -5,13 +5,13 @@
 // validated pick's own source records (description + subjects/genres) so a later step can
 // check the model's description against them.
 //
-// LOG ONLY for now: route.ts awaits this and logs the result, but nothing here changes
+// LOG ONLY for now: recommend.ts awaits this and logs the result, but nothing here changes
 // the response. It is awaited (not deferred with after()) because step 3 needs the
 // results before the response is sent — so it has to be fast and can't fail the request:
 // every lookup is capped at LOOKUP_TIMEOUT_MS, all run in parallel, and every failure is
 // caught and reported as data rather than thrown.
-import type { CheckedPick } from "../merge/pickGrounding";
-import { hcGraphql } from "../hardcover/preparePool";
+import type { CheckedPick } from "@/lib/engine/pool/pickGrounding";
+import { hcGraphql } from "@/lib/engine/sources/hardcover/preparePool";
 
 const LOOKUP_TIMEOUT_MS = 5000;
 const OPEN_LIBRARY_BASE_URL = "https://openlibrary.org";

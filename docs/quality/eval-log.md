@@ -6,6 +6,18 @@ Running log of quality findings, known limitations, and decisions made while eva
 
 ---
 
+## 2026-11-02 — Restructure PR 4b: engine move live check (case 1)
+
+**Change:** the engine moved into `lib/engine/` and the route now calls `recommend()` (decision 14.5); the golden-request test shows every request is identical. This run checks the moved engine and the new runner (`evals/run.mjs`, `SET=legacy-v0`) live. Run by Grim in his Codespace on `refactor/engine-move`. **Spend: $0.09.**
+
+| Case | Nov 1 (PR 4a) | This run | Picks |
+|---|---|---|---|
+| 1 | 27.6s · $0.093 | 30.8s · $0.093 | Strangers · The Go-Between · A Jest of God |
+
+**Findings:** 3 picks, same cost to the tenth of a cent, Sonnet 5 and Haiku 4.5 from the slots. The runner read the case file and wrote its results. The driver's 47.3s includes the dev server compiling the route on its first request; the server's own 30.8s is within case 1's run-to-run range.
+
+---
+
 ## 2026-11-01 — Restructure PR 4a: AI gateway live check (cases 1, 5, 6, 8, 9, 10)
 
 **Change:** every model call now goes through the AI gateway (decision 14.4). Same models, prompts and settings; the golden-request test shows every request the engine sends is identical to before. This run checks the live connection only (key, streaming, timeouts). Run by Grim in his Codespace on `feat/ai-gateway`, dev workspace (spend-capped at $20). **Spend: $0.54.** One run each; not scored against the rubric.

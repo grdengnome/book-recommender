@@ -9,11 +9,11 @@
 // below. Remove once the query-log.json results have been reviewed.
 import { appendFileSync, mkdirSync } from "fs";
 import path from "path";
-import { noopTrace, type RequestTrace } from "../trace/requestTrace";
+import { noopTrace, type RequestTrace } from "@/lib/trace/requestTrace";
 
 let currentLogTag: string | null = null;
 
-// Called by the eval driver (via route.ts's optional evalTag passthrough) before
+// Called by the eval driver (via recommend.ts's optional evalTag passthrough) before
 // each case, so every search_books call made during that case's tool loop is
 // tagged. Never called in normal (non-eval) request handling, where it stays null.
 export function setSearchBooksLogTag(tag: string | null): void {
@@ -23,7 +23,7 @@ export function setSearchBooksLogTag(tag: string | null): void {
 const QUERY_LOG_PATH = path.join(process.cwd(), ".local", "query-log.json");
 
 // Newline-delimited JSON, not a single JSON array — search_books calls within a
-// round can run concurrently (route.ts fires tool_use blocks via Promise.all), and
+// round can run concurrently (recommend.ts fires tool_use blocks via Promise.all), and
 // synchronous line-appends avoid a read-modify-write race across those calls.
 // `pool` is logged in full (title + author) so cross-case title repeats can be
 // checked against the actual raw candidates each call saw, not just the count.
@@ -107,7 +107,7 @@ interface LookupReport {
 type LookupReporter = (report: LookupReport) => void;
 
 // olWorkKey is internal plumbing (e.g. "/works/OL1174972W"), carried so a final pick can
-// be traced back to its Open Library work record. Never model-facing: route.ts strips it
+// be traced back to its Open Library work record. Never model-facing: recommend.ts strips it
 // (via mergeCandidatePools.ts's toModelPool) before the pool goes into a tool_result.
 export interface BookCandidate {
   title: string;
@@ -261,7 +261,7 @@ export async function searchBooks(
 
   // Strip ranking/origin metadata — the model sees only title, author, and a tag or
   // two, never which call or rank a result came from. The work key is kept internally
-  // for pick tracing; it is removed before the model sees the pool (route.ts).
+  // for pick tracing; it is removed before the model sees the pool (recommend.ts).
   const pool: BookCandidate[] = shuffled.map((c) => ({
     title: c.title,
     author: c.author,

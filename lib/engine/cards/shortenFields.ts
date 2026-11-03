@@ -11,10 +11,10 @@
 //   code, not just in the prompt. It's strict (a changed word form also fails), which only
 //   costs a kept original, never a wrong claim. It can't check meaning: a cut can still
 //   shift emphasis.
-import type { ModelPick } from "./pickSchema";
-import { LENGTH_CEILINGS, LENGTH_TARGETS, type LimitedField, type OverLimitField } from "./validatePicks";
-import { noopTrace, type RequestTrace } from "../trace/requestTrace";
-import { callModel, modelFor } from "../ai/gateway";
+import type { ModelPick } from "@/lib/engine/picks/pickSchema";
+import { LENGTH_CEILINGS, LENGTH_TARGETS, type LimitedField, type OverLimitField } from "@/lib/engine/picks/validatePicks";
+import { noopTrace, type RequestTrace } from "@/lib/trace/requestTrace";
+import { callModel, modelFor } from "@/lib/ai/gateway";
 
 // The model comes from the "shortening" slot (lib/ai/slots.ts); this call sits in front of
 // the response, so that slot uses a small, fast model.

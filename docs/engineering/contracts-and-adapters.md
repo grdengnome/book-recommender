@@ -34,7 +34,7 @@ Otherwise keep plain code: a screen's layout, a button style, small helpers. If 
 | Area | Contract | v0 adapter(s) | Could be swapped for |
 |---|---|---|---|
 | AI jobs | `AiSlot` per job, through `lib/ai/gateway.ts` + `slots.ts` | Anthropic: Sonnet 5 (taste → tags, picks, card writing), Haiku 4.5 (field shortening, description check) | Any model or provider, per job |
-| Book sources | `BookSource` | Open Library, Hardcover | Google Books, ISBNdb, curated lists |
+| Book sources | `BookSource` (deferred, see below) | Open Library, Hardcover | Google Books, ISBNdb, curated lists |
 | Covers | `CoverSource`, `CoverEnhancer` | Open Library / Hardcover covers; EDSR-class faithful upscaler | Stronger upscalers, paid cover sources |
 | Images | `ImageGenerator` (asset pipeline, not run per request) | Image bake-off winner | Any generator, or a trained Squirmly style model |
 | Storage | `Store` (feedback, rate-limit counters, card bank, logs) | One chosen data store | Any database |
@@ -45,7 +45,8 @@ Otherwise keep plain code: a screen's layout, a button style, small helpers. If 
 | Later | `Auth`, `Analytics`, `Shelf`, `Ranking`, `Collection`, `Notifications` | Placeholder types only | Chosen when built |
 
 ## Where the code stands (audit, Oct 27)
-- **Already close:** each AI job lives in its own file; Open Library and Hardcover are separate modules joined in one merge step; `lib/output/pickSchema.ts` defines the pick and card shapes; `lib/trace/` records which model ran each call, with tokens and cost (local only).
+- **Already close:** each AI job lives in its own file; Open Library and Hardcover are separate modules joined in one merge step; `lib/engine/picks/pickSchema.ts` defines the pick and card shapes; `lib/trace/` records which model ran each call, with tokens and cost (local only).
 - **Done (PR 4a):** every model call goes through `lib/ai/gateway.ts`; `slots.ts` picks each job's model, and an `AI_SLOT_<JOB>` setting can override one for an experiment. Requests still use Anthropic's message format; a provider-neutral format arrives with the first non-Anthropic adapter.
-- **To do:** book sources return different shapes with no shared contract; there are no per-slot test sets; production doesn't record which engine made each output (arrives with the data store).
+- **Deferred (PR 4b):** a shared `BookSource` contract. Open Library is searched by the model, round by round; Hardcover is fetched once, up front. A common shape now would be a guess, so it waits until a third source is actually tried; until then the merge step (`lib/engine/pool/`) is where the sources meet.
+- **To do:** there are no per-slot test sets; production doesn't record which engine made each output (arrives with the data store).
 - **Not built yet, so built on contracts from day one:** the app screens, covers and the cover enhancer, illustration, the reveal renderer, storage and security.

@@ -1,22 +1,54 @@
 # evals/
 
-> **Status:** Living · How recommendation quality is measured. Last updated Nov 1, 2026.
+> **Status:** Living · How recommendation quality is measured. Last updated Nov 2, 2026.
 
 Every change to prompts, models or recommendation logic is checked against the eval set before it ships (CLAUDE.md, "Eval discipline"; decision 14.3 for model changes).
 
-- **Rubric and cases:** [`docs/quality/eval-set.md`](../docs/quality/eval-set.md) (6 dimensions, fail/weak/good/excellent; 11 cases).
+- **Rubric and cases:** [`docs/quality/eval-set.md`](../docs/quality/eval-set.md) (6 dimensions, fail/weak/good/excellent). The cases themselves are data in `cases/`.
 - **Findings:** [`docs/quality/eval-log.md`](../docs/quality/eval-log.md).
 - **Raw output:** `evals/results/` (gitignored).
 
-## Runners
-All three call the live `/api/recommend` route, so they need `npm run dev` running and real API keys in `.env.local`. **They cost money** (about $0.08 per case), so they're run deliberately, never automatically.
+## Running an eval
+One runner, `run.mjs`, sends a set of cases to the live `/api/recommend` route one at a time and prints a summary. It needs `npm run dev` running and real API keys in `.env.local`. **It costs money** (about $0.09 per case), so it's run deliberately, never automatically.
 
-| Runner | What it runs |
+```
+ENGINE_TRACE=1 npm run dev                                        # terminal 1
+SET=legacy-v0 CASE_IDS=case-1,case-5 TAG_PREFIX=mytest node evals/run.mjs   # terminal 2
+```
+
+| Setting | What it does |
 |---|---|
-| `run-eval.mjs` | All 11 cases, or a subset with `CASE_IDS=case-1,case-5`; holds the case inputs (verbatim from the eval set). Prints a summary: picks returned, time and, with the dev server started as `ENGINE_TRACE=1 npm run dev`, each case's cost and models |
-| `run-eval-grounded.mjs` | All 11 cases, also parsing the dev-server log for attempts, pick sources and pool sizes (`DEV_LOG=/path/to/dev.log node evals/run-eval-grounded.mjs`) |
-| `run-eval-narrow.mjs` | Cases 3, 4, 6 and 8 (the ones that showed title clustering) |
+| `SET` | Which case set to run, a file in `cases/` (default `legacy-v0`) |
+| `CASE_IDS` | Run only these cases, in this order (default: the whole set) |
+| `TAG_PREFIX` | Tags each request, so its logs and traces are easy to find later |
+| `OUT` | Results file name in `evals/results/` (default `<set>-<tag prefix>.json`) |
 
-To try a different model for one job, set its override (for example `AI_SLOT_CARD_WRITING=...` in `.env.local`, see `lib/ai/slots.ts`), restart the dev server and run the cases; the summary's models column confirms which models ran.
+The summary shows, per case: picks returned, server and driver time, and (with tracing on) cost and which models ran. It holds no reader data, so it can be pasted into a PR. Attempts, pick sources and pool sizes are in each request's debug trace in `.local/traces/`.
 
-**Planned (restructure PR 4b):** combine these into one runner with the cases in a data file. Per-job evals for the AI gateway slots follow when a model swap is first tested.
+Common subsets of `legacy-v0`: the clustering cases `CASE_IDS=case-3,case-4,case-6,case-8`; the Oct 22 timing baseline `CASE_IDS=case-1,case-5,case-6,case-8,case-9,case-10`.
+
+To try a different model for one job, set its override (for example `AI_SLOT_CARD_WRITING=...` in `.env.local`, see `lib/ai/slots.ts`), restart the dev server and run the cases; the models column confirms which models ran.
+
+## Case sets
+Each file in `cases/` is one set:
+
+```json
+{
+  "set": "legacy-v0",
+  "description": "What the set is for",
+  "rubric": "docs/quality/eval-set.md",
+  "cases": [
+    { "id": "case-1", "label": "Rich, clear input", "tests": "What this case checks",
+      "focus": ["relevance", "traceability"], "status": "active", "tasteDescription": "..." }
+  ]
+}
+```
+
+- `focus`: the rubric dimensions the case mainly tests.
+- `status`: `active`, or `approximation` for cases that test question-flow behaviour the engine alone can't show.
+
+| Set | What it is |
+|---|---|
+| `legacy-v0.json` | The original 11 cases, frozen Nov 2, 2026, so every run stays comparable with results since July. Don't edit; add a new set instead. |
+
+**Planned:** a new set in the exact shape the question flow will send, once that format is settled (spec §4a), with more machine-scored checks ([backlog](../docs/product/roadmap-and-backlog.md)). Per-job evals for the AI gateway slots follow when a model swap is first tested.

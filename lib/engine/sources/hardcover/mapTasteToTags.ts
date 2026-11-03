@@ -13,8 +13,8 @@
 // to the model carries tag names only (no counts, shuffled order) — count literally
 // isn't visible input to the selection, so it can't be leaned on even by accident.
 import { HARDCOVER_TAG_VOCABULARY } from "./tagVocabulary";
-import { noopTrace, type RequestTrace } from "../trace/requestTrace";
-import { callModel, modelFor } from "../ai/gateway";
+import { noopTrace, type RequestTrace } from "@/lib/trace/requestTrace";
+import { callModel, modelFor } from "@/lib/ai/gateway";
 
 const MIN_TAGS = 2;
 const MAX_TAGS = 4;
@@ -100,7 +100,7 @@ function parseSelectedTags(responseText: string): string[] {
   // The "no prose before or after" instruction isn't always followed — seen in
   // practice with leading reasoning text ahead of the array (2026-08-20, Step 4
   // real-merge run). Extract the first balanced [...] span rather than assuming the
-  // whole trimmed response is valid JSON, same tolerance route.ts already applies to
+  // whole trimmed response is valid JSON, same tolerance recommend.ts already applies to
   // the main recommendation response (strips code fences there; this goes one step
   // further since a bare fence strip isn't enough for leading prose).
   const span = extractJsonArraySpan(responseText);

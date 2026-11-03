@@ -3,7 +3,7 @@ import {
   isRatingWidgetTag,
   isShelfNoiseTag,
   isExcludedTag,
-} from "../lib/hardcover/tagExclusions";
+} from "../lib/engine/sources/hardcover/tagExclusions";
 
 const tags: { tag: string; count: number }[] = JSON.parse(
   readFileSync("scripts/hardcover-tags-gt100.json", "utf8"),
