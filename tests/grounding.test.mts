@@ -2,8 +2,8 @@
 // These check lib/merge/pickGrounding.ts with no network and no model calls.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { checkPickGrounding, recordSeenCandidates, type SeenCandidates } from "@/lib/merge/pickGrounding";
-import type { MergedBookCandidate } from "@/lib/merge/mergeCandidatePools";
+import { checkPickGrounding, recordSeenCandidates, type SeenCandidates } from "@/lib/engine/pool/pickGrounding";
+import type { MergedBookCandidate } from "@/lib/engine/pool/mergeCandidatePools";
 
 function poolOf(...books: Partial<MergedBookCandidate>[]): SeenCandidates {
   const seen: SeenCandidates = new Map();

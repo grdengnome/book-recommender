@@ -13,8 +13,8 @@
 // to the model carries tag names only (no counts, shuffled order) — count literally
 // isn't visible input to the selection, so it can't be leaned on even by accident.
 import { HARDCOVER_TAG_VOCABULARY } from "./tagVocabulary";
-import { noopTrace, type RequestTrace } from "../trace/requestTrace";
-import { callModel, modelFor } from "../ai/gateway";
+import { noopTrace, type RequestTrace } from "@/lib/trace/requestTrace";
+import { callModel, modelFor } from "@/lib/ai/gateway";
 
 const MIN_TAGS = 2;
 const MAX_TAGS = 4;

@@ -9,7 +9,7 @@
 // below. Remove once the query-log.json results have been reviewed.
 import { appendFileSync, mkdirSync } from "fs";
 import path from "path";
-import { noopTrace, type RequestTrace } from "../trace/requestTrace";
+import { noopTrace, type RequestTrace } from "@/lib/trace/requestTrace";
 
 let currentLogTag: string | null = null;
 

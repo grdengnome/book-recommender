@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { appendFileSync, mkdirSync } from "fs";
 import path from "path";
-import { toolDefinitions, callTool, setSearchBooksLogTag } from "@/lib/tools";
-import type { SearchBooksResult } from "@/lib/tools/searchBooks";
-import { mapTasteToHardcoverTags } from "@/lib/hardcover/mapTasteToTags";
+import { toolDefinitions, callTool, setSearchBooksLogTag } from "@/lib/engine/sources/openlibrary";
+import type { SearchBooksResult } from "@/lib/engine/sources/openlibrary/searchBooks";
+import { mapTasteToHardcoverTags } from "@/lib/engine/sources/hardcover/mapTasteToTags";
 import {
   prepareHardcoverPool,
   type HardcoverBookCandidate,
-} from "@/lib/hardcover/preparePool";
-import { mergeCandidatePools, toModelPool } from "@/lib/merge/mergeCandidatePools";
+} from "@/lib/engine/sources/hardcover/preparePool";
+import { mergeCandidatePools, toModelPool } from "@/lib/engine/pool/mergeCandidatePools";
 import {
   checkPickGrounding,
   formatPickSources,
@@ -16,22 +16,22 @@ import {
   type CheckedPick,
   type GroundingResult,
   type SeenCandidates,
-} from "@/lib/merge/pickGrounding";
-import { formatPickMetadata, lookupPickMetadata, type PickMetadata } from "@/lib/verify/lookupPickMetadata";
-import { checkPickDescriptions, formatPickCheck } from "@/lib/verify/checkPickDescriptions";
+} from "@/lib/engine/pool/pickGrounding";
+import { formatPickMetadata, lookupPickMetadata, type PickMetadata } from "@/lib/engine/verify/lookupPickMetadata";
+import { checkPickDescriptions, formatPickCheck } from "@/lib/engine/verify/checkPickDescriptions";
 import { createRequestTrace, type RequestTrace } from "@/lib/trace/requestTrace";
-import { SELECTION_FORMAT, toClientPick, type CardText, type ModelPick, type SelectedPick } from "@/lib/output/pickSchema";
+import { SELECTION_FORMAT, toClientPick, type CardText, type ModelPick, type SelectedPick } from "@/lib/engine/picks/pickSchema";
 import {
   duplicateMoods,
   validateSelectedPick,
   validateSelectionCount,
   type LimitedField,
   type OverLimitField,
-} from "@/lib/output/validatePicks";
-import { writeCard } from "@/lib/output/writeCards";
-import { createPickScanner } from "@/lib/output/streamSelection";
+} from "@/lib/engine/picks/validatePicks";
+import { writeCard } from "@/lib/engine/cards/writeCards";
+import { createPickScanner } from "@/lib/engine/picks/streamSelection";
 import { aiConfigError, modelFor, streamModel } from "@/lib/ai/gateway";
-import { formatShorten, shortenFields } from "@/lib/output/shortenFields";
+import { formatShorten, shortenFields } from "@/lib/engine/cards/shortenFields";
 
 // Engine runs take up to ~2 min; 300s is the Vercel Hobby maximum.
 export const maxDuration = 300;

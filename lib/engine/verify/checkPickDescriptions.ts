@@ -22,11 +22,11 @@
 //   output) returns the original picks unchanged. A rewrite that would break the length
 //   ceilings (lib/output/validatePicks.ts) is dropped the same way.
 import type { PickMetadata } from "./lookupPickMetadata";
-import type { ModelPick } from "../output/pickSchema";
-import { LENGTH_CEILINGS } from "../output/validatePicks";
-import { noopTrace, type RequestTrace } from "../trace/requestTrace";
-import { callModel, modelFor } from "../ai/gateway";
-import type { AiResponse } from "../contracts/ai";
+import type { ModelPick } from "@/lib/engine/picks/pickSchema";
+import { LENGTH_CEILINGS } from "@/lib/engine/picks/validatePicks";
+import { noopTrace, type RequestTrace } from "@/lib/trace/requestTrace";
+import { callModel, modelFor } from "@/lib/ai/gateway";
+import type { AiResponse } from "@/lib/contracts/ai";
 
 // The model comes from the "descriptionCheck" slot (lib/ai/slots.ts). A narrow fact-check that
 // sits in front of the response, so that slot uses a small, fast model.

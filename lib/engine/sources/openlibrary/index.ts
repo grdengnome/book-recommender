@@ -9,7 +9,7 @@ import {
   setSearchBooksLogTag,
   type SearchBooksInput,
 } from "./searchBooks";
-import { noopTrace, type RequestTrace } from "../trace/requestTrace";
+import { noopTrace, type RequestTrace } from "@/lib/trace/requestTrace";
 
 export const toolDefinitions = [searchBooksToolDefinition];
 

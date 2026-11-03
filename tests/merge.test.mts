@@ -2,7 +2,7 @@
 // These check lib/merge/mergeCandidatePools.ts with no network and no model calls.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mergeCandidatePools, toModelPool } from "@/lib/merge/mergeCandidatePools";
+import { mergeCandidatePools, toModelPool } from "@/lib/engine/pool/mergeCandidatePools";
 
 const quiet = () => {
   const log = console.log;

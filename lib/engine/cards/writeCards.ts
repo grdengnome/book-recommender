@@ -13,12 +13,12 @@
 // A card that fails (API error, timeout, cut off, an empty field) is retried once on its
 // own. If it fails again the whole attempt fails, like any other missing required field,
 // and route.ts re-runs the generation. Length overflow is not a failure (validatePicks.ts).
-import type { CheckedPick } from "../merge/pickGrounding";
-import type { PickMetadata } from "../verify/lookupPickMetadata";
-import { CARD_FORMAT, type CardText, type SelectedPick } from "./pickSchema";
-import { validateCard, type LimitedField } from "./validatePicks";
-import { noopTrace, type RequestTrace } from "../trace/requestTrace";
-import { callModel, modelFor } from "../ai/gateway";
+import type { CheckedPick } from "@/lib/engine/pool/pickGrounding";
+import type { PickMetadata } from "@/lib/engine/verify/lookupPickMetadata";
+import { CARD_FORMAT, type CardText, type SelectedPick } from "@/lib/engine/picks/pickSchema";
+import { validateCard, type LimitedField } from "@/lib/engine/picks/validatePicks";
+import { noopTrace, type RequestTrace } from "@/lib/trace/requestTrace";
+import { callModel, modelFor } from "@/lib/ai/gateway";
 
 // The model comes from the "cardWriting" slot (lib/ai/slots.ts).
 const CARD_TIMEOUT_MS = 20000;

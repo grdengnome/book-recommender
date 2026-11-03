@@ -14,7 +14,7 @@
 // the actual query rather than platform-wide or single-axis noise. Decided, not
 // re-litigated here.
 //
-import { noopTrace, type RequestTrace } from "../trace/requestTrace";
+import { noopTrace, type RequestTrace } from "@/lib/trace/requestTrace";
 
 const HARDCOVER_ENDPOINT = "https://api.hardcover.app/v1/graphql";
 const RAW_FETCH_LIMIT = 100; // taggable_counts rows pulled before summing/dedup — matches the depth used in the ordering test

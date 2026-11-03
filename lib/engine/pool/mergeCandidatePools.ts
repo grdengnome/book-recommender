@@ -11,9 +11,9 @@
 // metadata merge + source tracking. The one exception is a final cross-source
 // shuffle (step 4 below), which exists purely to prevent source-clustering bias,
 // not to rank or filter anything.
-import type { BookCandidate } from "../tools/searchBooks";
-import type { HardcoverBookCandidate } from "../hardcover/preparePool";
-import { noopTrace, type RequestTrace } from "../trace/requestTrace";
+import type { BookCandidate } from "@/lib/engine/sources/openlibrary/searchBooks";
+import type { HardcoverBookCandidate } from "@/lib/engine/sources/hardcover/preparePool";
+import { noopTrace, type RequestTrace } from "@/lib/trace/requestTrace";
 
 // Step 1: shape check. BookCandidate is { title, author, subjects } and
 // HardcoverBookCandidate is { title, author, subjects, usersCount } — the three

@@ -10,8 +10,8 @@
 // results before the response is sent — so it has to be fast and can't fail the request:
 // every lookup is capped at LOOKUP_TIMEOUT_MS, all run in parallel, and every failure is
 // caught and reported as data rather than thrown.
-import type { CheckedPick } from "../merge/pickGrounding";
-import { hcGraphql } from "../hardcover/preparePool";
+import type { CheckedPick } from "@/lib/engine/pool/pickGrounding";
+import { hcGraphql } from "@/lib/engine/sources/hardcover/preparePool";
 
 const LOOKUP_TIMEOUT_MS = 5000;
 const OPEN_LIBRARY_BASE_URL = "https://openlibrary.org";
