@@ -189,7 +189,7 @@ globalThis.fetch = (async (input: string | URL | Request, init?: RequestInit) =>
   throw new Error(`offline check: unexpected request to ${url.href}`);
 }) as typeof fetch;
 
-function seedRandom(seed: number): void {
+export function seedRandom(seed: number): void {
   let a = seed >>> 0;
   Math.random = () => {
     a = (a + 0x6d2b79f5) >>> 0;

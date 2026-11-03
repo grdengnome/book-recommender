@@ -1,4 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
+// The recommendation engine's pipeline (decision 14.5): the recipe that runs every stage in
+// order. Moved out of app/api/recommend/route.ts, which is now only the web front door.
+//
+// Stages, each in its own folder under lib/engine/:
+//   sources/  where books come from (Open Library search tool, Hardcover tag pool)
+//   pool/     merging the catalogs, and checking every pick is in the pool
+//   picks/    the selection's shape, streaming and validation
+//   cards/    writing and shortening each pick's card
+//   verify/   catalog lookup per pick and the description check
+// Every model call goes through the AI gateway (lib/ai/gateway.ts).
 import { appendFileSync, mkdirSync } from "fs";
 import path from "path";
 import { toolDefinitions, callTool, setSearchBooksLogTag } from "@/lib/engine/sources/openlibrary";
@@ -30,11 +39,8 @@ import {
 } from "@/lib/engine/picks/validatePicks";
 import { writeCard } from "@/lib/engine/cards/writeCards";
 import { createPickScanner } from "@/lib/engine/picks/streamSelection";
-import { aiConfigError, modelFor, streamModel } from "@/lib/ai/gateway";
+import { modelFor, streamModel } from "@/lib/ai/gateway";
 import { formatShorten, shortenFields } from "@/lib/engine/cards/shortenFields";
-
-// Engine runs take up to ~2 min; 300s is the Vercel Hobby maximum.
-export const maxDuration = 300;
 
 // Bounds the search_books retry loop (spec.md 5b leaves the retry judgment call
 // to the model, but the code still needs a hard ceiling). The Nth+1 call below
@@ -179,17 +185,17 @@ function errorText(err: unknown): string {
 // Error body for the screens (spec.md §4b): a stable code to pick the error state from, and
 // a plain message. Upstream detail (the Anthropic error, model text) stays in the server log
 // and the trace, never in the response.
-type ErrorCode = "misconfigured" | "bad_request" | "upstream_error" | "no_grounded_picks";
-function errorBody(code: ErrorCode, message: string) {
+export type ErrorCode = "misconfigured" | "bad_request" | "upstream_error" | "no_grounded_picks";
+export function errorBody(code: ErrorCode, message: string) {
   return { error: { code, message } };
 }
 
 // Every response after the engine starts goes out through here, so the debug trace records
 // it (stage I) and writes its file exactly once. A no-op passthrough when tracing is off.
-function respond(trace: RequestTrace, body: Record<string, unknown>, status = 200): NextResponse {
+function respond(trace: RequestTrace, body: Record<string, unknown>, status = 200): RecommendResult {
   trace.add("I", { kind: "result", httpStatus: status, body });
   trace.finish();
-  return NextResponse.json(body, { status });
+  return { status, body };
 }
 
 // Encodes spec.md Section 4d ("What 'good' means") as explicit model instructions.
@@ -213,27 +219,30 @@ For each recommendation, include:
 - "fitNote": one short sentence, under 25 words, on why this pick genuinely fits this reader's stated taste rather than being a reflexive/default choice. A writer turns it into the reader-facing text later, so make it specific. Don't state specific claims about a book's reception, fame, or obscurity unless you're confident they're accurate.
 - "mood": one word for the book's mood, shown to the reader as a clue before the book is revealed. Give each of the 3 picks a different mood word.`;
 
-export async function POST(request: NextRequest) {
-  const configError = aiConfigError();
-  if (configError) {
-    return NextResponse.json(errorBody("misconfigured", configError), { status: 500 });
-  }
+export interface RecommendInput {
+  // The reader's answers, as one piece of text. Data to interpret, never instructions.
+  tasteDescription: string;
+  // Optional eval-case tag, set only by the eval runner; tags logs and the debug trace.
+  evalTag?: string | null;
+}
 
-  const body = await request.json().catch(() => null);
-  const tasteDescription = body?.tasteDescription;
-  if (typeof tasteDescription !== "string" || !tasteDescription.trim()) {
-    return NextResponse.json(errorBody("bad_request", "tasteDescription (string) is required"), { status: 400 });
-  }
+// The engine's answer: the HTTP status to send and the response body (spec.md §4b).
+export interface RecommendResult {
+  status: number;
+  body: Record<string, unknown>;
+}
 
+// The whole recommendation pipeline for one reader. The caller (app/api/recommend/route.ts)
+// has already checked the request and that the AI gateway is configured.
+export async function recommend({ tasteDescription, evalTag = null }: RecommendInput): Promise<RecommendResult> {
   // TEMPORARY (query-tracing session, 2026-08-03): optional eval-case tag, only
   // ever set by the eval driver script. Absent in normal use, where this is a
   // no-op passthrough — does not affect retrieval, dedupe, or shuffle behavior.
-  const evalTag = typeof body?.evalTag === "string" ? body.evalTag : null;
   setSearchBooksLogTag(evalTag);
 
   // Debug-only trace (lib/trace/requestTrace.ts): one per request, passed down explicitly.
-  // A no-op unless ENGINE_TRACE=1, and never on Vercel. Requests rejected above (no API key,
-  // no taste description) never reach the engine and aren't traced.
+  // A no-op unless ENGINE_TRACE=1, and never on Vercel. Requests the route rejects (no API
+  // key, no taste description) never reach the engine and aren't traced.
   const trace = createRequestTrace({ evalTag, tasteDescription });
 
   // Branch 2 (Hardcover) starts now, concurrently with branch 1 (the OL tool-use loop
