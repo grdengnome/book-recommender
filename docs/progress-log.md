@@ -890,7 +890,7 @@ Alongside: claim @squirmly and getsquirmly.com; put the new Hardcover key in Ver
 
 ## November 2, 2026 — Restructure PR 4b: engine moves into lib/engine/
 
-**Conclusion:** The engine now lives in `lib/engine/`, one folder per pipeline stage, and the web route is a 26-line front door that calls `recommend()` (decision 14.5). Behaviour unchanged: the golden-request test matches byte for byte, and a new test shows `recommend()` called directly returns the route's exact answer (19 offline tests).
+**Conclusion:** The engine now lives in `lib/engine/`, one folder per pipeline stage, and the web route is a 26-line front door that calls `recommend()` (decision 14.5). Behaviour unchanged: the golden-request test matches byte for byte, and a new test shows `recommend()` called directly returns the route's exact answer (19 offline tests). A live case 1 run through the new runner returned 3 picks in 30.8s for $0.093 ([eval log](./quality/eval-log.md)).
 
 - **Folders by stage:** `sources/openlibrary/`, `sources/hardcover/`, `pool/`, `picks/`, `cards/`, `verify/`, plus `recommend.ts` (the recipe, moved out of `route.ts`). Pure moves in their own commits; imports use the `@/lib/...` alias.
 - **Evals:** one runner, `evals/run.mjs`, with case sets as data in `evals/cases/`. The original 11 are frozen as `legacy-v0` (verbatim, checked in code) with labels for what each tests; a new offline test checks every case set is well-formed. The three old runners are gone (history keeps them).
