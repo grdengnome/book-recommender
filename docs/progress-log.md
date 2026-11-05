@@ -904,3 +904,21 @@ Alongside: claim @squirmly and getsquirmly.com; put the new Hardcover key in Ver
 4. Image generator bake-off, Part A, once the image tool accounts are set up.
 
 Alongside: dependency checkup PR (npm reports 25 package vulnerabilities); claim @squirmly and getsquirmly.com; new Hardcover key into Vercel.
+
+---
+
+## November 4, 2026 — Eval refresh, part 1: the taste profile is the engine's input
+
+**Conclusion:** The engine now accepts a taste profile, the format the v2 question flow will send, and writes its reader brief from it in plain code (decision 2.24). Evals come before the app skeleton (decided Nov 2), so the engine is tested on the new flow before screens are built. Relevance is the hard bar; non-obviousness is an enhancement, expected only when the reader leans surprising or asks for something niche.
+
+- **The profile:** three layers (slots with source and confidence, the reader's own answers, an "anything else" list) so nothing is lost to a summary. Hard rules: avoid, category, audience, length (quick ≤ 200 pages, short 200–300, medium 300–500, long 500+). Strong: mood, standalone or series. Weighed (never thrown away): the appeal factors. Firmness is data and changes only on evidence.
+- **No single way in:** a loved book is one doorway; mood, ingredients and the moment are equal ones, and the evals will show which work best.
+- **Built:** `lib/contracts/tasteProfile.ts`, `lib/engine/profile/` (slot settings, input checks, brief writer), the route accepts `{ profile }`, eval cases can hold profiles. 26 offline tests; the legacy path is unchanged (golden test byte-identical).
+- **Eval strategy** written: the ladder from automatic checks to real readers, and what gets measured across the engine, the read of the reader, retrieval, the question flow and visuals ([eval strategy](./quality/eval-strategy.md)).
+
+**Next:**
+1. Readiness bar: turn "comfortable rolling out widely, based on great eval results" into pass marks (relevance first; hard rules 100%; adherence; speed).
+2. New case set (~20) in the profile format, across every doorway, with variety and robustness cases.
+3. Baseline run on today's engine (~$2, Codespace), blind-scored.
+4. Engine improvements against the baseline, one at a time (page counts first).
+5. Then PR 5 app skeleton, PR 6 store and trust basics.

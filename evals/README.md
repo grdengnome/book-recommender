@@ -1,6 +1,6 @@
 # evals/
 
-> **Status:** Living · How recommendation quality is measured. Last updated Nov 2, 2026.
+> **Status:** Living · How recommendation quality is measured. Last updated Nov 4, 2026.
 
 Every change to prompts, models or recommendation logic is checked against the eval set before it ships (CLAUDE.md, "Eval discipline"; decision 14.3 for model changes).
 
@@ -39,12 +39,15 @@ Each file in `cases/` is one set:
   "rubric": "docs/quality/eval-set.md",
   "cases": [
     { "id": "case-1", "label": "Rich, clear input", "tests": "What this case checks",
-      "focus": ["relevance", "traceability"], "status": "active", "tasteDescription": "..." }
+      "focus": ["relevance", "traceability"], "status": "active", "tasteDescription": "..." },
+    { "id": "...", "label": "...", "tests": "...", "focus": ["relevance"], "status": "active",
+      "profile": { "version": 1, "slots": { }, "answers": [ ], "extras": [ ] } }
   ]
 }
 ```
 
 - `focus`: the rubric dimensions the case mainly tests.
+- Each case has a `profile` (a taste profile, [decision 2.24](../docs/product/question-flow/taste-profile.md)) or a legacy `tasteDescription` paragraph, never both. Profiles are checked offline with the same rules the route applies.
 - `status`: `active`, or `approximation` for cases that test question-flow behaviour the engine alone can't show.
 
 | Set | What it is |

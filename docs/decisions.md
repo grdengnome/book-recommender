@@ -2,7 +2,7 @@
 
 > **Status:** Living · Every product and architecture decision, and the paths rejected.
 
-*Covers decisions through the v0 engine, v0 product planning, the v0 scope and the repo restructure (November 2, 2026). Further decisions are added as they're made.*
+*Covers decisions through the v0 engine, v0 product planning, the v0 scope and the repo restructure (November 4, 2026). Further decisions are added as they're made.*
 
 The product and architecture decisions behind this recommender, and the paths I rejected. The [progress log](./progress-log.md) is the session-by-session diary; this file is the story told by decision. Each entry gives the decision and why, with a link to the full detail.
 
@@ -206,6 +206,11 @@ The full operating principles are in [question-flow-principles.md](./product/que
 ### 2.23 A simple favourites doorway in v0
 **Decision:** "Something I loved" stays in v0 as one search box on the existing Open Library title search: one favourite required, up to three optional, books only at first (shows and films later).
 **Why:** A loved book is the most natural way many readers explain their taste, but full multi-media matching is hard. The simple version keeps the doorway without the hard part. ([progress log, Nov 1](./progress-log.md))
+*Updated Nov 4 (2.24): a loved item is optional, not required. It's one doorway among several, and the "loved" slot can hold any medium (books first).*
+
+### 2.24 The taste profile is the engine's input; relevance is the bar, non-obviousness an enhancement
+**Decision:** The question flow hands the engine a taste profile, not a paragraph, in three layers: slots (each with its source, asked · inferred · typed, and confidence), the reader's own answers word for word, and an "anything else" list for signals no slot covers. The engine writes the reader brief from it in plain code. Slots: doorway, loved (any medium, with what hooked them and a "but…" twist), ingredients, mood + intensity, pace, people or plot, writing style, setting, think or escape, ending feel, familiar ↔ surprising, published, standalone or series, moment, category, audience, length, avoid. Firmness: hard rules (avoid, category, audience, length: quick ≤ 200 pages, short 200–300, medium 300–500, long 500+, unknown lengths left out when a band is asked for), strong (mood; standalone or series), weighed (the appeal factors: always considered, never thrown away), context. A slot's weight rises with how explicitly the reader gave it; "avoid" is never inferred. Firmness lives in the slot data and changes only on evidence (eval adherence and impact, then real readers). No single way in: a loved book is one doorway; mood, ingredients and the moment are equal ones, and the evals show which work best. Relevance (the best pick for this reader) is the hard bar; non-obviousness is an enhancement, expected only when the reader leans surprising or asks for something niche. Rejected: a paragraph (nothing enforceable, hard to test) and slots alone (drops what doesn't fit and can distort); semantic search over our own index is a later retrieval option, not an input format. Spec: [taste profile](./product/question-flow/taste-profile.md).
+**Why:** Structure gives control (hard rules, search steering, precise evals, accounts later) and the reader's own words keep the nuance a summary would lose. The audit showed mood decides the picks and only about 1 in 4 real requests start from a book. A popular book that genuinely fits is a good pick; the failure is reaching for one out of habit. Fetching page counts is the first engine improvement after the baseline. ([progress log, Nov 4](./progress-log.md))
 
 ---
 

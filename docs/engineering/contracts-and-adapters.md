@@ -38,7 +38,7 @@ Otherwise keep plain code: a screen's layout, a button style, small helpers. If 
 | Covers | `CoverSource`, `CoverEnhancer` | Open Library / Hardcover covers; EDSR-class faithful upscaler | Stronger upscalers, paid cover sources |
 | Images | `ImageGenerator` (asset pipeline, not run per request) | Image bake-off winner | Any generator, or a trained Squirmly style model |
 | Storage | `Store` (feedback, rate-limit counters, card bank, logs) | One chosen data store | Any database |
-| Question flow | `QuestionBank` (data), `QuestionChooser`, `TasteProfile` | v2 bank, simple chooser | New formats, a smarter chooser |
+| Question flow | `QuestionBank` (data), `QuestionChooser`, `TasteProfile` (built: `lib/contracts/tasteProfile.ts`, decision 2.24) | v2 bank, simple chooser; profile v1 with slot settings as data in `lib/engine/profile/slots.ts` | New formats, a smarter chooser, new slots |
 | Themes | `Theme` (tokens, scenes, wrapping, copy, motion) | Café, Mystery, Fantasy, Superhero, Sci-fi | New and seasonal themes |
 | Reveal | `RevealBook` renderer, `RevealAnimation` | CSS 3D book; v0 animation set | Three.js book; new animations |
 | Security | `InputGuard`, `RateLimiter` | Basic guard; per-visitor limit | Stronger guard, another limiter |
