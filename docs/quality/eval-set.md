@@ -12,8 +12,8 @@ Score each test case's output on all 6 dimensions, 4-point scale: **fail / weak 
 
 | Dimension | The question | Why it's here |
 |---|---|---|
-| Relevance | Do the picks match the stated taste, mood, appetite? | Baseline — must hit |
-| Non-obviousness | Are these NOT the bandwagon picks everyone names? | Core differentiator |
+| Relevance | Do the picks match the stated taste, mood, appetite? | The hard bar: the best picks for this reader |
+| Non-obviousness | Are these NOT the bandwagon picks everyone names? | An enhancement, required only when the reader leans surprising or asks for niche ([decision 2.24](../decisions.md)) |
 | Range | Variety across era, author, genre — not 3 flavors of one thing? | The "wide variety" rule |
 | Real & correct | Actual books, right authors, no invented titles? | Guards against hallucination |
 | Traceability | Can you see *why* each was picked from the inputs? | Feeds reflect-back; builds trust |

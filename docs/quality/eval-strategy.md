@@ -1,6 +1,6 @@
 # Eval strategy: how every part of Squirmly gets measured and improved
 
-> **Status:** Living · Agreed Nov 4, 2026. How evals spread beyond the pick-quality eval, so every part of the product can be hill-climbed. Rubric and cases: [eval set](./eval-set.md) and [`evals/`](../../evals/README.md). Findings: [eval log](./eval-log.md). Last updated Nov 4, 2026.
+> **Status:** Living · Agreed Nov 4, 2026. How evals spread beyond the pick-quality eval, so every part of the product can be hill-climbed. Rubric and cases: [eval set](./eval-set.md) and [`evals/`](../../evals/README.md). When it's ready: [readiness bar](./readiness-bar.md). Findings: [eval log](./eval-log.md). Last updated Nov 4, 2026.
 
 ## The loop
 Hill-climbing is the same everywhere: a fixed case set, a baseline score, change **one** thing, rerun the same set, keep the change only if it wins, and log it. A change is never judged on a fresh, different set of examples.
