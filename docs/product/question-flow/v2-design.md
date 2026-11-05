@@ -1,6 +1,6 @@
 # Question flow v2: design
 
-> **Status:** Living · Draft rev 2 (Oct 24, 2026), with the Oct 25 and Oct 28 changes marked below. Last updated Nov 1, 2026.
+> **Status:** Living · Draft rev 2 (Oct 24, 2026), with the Oct 25 and Oct 28 changes marked below. Last updated Nov 4, 2026.
 
 *Follows [decision 2.20](../../decisions.md) (new question core) and the [principles](./principles.md). Evidence: [question core audit](../../research/question-core-audit-2026-10-22.md). Replaces the backbone in [spec §4a](../spec.md) and [question-bank.md](./question-bank.md), which are pending a rewrite. A themed café prototype of this flow was built and reviewed over Oct 25–26.*
 
@@ -18,7 +18,7 @@ Plus: **never corny.** Wording and content must feel genuinely intriguing to a r
 *Oct 25 changes: the "just show me" shortcut was removed, and the live taste line was removed from question screens (see §6).*
 
 ## 2. The taste profile
-What the engine fills in while the reader answers. Each slot is **empty / partial / clear**.
+What the engine fills in while the reader answers. Each slot is **empty / partial / clear**. *Nov 4: the exact slots, values and firmness the engine receives are now specified in [taste profile](./taste-profile.md) (decision 2.24), which adds doorway, ingredients, published, standalone or series, moment, category and audience.*
 
 **Core: what you want (most questions go here)**
 1. **Starting point:** a book, show or film loved · a feeling · a world or topic · surprise me.

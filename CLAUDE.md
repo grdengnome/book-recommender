@@ -17,7 +17,7 @@ Start here:
 
 **v0 is a polished preview of the full Discover experience on a private link** (decision 1.11), soft target end of 2026. The engine is complete and deployed privately.
 
-Now: the repo restructure, one pull request at a time (`docs/engineering/repo-guide.md`): PR 5 app skeleton → PR 6 store, feedback, rate limit, input guard. Then the café vertical slice, with a new eval case set in the question flow's input shape. (PRs 1–4b, docs, README/CLAUDE.md, hygiene + automatic checks, the AI gateway and the engine move, are done.)
+Now: the eval refresh (decided Nov 2: test the engine on the new question flow before building screens): taste profile format (done, decision 2.24) → readiness bar → new case set in the profile format → baseline run → engine improvements, each proven against the baseline (page counts first). How everything gets measured: `docs/quality/eval-strategy.md`. Then the rest of the repo restructure, one pull request at a time (`docs/engineering/repo-guide.md`; PRs 1–4b are done): PR 5 app skeleton → PR 6 store, feedback, rate limit, input guard → the café vertical slice.
 
 Don't build screens until explicitly asked. Screens follow `docs/design/design-system.md` and `docs/design/art-direction.md`; question flow work follows `docs/product/question-flow/principles.md` and `v2-design.md`. The illustration style and tool are under review in an image generator bake-off, so don't redraw scene artwork from scratch; the prototypes in `prototypes/` are the reference until that's decided. The data store, rate limit and input guard must be in place before anyone outside sees the app.
 
@@ -56,9 +56,10 @@ Rules for all new code:
 
 ## How the engine works (today)
 
-One API route, `app/api/recommend/route.ts`: POST `{ tasteDescription }` → `{ picks }` (spec §4b contract; fields the engine can't fill yet are `null`). Errors are `{ error: { code, message } }`. Nothing else leaves the server: no model message, no thinking, no pool strings or IDs. The route is only the web front door (decision 14.5): it checks the request and the AI configuration, then calls `recommend()` in `lib/engine/recommend.ts`, which runs the whole pipeline and can also be called directly (tests, scripts, future routes).
+One API route, `app/api/recommend/route.ts`: POST `{ profile }` (a taste profile, decision 2.24) or the legacy `{ tasteDescription }` paragraph → `{ picks }` (spec §4b contract; fields the engine can't fill yet are `null`). Errors are `{ error: { code, message } }`. Nothing else leaves the server: no model message, no thinking, no pool strings or IDs. The route is only the web front door (decision 14.5): it checks the request and the AI configuration, then calls `recommend()` in `lib/engine/recommend.ts`, which runs the whole pipeline and can also be called directly (tests, scripts, future routes).
 
 The engine lives in `lib/engine/`, one folder per pipeline stage:
+- `profile/`: the taste profile's slot settings as data (`slots.ts`: firmness, wording, length bands), `validateProfile.ts` (untrusted input checks; avoid never inferred) and `renderBrief.ts` (plain-code reader brief, grouped by firmness; reader text quoted, never instructions). Spec: `docs/product/question-flow/taste-profile.md`.
 - `recommend.ts`: the recipe. The selection prompt, the search loop, the Hardcover deadline, the 3-attempt retry, starting each pick's work as it streams in, error codes.
 - `sources/openlibrary/`: the `search_books` tool (Open Library subjects + search) and the tool registry. The model calls it up to 3 rounds; the 4th call omits tools to force an answer. Subject lists are cached for 24h; every Open Library call times out at 5s.
 - `sources/hardcover/`: maps the taste description to reader tags (one model call), then fetches a tag-matched pool. Runs once per request, in parallel with the Open Library loop; dropped if not back within 5s.

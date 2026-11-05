@@ -215,7 +215,8 @@ export const traceFiles = () => (existsSync(traceDir) ? readdirSync(traceDir).so
 const realLog = console.log, realError = console.error;
 const { POST } = await import(pathToFileURL(path.join(ROOT, "app/api/recommend/route.ts")).href);
 
-export async function run(env: Record<string, string | undefined>) {
+// `body` defaults to eval case 1 as a legacy paragraph; pass another request body to test other inputs.
+export async function run(env: Record<string, string | undefined>, body: Record<string, unknown> = { tasteDescription: CASE_1, evalTag: "trace-check-case-1" }) {
   for (const [k, v] of Object.entries(env)) v === undefined ? delete process.env[k] : (process.env[k] = v);
   seedRandom(20261017);
   captured = [];
@@ -226,7 +227,7 @@ export async function run(env: Record<string, string | undefined>) {
     const res = await POST(new Request("http://localhost/api/recommend", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ tasteDescription: CASE_1, evalTag: "trace-check-case-1" }),
+      body: JSON.stringify(body),
     }));
     return { status: res.status, responseText: await res.text(), requests: captured, newTraces: traceFiles().filter((f) => !before.includes(f)) };
   } finally {

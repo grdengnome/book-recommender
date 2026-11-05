@@ -1,6 +1,6 @@
 # Docs
 
-> **Status:** Living · The map of every doc in this repo. Last updated Nov 1, 2026.
+> **Status:** Living · The map of every doc in this repo. Last updated Nov 4, 2026.
 
 Each doc starts with a status line:
 - **Living:** current and kept up to date.
@@ -22,6 +22,7 @@ Each doc starts with a status line:
 | [Roadmap and backlog](./product/roadmap-and-backlog.md) | The full vision and every idea, sorted by area and phase | Living |
 | [Question flow principles](./product/question-flow/principles.md) | The rules every question follows | Living |
 | [Question flow v2 design](./product/question-flow/v2-design.md) | Taste profile, next-question rule, question formats | Living |
+| [Taste profile](./product/question-flow/taste-profile.md) | Exactly what the question flow hands the engine: slots, firmness, the reader brief | Living |
 | [Spec](./product/spec.md) | Product spec; engine sections current, question flow superseded | Reference |
 | [Question bank](./product/question-flow/question-bank.md) | The original question wording and pools | Reference |
 
@@ -43,6 +44,7 @@ Each doc starts with a status line:
 | Doc | What it's for | Status |
 |---|---|---|
 | [Eval set](./quality/eval-set.md) | The 6-dimension rubric and the test cases | Living |
+| [Eval strategy](./quality/eval-strategy.md) | How every part of the product gets measured and hill-climbed | Living |
 | [Eval log](./quality/eval-log.md) | Findings from each eval run | Living |
 | [Results history](./quality/results-history.md) | Raw outputs from early eval runs | Reference |
 

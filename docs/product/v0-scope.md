@@ -1,6 +1,6 @@
 # v0 scope
 
-> **Status:** Living · Agreed Oct 28, 2026 ([decision 1.11](../decisions.md)). Scope is frozen: new ideas go to the [roadmap and backlog](./roadmap-and-backlog.md) as "Later" unless they're a true must-have. Last updated Nov 1, 2026.
+> **Status:** Living · Agreed Oct 28, 2026 ([decision 1.11](../decisions.md)). Scope is frozen: new ideas go to the [roadmap and backlog](./roadmap-and-backlog.md) as "Later" unless they're a true must-have. Last updated Nov 4, 2026.
 
 ## What v0 is
 **A polished preview of the full Discover experience, shared on a private link.** It proves the product works, gathers feedback from a first set of readers, and doubles as a portfolio link.
@@ -10,7 +10,7 @@
 ## In v0
 **Question flow**
 - Adaptive question flow that fills a taste profile ([v2 design](./question-flow/v2-design.md)), with a lite set of formats; more formats after v0.
-- Four doorways, including a simple favourites doorway: one search box using the existing Open Library title search; one favourite required, up to three optional; books only at first ([decision 2.23](../decisions.md)).
+- Several doorways (something I loved · a feeling · an ingredient or world · a moment · surprise me), all filling one taste profile ([decision 2.24](../decisions.md), [taste profile](./question-flow/taste-profile.md)). The favourites doorway is one search box using the existing Open Library title search, up to three, books only at first; it's optional, not required ([decision 2.23](../decisions.md)).
 - Gentle nudge for unclear typed answers (never blocks).
 
 **Recommendations**

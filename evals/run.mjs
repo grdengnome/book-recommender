@@ -52,7 +52,8 @@ async function runCase(c) {
     res = await fetch(API_URL, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ tasteDescription: c.tasteDescription, evalTag }),
+      // A case holds a taste profile (decision 2.24) or a legacy paragraph.
+      body: JSON.stringify(c.profile ? { profile: c.profile, evalTag } : { tasteDescription: c.tasteDescription, evalTag }),
     });
     data = await res.json();
   } catch (err) {
