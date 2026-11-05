@@ -18,25 +18,34 @@ Every slot is optional. An empty slot is left out of the brief; the engine fills
 |---|---|---|---|
 | **Starting point** | Favourite books (up to 3, each with an optional "what hooked you": the people · the world · the twists · the writing · the feeling) · a feeling · a world or topic · surprise me | Steers the search | Search |
 | **Mood** | Mood words, plus intensity from 1 (a hint) to 5 (wreck me) | **Strong preference** | Search + choice |
-| **Pace** | page-turner · steady · slow and immersive | Soft | Choice |
-| **People or plot** | people · plot · both | Soft | Choice |
-| **Writing style** | spare · lush · witty (one or more) | Soft | Choice |
-| **Setting / world** | Places, eras, "an invented world", "here and now" (up to 2) | Soft, steers the search | Search + choice |
-| **Think or escape** | think · escape · both | Soft | Choice |
-| **Ending feel** | happy · bittersweet · gut-punch · open | Soft | Choice |
+| **Pace** | page-turner · steady · slow and immersive | Weighed | Choice |
+| **People or plot** | people · plot · both | Weighed | Choice |
+| **Writing style** | spare · lush · witty (one or more) | Weighed | Choice |
+| **Setting / world** | Places, eras, "an invented world", "here and now" (up to 2) | Weighed, steers the search | Search + choice |
+| **Think or escape** | think · escape · both | Weighed | Choice |
+| **Ending feel** | happy · bittersweet · gut-punch · open | Weighed | Choice |
 | **Familiar ↔ surprising** | familiar · neutral · surprising | Sets how much non-obviousness matters (below) | Choice |
 | **Category** | fiction · nonfiction | **Hard rule** when given | Search + choice |
-| **Length** | quick · medium · long | **Hard rule** when given | Choice |
+| **Length** | quick · short · medium · long | **Hard rule** when given | Choice |
 | **Avoid** | Genres, themes or content the reader rules out | **Hard rule** | Search + choice |
 | **Occasion** | Free text ("a long flight", "gift for my dad") | Context | Choice |
 
-**Length bands** (tunable, in the slot data): quick = up to about 300 pages · medium = about 300–500 · long = over about 500. A book whose length is unknown is left out when the reader asked for a band, rather than risked. *Enforcing this in code needs page counts from the catalogs; until then the brief states the rule and the eval measures whether it holds.*
+**Length bands** (tunable, in the slot data): quick = up to 200 pages · short = 200–300 · medium = 300–500 · long = over 500. A book whose length is unknown is left out when the reader asked for a band, rather than risked. *The engine doesn't fetch page counts yet; fetching them is the first engine improvement after the baseline. Until then the brief states the rule and the eval measures whether it holds.*
 
 ## Firmness, in plain words
 - **Hard rule:** never broken. Avoid, category, length.
 - **Strong preference:** mood. The audit showed mood decides whether picks feel right ([decision 2.20](../../decisions.md)).
-- **Soft preference:** the appeal factors. Weighed together, never enforced one by one; a book that's perfect on mood and starting point can miss on pace.
+- **Weighed:** the appeal factors. Always considered, never thrown away: the picks should reflect each one the reader gave, and a book that misses one needs to be clearly stronger on the others. They're weighed together rather than enforced one by one, so a book that's perfect on mood and starting point can still miss on pace.
+- **How explicit the reader was matters too.** A slot's weight rises with how directly the reader said it: a clear answer they chose outweighs a partial one, and both outweigh our inferences. A specific direction ("properly unsettling", "witty, please") is treated close to a strong preference.
 - **Steers the search:** starting point, topic, setting and mood also decide what gets searched, not just what gets chosen.
+
+## Firmness is a setting, tuned by evidence
+Each slot's firmness lives in the slot data, like a model choice in `lib/ai/slots.ts`, so it can be changed without touching code. It's measured, not assumed:
+- **Adherence:** the evals score, for every slot a reader gave, whether the picks honour it. A slot that's often ignored shows up as a low adherence rate.
+- **Impact:** removing one slot at a time from a case (as in the [question core audit](../../research/question-core-audit-2026-10-22.md)) shows which slots actually change the picks.
+- **Real readers, once live:** which missed slots go with a thumbs-down or a "Not quite? Try again".
+
+A slot gets firmer or softer only when that evidence says so, and each change is logged like any other eval-backed decision.
 
 ## Familiar ↔ surprising decides how much "non-obvious" matters
 Relevance is always the bar: the best pick for this reader. Non-obviousness is an enhancement ([decision 2.24](../../decisions.md)):
