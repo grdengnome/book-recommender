@@ -922,3 +922,20 @@ Alongside: dependency checkup PR (npm reports 25 package vulnerabilities); claim
 3. Baseline run on today's engine (~$2, Codespace), blind-scored.
 4. Engine improvements against the baseline, one at a time (page counts first).
 5. Then PR 5 app skeleton, PR 6 store and trust basics.
+
+---
+
+## November 5, 2026 — Readiness bar agreed; main protected
+
+**Conclusion:** The bar for "ready for a wider audience" is written before any results (decision 3.8, [readiness bar](./quality/readiness-bar.md)): the eval set passes, then a 5–10 person pilot meets success marks set in advance. Relevance is the hard bar; speed gates are targets (median 20s, 9 in 10 within 30s, first pick within 10s), not today's ~26s.
+
+- **Keeping the bar honest:** beat plain "ask Claude for 3 books"; hold for every doorway; 2–3 runs per case; pilot results check whether the scores meant anything.
+- **Scoring:** an Opus judge with catalog facts, validated by planted picks and a second judge; Grim gut-checks a review page without grading.
+- **Review method (decision 11.8):** every PR has a "Review focus" section; high-stakes PRs get an independent reviewer agent. `main` is protected by a GitHub ruleset (PRs only, merge commits only, `checks` + `Vercel` must pass), set up Nov 4 and verified.
+- **Tool Radar hype checks:** viral AI tweets go to a fresh standalone chat with the Radar link; verdicts (real · overstated · too early · hype) are logged in the Radar.
+
+**Next:**
+1. New case set (~20) in the profile format, across every doorway, plus variety, robustness and planted calibration cases.
+2. The judge and the review page; the plain-Claude baseline.
+3. Baseline run (Codespace), then engine improvements one at a time: page counts, profile-driven search for speed, code-enforced hard rules, a prompt written for the profile.
+4. Then PR 5 app skeleton, PR 6 store and trust basics, then the pilot.

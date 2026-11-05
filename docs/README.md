@@ -1,6 +1,6 @@
 # Docs
 
-> **Status:** Living · The map of every doc in this repo. Last updated Nov 4, 2026.
+> **Status:** Living · The map of every doc in this repo. Last updated Nov 5, 2026.
 
 Each doc starts with a status line:
 - **Living:** current and kept up to date.
@@ -44,6 +44,7 @@ Each doc starts with a status line:
 | Doc | What it's for | Status |
 |---|---|---|
 | [Eval set](./quality/eval-set.md) | The 6-dimension rubric and the test cases | Living |
+| [Readiness bar](./quality/readiness-bar.md) | The pass marks for a wider rollout, written before any results | Living |
 | [Eval strategy](./quality/eval-strategy.md) | How every part of the product gets measured and hill-climbed | Living |
 | [Eval log](./quality/eval-log.md) | Findings from each eval run | Living |
 | [Results history](./quality/results-history.md) | Raw outputs from early eval runs | Reference |

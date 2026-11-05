@@ -2,7 +2,7 @@
 
 > **Status:** Living · Every product and architecture decision, and the paths rejected.
 
-*Covers decisions through the v0 engine, v0 product planning, the v0 scope and the repo restructure (November 4, 2026). Further decisions are added as they're made.*
+*Covers decisions through the v0 engine, v0 product planning, the v0 scope and the repo restructure (November 5, 2026). Further decisions are added as they're made.*
 
 The product and architecture decisions behind this recommender, and the paths I rejected. The [progress log](./progress-log.md) is the session-by-session diary; this file is the story told by decision. Each entry gives the decision and why, with a link to the full detail.
 
@@ -243,6 +243,10 @@ The full operating principles are in [question-flow-principles.md](./product/que
 ### 3.7 Automatic checks on every pull request, with offline tests of the engine's rules
 **Decision:** GitHub Actions runs the type check, the linter and the tests on every pull request and push to `main`; checks must be green before merging. Tests use Node's built-in test runner and run fully offline (no API keys, no spend): grounding, merge and trace-equivalence first. Paid evals stay a deliberate step, and Vercel's own preview build covers the app build.
 **Why:** The engine is about to move behind the AI gateway (PR 4) and models will keep changing (14.3); rules like "picks come only from the pool" need a machine checking them on every change, not memory. The built-in runner needs nothing new installed; Vitest can join when screen tests arrive (PR 5). ([progress log, Nov 1](./progress-log.md))
+
+### 3.8 The readiness bar, written before any results
+**Decision:** "Ready for a wider audience" is two steps: the eval set passes the [readiness bar](./quality/readiness-bar.md), then a real-reader pilot (5–10 people, after PR 6) meets success marks written in advance (at least 70% of picks thumbs up; most readers would read at least one). Gates, any miss means not ready: 100% real and correct, 100% hard rules, 100% safety against typed instructions, at least 95% of requests return 3 picks, median time to all three picks 20 seconds or less with 9 in 10 within 30 (stretch 15), first pick visible within 10 seconds. Quality: relevance at least 80% good or excellent with none failing and every case at least 2 of 3 good; strong preferences honoured at least 90%; weighed preferences reflected at least 75%; non-obviousness required only for readers who lean surprising or ask for niche. The engine must clearly beat plain "ask Claude for 3 books" on relevance; the bar must hold for every doorway; cases run 2–3 times. A model judge scores (a stronger model than the picker, given each book's catalog facts), validated by planted picks and a second judge; Grim gut-checks a review page of each reader's picks without grading them.
+**Why:** Written before results so the goalposts can't move. Speed is a core part of the experience, so the speed gates are targets to reach, not a description of today (the engine runs about 26 seconds). A plain-Claude baseline, per-segment checks and repeat runs keep a good average from hiding real failures; the pilot is the outside check that the eval scores mean what readers feel. ([progress log, Nov 5](./progress-log.md))
 
 ---
 
@@ -569,6 +573,12 @@ The full operating principles are in [question-flow-principles.md](./product/que
 ### 11.7 Every change goes through a pull request, docs included
 **Decision:** All changes, including doc-only ones, go on a branch and through a pull request that the owner reviews and merges. Replaces the earlier rule that doc-only changes could go straight to `main`.
 **Why:** `main` is always something the owner approved, every change is a chance to learn from the review, and the cost is a few extra clicks on small fixes. ([progress log, Nov 1](./progress-log.md))
+
+---
+
+### 11.8 How PRs are reviewed, and main is protected
+**Decision:** Every PR description has a "Review focus" section naming the 1–3 files or sections worth Grim's eyes; Grim's review is: the description matches the agreed plan, checks are green, the flagged files read right, and anything surprising gets asked about. High-stakes PRs (the engine's prompt, hard-rule enforcement, the input guard, anything that reaches readers, safety or money) also get an independent cold review by a separate reviewer agent that didn't build the change, with its findings posted for Grim. `main` is protected by a GitHub ruleset: no deletion or force push, a PR is required (merge commits only), and the `checks` and `Vercel` status checks must pass before merging.
+**Why:** Machines check mechanics; people check intent and risk. Grim isn't a developer, so his review focuses on what he can judge (does it match what we agreed, are decisions recorded in his words), and an independent reviewer covers the code where a mistake would reach readers. The ruleset turns "never merge on red" from memory into enforcement. ([progress log, Nov 5](./progress-log.md))
 
 ---
 

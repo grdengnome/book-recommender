@@ -17,7 +17,7 @@ Start here:
 
 **v0 is a polished preview of the full Discover experience on a private link** (decision 1.11), soft target end of 2026. The engine is complete and deployed privately.
 
-Now: the eval refresh (decided Nov 2: test the engine on the new question flow before building screens): taste profile format (done, decision 2.24) → readiness bar → new case set in the profile format → baseline run → engine improvements, each proven against the baseline (page counts first). How everything gets measured: `docs/quality/eval-strategy.md`. Then the rest of the repo restructure, one pull request at a time (`docs/engineering/repo-guide.md`; PRs 1–4b are done): PR 5 app skeleton → PR 6 store, feedback, rate limit, input guard → the café vertical slice.
+Now: the eval refresh (decided Nov 2: test the engine on the new question flow before building screens): taste profile format (done, decision 2.24) → readiness bar (done, `docs/quality/readiness-bar.md`, decision 3.8) → new case set in the profile format → baseline run → engine improvements, each proven against the baseline (page counts first). How everything gets measured: `docs/quality/eval-strategy.md`. Then the rest of the repo restructure, one pull request at a time (`docs/engineering/repo-guide.md`; PRs 1–4b are done): PR 5 app skeleton → PR 6 store, feedback, rate limit, input guard → the café vertical slice.
 
 Don't build screens until explicitly asked. Screens follow `docs/design/design-system.md` and `docs/design/art-direction.md`; question flow work follows `docs/product/question-flow/principles.md` and `v2-design.md`. The illustration style and tool are under review in an image generator bake-off, so don't redraw scene artwork from scratch; the prototypes in `prototypes/` are the reference until that's decided. The data store, rate limit and input guard must be in place before anyone outside sees the app.
 
@@ -40,7 +40,9 @@ Before proposing a plan, building a feature, or changing the engine or design, a
 - **Every change goes through a pull request,** docs included (decision 11.7). The owner reviews and merges every PR; Claude never merges into `main`.
 - **Work can happen from a claude.ai session or a Codespace** (decision 11.5). Either way, start from the latest `main`, and don't have two sessions editing the same branch.
 
-**PR description template:** what changed (plain language) · why · how it was checked · Pro check · anything left for a later PR.
+**PR description template:** what changed (plain language) · why · how it was checked · Pro check · **Review focus** (the 1–3 files or sections worth the owner's eyes, and what to look for) · anything left for a later PR.
+
+**Reviews (decision 11.8):** the owner checks intent and risk, not every line. High-stakes PRs (the engine's prompt, hard-rule enforcement, the input guard, anything that reaches readers, safety or money) also get an independent cold review from a separate reviewer agent that didn't build the change; post its findings in the PR. `main` is protected: PRs only, merge commits only, and the `checks` and `Vercel` status checks must pass.
 
 ## How the code is organized
 
