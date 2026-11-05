@@ -7,7 +7,7 @@ When a reader finishes the question flow, the app sends the engine a **taste pro
 
 1. **Slots:** the organised read of the reader (mood, pace, setting…). Each filled slot says where it came from and how sure we are.
 2. **Their answers:** what the reader actually chose or typed, question by question ("chose the *fog* forecast"). Kept word for word.
-3. **Anything else:** signals no slot covers ("audiobook", "for my dad", "set in Puerto Rico"). Logged, so a recurring signal becomes a new slot.
+3. **Anything else:** signals no slot covers ("audiobook", "translated fiction", "by women authors"). Logged, so a recurring signal becomes a new slot.
 
 The engine turns the profile into a labelled **reader brief** for the choosing model, in plain code (no model call, no added wait). The brief always shows the reader's own answers next to the slots, and tells the model that the reader's words outrank our inferences.
 
@@ -16,7 +16,9 @@ Every slot is optional. An empty slot is left out of the brief; the engine fills
 
 | Slot | Values | How firmly it's treated | Shapes |
 |---|---|---|---|
-| **Starting point** | Favourite books (up to 3, each with an optional "what hooked you": the people · the world · the twists · the writing · the feeling) · a feeling · a world or topic · surprise me | Steers the search | Search |
+| **Doorway** | Which way in the reader chose: something I loved · a feeling · an ingredient or world · a moment · surprise me | Context: tells the engine where the reader started | — |
+| **Loved** | Up to 3 things the reader loved, any medium (books first; shows, films and comics later), each with an optional *what hooked you* (the people · the world · the twists · the writing · the feeling) and an optional *but…* twist (darker · lighter · shorter · funnier · less bleak…) | Steers the search; the hook and twist are the reader's direction | Search + choice |
+| **Ingredients** | What the book should have: "a heist", "found family", "big ideas about time", "a strong narrator" | Weighed, steers the search | Search + choice |
 | **Mood** | Mood words, plus intensity from 1 (a hint) to 5 (wreck me) | **Strong preference** | Search + choice |
 | **Pace** | page-turner · steady · slow and immersive | Weighed | Choice |
 | **People or plot** | people · plot · both | Weighed | Choice |
@@ -25,19 +27,24 @@ Every slot is optional. An empty slot is left out of the brief; the engine fills
 | **Think or escape** | think · escape · both | Weighed | Choice |
 | **Ending feel** | happy · bittersweet · gut-punch · open | Weighed | Choice |
 | **Familiar ↔ surprising** | familiar · neutral · surprising | Sets how much non-obviousness matters (below) | Choice |
+| **Published** | recent · modern · classic | Weighed | Search + choice |
+| **Standalone or series** | standalone · series is fine | **Strong preference** when given | Choice |
+| **Moment** | When or why they're reading: "a long flight", "reading slump", "gift for my dad" | Context | Choice |
 | **Category** | fiction · nonfiction | **Hard rule** when given | Search + choice |
+| **Audience** | adult · young adult · children | **Hard rule** when given | Search + choice |
 | **Length** | quick · short · medium · long | **Hard rule** when given | Choice |
 | **Avoid** | Genres, themes or content the reader rules out | **Hard rule** | Search + choice |
-| **Occasion** | Free text ("a long flight", "gift for my dad") | Context | Choice |
+
+**No single way in.** A loved book is one doorway, not the main road: in the [question core audit](../../research/question-core-audit-2026-10-22.md) only about 1 in 4 real requests started from a book, and mood decided the picks even over the anchor. Mood, ingredients and the moment are equal ways in. Whatever doorway the reader takes, the engine searches with the combination of what's filled: subjects from ingredients and setting, mood tags, and the loved books' subjects. Which doorways produce the most relevant picks is measured by the evals, and the flow's emphasis follows the evidence.
 
 **Length bands** (tunable, in the slot data): quick = up to 200 pages · short = 200–300 · medium = 300–500 · long = over 500. A book whose length is unknown is left out when the reader asked for a band, rather than risked. *The engine doesn't fetch page counts yet; fetching them is the first engine improvement after the baseline. Until then the brief states the rule and the eval measures whether it holds.*
 
 ## Firmness, in plain words
-- **Hard rule:** never broken. Avoid, category, length.
-- **Strong preference:** mood. The audit showed mood decides whether picks feel right ([decision 2.20](../../decisions.md)).
+- **Hard rule:** never broken. Avoid, category, audience, length.
+- **Strong preference:** mood, and standalone or series when given. The audit showed mood decides whether picks feel right ([decision 2.20](../../decisions.md)).
 - **Weighed:** the appeal factors. Always considered, never thrown away: the picks should reflect each one the reader gave, and a book that misses one needs to be clearly stronger on the others. They're weighed together rather than enforced one by one, so a book that's perfect on mood and starting point can still miss on pace.
 - **How explicit the reader was matters too.** A slot's weight rises with how directly the reader said it: a clear answer they chose outweighs a partial one, and both outweigh our inferences. A specific direction ("properly unsettling", "witty, please") is treated close to a strong preference.
-- **Steers the search:** starting point, topic, setting and mood also decide what gets searched, not just what gets chosen.
+- **Steers the search:** loved books, ingredients, setting, published and mood also decide what gets searched, not just what gets chosen.
 
 ## Firmness is a setting, tuned by evidence
 Each slot's firmness lives in the slot data, like a model choice in `lib/ai/slots.ts`, so it can be changed without touching code. It's measured, not assumed:
