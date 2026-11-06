@@ -30,11 +30,11 @@ Common subsets of `legacy-v0`: the clustering cases `CASE_IDS=case-3,case-4,case
 To try a different model for one job, set its override (for example `AI_SLOT_CARD_WRITING=...` in `.env.local`, see `lib/ai/slots.ts`), restart the dev server and run the cases; the models column confirms which models ran.
 
 ## Scoring against the readiness bar
-After a run, the judge scores it against the [readiness bar](../docs/quality/readiness-bar.md). Both commands cost money and need the API key; neither needs the dev server.
+After a run, the judge scores it against the [readiness bar](../docs/quality/readiness-bar.md). Both commands cost money and need the API key; neither needs the dev server. `--env-file=.env.local` loads the key: the dev server reads `.env.local` by itself, standalone scripts don't.
 
 ```
-node --import ./tests/support/resolve.mts evals/calibrate.mts                 # once per judge model, about $0.20
-RUNS=profile-v1-run1.json BASELINE=1 node --import ./tests/support/resolve.mts evals/score.mts
+node --env-file=.env.local --import ./tests/support/resolve.mts evals/calibrate.mts                 # once per judge model, about $0.20
+RUNS=profile-v1-run1.json BASELINE=1 node --env-file=.env.local --import ./tests/support/resolve.mts evals/score.mts
 ```
 
 - `calibrate.mts` has the judge score planted picks (`calibration/judge-calibration.json`): at least 9 of 10 must land right before its scores count.

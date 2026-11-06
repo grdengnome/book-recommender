@@ -3,7 +3,7 @@
 // expected bucket. Costs about $0.20. Writes evals/results/calibration.json, which the scorecard
 // shows.
 //
-//   node --import ./tests/support/resolve.mts evals/calibrate.mts
+//   node --env-file=.env.local --import ./tests/support/resolve.mts evals/calibrate.mts
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -26,7 +26,16 @@ for (const item of items) {
   const c = cases.find((x) => x.id === item.caseId);
   if (!c) throw new Error(`Unknown caseId ${item.caseId}`);
   const facts = await lookupFacts(item.title, item.author);
-  const score = await judgeCase({ brief: renderBrief(c.profile), checks: c.checks, picks: [{ title: item.title, author: item.author, card: "", facts }] });
+  let score;
+  try {
+    score = await judgeCase({ brief: renderBrief(c.profile), checks: c.checks, picks: [{ title: item.title, author: item.author, card: "", facts }] });
+  } catch (err) {
+    // One failed call doesn't throw away the rest of the paid run; it counts as a miss.
+    const error = err instanceof Error ? err.message : String(err);
+    results.push({ ...item, relevance: null, correct: false, reason: `not scored: ${error}` });
+    console.log(`MISS ${item.caseId} "${item.title}": not scored (${error})`);
+    continue;
+  }
   const relevance = score.picks[0].relevance;
   const correct = item.expect === "great" ? GOOD_OR_BETTER.includes(relevance) : !GOOD_OR_BETTER.includes(relevance);
   results.push({ ...item, relevance, correct, reason: score.picks[0].relevanceReason });

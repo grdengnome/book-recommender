@@ -10,7 +10,7 @@
     { "caseId": "prof-12", "title": "We Have Always Lived in the Castle", "author": "Shirley Jackson", "expect": "great", "why": "Quietly eerie, not horror" },
     { "caseId": "prof-15", "title": "The Wild Robot", "author": "Peter Brown", "expect": "great", "why": "A cozy, gently adventurous children's read-aloud" },
     { "caseId": "prof-14", "title": "Three Men in a Boat", "author": "Jerome K. Jerome", "expect": "great", "why": "A short, funny classic" },
-    { "caseId": "prof-03", "title": "Salt: A World History", "author": "Mark Kurlansky", "expect": "great", "why": "The history of one everyday thing" },
+    { "caseId": "prof-03", "title": "Mauve", "author": "Simon Garfield", "expect": "great", "why": "A short, witty history of one accidental dye that changed the world, and not the famous example the reader named (replaced Salt on Nov 5: the reader used salt as their own example and asked for something they don't know, so Salt was a bad answer key)" },
     { "caseId": "prof-05", "title": "A Psalm for the Wild-Built", "author": "Becky Chambers", "expect": "great", "why": "Cozy and uplifting, with lovely prose" }
   ]
 }
