@@ -29,6 +29,19 @@ Common subsets of `legacy-v0`: the clustering cases `CASE_IDS=case-3,case-4,case
 
 To try a different model for one job, set its override (for example `AI_SLOT_CARD_WRITING=...` in `.env.local`, see `lib/ai/slots.ts`), restart the dev server and run the cases; the models column confirms which models ran.
 
+## Scoring against the readiness bar
+After a run, the judge scores it against the [readiness bar](../docs/quality/readiness-bar.md). Both commands cost money and need the API key; neither needs the dev server.
+
+```
+node --import ./tests/support/resolve.mts evals/calibrate.mts                 # once per judge model, about $0.20
+RUNS=profile-v1-run1.json BASELINE=1 node --import ./tests/support/resolve.mts evals/score.mts
+```
+
+- `calibrate.mts` has the judge score planted picks (`calibration/judge-calibration.json`): at least 9 of 10 must land right before its scores count.
+- `score.mts` looks up every pick's catalog facts (Open Library, plus Hardcover reader counts when `HARDCOVER_API_TOKEN` is set), has the judge (`evalJudge` slot, Opus 5.5) score each reader, cross-checks `SECOND_JUDGE` readers (default 5) with the second judge, and with `BASELINE=1` runs and scores plain Claude on the same readers. `RUNS` takes several files to score repeat runs side by side; `OUT` names the output.
+- It prints the scorecard (safe to paste) and writes `results/<name>-scored.json` and `results/<name>-review.html`: open the review page in the browser for every reader's picks, with scores hidden until you tick "Show scores".
+- About $1 per run of 21 readers for the judge, plus about $1 with the baseline.
+
 ## Case sets
 Each file in `cases/` is one set:
 
@@ -55,4 +68,4 @@ Each file in `cases/` is one set:
 | `legacy-v0.json` | The original 11 cases, frozen Nov 2, 2026, so every run stays comparable with results since July. Don't edit; add a new set instead. |
 | `profile-v1.json` | 21 readers in the taste profile format, across every doorway, for the readiness baseline ([readiness bar](../docs/quality/readiness-bar.md)). Each case lists its `checks`: the hard rules, strong and weighed preferences the picks must honour, and whether non-obvious picks are required. Grounded in real-request patterns; refreshed from pilot readers later. |
 
-**Planned:** the model judge, the plain-Claude baseline and a results review page (next PR), then sets refreshed from pilot readers. Per-job evals for the AI gateway slots follow when a model swap is first tested.
+**Planned:** sets refreshed from pilot readers. Per-job evals for the AI gateway slots follow when a model swap is first tested.

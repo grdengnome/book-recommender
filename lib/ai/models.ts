@@ -15,6 +15,8 @@ export interface ModelInfo {
 export const MODELS: Record<string, ModelInfo> = {
   "claude-sonnet-5": { provider: "anthropic", pricePerMTok: { input: 2, output: 10 } },
   "claude-haiku-4-5": { provider: "anthropic", pricePerMTok: { input: 1, output: 5 } },
+  // Opus 5.5 price checked 2026-11-05.
+  "claude-opus-5-5": { provider: "anthropic", pricePerMTok: { input: 4, output: 20 } },
 };
 
-export const PRICES_CHECKED = "2026-10-17";
+export const PRICES_CHECKED = "2026-11-05";

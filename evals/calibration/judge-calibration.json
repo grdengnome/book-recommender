@@ -1,0 +1,16 @@
+{
+  "set": "judge-calibration",
+  "description": "Planted picks the judge must sort correctly before its scores count (decision 3.8): clearly wrong books and clearly great ones for readers in profile-v1. Pass mark: at least 9 of 10 land in the expected bucket (wrong = fail or weak relevance; great = good or excellent).",
+  "items": [
+    { "caseId": "prof-12", "title": "It", "author": "Stephen King", "expect": "wrong", "why": "Full horror for a reader who ruled horror out" },
+    { "caseId": "prof-15", "title": "American Psycho", "author": "Bret Easton Ellis", "expect": "wrong", "why": "Violent adult novel for reading aloud to a 9-year-old" },
+    { "caseId": "prof-14", "title": "Les Misérables", "author": "Victor Hugo", "expect": "wrong", "why": "Huge and heavy for a light, funny, quick read" },
+    { "caseId": "prof-03", "title": "The Count of Monte Cristo", "author": "Alexandre Dumas", "expect": "wrong", "why": "A long novel for a short nonfiction microhistory" },
+    { "caseId": "prof-05", "title": "The Road", "author": "Cormac McCarthy", "expect": "wrong", "why": "Bleak for a reader who wants cozy and uplifting right now" },
+    { "caseId": "prof-12", "title": "We Have Always Lived in the Castle", "author": "Shirley Jackson", "expect": "great", "why": "Quietly eerie, not horror" },
+    { "caseId": "prof-15", "title": "The Wild Robot", "author": "Peter Brown", "expect": "great", "why": "A cozy, gently adventurous children's read-aloud" },
+    { "caseId": "prof-14", "title": "Three Men in a Boat", "author": "Jerome K. Jerome", "expect": "great", "why": "A short, funny classic" },
+    { "caseId": "prof-03", "title": "Salt: A World History", "author": "Mark Kurlansky", "expect": "great", "why": "The history of one everyday thing" },
+    { "caseId": "prof-05", "title": "A Psalm for the Wild-Built", "author": "Becky Chambers", "expect": "great", "why": "Cozy and uplifting, with lovely prose" }
+  ]
+}

@@ -7,7 +7,16 @@
 // docs/engineering/contracts-and-adapters.md); that adapter translates to and from this shape.
 
 // One slot per AI job. Which model fills each slot lives in lib/ai/slots.ts.
-export type AiJob = "tagMapping" | "selection" | "cardWriting" | "shortening" | "descriptionCheck";
+// The last three are eval jobs (decision 3.8): they score or stand in for the engine, never run for readers.
+export type AiJob =
+  | "tagMapping"
+  | "selection"
+  | "cardWriting"
+  | "shortening"
+  | "descriptionCheck"
+  | "evalJudge"
+  | "evalSecondJudge"
+  | "evalBaseline";
 
 export type ProviderId = "anthropic";
 

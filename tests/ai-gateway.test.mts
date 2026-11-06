@@ -12,7 +12,7 @@ import { MODELS } from "@/lib/ai/models";
 import type { AiJob } from "@/lib/contracts/ai";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const JOBS: AiJob[] = ["tagMapping", "selection", "cardWriting", "shortening", "descriptionCheck"];
+const JOBS: AiJob[] = ["tagMapping", "selection", "cardWriting", "shortening", "descriptionCheck", "evalJudge", "evalSecondJudge", "evalBaseline"];
 
 test("every AI job has a slot with a known, priced model and its own override setting", () => {
   assert.deepEqual(Object.keys(AI_SLOTS).sort(), [...JOBS].sort());
@@ -70,14 +70,14 @@ function sourceFiles(dir: string): string[] {
   return readdirSync(dir).flatMap((name) => {
     const full = path.join(dir, name);
     if (statSync(full).isDirectory()) return sourceFiles(full);
-    return /\.(ts|tsx|mts)$/.test(name) ? [full] : [];
+    return /\.(ts|tsx|mts|mjs)$/.test(name) ? [full] : [];
   });
 }
 
-test("nothing outside lib/ai/ calls a model provider or names a model", () => {
+test("nothing outside lib/ai/ calls a model provider or names a model (app, lib, evals)", () => {
   const aiDir = path.join(ROOT, "lib", "ai") + path.sep;
   const offenders: string[] = [];
-  for (const file of [...sourceFiles(path.join(ROOT, "app")), ...sourceFiles(path.join(ROOT, "lib"))]) {
+  for (const file of [...sourceFiles(path.join(ROOT, "app")), ...sourceFiles(path.join(ROOT, "lib")), ...sourceFiles(path.join(ROOT, "evals")).filter((f) => !f.includes(`${path.sep}results${path.sep}`))]) {
     if (file.startsWith(aiDir)) continue;
     const text = readFileSync(file, "utf8");
     const rel = path.relative(ROOT, file);
