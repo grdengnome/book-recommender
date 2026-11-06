@@ -1,6 +1,6 @@
 # evals/
 
-> **Status:** Living · How recommendation quality is measured. Last updated Nov 4, 2026.
+> **Status:** Living · How recommendation quality is measured. Last updated Nov 5, 2026.
 
 Every change to prompts, models or recommendation logic is checked against the eval set before it ships (CLAUDE.md, "Eval discipline"; decision 14.3 for model changes).
 
@@ -53,5 +53,6 @@ Each file in `cases/` is one set:
 | Set | What it is |
 |---|---|
 | `legacy-v0.json` | The original 11 cases, frozen Nov 2, 2026, so every run stays comparable with results since July. Don't edit; add a new set instead. |
+| `profile-v1.json` | 21 readers in the taste profile format, across every doorway, for the readiness baseline ([readiness bar](../docs/quality/readiness-bar.md)). Each case lists its `checks`: the hard rules, strong and weighed preferences the picks must honour, and whether non-obvious picks are required. Grounded in real-request patterns; refreshed from pilot readers later. |
 
-**Planned:** a new set in the exact shape the question flow will send, once that format is settled (spec §4a), with more machine-scored checks ([backlog](../docs/product/roadmap-and-backlog.md)). Per-job evals for the AI gateway slots follow when a model swap is first tested.
+**Planned:** the model judge, the plain-Claude baseline and a results review page (next PR), then sets refreshed from pilot readers. Per-job evals for the AI gateway slots follow when a model swap is first tested.
