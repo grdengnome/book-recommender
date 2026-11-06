@@ -63,6 +63,7 @@ Relevance is always the bar: the best pick for this reader. Non-obviousness is a
 Misreading a reader is the biggest risk, and it comes from the places we interpret rather than record:
 - **Every slot value carries its source** (asked · inferred · typed) and confidence (partial · clear). Inferred values are marked as such in the brief and carry less weight.
 - **"Avoid" is never inferred.** Only the reader can rule something out.
+- **"Avoid" means what the reader meant, not a shelf label.** A rule like "no horror" is judged by what reading the book is actually like (its description and moods), read through the reader's own words ("horror, I want spooky but subtle"). Catalog genre labels are broad shelves: they count as evidence, never as the verdict on their own, either way ([decision 3.10](../../decisions.md)).
 - **Typed answers travel word for word**, wrapped as reader data, never instructions ([decision 10.5](../../decisions.md)), with the slots read from them listed alongside.
 - **The brief writer is plain code, tested word for word** (`tests/taste-profile.test.mts`).
 - **The reader sees our read** on the loading screen ("Looking for…"), and "Not quite? Try again" catches what we got wrong.

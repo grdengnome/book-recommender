@@ -3,7 +3,7 @@
 // expected bucket. Costs about $0.20. Writes evals/results/calibration.json, which the scorecard
 // shows.
 //
-//   node --import ./tests/support/resolve.mts evals/calibrate.mts
+//   node --env-file=.env.local --import ./tests/support/resolve.mts evals/calibrate.mts
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";

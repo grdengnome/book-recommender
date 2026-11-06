@@ -4,7 +4,7 @@
 // prints the scorecard and writes a scored JSON file and a review page to evals/results/.
 // Costs money (the judge is Opus): about $1 per run of 21 readers, plus about $1 for the baseline.
 //
-//   node --import ./tests/support/resolve.mts evals/score.mts
+//   node --env-file=.env.local --import ./tests/support/resolve.mts evals/score.mts
 // Settings:
 //   RUNS=profile-v1-run1.json,profile-v1-run2.json   results files in evals/results/ (required)
 //   BASELINE=1        also run and score plain Claude on the same readers
