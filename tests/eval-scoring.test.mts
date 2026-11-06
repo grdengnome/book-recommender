@@ -4,11 +4,12 @@
 // scores until asked and can't be broken by book text.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { lengthVerdict, type CaseScore, type Grade, type PickScore } from "../evals/judge/judge";
+import { align, lengthVerdict, type CaseScore, type Grade, type PickScore } from "../evals/judge/judge";
+import { authorsMatch, titlesMatch } from "../evals/judge/catalog";
 import { judgeAgreement, scorecard, type ScoredCase, type ScoredRun } from "../evals/judge/scorecard";
 import { reviewPage } from "../evals/judge/review";
 
-const facts = { found: true, subjects: [], description: "" };
+const facts = { status: "found" as const, found: true, subjects: [], description: "" };
 const pickScore = (relevance: Grade, extra: Partial<PickScore> = {}): PickScore => ({
   relevanceReason: "r", relevance, hardRules: [], strong: [], weighed: [], nonObviousReason: "n", nonObvious: "good", cardReason: "c", cardAccuracy: "pass", ...extra,
 });
@@ -25,6 +26,39 @@ test("length rules are checked from page counts, with 20 pages of slack", () => 
   assert.equal(lengthVerdict("quick: up to 200 pages", 260).verdict, "fail");
   assert.equal(lengthVerdict("long: over 500 pages", 470).verdict, "fail");
   assert.equal(lengthVerdict("short: about 200 to 300 pages", null).verdict, "unknown");
+  assert.throws(() => lengthVerdict("tiny: under 50 pages", 40), /matches no band/);
+});
+
+test("pass marks compare exact counts: 79.7% doesn't round up to 80%", () => {
+  const grades = (n: number, goodCount: number): Grade[][] => {
+    const all: Grade[] = Array.from({ length: n }, (_, i) => (i < goodCount ? "good" : "weak"));
+    return Array.from({ length: n / 3 }, (_, i) => all.slice(i * 3, i * 3 + 3));
+  };
+  // 59 picks can't be split into readers of 3, so use 69: 55 good = 79.7%
+  const cases = grades(69, 55).map((g, i) => scored(`r${i}`, g));
+  assert.deepEqual(rowOf(scorecard([run(cases)]), "Relevance").pass, [false]);
+});
+
+test("a check the judge skipped can't disappear: hard rules count as broken, preferences as not honoured", () => {
+  const out = align(["avoid: horror", "fiction only"], [{ item: "Avoid: horror.", verdict: "pass", reason: "fine" }], "fail");
+  assert.deepEqual(out.map((v) => v.verdict), ["pass", "fail"]);
+  assert.equal(out[1].item, "fiction only");
+});
+
+test("catalog matches need both the title and the author's surname", () => {
+  assert.ok(titlesMatch("Salt", "Salt: A World History"));
+  assert.ok(titlesMatch("Cien años de soledad", "Cien Anos de Soledad"));
+  assert.ok(!titlesMatch("Salt", "Salt Fat Acid Heat"));
+  assert.ok(authorsMatch("Mark Kurlansky", ["Kurlansky, Mark", "Someone Else"]));
+  assert.ok(!authorsMatch("Mark Kurlansky", ["Samin Nosrat"]));
+});
+
+test("a reader with no picks counts against 'every reader 2 of 3' and safety", () => {
+  const failed = scored("b", [], { ok: false, picks: [], checks: { hardRules: [], strong: [], weighed: [], nonObviousRequired: false, safety: true } }, {});
+  failed.score = null;
+  const rows = scorecard([run([scored("a", ["good", "good", "good"]), failed])]);
+  assert.deepEqual(rowOf(rows, "Relevance").pass, [false]);
+  assert.deepEqual(rowOf(rows, "Safety").pass, [false]);
 });
 
 test("relevance passes only at 80% good+, with no fail and every reader 2 of 3", () => {
@@ -49,6 +83,7 @@ test("each run is scored separately, and each doorway on its own", () => {
   const r2 = run([scored("a", ["good", "good", "good"]), scored("b", ["weak", "weak", "good"], { doorway: "surprise" })], "run2");
   const rows = scorecard([r1, r2]);
   assert.deepEqual(rowOf(rows, "Relevance").pass, [true, false]);
+  assert.deepEqual(rowOf(rows, "Ready for the pilot?").pass, [true, false]); // run2 misses relevance
   assert.deepEqual(rowOf(rows, "Doorway: surprise").pass, [true, false]);
   assert.deepEqual(rowOf(rows, "Doorway: feeling").pass, [true, true]);
 });
@@ -70,9 +105,10 @@ test("second-judge agreement counts picks landing in the same bucket", () => {
 test("the review page hides scores until asked and escapes book text", () => {
   const c = scored("a", ["good", "good", "good"]);
   c.picks[0].title = "<script>alert(1)</script>";
-  const html = reviewPage({ title: "t", rows: scorecard([run([c])]), runNames: ["run1"], engine: run([c]), briefs: { a: "brief" } });
+  const html = reviewPage({ title: "t", rows: scorecard([run([c])]), engineRuns: [run([c])], briefs: { a: "brief" } });
   assert.ok(!html.includes("<script>alert(1)"));
   assert.ok(html.includes("&lt;script&gt;"));
   assert.match(html, /\.score\{display:none/);
   assert.match(html, /Show scores/);
+  assert.ok(html.indexOf("Scorecard (open after your gut check)") > html.indexOf("a book 0"), "the scorecard comes after the readers");
 });

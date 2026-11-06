@@ -19,4 +19,4 @@ export const MODELS: Record<string, ModelInfo> = {
   "claude-opus-5-5": { provider: "anthropic", pricePerMTok: { input: 4, output: 20 } },
 };
 
-export const PRICES_CHECKED = "2026-10-17";
+export const PRICES_CHECKED = "2026-11-05";
