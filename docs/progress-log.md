@@ -937,6 +937,9 @@ Alongside: dependency checkup PR (npm reports 25 package vulnerabilities); claim
 - **Models:** Sonnet for picking and card writing is an inherited choice, never compared against others; model comparisons per job are improvement experiments after the baseline.
 - **Tool Radar hype checks:** viral AI tweets go to a fresh standalone chat with the Radar link; verdicts (real · overstated · too early · hype) are logged in the Radar.
 
+- **Judge calibrated: 10/10** (#19 judge built, #20 fixes). The first run scored 8/10; the judge's own reasons showed a shelf-label problem and a weak answer key, not a weak judge. Fixes: "avoid" means what the reader meant, not the catalog label (decision 3.10); the *Salt* plant (the reader's own example) replaced with *Mauve*, chosen before rerunning; catalog lookups retry without the subtitle (*Salt: A World History* was being missed); a malformed judge answer is retried once. *It* still fails for the no-horror reader, so the judge didn't go soft.
+
 **Next:**
-1. Baseline run (Codespace), then engine improvements one at a time: page counts, profile-driven search for speed, code-enforced hard rules, a prompt written for the profile.
-2. Then PR 5 app skeleton, PR 6 store and trust basics, then the pilot.
+1. Baseline run in the Codespace: `ENGINE_TRACE=1 npm run dev` (terminal 1), `SET=profile-v1 TAG_PREFIX=run1 node evals/run.mjs` (terminal 2, ~12 min, ~$2), then `RUNS=profile-v1-run1.json BASELINE=1 node --env-file=.env.local --import ./tests/support/resolve.mts evals/score.mts` (~10 min, ~$2–3). Paste the scorecard; gut-check the review page; log in the eval log; then run 2.
+2. Engine improvements one at a time against the baseline: page counts, profile-driven search for speed, code-enforced hard rules (avoid judged by meaning, decision 3.10), a prompt written for the profile.
+3. Then PR 5 app skeleton, PR 6 store and trust basics, then the pilot.
