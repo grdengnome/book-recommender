@@ -1,6 +1,6 @@
 # Readiness bar: when the engine is ready for a wider audience
 
-> **Status:** Living · Agreed Nov 5, 2026 ([decision 3.8](../decisions.md)), written before any results so the goalposts can't move. "Ready" means Grim is comfortable rolling out to a wider audience based on great eval results. Thresholds are tuned only by evidence (the pilot check below). Last updated Nov 5, 2026.
+> **Status:** Living · Agreed Nov 5, 2026 ([decision 3.8](../decisions.md)), written before any results so the goalposts can't move. "Ready" means Grim is comfortable rolling out to a wider audience based on great eval results. Thresholds are tuned only by evidence (the pilot check below). Last updated Nov 5, 2026. How to run it: [`evals/README.md`](../../evals/README.md).
 
 ## Two steps to "ready"
 1. **The eval set passes this bar.** That makes the engine ready for a pilot, not proven for everyone: about 20 cases find problems, they don't prove their absence.
@@ -28,14 +28,15 @@
 Non-obviousness for everyone else · range within a set · repeats across readers (flag any book picked for 3 or more different readers) · cost per request.
 
 ## Making the thresholds mean something
-- **Beat a simple baseline.** The same profiles also go through plain "ask Claude for 3 books" (no catalogs, no engine). If the engine doesn't clearly beat it on relevance, it isn't ready, whatever its absolute scores.
+- **Beat a simple baseline.** The same profiles also go through plain "ask Claude for 3 books" (no catalogs, no engine). If the engine doesn't clearly beat it on relevance, it isn't ready, whatever its absolute scores. "Clearly" means at least 10 percentage points more picks rated good or better.
 - **Every segment, not just the average.** The bar must hold for each doorway (loved · feeling · ingredient · moment · surprise) and reader type; an average can hide a failing doorway. Every failed pick is read.
 - **Repeat runs.** Each case runs 2–3 times; a pass must hold across runs. A gate miss is rerun to confirm before acting on it.
 - **Tied to real readers.** After the pilot, check whether eval scores predicted what readers felt; if they didn't, the bar is adjusted, with the change logged.
 
 ## Who scores
 - **A model judge scores every pick.** It's a different, stronger model than the one choosing (Opus judges Sonnet's picks), so the engine isn't grading itself, and it's given each book's catalog description and subjects rather than relying on memory.
-- **The judge earns trust before it's used:** a calibration set with planted picks (clearly wrong ones and clearly great ones) that it must sort correctly, and a second, different judge on a sample to show where they disagree.
+- **The judge earns trust before it's used:** a calibration set with planted picks (clearly wrong ones and clearly great ones) that it must sort correctly, at least 9 of 10 (`evals/calibration/`), and a second judge on a sample to show where they disagree. Today the second judge is Sonnet 5, the picker's own model, so it may go easy on the picks; if the two judges disagree a lot, an outside judge from another provider gets added.
+- **Length is checked in code**, from each book's catalog page count, with 20 pages of slack for edition differences; unknown when there's no page count.
 - **Grim's gut check:** each run produces a review page showing every reader's profile in plain words and their three picks with covers, scores hidden by default. Grim skims for "great find" or "way off"; flags get investigated. Grim doesn't grade picks.
 
 ## Pilot success (written before the pilot)

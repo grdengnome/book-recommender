@@ -582,6 +582,12 @@ The full operating principles are in [question-flow-principles.md](./product/que
 
 ---
 
+### 11.9 AI attribution stays on PRs and commits
+**Decision:** PRs keep the "Generated with Claude Code" line and the session link; commits keep the Co-Authored-By line. Not added to CLAUDE.md, since it's the default.
+**Why:** Provenance (which work was AI-assisted, useful in any future due diligence) and a "why" trail back to the conversation behind each change; it also fits building in public. Revisit if Squirmly gets collaborators and a contributing policy. ([progress log, Nov 5](./progress-log.md))
+
+---
+
 ## 12. Open questions I'm carrying
 
 - **Does tag relevance still favor popular books?** Needs logging first.

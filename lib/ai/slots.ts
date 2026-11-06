@@ -41,4 +41,21 @@ export const AI_SLOTS: Record<AiJob, AiSlot> = {
     envOverride: "AI_SLOT_DESCRIPTION_CHECK",
     purpose: "Checks flagged picks' card text against catalog facts (lib/engine/verify/checkPickDescriptions.ts)",
   },
+  // Eval jobs (decision 3.8). The judge is a stronger model than the one choosing the picks, so
+  // the engine isn't grading itself; the second judge cross-checks a sample.
+  evalJudge: {
+    model: "claude-opus-5-5",
+    envOverride: "AI_SLOT_EVAL_JUDGE",
+    purpose: "Scores each pick against the reader and the readiness bar (evals/judge/judge.ts)",
+  },
+  evalSecondJudge: {
+    model: "claude-sonnet-5",
+    envOverride: "AI_SLOT_EVAL_SECOND_JUDGE",
+    purpose: "Cross-checks the judge on a sample of readers (evals/score.mts)",
+  },
+  evalBaseline: {
+    model: "claude-sonnet-5",
+    envOverride: "AI_SLOT_EVAL_BASELINE",
+    purpose: "Plain 'recommend 3 books' with no catalogs, the baseline the engine must beat (evals/judge/baseline.ts)",
+  },
 };
