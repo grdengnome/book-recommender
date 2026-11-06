@@ -185,12 +185,24 @@ export async function judgeCase(args: {
     messages: [{ role: "user", content: user }],
     output_config: { format: JUDGE_FORMAT },
   };
-  const res = await callModel(body, { timeoutMs: 120_000 });
-  if (!res.ok) throw new Error(`judge call failed (${res.status}): ${JSON.stringify(res.data?.error ?? res.data).slice(0, 300)}`);
-  if (res.data.stop_reason !== "end_turn") throw new Error(`judge answer incomplete (stop_reason: ${res.data.stop_reason})`);
-  const text = res.data.content?.find((b) => b.type === "text")?.text ?? "";
-  const parsed = JSON.parse(text) as Omit<CaseScore, "model">;
-  if (parsed.picks.length !== picks.length) throw new Error(`judge scored ${parsed.picks.length} of ${picks.length} picks`);
+  // A malformed answer (wrong number of picks, cut off, unreadable) is retried once before it
+  // counts as an error; the schema can't fix the pick count, so code checks it.
+  let parsed: Omit<CaseScore, "model"> | undefined;
+  let lastErr: Error | undefined;
+  for (let attempt = 0; attempt < 2 && !parsed; attempt++) {
+    const res = await callModel(body, { timeoutMs: 120_000 });
+    if (!res.ok) throw new Error(`judge call failed (${res.status}): ${JSON.stringify(res.data?.error ?? res.data).slice(0, 300)}`);
+    try {
+      if (res.data.stop_reason !== "end_turn") throw new Error(`judge answer incomplete (stop_reason: ${res.data.stop_reason})`);
+      const text = res.data.content?.find((b) => b.type === "text")?.text ?? "";
+      const candidate = JSON.parse(text) as Omit<CaseScore, "model">;
+      if (candidate.picks.length !== picks.length) throw new Error(`judge scored ${candidate.picks.length} of ${picks.length} picks`);
+      parsed = candidate;
+    } catch (err) {
+      lastErr = err instanceof Error ? err : new Error(String(err));
+    }
+  }
+  if (!parsed) throw lastErr ?? new Error("judge gave no usable answer");
 
   // The verdict lists are rebuilt from the case's own checks, so a check the judge skipped can't
   // vanish from the count: a missing hard rule counts as broken, a missing preference as not
