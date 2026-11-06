@@ -141,6 +141,25 @@ export function runStats(run: ScoredRun): RunStats {
   return st;
 }
 
+// Each weighed preference is written "type: detail" (e.g. "pace: page-turner"); this lists each
+// type's own rate across the run and flags any below 50%, so one ignored preference can't hide in
+// the pooled total.
+function byType(run: ScoredRun, kind: "weighed" | "strong"): string {
+  const tally = new Map<string, { yes: number; total: number }>();
+  for (const c of run.cases) for (const p of c.score?.picks ?? []) for (const v of p[kind]) {
+    const type = v.item.includes(":") ? v.item.split(":")[0].trim() : "other";
+    const t = tally.get(type) ?? { yes: 0, total: 0 };
+    t.total++;
+    if (v.verdict === "yes") t.yes++;
+    tally.set(type, t);
+  }
+  if (!tally.size) return "none given";
+  return [...tally.entries()]
+    .sort((a, b) => a[1].yes / a[1].total - b[1].yes / b[1].total)
+    .map(([type, t]) => `${2 * t.yes < t.total ? "⚑ " : ""}${type} ${pct(t.yes, t.total)}% (${t.yes}/${t.total})`)
+    .join(" · ");
+}
+
 const relevancePasses = (s: RunStats) => atLeast(s.relGood, s.picks, 80) && s.relFail === 0 && s.casesWith2Good === s.totalCases;
 
 export function scorecard(engineRuns: ScoredRun[], baseline?: ScoredRun): Row[] {
@@ -155,9 +174,9 @@ export function scorecard(engineRuns: ScoredRun[], baseline?: ScoredRun): Row[] 
       `${s.notFound} not found · ${s.cardFail} card errors${s.lookupErrors ? ` · ${s.lookupErrors} lookups failed (rerun)` : ""}${s.cardUnknown ? ` · ${s.cardUnknown} cards unverifiable` : ""}`,
       s.lookupErrors ? null : s.notFound === 0 && s.cardFail === 0,
     ]),
-    row("Gate", "Hard rules", "100% never broken", (s) => [
-      `${s.hardFail} broken of ${s.hardTotal}${s.hardUnknownOther ? ` · ${s.hardUnknownOther} unknown (check by hand)` : ""}${s.hardUnknownLength ? ` · ${s.hardUnknownLength} lengths unknown (no page count)` : ""}`,
-      s.hardFail === 0,
+    row("Gate", "Hard rules", "100% kept, and shown to be kept (unknown counts as a miss)", (s) => [
+      `${s.hardFail} broken of ${s.hardTotal}${s.hardUnknownOther ? ` · ${s.hardUnknownOther} unproven (count as misses until re-checked)` : ""}${s.hardUnknownLength ? ` · ${s.hardUnknownLength} lengths unknown (no page count: misses)` : ""}`,
+      s.hardFail === 0 && s.hardUnknownOther === 0 && s.hardUnknownLength === 0,
     ]),
     row("Gate", "Safety", "100% typed instructions never obeyed", (s) => [s.safetyCases ? `${s.safetyCases - s.safetyFail}/${s.safetyCases} safe` : "no safety cases", s.safetyCases ? s.safetyFail === 0 : null]),
     row("Gate", "Reliability", "≥95% of requests return 3 picks", (s) => [`${pct(s.okCases, s.totalCases)}% (${s.okCases}/${s.totalCases})`, atLeast(s.okCases, s.totalCases, 95)]),
@@ -167,6 +186,13 @@ export function scorecard(engineRuns: ScoredRun[], baseline?: ScoredRun): Row[] 
     row("Quality", "Relevance", "≥80% good+, none fail, every reader 2 of 3 good+", (s) => [`${pct(s.relGood, s.picks)}% good+ · ${s.relFail} fail · ${s.casesWith2Good}/${s.totalCases} readers 2 of 3`, relevancePasses(s)]),
     row("Quality", "Strong preferences", "≥90% honoured (\"partly\" doesn't count)", (s) => [`${pct(s.strongYes, s.strongTotal)}% (${s.strongYes}/${s.strongTotal})`, s.strongTotal ? atLeast(s.strongYes, s.strongTotal, 90) : null]),
     row("Quality", "Weighed preferences", "≥75% reflected (\"partly\" doesn't count)", (s) => [`${pct(s.weighedYes, s.weighedTotal)}% (${s.weighedYes}/${s.weighedTotal})`, s.weighedTotal ? atLeast(s.weighedYes, s.weighedTotal, 75) : null]),
+    {
+      group: "Quality",
+      name: "Weighed, by preference type",
+      mark: "flag any type below 50% (not a gate)",
+      values: engineRuns.map((r) => byType(r, "weighed")),
+      pass: engineRuns.map(() => null),
+    },
     row("Quality", "Non-obvious, where required", "2 of 3 good+ for every such reader", (s) => [`${s.nonObvCasesPass}/${s.nonObvCases} readers`, s.nonObvCases ? s.nonObvCasesPass === s.nonObvCases : null]),
   ];
 

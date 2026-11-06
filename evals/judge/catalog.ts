@@ -21,6 +21,9 @@ export interface CatalogFacts {
   firstYear?: number;
   pages?: number;
   subjects: string[];
+  // Hardcover readers' genre and mood tags ("Juvenile", "Horror", "Cozy"): often the clearest
+  // evidence for audience and avoid rules, especially for lesser-known books with thin subjects.
+  tags: string[];
   description: string;
   coverUrl?: string;
   hardcoverReaders?: number;
@@ -82,13 +85,17 @@ interface HcBook {
   release_year: number | null;
   description: string | null;
   contributions: Array<{ author: { name: string } | null }>;
+  cached_tags: Record<string, Array<{ tag?: string }>> | null;
 }
+
+const hcTags = (b?: HcBook) =>
+  b ? ["Genre", "Mood"].flatMap((k) => (b.cached_tags?.[k] ?? []).map((t) => t.tag).filter((t): t is string => typeof t === "string")).slice(0, 25) : [];
 
 async function hardcoverBook(title: string, author: string): Promise<HcBook | undefined> {
   if (!process.env.HARDCOVER_API_TOKEN) return undefined;
   const data = await withRetry(() =>
     hcGraphql<{ books: HcBook[] }>(
-      `query Book($title: String!) { books(where: { title: { _ilike: $title } }, order_by: { users_count: desc }, limit: 10) { title users_count pages release_year description contributions { author { name } } } }`,
+      `query Book($title: String!) { books(where: { title: { _ilike: $title } }, order_by: { users_count: desc }, limit: 10) { title users_count pages release_year description contributions { author { name } } cached_tags } }`,
       { title },
       AbortSignal.timeout(TIMEOUT_MS),
     ),
@@ -97,7 +104,7 @@ async function hardcoverBook(title: string, author: string): Promise<HcBook | un
 }
 
 export async function lookupFacts(title: string, author: string): Promise<CatalogFacts> {
-  const empty = { subjects: [], description: "" };
+  const empty = { subjects: [], tags: [], description: "" };
   try {
     const params = new URLSearchParams({ title, author, fields: "key,title,author_name,first_publish_year,number_of_pages_median,subject,cover_i", limit: "10" });
     const docs = ((await getJson(`${OL}/search.json?${params}`)) as { docs?: OlDoc[] }).docs ?? [];
@@ -115,7 +122,7 @@ export async function lookupFacts(title: string, author: string): Promise<Catalo
       return {
         status: "found", found: true, source: "openlibrary",
         title: doc.title, author: doc.author_name?.[0], firstYear: doc.first_publish_year, pages: doc.number_of_pages_median,
-        subjects: (doc.subject ?? []).slice(0, 30), description: (description || hc?.description || "").slice(0, 1200),
+        subjects: (doc.subject ?? []).slice(0, 30), tags: hcTags(hc), description: (description || hc?.description || "").slice(0, 1200),
         coverUrl: doc.cover_i ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg` : undefined,
         hardcoverReaders: hc?.users_count ?? undefined,
       };
@@ -124,7 +131,7 @@ export async function lookupFacts(title: string, author: string): Promise<Catalo
       return {
         status: "found", found: true, source: "hardcover",
         title: hc.title, author: hc.contributions[0]?.author?.name, firstYear: hc.release_year ?? undefined, pages: hc.pages ?? undefined,
-        ...empty, description: (hc.description ?? "").slice(0, 1200), hardcoverReaders: hc.users_count ?? undefined,
+        ...empty, tags: hcTags(hc), description: (hc.description ?? "").slice(0, 1200), hardcoverReaders: hc.users_count ?? undefined,
       };
     }
     return { status: "not_found", found: false, ...empty };

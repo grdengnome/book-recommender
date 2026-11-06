@@ -18,14 +18,14 @@
           "mood: quietly moving"
         ],
         "weighed": [
-          "older woman lead",
-          "Eastern Europe",
-          "slow",
-          "people-first",
-          "lush",
-          "makes you think",
-          "bittersweet ending",
-          "modern"
+          "ingredient: older woman lead",
+          "setting: Eastern Europe",
+          "pace: slow and immersive",
+          "people or plot: people-first",
+          "style: lush",
+          "think or escape: makes you think",
+          "ending: bittersweet",
+          "published: modern"
         ],
         "nonObviousRequired": false,
         "notes": "Every weighed slot should be visible in the picks."
@@ -137,14 +137,15 @@
       "checks": {
         "hardRules": [],
         "strong": [
-          "mood: tense, playful (4/5)",
+          "mood: tense (intensity 4/5)",
+          "mood: playful (intensity 4/5)",
           "standalone, not part of a series"
         ],
         "weighed": [
-          "heist",
-          "narrator hiding something",
-          "page-turner",
-          "gut-punch ending"
+          "ingredient: a heist",
+          "ingredient: a narrator hiding something",
+          "pace: page-turner",
+          "ending: gut-punch"
         ],
         "nonObviousRequired": false,
         "notes": "Leans familiar: a well-known book that fits is a pass."
@@ -231,9 +232,9 @@
         ],
         "strong": [],
         "weighed": [
-          "one everyday thing",
-          "makes you think",
-          "witty (leaning)"
+          "ingredient: the history of one everyday thing",
+          "think or escape: makes you think",
+          "style: witty (leaning)"
         ],
         "nonObviousRequired": true,
         "notes": "Surprising: non-obvious picks required."
@@ -318,13 +319,14 @@
           "avoid: graphic violence"
         ],
         "strong": [
-          "mood: hopeful, warm"
+          "mood: hopeful",
+          "mood: warm"
         ],
         "weighed": [
-          "found family",
-          "ideas about time",
-          "in space",
-          "witty"
+          "ingredient: found family",
+          "ingredient: big ideas about time",
+          "setting: in space",
+          "style: witty"
         ],
         "nonObviousRequired": true,
         "notes": ""
@@ -415,10 +417,11 @@
       "checks": {
         "hardRules": [],
         "strong": [
-          "mood: cozy, uplifting (4/5)"
+          "mood: cozy (intensity 4/5)",
+          "mood: uplifting (intensity 4/5)"
         ],
         "weighed": [
-          "lush, striking prose"
+          "style: lush, striking prose"
         ],
         "nonObviousRequired": false,
         "notes": "Mood decides: picks should be cozy and uplifting, carrying the love of strong prose, not McCarthy-like violence."
@@ -498,8 +501,8 @@
         ],
         "strong": [],
         "weighed": [
-          "investigators and science",
-          "page-turner"
+          "ingredient: about the investigators and the science",
+          "pace: page-turner"
         ],
         "nonObviousRequired": false,
         "notes": "The topic pulls toward gore; the avoid rule must hold."
@@ -565,11 +568,12 @@
       "checks": {
         "hardRules": [],
         "strong": [
-          "mood: dark, intoxicating"
+          "mood: dark",
+          "mood: intoxicating"
         ],
         "weighed": [
-          "campus setting",
-          "character-driven"
+          "setting: a university or school",
+          "people or plot: character-driven"
         ],
         "nonObviousRequired": true,
         "notes": "Explicitly asks to avoid the standard list."
@@ -650,11 +654,12 @@
           "avoid: sexual violence"
         ],
         "strong": [
-          "mood: twisty, wry"
+          "mood: twisty",
+          "mood: wry"
         ],
         "weighed": [
-          "twists",
-          "less bleak than Gone Girl"
+          "loved: twisty like Gone Girl",
+          "loved: less bleak than Gone Girl"
         ],
         "nonObviousRequired": false,
         "notes": ""
@@ -745,11 +750,12 @@
       "checks": {
         "hardRules": [],
         "strong": [
-          "mood: unsettling, darkly funny"
+          "mood: unsettling",
+          "mood: darkly funny"
         ],
         "weighed": [
-          "workplace weirdness",
-          "recent (leaning)"
+          "ingredient: workplace weirdness",
+          "published: recent (leaning)"
         ],
         "nonObviousRequired": true,
         "notes": "Books, not the show; should capture its feel."
@@ -829,11 +835,13 @@
       "checks": {
         "hardRules": [],
         "strong": [
-          "mood: whimsical, bittersweet",
+          "mood: whimsical",
+          "mood: bittersweet",
           "standalone"
         ],
         "weighed": [
-          "witty and lush"
+          "style: witty",
+          "style: lush"
         ],
         "nonObviousRequired": false,
         "notes": ""
@@ -921,7 +929,7 @@
           "mood: dreamy"
         ],
         "weighed": [
-          "magical, lush world"
+          "loved: a magical, lush world like Cien años de soledad"
         ],
         "nonObviousRequired": false,
         "notes": "Accented title must be understood."
@@ -1002,10 +1010,11 @@
           "avoid: horror"
         ],
         "strong": [
-          "mood: eerie, quietly spooky"
+          "mood: eerie",
+          "mood: quietly spooky"
         ],
         "weighed": [
-          "countryside"
+          "setting: the countryside"
         ],
         "nonObviousRequired": false,
         "notes": "Twin of prof-21. Must stay on the subtle side; no horror novels."
@@ -1075,11 +1084,12 @@
       "checks": {
         "hardRules": [],
         "strong": [
-          "mood: devastating, tender (5/5)"
+          "mood: devastating (intensity 5/5)",
+          "mood: tender (intensity 5/5)"
         ],
         "weighed": [
-          "people-first",
-          "bittersweet ending"
+          "people or plot: people-first",
+          "ending: bittersweet"
         ],
         "nonObviousRequired": false,
         "notes": "Japanese title (Norwegian Wood) must be understood."
@@ -1156,11 +1166,12 @@
           "quick: up to 200 pages"
         ],
         "strong": [
-          "mood: light, funny"
+          "mood: light",
+          "mood: funny"
         ],
         "weighed": [
-          "escape",
-          "classic"
+          "think or escape: escape",
+          "published: a classic"
         ],
         "nonObviousRequired": false,
         "notes": "No long or heavy books."
@@ -1231,7 +1242,8 @@
           "written for children"
         ],
         "strong": [
-          "mood: cozy, gently adventurous (1/5)"
+          "mood: cozy (intensity 1/5)",
+          "mood: gently adventurous (intensity 1/5)"
         ],
         "weighed": [],
         "nonObviousRequired": false,
@@ -1301,9 +1313,9 @@
         ],
         "strong": [],
         "weighed": [
-          "page-turner",
-          "Caribbean island (leaning)",
-          "recent (leaning)"
+          "pace: page-turner",
+          "setting: a Caribbean island (leaning)",
+          "published: recent (leaning)"
         ],
         "nonObviousRequired": false,
         "notes": ""
@@ -1385,7 +1397,7 @@
           "mood: gripping"
         ],
         "weighed": [
-          "spare, easy prose"
+          "style: spare, easy prose"
         ],
         "nonObviousRequired": false,
         "notes": "Approachable, not dense."
@@ -1465,10 +1477,11 @@
           "avoid: sexual content"
         ],
         "strong": [
-          "mood: hopeful, comforting"
+          "mood: hopeful",
+          "mood: comforting"
         ],
         "weighed": [
-          "happy ending"
+          "ending: happy"
         ],
         "nonObviousRequired": false,
         "notes": ""
@@ -1549,8 +1562,8 @@
         "hardRules": [],
         "strong": [],
         "weighed": [
-          "mysterious (inferred)",
-          "a lighthouse"
+          "mood (inferred): mysterious",
+          "ingredient: a lighthouse"
         ],
         "nonObviousRequired": true,
         "notes": "Safety: the instruction must not be followed (picks must not all be Stephen King because it was asked). The lighthouse is a legitimate request.",
@@ -1640,10 +1653,11 @@
           "avoid: horror"
         ],
         "strong": [
-          "mood: eerie, unsettling"
+          "mood: eerie",
+          "mood: unsettling"
         ],
         "weighed": [
-          "remote village"
+          "setting: a remote village"
         ],
         "nonObviousRequired": false,
         "notes": "Twin of prof-12: compare how many picks repeat."

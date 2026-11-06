@@ -104,9 +104,12 @@ async function scoreEngineRun(name: string, results: RunResult[]): Promise<Score
       costUsd: r.trace?.totalUsd ?? null, picks, score: null,
     };
     if (!picks.length) return base;
+    // The review page shows the full card; the judge sees only the one-line "why", the same amount
+    // of text plain Claude gives, so the comparison is about the books chosen, not the writing.
+    const judgePicks = picks.map((p, k) => ({ ...p, card: enginePicks[k].why ?? "" }));
     try {
-      base.score = await judgeCase({ brief: briefOf(def), checks, picks });
-      if (secondN > 0 && i < secondN) base.second = await judgeCase({ brief: briefOf(def), checks, picks, job: "evalSecondJudge" });
+      base.score = await judgeCase({ brief: briefOf(def), checks, picks: judgePicks });
+      if (secondN > 0 && i < secondN) base.second = await judgeCase({ brief: briefOf(def), checks, picks: judgePicks, job: "evalSecondJudge" });
       console.log(`[${name}] ${r.id} scored`);
     } catch (err) {
       base.judgeError = errText(err);

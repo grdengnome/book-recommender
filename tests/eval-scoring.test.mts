@@ -9,7 +9,7 @@ import { authorsMatch, titlesMatch } from "../evals/judge/catalog";
 import { judgeAgreement, scorecard, type ScoredCase, type ScoredRun } from "../evals/judge/scorecard";
 import { reviewPage } from "../evals/judge/review";
 
-const facts = { status: "found" as const, found: true, subjects: [], description: "" };
+const facts = { status: "found" as const, found: true, subjects: [], tags: [], description: "" };
 const pickScore = (relevance: Grade, extra: Partial<PickScore> = {}): PickScore => ({
   relevanceReason: "r", relevance, hardRules: [], strong: [], weighed: [], nonObviousReason: "n", nonObvious: "good", cardReason: "c", cardAccuracy: "pass", ...extra,
 });
@@ -37,6 +37,20 @@ test("pass marks compare exact counts: 79.7% doesn't round up to 80%", () => {
   // 59 picks can't be split into readers of 3, so use 69: 55 good = 79.7%
   const cases = grades(69, 55).map((g, i) => scored(`r${i}`, g));
   assert.deepEqual(rowOf(scorecard([run(cases)]), "Relevance").pass, [false]);
+});
+
+test("an unproven hard rule counts as a miss; weighed preferences are listed by type and flagged under 50%", () => {
+  const unproven = scored("a", ["good", "good", "good"], {}, { picks: [pickScore("good", { hardRules: [{ item: "written for children", verdict: "unknown", reason: "" }] }), pickScore("good"), pickScore("good")] });
+  assert.deepEqual(rowOf(scorecard([run([unproven])]), "Hard rules").pass, [false]);
+  const w = (item: string, verdict: string) => ({ item, verdict, reason: "" });
+  const mixed = scored("b", ["good", "good", "good"], {}, { picks: [
+    pickScore("good", { weighed: [w("pace: slow", "yes"), w("style: witty", "no")] }),
+    pickScore("good", { weighed: [w("pace: slow", "yes"), w("style: witty", "no")] }),
+    pickScore("good", { weighed: [w("pace: slow", "yes"), w("style: witty", "yes")] }),
+  ] });
+  const value = rowOf(scorecard([run([mixed])]), "Weighed, by preference type").values[0];
+  assert.match(value, /⚑ style 33% \(1\/3\)/);
+  assert.match(value, /pace 100% \(3\/3\)/);
 });
 
 test("a check the judge skipped can't disappear: hard rules count as broken, preferences as not honoured", () => {
