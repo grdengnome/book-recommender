@@ -5,7 +5,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { align, lengthVerdict, type CaseScore, type Grade, type PickScore } from "../evals/judge/judge";
-import { authorsMatch, titlesMatch } from "../evals/judge/catalog";
+import { authorsMatch, lookupFacts, titlesMatch } from "../evals/judge/catalog";
 import { judgeAgreement, scorecard, type ScoredCase, type ScoredRun } from "../evals/judge/scorecard";
 import { reviewPage } from "../evals/judge/review";
 
@@ -65,6 +65,32 @@ test("catalog matches need both the title and the author's surname", () => {
   assert.ok(!titlesMatch("Salt", "Salt Fat Acid Heat"));
   assert.ok(authorsMatch("Mark Kurlansky", ["Kurlansky, Mark", "Someone Else"]));
   assert.ok(!authorsMatch("Mark Kurlansky", ["Samin Nosrat"]));
+});
+
+test("a catalog search sent with a subtitle retries with the main title (Salt: A World History)", async () => {
+  const realFetch = globalThis.fetch;
+  const savedToken = process.env.HARDCOVER_API_TOKEN;
+  delete process.env.HARDCOVER_API_TOKEN;
+  const searched: string[] = [];
+  globalThis.fetch = (async (input: string | URL) => {
+    const url = new URL(String(input));
+    if (url.pathname === "/search.json") {
+      const t = url.searchParams.get("title") ?? "";
+      searched.push(t);
+      const docs = t === "Salt" ? [{ key: "/works/OL1W", title: "Salt", author_name: ["Mark Kurlansky"], number_of_pages_median: 484 }] : [];
+      return new Response(JSON.stringify({ docs }));
+    }
+    return new Response(JSON.stringify({ description: "A history of salt." }));
+  }) as typeof fetch;
+  try {
+    const f = await lookupFacts("Salt: A World History", "Mark Kurlansky");
+    assert.equal(f.status, "found");
+    assert.equal(f.pages, 484);
+    assert.deepEqual(searched, ["Salt: A World History", "Salt"]);
+  } finally {
+    globalThis.fetch = realFetch;
+    if (savedToken !== undefined) process.env.HARDCOVER_API_TOKEN = savedToken;
+  }
 });
 
 test("a reader with no picks counts against 'every reader 2 of 3' and safety", () => {
