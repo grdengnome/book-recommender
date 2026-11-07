@@ -59,7 +59,8 @@ async function withRetry<T>(fn: () => Promise<T>): Promise<T> {
       last = err;
       // A refusal (400–499 other than 429 "slow down") won't change on retry: fail at once.
       if (/(status|HTTP) 4(?!29)\d\d/.test(err instanceof Error ? err.message : String(err))) break;
-      await new Promise((r) => setTimeout(r, 1000 * 2 ** attempt));
+      const slowDown = /(status|HTTP) 429/.test(err instanceof Error ? err.message : String(err));
+      await new Promise((r) => setTimeout(r, (slowDown ? 10_000 : 1000) * 2 ** attempt));
     }
   }
   throw last;
@@ -107,25 +108,35 @@ const searchTitles = (title: string) => [...new Set([title, mainTitle(title)])].
 // Hardcover's API refuses title pattern queries (_ilike), so the book is found with its search
 // endpoint (title + author, the same call the cover research used), matched in code, then its
 // tags and reader count are fetched by id.
+// Hardcover allows about 60 requests a minute; the scorer looks up several picks at once, so its
+// calls go out one at a time, at least a second apart (the rescore hit "429 Too Many Requests").
+const HC_GAP_MS = 1100;
+let hcQueue: Promise<unknown> = Promise.resolve();
+function hcPaced<T>(fn: () => Promise<T>): Promise<T> {
+  const turn = hcQueue.then(() => fn());
+  hcQueue = turn.catch(() => undefined).then(() => new Promise((r) => setTimeout(r, HC_GAP_MS)));
+  return turn;
+}
+
 interface HcHit { document: { id: number | string; title: string; author_names?: string[] } }
 async function hardcoverBook(title: string, author: string): Promise<HcBook | undefined> {
   if (!process.env.HARDCOVER_API_TOKEN) return undefined;
-  const found = await withRetry(() =>
+  const found = await withRetry(() => hcPaced(() =>
     hcGraphql<{ search: { results: { hits?: HcHit[] } } }>(
       `query Find($q: String!) { search(query: $q, query_type: "Book", per_page: 10) { results } }`,
       { q: `${mainTitle(title)} ${author}` },
       AbortSignal.timeout(TIMEOUT_MS),
     ),
-  );
+  ));
   const hit = (found.search?.results?.hits ?? []).find((h) => titlesMatch(h.document.title, title) && authorsMatch(author, h.document.author_names ?? []));
   if (!hit) return undefined;
-  const data = await withRetry(() =>
+  const data = await withRetry(() => hcPaced(() =>
     hcGraphql<{ books: HcBook[] }>(
       `query Book($id: Int!) { books(where: { id: { _eq: $id } }, limit: 1) { title users_count pages release_year description contributions { author { name } } cached_tags } }`,
       { id: Number(hit.document.id) },
       AbortSignal.timeout(TIMEOUT_MS),
     ),
-  );
+  ));
   return data.books[0];
 }
 
