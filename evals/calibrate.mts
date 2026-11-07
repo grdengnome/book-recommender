@@ -11,7 +11,7 @@ import { renderBrief } from "@/lib/engine/profile/renderBrief";
 import { modelFor } from "@/lib/ai/gateway";
 import type { TasteProfile } from "@/lib/contracts/tasteProfile";
 import { lookupFacts } from "./judge/catalog";
-import { GOOD_OR_BETTER, judgeCase, type CaseChecks } from "./judge/judge";
+import { GOOD_OR_BETTER, JUDGE_VERSION, judgeCase, type CaseChecks } from "./judge/judge";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const { items } = JSON.parse(readFileSync(path.join(HERE, "calibration", "judge-calibration.json"), "utf8")) as {
@@ -44,5 +44,5 @@ for (const item of items) {
 const correct = results.filter((r) => r.correct).length;
 const passed = correct >= Math.ceil(items.length * 0.9);
 mkdirSync(path.join(HERE, "results"), { recursive: true });
-writeFileSync(path.join(HERE, "results", "calibration.json"), JSON.stringify({ model: modelFor("evalJudge"), correct, total: items.length, passed, results }, null, 2));
+writeFileSync(path.join(HERE, "results", "calibration.json"), JSON.stringify({ model: modelFor("evalJudge"), judgeVersion: JUDGE_VERSION, correct, total: items.length, passed, results }, null, 2));
 console.log(`\nJudge calibration: ${correct}/${items.length} ${passed ? "PASSED" : "FAILED: don't trust its scores yet"}`);

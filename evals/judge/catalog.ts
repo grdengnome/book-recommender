@@ -27,11 +27,14 @@ export interface CatalogFacts {
   description: string;
   coverUrl?: string;
   hardcoverReaders?: number;
+  // Set when the Hardcover lookup itself failed (not when the book just isn't there), so a broken
+  // Hardcover connection shows on the scorecard instead of silently thinning the evidence.
+  hardcoverError?: string;
   error?: string;
 }
 
 export const norm = (s: string) =>
-  s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+  s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/&/g, " and ").replace(/[^\p{L}\p{N}]+/gu, " ").trim();
 
 const surname = (name: string) => norm(name).split(" ").pop() ?? "";
 
@@ -54,6 +57,8 @@ async function withRetry<T>(fn: () => Promise<T>): Promise<T> {
       return await fn();
     } catch (err) {
       last = err;
+      // A refusal (400–499 other than 429 "slow down") won't change on retry: fail at once.
+      if (/(status|HTTP) 4(?!29)\d\d/.test(err instanceof Error ? err.message : String(err))) break;
       await new Promise((r) => setTimeout(r, 1000 * 2 ** attempt));
     }
   }
@@ -72,6 +77,9 @@ interface OlDoc {
   key: string;
   title: string;
   author_name?: string[];
+  // Romanised spellings: Open Library often lists a translated author in their own script first
+  // (夏目漱石, Михаил Булгаков), with "Natsume Sōseki" or "Mikhail Bulgakov" only here.
+  author_alternative_name?: string[];
   first_publish_year?: number;
   number_of_pages_median?: number;
   subject?: string[];
@@ -92,31 +100,44 @@ const hcTags = (b?: HcBook) =>
   b ? ["Genre", "Mood"].flatMap((k) => (b.cached_tags?.[k] ?? []).map((t) => t.tag).filter((t): t is string => typeof t === "string")).slice(0, 25) : [];
 
 // Catalogs file a subtitle separately from the main title, so a search sent with the subtitle
-// ("Salt: A World History") can miss the book entirely. Each search tries the title as given,
-// then the main title alone; titlesMatch and authorsMatch still decide what counts as a match.
+// ("Salt: A World History") can miss the book entirely. Open Library searches try the title as
+// given, then the main title alone; titlesMatch and authorsMatch still decide what's a match.
 const searchTitles = (title: string) => [...new Set([title, mainTitle(title)])].filter(Boolean);
 
+// Hardcover's API refuses title pattern queries (_ilike), so the book is found with its search
+// endpoint (title + author, the same call the cover research used), matched in code, then its
+// tags and reader count are fetched by id.
+interface HcHit { document: { id: number | string; title: string; author_names?: string[] } }
 async function hardcoverBook(title: string, author: string): Promise<HcBook | undefined> {
   if (!process.env.HARDCOVER_API_TOKEN) return undefined;
-  for (const t of searchTitles(title)) {
-    const data = await withRetry(() =>
-      hcGraphql<{ books: HcBook[] }>(
-        `query Book($title: String!) { books(where: { title: { _ilike: $title } }, order_by: { users_count: desc }, limit: 10) { title users_count pages release_year description contributions { author { name } } cached_tags } }`,
-        { title: t === title ? t : `${t}%` },
-        AbortSignal.timeout(TIMEOUT_MS),
-      ),
-    );
-    const hit = data.books.find((b) => titlesMatch(b.title, title) && authorsMatch(author, b.contributions.map((c) => c.author?.name ?? "")));
-    if (hit) return hit;
-  }
-  return undefined;
+  const found = await withRetry(() =>
+    hcGraphql<{ search: { results: { hits?: HcHit[] } } }>(
+      `query Find($q: String!) { search(query: $q, query_type: "Book", per_page: 10) { results } }`,
+      { q: `${mainTitle(title)} ${author}` },
+      AbortSignal.timeout(TIMEOUT_MS),
+    ),
+  );
+  const hit = (found.search?.results?.hits ?? []).find((h) => titlesMatch(h.document.title, title) && authorsMatch(author, h.document.author_names ?? []));
+  if (!hit) return undefined;
+  const data = await withRetry(() =>
+    hcGraphql<{ books: HcBook[] }>(
+      `query Book($id: Int!) { books(where: { id: { _eq: $id } }, limit: 1) { title users_count pages release_year description contributions { author { name } } cached_tags } }`,
+      { id: Number(hit.document.id) },
+      AbortSignal.timeout(TIMEOUT_MS),
+    ),
+  );
+  return data.books[0];
 }
 
+// Open Library's own author search is strict about spelling ("Natsume Soseki" vs "Sōseki", a
+// translator listed first), so a last try searches by title alone and matches the author in code,
+// where accents are already ignored.
 async function openLibraryDoc(title: string, author: string): Promise<OlDoc | undefined> {
-  for (const t of searchTitles(title)) {
-    const params = new URLSearchParams({ title: t, author, fields: "key,title,author_name,first_publish_year,number_of_pages_median,subject,cover_i", limit: "10" });
+  const tries = [...searchTitles(title).map((t) => ({ title: t, author, limit: "10" })), { title: mainTitle(title), limit: "30" }];
+  for (const t of tries) {
+    const params = new URLSearchParams({ ...t, fields: "key,title,author_name,author_alternative_name,first_publish_year,number_of_pages_median,subject,cover_i" });
     const docs = ((await getJson(`${OL}/search.json?${params}`)) as { docs?: OlDoc[] }).docs ?? [];
-    const doc = docs.find((d) => titlesMatch(d.title, title) && authorsMatch(author, d.author_name ?? []));
+    const doc = docs.find((d) => titlesMatch(d.title, title) && authorsMatch(author, [...(d.author_name ?? []), ...(d.author_alternative_name ?? [])]));
     if (doc) return doc;
   }
   return undefined;
@@ -126,7 +147,11 @@ export async function lookupFacts(title: string, author: string): Promise<Catalo
   const empty = { subjects: [], tags: [], description: "" };
   try {
     const doc = await openLibraryDoc(title, author);
-    const hc = await hardcoverBook(title, author).catch(() => undefined);
+    let hardcoverError: string | undefined;
+    const hc = await hardcoverBook(title, author).catch((err) => {
+      hardcoverError = (err instanceof Error ? err.message : String(err)).slice(0, 200);
+      return undefined;
+    });
 
     if (doc) {
       let description = "";
@@ -141,7 +166,7 @@ export async function lookupFacts(title: string, author: string): Promise<Catalo
         title: doc.title, author: doc.author_name?.[0], firstYear: doc.first_publish_year, pages: doc.number_of_pages_median,
         subjects: (doc.subject ?? []).slice(0, 30), tags: hcTags(hc), description: (description || hc?.description || "").slice(0, 1200),
         coverUrl: doc.cover_i ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg` : undefined,
-        hardcoverReaders: hc?.users_count ?? undefined,
+        hardcoverReaders: hc?.users_count ?? undefined, hardcoverError,
       };
     }
     if (hc) {
@@ -151,7 +176,7 @@ export async function lookupFacts(title: string, author: string): Promise<Catalo
         ...empty, tags: hcTags(hc), description: (hc.description ?? "").slice(0, 1200), hardcoverReaders: hc.users_count ?? undefined,
       };
     }
-    return { status: "not_found", found: false, ...empty };
+    return { status: "not_found", found: false, ...empty, hardcoverError };
   } catch (err) {
     return { status: "error", found: false, ...empty, error: err instanceof Error ? err.message : String(err) };
   }

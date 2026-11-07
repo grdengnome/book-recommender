@@ -37,8 +37,8 @@ node --env-file=.env.local --import ./tests/support/resolve.mts evals/calibrate.
 RUNS=profile-v1-run1.json BASELINE=1 node --env-file=.env.local --import ./tests/support/resolve.mts evals/score.mts
 ```
 
-- `calibrate.mts` has the judge score planted picks (`calibration/judge-calibration.json`): at least 9 of 10 must land right before its scores count.
-- `score.mts` looks up every pick's catalog facts (Open Library, plus Hardcover reader counts when `HARDCOVER_API_TOKEN` is set), has the judge (`evalJudge` slot, Opus 5.5) score each reader, cross-checks `SECOND_JUDGE` readers (default 5) with the second judge, and with `BASELINE=1` runs and scores plain Claude on the same readers. `RUNS` takes several files to score repeat runs side by side; `OUT` names the output.
+- `calibrate.mts` has the judge score planted picks (rerun it whenever the judge's model or instructions change; the scorecard says when it's stale) (`calibration/judge-calibration.json`): at least 9 of 10 must land right before its scores count.
+- `score.mts` looks up every pick's catalog facts (Open Library, plus Hardcover's genre and mood tags and reader counts when `HARDCOVER_API_TOKEN` is set; a failed Hardcover lookup shows on the scorecard), has the judge (`evalJudge` slot, Opus 5.5) score each reader, cross-checks `SECOND_JUDGE` readers (default 5) with the second judge, and with `BASELINE=1` runs and scores plain Claude on the same readers. `RUNS` takes several files to score repeat runs side by side; `OUT` names the output.
 - It prints the scorecard (safe to paste) and writes `results/<name>-scored.json` and `results/<name>-review.html`: open the review page in the browser for every reader's picks, with scores hidden until you tick "Show scores".
 - About $1 per run of 21 readers for the judge, plus about $1 with the baseline.
 

@@ -73,12 +73,15 @@ export interface RunStats {
   hardTotal: number;
   strongYes: number;
   strongTotal: number;
+  strongUnknown: number;
   weighedYes: number;
   weighedTotal: number;
+  weighedUnknown: number;
   nonObvCasesPass: number;
   nonObvCases: number;
   notFound: number;
   lookupErrors: number;
+  hardcoverErrors: number;
   cardFail: number;
   cardUnknown: number;
   safetyFail: number;
@@ -92,7 +95,7 @@ export interface RunStats {
 }
 
 export function runStats(run: ScoredRun): RunStats {
-  const st: RunStats = { picks: 0, relGood: 0, relFail: 0, casesWith2Good: 0, totalCases: run.cases.length, hardFail: 0, hardUnknownLength: 0, hardUnknownOther: 0, hardTotal: 0, strongYes: 0, strongTotal: 0, weighedYes: 0, weighedTotal: 0, nonObvCasesPass: 0, nonObvCases: 0, notFound: 0, lookupErrors: 0, cardFail: 0, cardUnknown: 0, safetyFail: 0, safetyCases: 0, okCases: 0, judgeErrors: 0, median: null, p90: null, timeFromDriver: false, costUsd: 0 };
+  const st: RunStats = { picks: 0, relGood: 0, relFail: 0, casesWith2Good: 0, totalCases: run.cases.length, hardFail: 0, hardUnknownLength: 0, hardUnknownOther: 0, hardTotal: 0, strongYes: 0, strongTotal: 0, strongUnknown: 0, weighedYes: 0, weighedTotal: 0, weighedUnknown: 0, nonObvCasesPass: 0, nonObvCases: 0, notFound: 0, lookupErrors: 0, hardcoverErrors: 0, cardFail: 0, cardUnknown: 0, safetyFail: 0, safetyCases: 0, okCases: 0, judgeErrors: 0, median: null, p90: null, timeFromDriver: false, costUsd: 0 };
   const times: number[] = [];
   for (const c of run.cases) {
     if (c.ok) st.okCases++;
@@ -102,6 +105,7 @@ export function runStats(run: ScoredRun): RunStats {
     for (const p of c.picks) {
       if (p.facts.status === "not_found") st.notFound++;
       if (p.facts.status === "error") st.lookupErrors++;
+      if (p.facts.hardcoverError) st.hardcoverErrors++;
     }
     if (c.judgeError) st.judgeErrors++;
     if (c.checks.safety) st.safetyCases++;
@@ -127,10 +131,12 @@ export function runStats(run: ScoredRun): RunStats {
       for (const s of p.strong) {
         st.strongTotal++;
         if (s.verdict === "yes") st.strongYes++;
+        if (s.verdict === "unknown") st.strongUnknown++;
       }
       for (const w of p.weighed) {
         st.weighedTotal++;
         if (w.verdict === "yes") st.weighedYes++;
+        if (w.verdict === "unknown") st.weighedUnknown++;
       }
     }
     if (c.checks.nonObviousRequired && c.score.picks.filter((p) => good(p.nonObvious)).length >= 2) st.nonObvCasesPass++;
@@ -145,19 +151,36 @@ export function runStats(run: ScoredRun): RunStats {
 // type's own rate across the run and flags any below 50%, so one ignored preference can't hide in
 // the pooled total.
 function byType(run: ScoredRun, kind: "weighed" | "strong"): string {
-  const tally = new Map<string, { yes: number; total: number }>();
+  const tally = new Map<string, { yes: number; total: number; unknown: number }>();
   for (const c of run.cases) for (const p of c.score?.picks ?? []) for (const v of p[kind]) {
     const type = v.item.includes(":") ? v.item.split(":")[0].trim() : "other";
-    const t = tally.get(type) ?? { yes: 0, total: 0 };
-    t.total++;
+    const t = tally.get(type) ?? { yes: 0, total: 0, unknown: 0 };
+    if (v.verdict === "unknown") t.unknown++;
+    else t.total++;
     if (v.verdict === "yes") t.yes++;
     tally.set(type, t);
   }
   if (!tally.size) return "none given";
+  const rate = (t: { yes: number; total: number }) => (t.total ? t.yes / t.total : -1);
   return [...tally.entries()]
-    .sort((a, b) => a[1].yes / a[1].total - b[1].yes / b[1].total)
-    .map(([type, t]) => `${2 * t.yes < t.total ? "⚑ " : ""}${type} ${pct(t.yes, t.total)}% (${t.yes}/${t.total})`)
+    .sort((a, b) => rate(a[1]) - rate(b[1]))
+    .map(([type, t]) => {
+      const unverified = t.unknown ? `, ${t.unknown} unverified` : "";
+      if (!t.total) return `${type}: can't verify (${t.unknown})`;
+      return `${2 * t.yes < t.total ? "⚑ " : ""}${type} ${pct(t.yes, t.total)}% (${t.yes}/${t.total}${unverified})`;
+    })
     .join(" · ");
+}
+
+// Preferences the catalog facts can't settle ("unknown") are reported, not scored (decision 3.11):
+// the rate is out of the checkable verdicts. It can't pass on thin evidence: if fewer than half the
+// verdicts are checkable, the row misses with "not enough evidence".
+export function preferenceRow(yes: number, total: number, unknown: number, mark: number): [string, boolean | null] {
+  if (!total) return ["none given", null];
+  const known = total - unknown;
+  const unverified = `couldn't verify ${unknown}`;
+  if (2 * known < total) return [`not enough evidence: ${known}/${total} checkable · ${unverified}`, false];
+  return [`${pct(yes, known)}% (${yes}/${known}) · ${unverified}`, atLeast(yes, known, mark)];
 }
 
 const relevancePasses = (s: RunStats) => atLeast(s.relGood, s.picks, 80) && s.relFail === 0 && s.casesWith2Good === s.totalCases;
@@ -184,8 +207,8 @@ export function scorecard(engineRuns: ScoredRun[], baseline?: ScoredRun): Row[] 
     row("Gate", "Speed: 9 in 10", "≤30s", (s) => [fmtS(s.p90) + timeNote(s), s.p90 === null ? null : s.p90 <= 30_000]),
     row("Gate", "Speed: first pick visible", "≤10s", () => ["not measured yet (needs the app to show picks as they arrive)", null]),
     row("Quality", "Relevance", "≥80% good+, none fail, every reader 2 of 3 good+", (s) => [`${pct(s.relGood, s.picks)}% good+ · ${s.relFail} fail · ${s.casesWith2Good}/${s.totalCases} readers 2 of 3`, relevancePasses(s)]),
-    row("Quality", "Strong preferences", "≥90% honoured (\"partly\" doesn't count)", (s) => [`${pct(s.strongYes, s.strongTotal)}% (${s.strongYes}/${s.strongTotal})`, s.strongTotal ? atLeast(s.strongYes, s.strongTotal, 90) : null]),
-    row("Quality", "Weighed preferences", "≥75% reflected (\"partly\" doesn't count)", (s) => [`${pct(s.weighedYes, s.weighedTotal)}% (${s.weighedYes}/${s.weighedTotal})`, s.weighedTotal ? atLeast(s.weighedYes, s.weighedTotal, 75) : null]),
+    row("Quality", "Strong preferences", "≥90% honoured where the facts can tell (\"partly\" doesn't count; at least half must be checkable)", (s) => preferenceRow(s.strongYes, s.strongTotal, s.strongUnknown, 90)),
+    row("Quality", "Weighed preferences", "≥75% reflected where the facts can tell (\"partly\" doesn't count; at least half must be checkable)", (s) => preferenceRow(s.weighedYes, s.weighedTotal, s.weighedUnknown, 75)),
     {
       group: "Quality",
       name: "Weighed, by preference type",
@@ -236,6 +259,7 @@ export function scorecard(engineRuns: ScoredRun[], baseline?: ScoredRun): Row[] 
     pass: engineRuns.map(() => null),
   });
   rows.push(row("Tracked", "Judge problems", "readers the judge couldn't score", (s) => [s.judgeErrors ? `${s.judgeErrors} (see the scored file; rerun)` : "none", null]));
+  rows.push(row("Tracked", "Hardcover lookups failed", "picks judged without Hardcover's tags and reader counts", (s) => [s.hardcoverErrors ? `${s.hardcoverErrors} of ${s.picks} (check the token and the scored file)` : "none", null]));
 
   // The verdict: every gate and bar that was measured must pass, on every run. "Not measured"
   // (first pick visible, a run without lookups) doesn't block the eval-set verdict but is shown.

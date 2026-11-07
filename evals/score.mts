@@ -20,7 +20,7 @@ import { renderBrief } from "@/lib/engine/profile/renderBrief";
 import { modelFor } from "@/lib/ai/gateway";
 import type { TasteProfile } from "@/lib/contracts/tasteProfile";
 import { lookupFacts, type CatalogFacts } from "./judge/catalog";
-import { judgeCase, type CaseChecks } from "./judge/judge";
+import { JUDGE_VERSION, judgeCase, type CaseChecks } from "./judge/judge";
 import { plainClaudePicks } from "./judge/baseline";
 import { judgeAgreement, scorecard, type ScoredCase, type ScoredRun } from "./judge/scorecard";
 import { reviewPage } from "./judge/review";
@@ -141,13 +141,15 @@ async function scoreBaseline(ids: Set<string>): Promise<ScoredRun> {
 }
 
 const calPath = path.join(RESULTS, "calibration.json");
-const cal = existsSync(calPath) ? (JSON.parse(readFileSync(calPath, "utf8")) as { correct: number; total: number; passed: boolean; model: string }) : null;
+const cal = existsSync(calPath) ? (JSON.parse(readFileSync(calPath, "utf8")) as { correct: number; total: number; passed: boolean; model: string; judgeVersion?: string }) : null;
 const judgeModel = modelFor("evalJudge");
 const calibration = !cal
   ? "Judge calibration: not run (run evals/calibrate.mts first)"
   : cal.model !== judgeModel
     ? `Judge calibration: STALE (calibrated ${cal.model}, judging with ${judgeModel}; rerun evals/calibrate.mts)`
-    : `Judge calibration: ${cal.correct}/${cal.total} (${cal.passed ? "passed" : "FAILED: don't trust these scores"}, ${cal.model})`;
+    : cal.judgeVersion !== JUDGE_VERSION
+      ? "Judge calibration: STALE (the judge's instructions changed since it was calibrated; rerun evals/calibrate.mts)"
+      : `Judge calibration: ${cal.correct}/${cal.total} (${cal.passed ? "passed" : "FAILED: don't trust these scores"}, ${cal.model})`;
 
 const engineRuns: ScoredRun[] = [];
 let baseline: ScoredRun | undefined;

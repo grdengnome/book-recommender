@@ -6,7 +6,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { align, lengthVerdict, type CaseScore, type Grade, type PickScore } from "../evals/judge/judge";
 import { authorsMatch, lookupFacts, titlesMatch } from "../evals/judge/catalog";
-import { judgeAgreement, scorecard, type ScoredCase, type ScoredRun } from "../evals/judge/scorecard";
+import { judgeAgreement, preferenceRow, scorecard, type ScoredCase, type ScoredRun } from "../evals/judge/scorecard";
 import { reviewPage } from "../evals/judge/review";
 
 const facts = { status: "found" as const, found: true, subjects: [], tags: [], description: "" };
@@ -61,6 +61,7 @@ test("a check the judge skipped can't disappear: hard rules count as broken, pre
 
 test("catalog matches need both the title and the author's surname", () => {
   assert.ok(titlesMatch("Salt", "Salt: A World History"));
+  assert.ok(titlesMatch("Jonathan Strange & Mr Norrell", "Jonathan Strange and Mr Norrell"));
   assert.ok(titlesMatch("Cien años de soledad", "Cien Anos de Soledad"));
   assert.ok(!titlesMatch("Salt", "Salt Fat Acid Heat"));
   assert.ok(authorsMatch("Mark Kurlansky", ["Kurlansky, Mark", "Someone Else"]));
@@ -91,6 +92,69 @@ test("a catalog search sent with a subtitle retries with the main title (Salt: A
     globalThis.fetch = realFetch;
     if (savedToken !== undefined) process.env.HARDCOVER_API_TOKEN = savedToken;
   }
+});
+
+// A stand-in for the catalogs: Open Library answers from `ol(title, hasAuthorParam)`, Hardcover
+// from `hc(query)`. Restores fetch and the token afterwards.
+async function withCatalogs(opts: { ol: (title: string, withAuthor: boolean) => unknown[]; hc?: (query: string) => Response }, fn: () => Promise<void>) {
+  const realFetch = globalThis.fetch;
+  const savedToken = process.env.HARDCOVER_API_TOKEN;
+  if (opts.hc) process.env.HARDCOVER_API_TOKEN = "test-token";
+  else delete process.env.HARDCOVER_API_TOKEN;
+  globalThis.fetch = (async (input: string | URL, init?: RequestInit) => {
+    const url = new URL(String(input));
+    if (url.hostname === "api.hardcover.app") return opts.hc!(JSON.parse(String(init?.body)).query);
+    if (url.pathname === "/search.json") return new Response(JSON.stringify({ docs: opts.ol(url.searchParams.get("title") ?? "", url.searchParams.has("author")) }));
+    return new Response(JSON.stringify({ description: "" }));
+  }) as typeof fetch;
+  try {
+    await fn();
+  } finally {
+    globalThis.fetch = realFetch;
+    if (savedToken === undefined) delete process.env.HARDCOVER_API_TOKEN;
+    else process.env.HARDCOVER_API_TOKEN = savedToken;
+  }
+}
+
+test("a translated author listed in their own script still matches by the romanised name", async () => {
+  await withCatalogs({ ol: () => [{ key: "/works/OL2W", title: "Kokoro", author_name: ["夏目漱石"], author_alternative_name: ["Natsume Sōseki"], number_of_pages_median: 248 }] }, async () => {
+    const f = await lookupFacts("Kokoro", "Natsume Soseki");
+    assert.equal(f.status, "found");
+    assert.equal(f.pages, 248);
+  });
+});
+
+test("Open Library's last try searches by title alone and matches the author in code", async () => {
+  await withCatalogs({ ol: (_t, withAuthor) => (withAuthor ? [] : [{ key: "/works/OL3W", title: "Cursed Bunny", author_name: ["Chung, Bora"] }]) }, async () => {
+    assert.equal((await lookupFacts("Cursed Bunny", "Bora Chung")).status, "found");
+  });
+});
+
+test("Hardcover is found through its search endpoint, then its tags are fetched by id", async () => {
+  const hc = (query: string) => query.includes("search(")
+    ? new Response(JSON.stringify({ data: { search: { results: { hits: [{ document: { id: 42, title: "Cursed Bunny", author_names: ["Bora Chung"] } }] } } } }))
+    : new Response(JSON.stringify({ data: { books: [{ title: "Cursed Bunny", users_count: 900, pages: 256, release_year: 2017, description: "Stories.", contributions: [{ author: { name: "Bora Chung" } }], cached_tags: { Genre: [{ tag: "Horror" }], Mood: [{ tag: "Dark" }] } }] } }));
+  await withCatalogs({ ol: () => [], hc }, async () => {
+    const f = await lookupFacts("Cursed Bunny", "Bora Chung");
+    assert.equal(f.source, "hardcover");
+    assert.deepEqual(f.tags, ["Horror", "Dark"]);
+    assert.equal(f.hardcoverReaders, 900);
+  });
+});
+
+test("a refused Hardcover lookup is reported on the facts, not silently dropped", async () => {
+  const hc = () => new Response(JSON.stringify({ error: "ilike and related operations are not permitted on this server." }), { status: 403 });
+  await withCatalogs({ ol: () => [], hc }, async () => {
+    const f = await lookupFacts("Kokoro", "Natsume Soseki");
+    assert.equal(f.status, "not_found");
+    assert.match(f.hardcoverError ?? "", /403/);
+  });
+});
+
+test("preferences the facts can't settle are reported, not scored, and can't pass on thin evidence", () => {
+  assert.deepEqual(preferenceRow(8, 12, 2, 75), ["80% (8/10) · couldn't verify 2", true]);
+  assert.deepEqual(preferenceRow(6, 12, 2, 75), ["60% (6/10) · couldn't verify 2", false]);
+  assert.deepEqual(preferenceRow(4, 12, 7, 75), ["not enough evidence: 5/12 checkable · couldn't verify 7", false]);
 });
 
 test("a reader with no picks counts against 'every reader 2 of 3' and safety", () => {

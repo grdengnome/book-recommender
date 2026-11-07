@@ -2,7 +2,7 @@
 
 > **Status:** Living · Every product and architecture decision, and the paths rejected.
 
-*Covers decisions through the v0 engine, v0 product planning, the v0 scope and the repo restructure (November 5, 2026). Further decisions are added as they're made.*
+*Covers decisions through the v0 engine, v0 product planning, the v0 scope and the repo restructure (November 6, 2026). Further decisions are added as they're made.*
 
 The product and architecture decisions behind this recommender, and the paths I rejected. The [progress log](./progress-log.md) is the session-by-session diary; this file is the story told by decision. Each entry gives the decision and why, with a link to the full detail.
 
@@ -256,6 +256,10 @@ The full operating principles are in [question-flow-principles.md](./product/que
 **Decision:** An avoid rule is judged by what reading the book is actually like (its description, subjects and moods), read through the reader's own words where they gave them. Catalog genre labels and reader tags are evidence, never the verdict on their own: a label alone can't fail a book, and a missing label can't pass one. The rule still passes only when the facts show it's kept (decision 3.9). Applies to the judge now and to the engine when avoid rules are enforced in code.
 **Why:** The first calibration failed *We Have Always Lived in the Castle* for a reader who wrote "horror, I want spooky but subtle", only because catalogs shelve it under "horror". Labels are catch-alls; the reader's meaning is the promise. The planted *It* for the same reader guards against a judge that turns lenient. The same calibration also replaced a weak answer key (*Salt*, the example the reader had named) with *Mauve*, chosen before rerunning. ([progress log, Nov 5](./progress-log.md))
 
+
+### 3.11 Preferences the evidence can't settle are reported, not scored
+**Decision:** The judge can answer "can't tell" (unknown) for a strong or weighed preference when the catalog facts can't settle it, such as how a book ends or its prose style. Those checks are reported ("couldn't verify N") and left out of the pass rate, which is out of the checkable verdicts. A bar can't pass on thin evidence: if fewer than half the checks are checkable, it misses. "Partly" still counts as not honoured, and hard rules stay strict (unproven is a miss, decision 3.9). The calibration records a fingerprint of the judge's instructions, so any change to them makes it stale.
+**Why:** The baseline's preference scores were mostly "partly" verdicts the judge explained as no evidence (36 strong, 66 weighed; only 3 and 12 contradicted). Counting missing evidence as a wrong pick measured how thin catalogs are, not the engine. Preferences aren't promises the way hard rules are. The same review found the judge's lookups were starving it: Hardcover refuses title pattern queries (every lookup failed silently, so no tags or reader counts reached the judge), and Open Library lists many translated authors in their own script; both fixed, and a failed Hardcover lookup now shows on the scorecard. ([progress log, Nov 6](./progress-log.md))
 ---
 
 ## 4. Defining "non-obvious"
