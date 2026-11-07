@@ -200,6 +200,16 @@ test("the engine must beat plain Claude by at least 10 points of good+ relevance
   assert.deepEqual(rowOf(scorecard([engine], level), "Beats plain Claude on relevance").pass, [false]);
 });
 
+test("plain Claude is compared on the same readers: one it failed to answer is left out on both sides", () => {
+  const engine = run([scored("a", ["good", "good", "good"]), scored("b", ["weak", "weak", "weak"])]);
+  const failed = scored("b", [], { ok: false, picks: [] });
+  failed.score = null;
+  const plain: ScoredRun = { ...run([scored("a", ["good", "weak", "weak"]), failed], "plain Claude"), kind: "baseline" };
+  const row = rowOf(scorecard([engine], plain), "Beats plain Claude on relevance");
+  assert.match(row.values[0], /^\+66\.7 points \(100% vs 33%, 1 readers; 1 left out/);
+  assert.deepEqual(row.pass, [true]);
+});
+
 test("second-judge agreement counts picks landing in the same bucket", () => {
   const c = scored("a", ["good", "weak", "excellent"]);
   c.second = { ...c.score!, picks: [pickScore("excellent"), pickScore("good"), pickScore("good")] };

@@ -220,12 +220,28 @@ export function scorecard(engineRuns: ScoredRun[], baseline?: ScoredRun): Row[] 
   ];
 
   if (baseline) {
-    const b = runStats(baseline);
-    // 10+ points more good+ picks, compared exactly: engine% − plain% ≥ 10.
-    rows.push(row("Compared", "Beats plain Claude on relevance", `≥10 points more good+ (plain Claude: ${pct(b.relGood, b.picks)}% good+, ${b.notFound} books not found)`, (s) => {
-      const exact = s.picks && b.picks ? (100 * s.relGood) / s.picks - (100 * b.relGood) / b.picks : 0;
-      return [`${exact >= 0 ? "+" : ""}${exact.toFixed(1)} points`, s.picks > 0 && b.picks > 0 && exact >= 10];
-    }));
+    // 10+ points more good+ picks, compared exactly (engine% − plain% ≥ 10) on the readers both
+    // sides were scored on, so a reader one side failed can't tilt the comparison.
+    const scoredIds = (r: ScoredRun) => new Set(r.cases.filter((c) => c.score).map((c) => c.id));
+    const plainIds = scoredIds(baseline);
+    const all = runStats(baseline);
+    rows.push({
+      group: "Compared",
+      name: "Beats plain Claude on relevance",
+      mark: `≥10 points more good+ on the same readers (plain Claude overall: ${pct(all.relGood, all.picks)}% good+, ${all.notFound} books not found)`,
+      ...(() => {
+        const out = engineRuns.map((r): [string, boolean | null] => {
+          const shared = [...scoredIds(r)].filter((id) => plainIds.has(id));
+          const e = runStats({ ...r, cases: r.cases.filter((c) => shared.includes(c.id)) });
+          const b = runStats({ ...baseline, cases: baseline.cases.filter((c) => shared.includes(c.id)) });
+          if (!e.picks || !b.picks) return ["no shared readers scored", null];
+          const exact = (100 * e.relGood) / e.picks - (100 * b.relGood) / b.picks;
+          const missing = r.cases.length - shared.length;
+          return [`${exact >= 0 ? "+" : ""}${exact.toFixed(1)} points (${pct(e.relGood, e.picks)}% vs ${pct(b.relGood, b.picks)}%, ${shared.length} readers${missing ? `; ${missing} left out, not scored on both sides` : ""})`, exact >= 10];
+        });
+        return { values: out.map((o) => o[0]), pass: out.map((o) => o[1]) };
+      })(),
+    });
   }
 
   // Each doorway must meet the whole relevance bar, not just the average.
@@ -258,7 +274,11 @@ export function scorecard(engineRuns: ScoredRun[], baseline?: ScoredRun): Row[] 
     }),
     pass: engineRuns.map(() => null),
   });
-  rows.push(row("Tracked", "Judge problems", "readers the judge couldn't score", (s) => [s.judgeErrors ? `${s.judgeErrors} (see the scored file; rerun)` : "none", null]));
+  const plainErrors = baseline ? runStats(baseline).judgeErrors : 0;
+  rows.push(row("Tracked", "Judge problems", "readers that couldn't be scored (engine; plain Claude)", (s) => [
+    s.judgeErrors || plainErrors ? `${s.judgeErrors} engine · ${plainErrors} plain Claude (see the scored file; rerun)` : "none",
+    null,
+  ]));
   rows.push(row("Tracked", "Hardcover lookups failed", "picks judged without Hardcover's tags and reader counts", (s) => [s.hardcoverErrors ? `${s.hardcoverErrors} of ${s.picks} (check the token and the scored file)` : "none", null]));
 
   // The verdict: every gate and bar that was measured must pass, on every run. "Not measured"
