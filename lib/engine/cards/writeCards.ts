@@ -27,7 +27,7 @@ const CARD_TRIES = 2;
 const DESCRIPTION_MAX_CHARS = 1200;
 const SUBJECTS_MAX = 20;
 
-const CARD_SYSTEM_PROMPT = `You write the card for one book recommendation. The book has already been chosen for this reader; your job is to tell them why, in a few short pieces of text.
+export const CARD_SYSTEM_PROMPT = `You write the card for one book recommendation. The book has already been chosen for this reader; your job is to tell them why, in a few short pieces of text.
 
 Write these fields:
 - "title": the book's English display title, without series or edition notes such as "(Penguin Classics)". If the catalog title is in another language or script, give the book's established English title, keeping the accents that title uses in English.
@@ -37,7 +37,12 @@ Write these fields:
 - "angleHeading": a heading for a section on why this pick genuinely fits rather than being a reflexive/default choice, written for this book (e.g. "Shelved in the wrong aisle"), not a generic label. About 5 words, 30 characters at most.
 - "angleText": that section's body, about 2 sentences. Don't state specific claims about a book's reception, fame, or obscurity unless you're confident they're accurate — if unsure, describe what makes the book fit rather than making a comparative claim about how well-known it is.
 
-What you say the book is and contains must agree with the catalog records given. Where they are silent, keep claims general rather than inventing plot. The selector's note says why the book was chosen, and its mood word is shown on the card next to yours; build on both. Any other picks are listed only so your angle differs from theirs: don't mention them.
+Be honest with the reader. Be enthusiastic and choose what to highlight, but never say the book is something it isn't or promise what it won't deliver.
+- What you say the book is and contains must agree with the catalog records given. Where they are silent, keep claims general rather than inventing plot.
+- The same goes for what reading it feels like: claims about its tone, mood, pace and style must agree with the catalog descriptions and the Hardcover moods. If the records call it dark, don't call it light.
+- Tie the "why" to the parts of the reader's taste the book genuinely delivers. Never claim it matches something it doesn't.
+- If the book clearly differs from something the reader explicitly asked for (a mood, a pace, a feel), say so briefly and kindly in "why", then say what makes it worth it anyway, so the reader can decide for themselves. For example: "It's darker than pure escape, but its wit carries you through." Only for a real gap with something they asked for; otherwise don't hedge.
+The selector's note says why the book was chosen, and its mood word is shown on the card next to yours; build on both, within these limits. Any other picks are listed only so your angle differs from theirs: don't mention them.
 
 Don't use emoji. Keep to the lengths above.`;
 
