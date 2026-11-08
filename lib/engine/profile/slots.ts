@@ -17,12 +17,34 @@ export interface SlotSetting {
 }
 
 // Pages per length band. A book whose length is unknown is left out when a band is asked for.
-export const LENGTH_BANDS: Record<"quick" | "short" | "medium" | "long", { min?: number; max?: number; words: string }> = {
+// The question flow shows these ranges on the length options, so the reader picks knowing what
+// each means (decision 2.25).
+export type LengthBand = "quick" | "short" | "medium" | "long";
+export const LENGTH_BANDS: Record<LengthBand, { min?: number; max?: number; words: string }> = {
   quick: { max: 200, words: "quick: up to 200 pages" },
   short: { min: 200, max: 300, words: "short: about 200 to 300 pages" },
   medium: { min: 300, max: 500, words: "medium: about 300 to 500 pages" },
   long: { min: 500, words: "long: over 500 pages" },
 };
+
+// Forgiveness at the edges (decision 2.25): a fitting book a little past the band is allowed,
+// up to 15% past each edge (at least 25 pages). Beyond that it's left out. One setting, used by
+// the engine's filter and by the eval judge, so the eval measures exactly the promised rule.
+export const LENGTH_TOLERANCE = { share: 0.15, minPages: 25 };
+
+export function allowedPages(band: LengthBand): { min?: number; max?: number } {
+  const { min, max } = LENGTH_BANDS[band];
+  const slack = (edge: number) => Math.max(LENGTH_TOLERANCE.minPages, Math.round(edge * LENGTH_TOLERANCE.share));
+  return {
+    ...(min !== undefined ? { min: min - slack(min) } : {}),
+    ...(max !== undefined ? { max: max + slack(max) } : {}),
+  };
+}
+
+export function fitsLength(band: LengthBand, pages: number): boolean {
+  const { min, max } = allowedPages(band);
+  return (min === undefined || pages >= min) && (max === undefined || pages <= max);
+}
 
 export const SLOT_SETTINGS: Record<SlotKey, SlotSetting> = {
   loved: { label: "Loved", firmness: "context" },

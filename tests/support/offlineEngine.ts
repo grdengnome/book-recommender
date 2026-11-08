@@ -57,6 +57,15 @@ let leakTitle: string | null = null; // set by the redaction run only
 export function setLeakTitle(title: string | null): void { leakTitle = title; }
 
 function cannedOpenLibrary(url: URL): Response {
+  // Page counts (lib/engine/sources/pageCounts.ts), asked only for readers who set a length:
+  // every third book is long (600 pages), every third has no count, the rest are short (250).
+  if (url.pathname === "/search.json" && url.searchParams.get("q")?.startsWith("key:(")) {
+    const keys = [...String(url.searchParams.get("q")).matchAll(/"(\/works\/OL(\d+)W)"/g)];
+    return json({ docs: keys.map(([, key, n]) => {
+      const i = Number(n) - 1000;
+      return i % 3 === 2 ? { key } : { key, number_of_pages_median: i % 3 === 0 ? 600 : 250 };
+    }) });
+  }
   if (url.pathname === "/search.json") {
     const docs = [0, 1, 2, 3, 10, 11, 12, 13, 14, 15].map(olDoc);
     if (leakTitle) docs.push({ key: "/works/OL9W", title: leakTitle, author_name: ["Leak Author"], subject: [] });
@@ -87,6 +96,10 @@ function cannedHardcover(body: { query: string; variables: Record<string, unknow
       if (i % 3 === 0) rows.push({ count: 4, tag: { tag: "Emotional" }, book });
     }
     return json({ data: { taggable_counts: rows } });
+  }
+  if (body.query.includes("query Pages")) {
+    const ids = (body.variables.ids as number[]) ?? [];
+    return json({ data: { books: ids.map((id) => ({ id, pages: id % 2 === 0 ? 280 : 900 })) } });
   }
   if (body.query.includes("books_by_pk")) {
     return json({ data: { books_by_pk: { description: "Hardcover's description.", cached_tags: { Genre: [{ tag: "Literary" }], Mood: [{ tag: "reflective" }] } } } });

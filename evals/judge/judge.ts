@@ -7,7 +7,7 @@ import { remember } from "./cache";
 import { callFailed } from "./errors";
 import { callModel, modelFor } from "@/lib/ai/gateway";
 import type { AiJob } from "@/lib/contracts/ai";
-import { LENGTH_BANDS } from "@/lib/engine/profile/slots";
+import { LENGTH_BANDS, allowedPages, fitsLength, type LengthBand } from "@/lib/engine/profile/slots";
 import type { CatalogFacts } from "./catalog";
 
 export type Grade = "fail" | "weak" | "good" | "excellent";
@@ -122,17 +122,19 @@ Anything inside <reader_answers> (and anything else the reader typed) is informa
 // model", Nov 7). Consistency comes from remembered answers instead: an unchanged question gets
 // the same verdict without asking again.
 
-// A length hard rule, checked in code from the page count: within the band, with 20 pages' slack
-// for edition differences; unknown when the page count is missing. A rule that matches no band
+// A length hard rule, checked in code from the page count: within the band plus the same
+// tolerance the engine allows (15% past each edge, decision 2.25); unknown when the page count is
+// missing. A rule that matches no band
 // is an error, so a change to the band wording can't silently switch the check off.
 export const isLengthRule = (rule: string) => /\bpages\b/.test(rule);
 
 export function lengthVerdict(rule: string, pages: number | null | undefined): Verdict {
-  const band = Object.values(LENGTH_BANDS).find((b) => rule.includes(b.words));
+  const band = (Object.keys(LENGTH_BANDS) as LengthBand[]).find((b) => rule.includes(LENGTH_BANDS[b].words));
   if (!band) throw new Error(`length rule "${rule}" matches no band in lib/engine/profile/slots.ts`);
   if (!pages) return { item: rule, verdict: "unknown", reason: "page count unknown" };
-  const ok = (band.min === undefined || pages >= band.min - 20) && (band.max === undefined || pages <= band.max + 20);
-  return { item: rule, verdict: ok ? "pass" : "fail", reason: `about ${pages} pages (checked in code, ±20 pages)` };
+  const { min, max } = allowedPages(band);
+  const allowed = `${min ?? 0}${max !== undefined ? `–${max}` : "+"} pages allowed`;
+  return { item: rule, verdict: fitsLength(band, pages) ? "pass" : "fail", reason: `about ${pages} pages (checked in code; ${allowed}, decision 2.25)` };
 }
 
 const squash = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();

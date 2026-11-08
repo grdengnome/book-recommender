@@ -37,7 +37,7 @@ Every slot is optional. An empty slot is left out of the brief; the engine fills
 
 **No single way in.** A loved book is one doorway, not the main road: in the [question core audit](../../research/question-core-audit-2026-10-22.md) only about 1 in 4 real requests started from a book, and mood decided the picks even over the anchor. Mood, ingredients and the moment are equal ways in. Whatever doorway the reader takes, the engine searches with the combination of what's filled: subjects from ingredients and setting, mood tags, and the loved books' subjects. Which doorways produce the most relevant picks is measured by the evals, and the flow's emphasis follows the evidence.
 
-**Length bands** (tunable, in the slot data): quick = up to 200 pages · short = 200–300 · medium = 300–500 · long = over 500. A book whose length is unknown is left out when the reader asked for a band, rather than risked. *The engine doesn't fetch page counts yet; fetching them is the first engine improvement after the baseline. Until then the brief states the rule and the eval measures whether it holds.*
+**Length bands** (tunable, in the slot data): quick = up to 200 pages · short = 200–300 · medium = 300–500 · long = over 500. **Forgiving at the edges:** a book up to 15% past either edge (at least 25 pages) is allowed, so short accepts about 170–345 pages and medium about 255–575; beyond that it's left out, and so is a book whose length is unknown. The engine enforces this in code before the model chooses: it looks up page counts for the candidate pool and removes books that don't fit ([decision 2.25](../../decisions.md)). The eval judge checks the same range.
 
 ## Firmness, in plain words
 - **Hard rule:** never broken. Avoid, category, audience, length.
