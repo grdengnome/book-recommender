@@ -79,3 +79,27 @@ test("without a length, no page counts are looked up and the pool is untouched",
   assert.ok(!res.requests.some((r) => r.body?.includes("query Pages")));
   assert.ok(shownToModel(res.requests).includes("Gilead"));
 });
+
+test("if fewer than 3 books fit the length, the engine gives up at once with a clear answer, no retries", async () => {
+  clearPageCounts();
+  // "quick" allows up to 230 pages; every canned book is 250+, 280+ or unknown, so none fit.
+  const res = await run({}, profile("quick"));
+  assert.equal(res.status, 422);
+  assert.equal(JSON.parse(res.responseText).error.code, "not_enough_books");
+  const firstCalls = res.requests.filter((r) => r.url.includes("api.anthropic.com") && r.body && JSON.parse(r.body).tools && JSON.parse(r.body).messages.length === 1);
+  assert.equal(firstCalls.length, 1, "one search, not three attempts");
+});
+
+test("the model is told the pool was filtered for length (and nothing about each book's pages)", async () => {
+  clearPageCounts();
+  const res = await run({}, profile("short"));
+  const toolResults = res.requests.flatMap((r) => (r.url.includes("api.anthropic.com") && r.body ? JSON.parse(r.body).messages : []))
+    .flatMap((m: { content: unknown }) => (Array.isArray(m.content) ? m.content : []))
+    .filter((b: { type: string }) => b.type === "tool_result")
+    .map((b: { content: string }) => JSON.parse(b.content));
+  assert.ok(toolResults.length > 0);
+  for (const t of toolResults) {
+    assert.match(t.note, /requested length/);
+    for (const c of t.pool) assert.deepEqual(Object.keys(c).sort(), ["author", "subjects", "title"]);
+  }
+});

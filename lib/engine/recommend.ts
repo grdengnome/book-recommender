@@ -187,7 +187,7 @@ function errorText(err: unknown): string {
 // Error body for the screens (spec.md §4b): a stable code to pick the error state from, and
 // a plain message. Upstream detail (the Anthropic error, model text) stays in the server log
 // and the trace, never in the response.
-export type ErrorCode = "misconfigured" | "bad_request" | "upstream_error" | "no_grounded_picks";
+export type ErrorCode = "misconfigured" | "bad_request" | "upstream_error" | "no_grounded_picks" | "not_enough_books";
 export function errorBody(code: ErrorCode, message: string) {
   return { error: { code, message } };
 }
@@ -445,7 +445,14 @@ async function generateOnce(
             recordSeenCandidates(seenCandidates, pool);
             // Sources and internal IDs (olWorkKey, hcBookId) stop here: the model's
             // tool_result shape is { title, author, subjects }.
-            result = { pool: toModelPool(pool), poolSize: pool.length };
+            result = length
+              ? {
+                  pool: toModelPool(pool),
+                  poolSize: pool.length,
+                  // Tells the model why a pool may be small, so it searches more broadly.
+                  note: "Only books of the reader's requested length are listed. If too few fit, search different subjects.",
+                }
+              : { pool: toModelPool(pool), poolSize: pool.length };
           }
         } catch (err) {
           result = {
@@ -466,6 +473,17 @@ async function generateOnce(
 
   // Every pick pipeline settles (they never reject), so nothing is left running unobserved.
   const settled = await Promise.all(outcomes);
+
+  // Give up fast (decision 2.25): if the length filter left fewer than 3 books across all the
+  // searching, no attempt can succeed, so say so now instead of retrying the whole search.
+  if (length && seenCandidates.size < 3) {
+    trace.add("F", { kind: "not_enough_books", length, candidatesShown: seenCandidates.size });
+    return {
+      ok: false,
+      status: 422,
+      body: errorBody("not_enough_books", "Not enough books of that length matched this request; a different length may help"),
+    };
+  }
 
   // Structured outputs only guarantee the schema on a finished answer: a cut-off or refused
   // one is rejected.

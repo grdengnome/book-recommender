@@ -137,6 +137,7 @@ One entry per session in `docs/progress-log.md`, written at session close:
 ## Things that look like bugs but aren't
 
 - **A 502 with no picks** when grounding fails 3 times: correct. Thin or empty pools fail closed rather than returning ungrounded picks.
+- **A 422 `not_enough_books`** when fewer than 3 books fit the reader's length: correct, and deliberately fast (no retries; decision 2.25).
 - **Hardcover failures are silent.** Missing token, API errors, or no matching tags degrade to Open Library only and are logged to `.local/hardcover-failure-log.json`, never shown to the user.
 - **Hardcover books rarely become final picks.** Proportional to their small share of the pool, not a bug (tested Sept 17).
 - **Most picks skip the description check.** It only runs when a pick's catalog subjects flag it as criticism of its genre; everything else passes through unchanged by design.
