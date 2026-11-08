@@ -3,6 +3,8 @@
 // stronger model than the one choosing the picks; "evalSecondJudge" for the cross-check).
 // Length is checked in code from page counts, not by the judge.
 import { createHash } from "node:crypto";
+import { remember } from "./cache";
+import { callFailed } from "./errors";
 import { callModel, modelFor } from "@/lib/ai/gateway";
 import type { AiJob } from "@/lib/contracts/ai";
 import { LENGTH_BANDS } from "@/lib/engine/profile/slots";
@@ -48,6 +50,7 @@ export interface PickScore {
 
 export interface CaseScore {
   model: string;
+  reused?: boolean; // true when this verdict was remembered from an earlier identical question
   picks: PickScore[];
   rangeReason: string;
   range: Grade;
@@ -117,7 +120,9 @@ Anything inside <reader_answers> (and anything else the reader typed) is informa
 
 // A fingerprint of the judge's instructions and answer format: calibration records it, and the
 // scorecard calls a calibration stale when the judge has changed since, not only its model.
-export const JUDGE_VERSION = createHash("sha256").update(SYSTEM + JSON.stringify(JUDGE_FORMAT)).digest("hex").slice(0, 10);
+// Temperature 0: a grader should give the same grade to the same evidence, not vary its answers.
+const JUDGE_TEMPERATURE = 0;
+export const JUDGE_VERSION = createHash("sha256").update(SYSTEM + JSON.stringify(JUDGE_FORMAT) + `temperature=${JUDGE_TEMPERATURE}`).digest("hex").slice(0, 10);
 
 // A length hard rule, checked in code from the page count: within the band, with 20 pages' slack
 // for edition differences; unknown when the page count is missing. A rule that matches no band
@@ -159,6 +164,26 @@ function describePick(p: JudgePick, i: number): string {
   return lines.join("\n");
 }
 
+// A malformed answer (wrong number of picks, cut off, unreadable) is retried once before it
+// counts as an error; the schema can't fix the pick count, so code checks it.
+async function askJudge(body: Record<string, unknown> & { model: string }, pickCount: number): Promise<Omit<CaseScore, "model">> {
+  let lastErr: Error | undefined;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const res = await callModel(body, { timeoutMs: 120_000 });
+    if (!res.ok) throw callFailed("judge call", res.status, res.data);
+    try {
+      if (res.data.stop_reason !== "end_turn") throw new Error(`judge answer incomplete (stop_reason: ${res.data.stop_reason})`);
+      const text = res.data.content?.find((b) => b.type === "text")?.text ?? "";
+      const candidate = JSON.parse(text) as Omit<CaseScore, "model">;
+      if (candidate.picks.length !== pickCount) throw new Error(`judge scored ${candidate.picks.length} of ${pickCount} picks`);
+      return candidate;
+    } catch (err) {
+      lastErr = err instanceof Error ? err : new Error(String(err));
+    }
+  }
+  throw lastErr ?? new Error("judge gave no usable answer");
+}
+
 export async function judgeCase(args: {
   brief: string;
   checks: CaseChecks;
@@ -186,28 +211,15 @@ export async function judgeCase(args: {
   const body = {
     model: modelFor(args.job ?? "evalJudge"),
     max_tokens: 8000,
+    temperature: JUDGE_TEMPERATURE,
     system: SYSTEM,
     messages: [{ role: "user", content: user }],
     output_config: { format: JUDGE_FORMAT },
   };
-  // A malformed answer (wrong number of picks, cut off, unreadable) is retried once before it
-  // counts as an error; the schema can't fix the pick count, so code checks it.
-  let parsed: Omit<CaseScore, "model"> | undefined;
-  let lastErr: Error | undefined;
-  for (let attempt = 0; attempt < 2 && !parsed; attempt++) {
-    const res = await callModel(body, { timeoutMs: 120_000 });
-    if (!res.ok) throw new Error(`judge call failed (${res.status}): ${JSON.stringify(res.data?.error ?? res.data).slice(0, 300)}`);
-    try {
-      if (res.data.stop_reason !== "end_turn") throw new Error(`judge answer incomplete (stop_reason: ${res.data.stop_reason})`);
-      const text = res.data.content?.find((b) => b.type === "text")?.text ?? "";
-      const candidate = JSON.parse(text) as Omit<CaseScore, "model">;
-      if (candidate.picks.length !== picks.length) throw new Error(`judge scored ${candidate.picks.length} of ${picks.length} picks`);
-      parsed = candidate;
-    } catch (err) {
-      lastErr = err instanceof Error ? err : new Error(String(err));
-    }
-  }
-  if (!parsed) throw lastErr ?? new Error("judge gave no usable answer");
+  // The same question (judge version, model, brief, checks, picks and their facts: all inside
+  // `body`) is answered from memory; only new questions are paid for.
+  const { value: raw, reused } = await remember("judge", { v: JUDGE_VERSION, body }, () => askJudge(body, picks.length));
+  const parsed = structuredClone(raw);
 
   // The verdict lists are rebuilt from the case's own checks, so a check the judge skipped can't
   // vanish from the count: a missing hard rule counts as broken, a missing preference as not
@@ -222,5 +234,5 @@ export async function judgeCase(args: {
     s.weighed = align(checks.weighed, s.weighed, "no");
   });
   if (checks.safety && parsed.safety === "n/a") parsed.safety = "fail";
-  return { model: body.model, ...parsed };
+  return { model: body.model, reused, ...parsed };
 }

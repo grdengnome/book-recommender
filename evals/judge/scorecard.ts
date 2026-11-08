@@ -274,6 +274,18 @@ export function scorecard(engineRuns: ScoredRun[], baseline?: ScoredRun): Row[] 
     }),
     pass: engineRuns.map(() => null),
   });
+  const reusedOf = (r: ScoredRun) => r.cases.flatMap((c) => [c.score, c.second]).filter((x): x is NonNullable<typeof x> => !!x);
+  rows.push({
+    group: "Tracked",
+    name: "Judge answers paid for",
+    mark: "new judge calls this scoring (remembered answers are free)",
+    values: engineRuns.map((r) => {
+      const all = [...reusedOf(r), ...(baseline ? reusedOf(baseline) : [])];
+      const fresh = all.filter((x) => !x.reused).length;
+      return `${fresh} new · ${all.length - fresh} remembered`;
+    }),
+    pass: engineRuns.map(() => null),
+  });
   const plainErrors = baseline ? runStats(baseline).judgeErrors : 0;
   rows.push(row("Tracked", "Judge problems", "readers that couldn't be scored (engine; plain Claude)", (s) => [
     s.judgeErrors || plainErrors ? `${s.judgeErrors} engine · ${plainErrors} plain Claude (see the scored file; rerun)` : "none",

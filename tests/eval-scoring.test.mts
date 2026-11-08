@@ -4,7 +4,11 @@
 // scores until asked and can't be broken by book text.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { align, lengthVerdict, type CaseScore, type Grade, type PickScore } from "../evals/judge/judge";
+import { align, judgeCase, lengthVerdict, type CaseScore, type Grade, type PickScore } from "../evals/judge/judge";
+import { OutOfCreditsError } from "../evals/judge/errors";
+import { mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import { authorsMatch, lookupFacts, titlesMatch } from "../evals/judge/catalog";
 import { judgeAgreement, preferenceRow, scorecard, type ScoredCase, type ScoredRun } from "../evals/judge/scorecard";
 import { reviewPage } from "../evals/judge/review";
@@ -208,6 +212,59 @@ test("plain Claude is compared on the same readers: one it failed to answer is l
   const row = rowOf(scorecard([engine], plain), "Beats plain Claude on relevance");
   assert.match(row.values[0], /^\+66\.7 points \(100% vs 33%, 1 readers; 1 left out/);
   assert.deepEqual(row.pass, [true]);
+});
+
+// A stand-in for the model provider that returns one fixed judge answer and counts the calls.
+async function withJudgeReplies(reply: () => Response, fn: (calls: () => number, bodies: Record<string, unknown>[]) => Promise<void>) {
+  const realFetch = globalThis.fetch;
+  const saved = { key: process.env.ANTHROPIC_API_KEY, dir: process.env.EVAL_CACHE_DIR, noCache: process.env.NO_CACHE };
+  process.env.ANTHROPIC_API_KEY = "sk-ant-FAKE-test-key";
+  process.env.EVAL_CACHE_DIR = mkdtempSync(path.join(tmpdir(), "eval-cache-"));
+  delete process.env.NO_CACHE;
+  const bodies: Record<string, unknown>[] = [];
+  globalThis.fetch = (async (_input: string | URL, init?: RequestInit) => {
+    bodies.push(JSON.parse(String(init?.body)));
+    return reply();
+  }) as typeof fetch;
+  try {
+    await fn(() => bodies.length, bodies);
+  } finally {
+    globalThis.fetch = realFetch;
+    for (const [k, env] of [["key", "ANTHROPIC_API_KEY"], ["dir", "EVAL_CACHE_DIR"], ["noCache", "NO_CACHE"]] as const) {
+      if (saved[k] === undefined) delete process.env[env];
+      else process.env[env] = saved[k];
+    }
+  }
+}
+
+const judgeAnswer = () => new Response(JSON.stringify({
+  stop_reason: "end_turn",
+  content: [{ type: "text", text: JSON.stringify({ picks: [pickScore("good")], rangeReason: "", range: "good", safetyReason: "", safety: "n/a" }) }],
+}));
+const oneCase = { brief: "A reader.", checks: { hardRules: [], strong: [], weighed: [], nonObviousRequired: false }, picks: [{ title: "T", author: "A", card: "why", facts }] };
+
+test("the judge runs at temperature 0, and an identical question is answered from memory for free", async () => {
+  await withJudgeReplies(judgeAnswer, async (calls, bodies) => {
+    const first = await judgeCase(oneCase);
+    assert.equal(bodies[0].temperature, 0);
+    assert.equal(first.reused, false);
+    const again = await judgeCase(oneCase);
+    assert.equal(calls(), 1, "the second identical question isn't paid for");
+    assert.equal(again.reused, true);
+    assert.equal(again.picks[0].relevance, "good");
+    await judgeCase({ ...oneCase, picks: [{ ...oneCase.picks[0], title: "Another book" }] });
+    assert.equal(calls(), 2, "a changed pick is asked afresh");
+    process.env.NO_CACHE = "1";
+    await judgeCase(oneCase);
+    assert.equal(calls(), 3, "NO_CACHE=1 asks afresh");
+  });
+});
+
+test("running out of API credit stops with a clear error instead of failing reader by reader", async () => {
+  const broke = () => new Response(JSON.stringify({ type: "error", error: { type: "invalid_request_error", message: "Your credit balance is too low to access the Anthropic API." } }), { status: 400 });
+  await withJudgeReplies(broke, async () => {
+    await assert.rejects(judgeCase(oneCase), OutOfCreditsError);
+  });
 });
 
 test("second-judge agreement counts picks landing in the same bucket", () => {

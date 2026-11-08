@@ -2,17 +2,21 @@
 // Reads the results files evals/run.mjs wrote, looks up every pick's catalog facts, has the judge
 // score each reader's picks, optionally runs the plain-Claude baseline and a second judge, then
 // prints the scorecard and writes a scored JSON file and a review page to evals/results/.
-// Costs money (the judge is Opus): about $1 per run of 21 readers, plus about $1 for the baseline.
+// Costs money (the judge is Opus) only for questions it hasn't answered before: a first scoring of
+// 21 readers is about $1 plus about $1 for plain Claude; rescoring unchanged picks is free.
 //
 //   node --env-file=.env.local --import ./tests/support/resolve.mts evals/score.mts
 // Settings:
 //   RUNS=profile-v1-run1.json,profile-v1-run2.json   results files in evals/results/ (required)
 //   BASELINE=1        also run and score plain Claude on the same readers
 //   SECOND_JUDGE=5    cross-check this many readers with the second judge (default 5; 0 = off)
+//   NO_CACHE=1        ask the judge afresh instead of reusing remembered answers (to measure its
+//                     randomness); by default an identical question is answered from evals/results/cache/
 //   OUT=baseline-nov  name for the scored file and review page (default: first run's name)
 //
 // One failed judge call never loses a paid run: that reader is recorded as unscored with the
-// error, and the scored file is saved as each run finishes.
+// error, and the scored file is saved as each run finishes. Out of API credit, it stops at once;
+// answers so far are remembered, so the rerun only pays for the rest.
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -24,6 +28,7 @@ import { JUDGE_VERSION, judgeCase, type CaseChecks } from "./judge/judge";
 import { plainClaudePicks } from "./judge/baseline";
 import { judgeAgreement, scorecard, type ScoredCase, type ScoredRun } from "./judge/scorecard";
 import { reviewPage } from "./judge/review";
+import { OutOfCreditsError } from "./judge/errors";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const RESULTS = path.join(HERE, "results");
@@ -110,8 +115,9 @@ async function scoreEngineRun(name: string, results: RunResult[]): Promise<Score
     try {
       base.score = await judgeCase({ brief: briefOf(def), checks, picks: judgePicks });
       if (secondN > 0 && i < secondN) base.second = await judgeCase({ brief: briefOf(def), checks, picks: judgePicks, job: "evalSecondJudge" });
-      console.log(`[${name}] ${r.id} scored`);
+      console.log(`[${name}] ${r.id} scored${base.score.reused ? " (remembered)" : ""}`);
     } catch (err) {
+      if (err instanceof OutOfCreditsError) throw err;
       base.judgeError = errText(err);
       console.error(`[${name}] ${r.id} NOT scored: ${base.judgeError}`);
     }
@@ -130,8 +136,9 @@ async function scoreBaseline(ids: Set<string>): Promise<ScoredRun> {
       base.ok = base.picks.length === 3;
       base.serverMs = ms;
       base.score = await judgeCase({ brief: briefOf(def), checks, picks: base.picks });
-      console.log(`[plain Claude] ${def.id} scored`);
+      console.log(`[plain Claude] ${def.id} scored${base.score.reused ? " (remembered)" : ""}`);
     } catch (err) {
+      if (err instanceof OutOfCreditsError) throw err;
       base.judgeError = errText(err);
       console.error(`[plain Claude] ${def.id} NOT scored: ${base.judgeError}`);
     }
@@ -162,13 +169,20 @@ function save() {
   return { rows, agreement };
 }
 
-for (const [i, raw] of runsRaw.entries()) {
-  engineRuns.push(await scoreEngineRun(runFiles[i].replace(/\.json$/, ""), raw.results));
-  save();
-}
-if (process.env.BASELINE === "1") {
-  // Plain Claude answers exactly the readers the engine runs covered.
-  baseline = await scoreBaseline(new Set(engineRuns.flatMap((r) => r.cases.map((c) => c.id))));
+try {
+  for (const [i, raw] of runsRaw.entries()) {
+    engineRuns.push(await scoreEngineRun(runFiles[i].replace(/\.json$/, ""), raw.results));
+    save();
+  }
+  if (process.env.BASELINE === "1") {
+    // Plain Claude answers exactly the readers the engine runs covered.
+    baseline = await scoreBaseline(new Set(engineRuns.flatMap((r) => r.cases.map((c) => c.id))));
+  }
+} catch (err) {
+  if (!(err instanceof OutOfCreditsError)) throw err;
+  // Every answer already paid for is remembered, so the rerun after a top-up only pays for the rest.
+  console.error(`\nStopped: ${err.message}`);
+  process.exit(1);
 }
 const { rows, agreement } = save();
 
