@@ -49,13 +49,13 @@ export async function remember<T>(
   kind: string,
   parts: unknown,
   ask: () => Promise<T>,
-  opts: { fresh?: boolean; keep?: boolean } = {},
+  opts: { fresh?: boolean; keep?: boolean | ((value: T) => boolean) } = {},
 ): Promise<{ value: T; reused: boolean }> {
   const key = cacheKey(parts);
   const s = store(kind);
   if (!opts.fresh && key in s) return { value: s[key] as T, reused: true };
   const value = await ask();
-  if (opts.keep === false) return { value, reused: false };
+  if (opts.keep === false || (typeof opts.keep === "function" && !opts.keep(value))) return { value, reused: false };
   s[key] = value;
   // Written to a temporary file, then swapped in, so stopping mid-write can't leave a broken file.
   const f = file(kind);

@@ -6,7 +6,14 @@
 // A match needs both the title and the author's surname to agree, so a made-up title can't borrow
 // another book's facts. A network failure is reported as an error (and retried, and never cached
 // by the caller), never as "this book doesn't exist".
+import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { hcGraphql } from "@/lib/engine/sources/hardcover/preparePool";
+
+// A fingerprint of this file: saved catalog facts are reused only while the lookup rules are
+// unchanged, so a fix here re-looks-up every book.
+export const CATALOG_VERSION = createHash("sha256").update(readFileSync(fileURLToPath(import.meta.url))).digest("hex").slice(0, 10);
 
 const OL = "https://openlibrary.org";
 const UA = "book-recommender-evals/0.1 (https://github.com/grdengnome/book-recommender)";
@@ -58,6 +65,9 @@ export function authorsMatch(wanted: string, candidates: string[]): boolean {
 //   "John Ronald Reuel Tolkien"; "Ursula K. Le Guin" and "Ursula Le Guin").
 // Accents, capitals, punctuation and hyphens are already ignored by norm().
 export function authorsMatchStrict(wanted: string, candidates: string[]): boolean {
+  // Co-authors ("Amal El-Mohtar and Max Gladstone"): any one of them matching is enough.
+  const people = wanted.split(/\s*(?:,|&|\band\b)\s*/i).filter((p) => p.trim().split(/\s+/).length > 1);
+  if (people.length > 1) return people.some((p) => authorsMatchStrict(p, candidates));
   const w = norm(wanted).split(" ").filter(Boolean);
   if (!w.length) return false;
   const s = w[w.length - 1];

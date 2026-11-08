@@ -10,6 +10,7 @@
 //   RUNS=profile-v1-run1.json,profile-v1-run2.json   results files in evals/results/ (required)
 //   BASELINE=1        also run and score plain Claude on the same readers
 //   SECOND_JUDGE=5    cross-check this many readers with the second judge (default 5; 0 = off)
+//   REFRESH_FACTS=1   look every book up in the catalogs again instead of reusing saved facts
 //   NO_CACHE=1        ask the judge afresh instead of reusing remembered answers (to measure its
 //                     randomness); by default an identical question is answered from evals/results/cache/
 //   OUT=baseline-nov  name for the scored file and review page (default: first run's name)
@@ -23,7 +24,8 @@ import { fileURLToPath } from "node:url";
 import { renderBrief } from "@/lib/engine/profile/renderBrief";
 import { modelFor } from "@/lib/ai/gateway";
 import type { TasteProfile } from "@/lib/contracts/tasteProfile";
-import { lookupFacts, type CatalogFacts } from "./judge/catalog";
+import { CATALOG_VERSION, lookupFacts, type CatalogFacts } from "./judge/catalog";
+import { remember } from "./judge/cache";
 import { JUDGE_VERSION, judgeCase, type CaseChecks } from "./judge/judge";
 import { plainClaudePicks } from "./judge/baseline";
 import { judgeAgreement, scorecard, type ScoredCase, type ScoredRun } from "./judge/scorecard";
@@ -46,15 +48,25 @@ interface RunResult { id: string; picks?: EnginePick[]; error?: unknown; driverM
 const NO_CHECKS: CaseChecks = { hardRules: [], strong: [], weighed: [], nonObviousRequired: false };
 const errText = (err: unknown) => (err instanceof Error ? err.message : String(err)).slice(0, 300);
 
-// Complete lookups are shared across runs; failed ones (or ones missing Hardcover's evidence
-// because its lookup failed) aren't kept, so they're tried again.
-const factsCache = new Map<string, CatalogFacts>();
-async function facts(title: string, author: string): Promise<CatalogFacts> {
+// Catalog facts are saved and reused (evals/results/cache/facts.json) while the lookup rules are
+// unchanged: rescoring sees exactly the same evidence (reader counts drift daily, which would
+// otherwise change every judge question) and skips the slow lookups. Failed lookups, or ones
+// missing Hardcover's evidence, aren't kept. REFRESH_FACTS=1 looks every book up again.
+const factsMemo = new Map<string, Promise<CatalogFacts>>();
+function facts(title: string, author: string): Promise<CatalogFacts> {
   const key = `${title}|${author}`.toLowerCase();
-  const hit = factsCache.get(key);
-  if (hit) return hit;
-  const f = await lookupFacts(title, author);
-  if (f.status !== "error" && !f.hardcoverError) factsCache.set(key, f);
+  let f = factsMemo.get(key);
+  if (!f) {
+    f = remember("facts", { v: CATALOG_VERSION, title, author }, () => lookupFacts(title, author), {
+      fresh: process.env.REFRESH_FACTS === "1",
+      keep: (x) => x.status !== "error" && !x.hardcoverError,
+    }).then((r) => {
+      // A failed lookup is retried for the next pick that needs it, not reused within the run.
+      if (r.value.status === "error" || r.value.hardcoverError) factsMemo.delete(key);
+      return r.value;
+    });
+    factsMemo.set(key, f);
+  }
   return f;
 }
 

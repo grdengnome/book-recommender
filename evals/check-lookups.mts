@@ -24,6 +24,9 @@ for (const r of runs) for (const c of r.cases) for (const p of c.picks) picks.se
 
 const show = (f: CatalogFacts) => `${f.status}${f.source ? ` via ${f.source}` : ""}${f.title ? ` "${f.title}"` : ""}${f.author ? ` by ${f.author}` : ""}${f.pages ? `, ${f.pages}pp` : ""}${f.hardcoverReaders !== undefined ? `, ${f.hardcoverReaders} readers` : ""}`;
 
+// Reader counts grow a little every day; only a real jump (another record of the book) is listed.
+const readersMoved = (a?: number, b?: number) => (a === undefined) !== (b === undefined) || (a !== undefined && b !== undefined && Math.abs(a - b) > Math.max(10, 0.1 * Math.max(a, b)));
+
 let lost = 0, gained = 0, changed = 0, same = 0;
 for (const p of picks.values()) {
   const now = await lookupFacts(p.title, p.author);
@@ -35,7 +38,7 @@ for (const p of picks.values()) {
   } else if (!was.found && now.found) {
     gained++;
     console.log(`FOUND   "${p.title}" by ${p.author}\n        now: ${show(now)}`);
-  } else if (was.found && now.found && (was.source !== now.source || was.title !== now.title || was.pages !== now.pages || was.hardcoverReaders !== now.hardcoverReaders)) {
+  } else if (was.found && now.found && (was.source !== now.source || was.title !== now.title || was.pages !== now.pages || readersMoved(was.hardcoverReaders, now.hardcoverReaders))) {
     changed++;
     console.log(`CHANGED "${p.title}" by ${p.author}\n        was: ${show(was)}\n        now: ${show(now)}`);
   } else same++;

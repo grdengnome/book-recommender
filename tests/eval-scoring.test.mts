@@ -198,6 +198,8 @@ test("the strict author check (title-only searches) accepts real naming differen
   ];
   for (const [wanted, cand] of same) assert.ok(authorsMatchStrict(wanted, [cand]), `${wanted} should match ${cand}`);
   assert.ok(authorsMatchStrict("Natsume Soseki", ["夏目漱石", "Natsume Sōseki"]), "any listed spelling can match");
+  assert.ok(authorsMatchStrict("Amal El-Mohtar and Max Gladstone", ["Max Gladstone"]), "any one co-author can match");
+  assert.ok(authorsMatchStrict("Douglas Preston & Lincoln Child", ["Child, Lincoln"]));
   const different: Array<[string, string]> = [
     ["Zadie Smith", "Ali Smith"],
     ["Marilynne Robinson", "Kim Stanley Robinson"],
