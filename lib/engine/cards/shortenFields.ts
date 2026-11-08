@@ -95,6 +95,7 @@ Rules:
 - Keep the meaning and the tone.
 - Only cut or tighten. Add nothing new: no new facts, claims, names, or words that aren't in the original.
 - Keep it a natural, complete line, not a clipped fragment.
+- Keep any part that says how the book differs from what the reader asked for (for example "it's darker than you asked for"); cut elsewhere.
 
 ${blocks.join("\n\n")}
 
