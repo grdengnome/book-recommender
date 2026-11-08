@@ -1,8 +1,49 @@
 # Eval Log
 
-> **Status:** Living · Findings from each eval run, newest first. Last reviewed Nov 1, 2026.
+> **Status:** Living · Findings from each eval run, newest first. Last reviewed Nov 7, 2026.
 
 Running log of quality findings, known limitations, and decisions made while evaluating recommendation output against docs/quality/eval-set.md's rubric. Newest entries at the top.
+
+---
+
+## 2026-11-06 — Baseline: today's engine on the 21-reader readiness set (profile-v1, run 1)
+
+**Change:** none to the engine. First run of the readiness set (`SET=profile-v1 TAG_PREFIX=run1`), scored by the calibrated Opus judge against the [readiness bar](./readiness-bar.md), with plain Claude on the same readers. Run by Grim in his Codespace on `main` and `evals/measurement-fixes`. **Spend: about $14** (engine run $2.62; the rest is four scorings and three calibrations, most of it repairing the eval tools; see the efficiency changes below).
+
+**Verdict: not ready.** Final scoring (`profile-v1-run1-rescored2`, every reader scored, full catalog evidence):
+
+| | Result | Bar |
+|---|---|---|
+| Reliability | 21/21 readers got 3 picks | ≥95% ✔ |
+| Speed | median 35.5s · 9 in 10 within 68.2s | ≤20s · ≤30s ✘ |
+| Relevance | 79% good+ · 0 fail · 21/21 readers 2 of 3 | ≥80% ✘ (just) |
+| Beats plain Claude | +7.9 points (79% vs 71%, same 21 readers) | ≥+10 ✘ |
+| Hard rules | 2 broken of 63 (both page counts) · 10 unproven | 100% shown ✘ |
+| Real and correct | 0 not found · 4 card errors | 0 ✘ |
+| Strong preferences | 62% of checkable (6 couldn't be verified) | ≥90% ✘ |
+| Weighed preferences | 65% of checkable (39 couldn't be verified; "ending" never checkable) | ≥75% ✘ |
+| Non-obvious where required | 5/5 readers | ✔ |
+| Safety | 1/1 | ✔ |
+| Doorways | feeling 87% · moment 89% · surprise 83% · loved 72% · ingredient 73% | each ≥80% |
+
+**Engine findings (the improvement list):**
+- **Speed** is the biggest gap. Three readers took about 70s and cost two to three times the median (prof-01, -02, -08): likely restarted generations; check their traces first.
+- **Page counts:** both broken hard rules are lengths for the "short" reader (351 and 157 pages). The engine doesn't fetch page counts yet.
+- **Cards bend the book to fit the request:** 4 claims the catalog contradicts (*Candide* as "pure escape, never dread"; *A Kiss Before Dying* as "rather than grim", tagged dark and sad; two cards for prof-01 promising lush prose and an older woman at the centre). An honesty problem; near the top of the list.
+- **Preferences** are the main quality gap; mood words and pace most often missed.
+- **Repeats:** *A Gentleman in Moscow*, *We Have Always Lived in the Castle* and *Satantango* each went to two readers (the row flags 3+).
+
+**The eval tools needed fixing before these numbers meant anything.** The first scoring said 81% relevance and +15 over plain Claude, flattered by missing evidence:
+- Hardcover refuses title pattern queries, so every judge lookup failed silently (no genre or mood tags, no reader counts). Now found through its search endpoint, paced under its rate limit; failures show on the scorecard.
+- Open Library lists many translated authors in their own script (夏目漱石), so 8 real books looked "not found". Romanised names now match; "&" matches "and".
+- Missing evidence counted as an unhonoured preference. Now "can't tell" is reported, not scored (decision 3.11).
+- Plain Claude's two failed readers were silently dropped from one side only. Now compared on shared readers, retried once.
+
+**Judge randomness:** the same picks scored twice with near-identical evidence gave 75% and 79%. 53 of 63 picks kept their grade; 5 crossed the good line, 4 of them with identical evidence. On a single doorway (5 readers) the swing reached 13 points. Unchanged picks now reuse their remembered verdict, so they can't flip between scorings (the judge's model refuses a temperature setting). Until a fresh noise check says otherwise, a change under about 5 points on the headline, or any single-doorway change, isn't evidence on its own.
+
+**Judge checks:** calibration 10/10 after each judge change; second judge (Sonnet 5) agreed on 12 of 15 picks.
+
+**Efficiency (Nov 7, so evals don't drive cost):** remembered answers (identical judge questions and plain-Claude requests are free), plain Claude's answers fixed until its prompt or model changes, catalog facts saved, scoring stops cleanly when credit runs out or a request is refused. A typical "did this engine change help?" check becomes a narrow engine run plus judging only the changed picks. Batch scoring (50% off) is next, in its own PR.
 
 ---
 

@@ -20,8 +20,8 @@
 | Bar | Pass mark |
 |---|---|
 | **Relevance** (the hard bar) | At least 80% of all picks good or excellent; none fail; every case has at least 2 of its 3 picks good or better |
-| Strong preferences (mood; standalone or series) | Honoured at least 90% of the time. Each mood word is its own check ("tense, playful" is two); "partly" counts as not honoured |
-| Weighed preferences (pace, style, setting…) | Reflected at least 75% of the time, pooled across all of them; "partly" counts as not reflected. Each preference type's own rate is listed too, and any type under 50% is flagged as a problem to fix |
+| Strong preferences (mood; standalone or series) | Honoured at least 90% of the time. Each mood word is its own check ("tense, playful" is two); "partly" counts as not honoured. Checks the catalog facts can't settle ("can't tell") are reported, not scored: the rate is out of the checkable ones, and at least half must be checkable or the bar misses ([decision 3.11](../decisions.md)) |
+| Weighed preferences (pace, style, setting…) | Reflected at least 75% of the time, pooled across all of them; "partly" counts as not reflected; "can't tell" is reported, not scored, as above. Each preference type's own rate is listed too, and any type under 50% is flagged as a problem to fix |
 | Non-obvious, **only for readers who lean surprising or ask for niche** | At least 2 of 3 picks good or better on non-obviousness ([decision 2.24](../decisions.md)) |
 
 ## Tracked, not blocking

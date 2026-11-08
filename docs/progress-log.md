@@ -943,3 +943,20 @@ Alongside: dependency checkup PR (npm reports 25 package vulnerabilities); claim
 1. Baseline run in the Codespace: `ENGINE_TRACE=1 npm run dev` (terminal 1), `SET=profile-v1 TAG_PREFIX=run1 node evals/run.mjs` (terminal 2, ~12 min, ~$2), then `RUNS=profile-v1-run1.json BASELINE=1 node --env-file=.env.local --import ./tests/support/resolve.mts evals/score.mts` (~10 min, ~$2–3). Paste the scorecard; gut-check the review page; log in the eval log; then run 2.
 2. Engine improvements one at a time against the baseline: page counts, profile-driven search for speed, code-enforced hard rules (avoid judged by meaning, decision 3.10), a prompt written for the profile.
 3. Then PR 5 app skeleton, PR 6 store and trust basics, then the pilot.
+
+---
+
+## November 6, 2026 — Baseline run; the eval tools needed fixing before its numbers meant anything
+
+**Conclusion:** Today's engine, on the 21 new readers: reliable (21/21), clearly too slow (median 35.5s, 9 in 10 within 68s), and about **75% relevant** once the judge had full evidence (bar: 80%). The first scoring said 81%, flattered by broken lookups. Real engine gaps: speed, page counts (2 broken length rules), preferences (strong 66% of checkable, weighed 61%), the ingredient doorway (60%), and **cards that bend a book to fit the request** (4 claims the catalog contradicts, e.g. *Candide* as "pure escape").
+
+- **Measurement fixes** (branch `evals/measurement-fixes`, PR next session): Hardcover refused the judge's title queries, so every lookup failed silently (now via its search endpoint, paced under its rate limit, failures shown on the scorecard); Open Library lists translated authors in their own script (romanised names now matched); "&" matches "and"; plain Claude is compared on the same readers and retried once; calibration is stale when the judge's instructions change.
+- **Decision 3.11:** preferences the catalog can't settle are reported ("couldn't verify N"), not scored; at least half must be checkable. Judge recalibrated 10/10.
+- **The judge's grade changes had stated reasons** (new mood and genre tags), not noise; a third scoring of the same run measures the judge's own randomness.
+
+**Next:**
+1. Analyse `profile-v1-run1-rescored2` (judge noise: picks whose grade changed with near-identical evidence; final baseline numbers; fair plain-Claude comparison). Write the eval-log entry; open the PR for `evals/measurement-fixes`.
+2. Run 2 of the engine (readiness bar asks for 2–3 runs).
+3. Engine improvements, one at a time against the baseline: honest cards (no claims the catalog contradicts), page counts, speed (the 70s readers first: check traces for retries), profile-driven search, a prompt written for the profile.
+4. Then PR 5 app skeleton, PR 6 store and trust basics, then the pilot.
+

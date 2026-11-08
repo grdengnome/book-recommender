@@ -2,28 +2,35 @@
 // Reads the results files evals/run.mjs wrote, looks up every pick's catalog facts, has the judge
 // score each reader's picks, optionally runs the plain-Claude baseline and a second judge, then
 // prints the scorecard and writes a scored JSON file and a review page to evals/results/.
-// Costs money (the judge is Opus): about $1 per run of 21 readers, plus about $1 for the baseline.
+// Costs money (the judge is Opus) only for questions it hasn't answered before: a first scoring of
+// 21 readers is about $1 plus about $1 for plain Claude; rescoring unchanged picks is free.
 //
 //   node --env-file=.env.local --import ./tests/support/resolve.mts evals/score.mts
 // Settings:
 //   RUNS=profile-v1-run1.json,profile-v1-run2.json   results files in evals/results/ (required)
 //   BASELINE=1        also run and score plain Claude on the same readers
 //   SECOND_JUDGE=5    cross-check this many readers with the second judge (default 5; 0 = off)
+//   REFRESH_FACTS=1   look every book up in the catalogs again instead of reusing saved facts
+//   NO_CACHE=1        ask the judge afresh instead of reusing remembered answers (to measure its
+//                     randomness); by default an identical question is answered from evals/results/cache/
 //   OUT=baseline-nov  name for the scored file and review page (default: first run's name)
 //
 // One failed judge call never loses a paid run: that reader is recorded as unscored with the
-// error, and the scored file is saved as each run finishes.
+// error, and the scored file is saved as each run finishes. Out of API credit, it stops at once;
+// answers so far are remembered, so the rerun only pays for the rest.
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { renderBrief } from "@/lib/engine/profile/renderBrief";
 import { modelFor } from "@/lib/ai/gateway";
 import type { TasteProfile } from "@/lib/contracts/tasteProfile";
-import { lookupFacts, type CatalogFacts } from "./judge/catalog";
-import { judgeCase, type CaseChecks } from "./judge/judge";
+import { CATALOG_VERSION, lookupFacts, type CatalogFacts } from "./judge/catalog";
+import { remember } from "./judge/cache";
+import { JUDGE_VERSION, judgeCase, type CaseChecks } from "./judge/judge";
 import { plainClaudePicks } from "./judge/baseline";
 import { judgeAgreement, scorecard, type ScoredCase, type ScoredRun } from "./judge/scorecard";
 import { reviewPage } from "./judge/review";
+import { StopScoringError } from "./judge/errors";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const RESULTS = path.join(HERE, "results");
@@ -41,14 +48,25 @@ interface RunResult { id: string; picks?: EnginePick[]; error?: unknown; driverM
 const NO_CHECKS: CaseChecks = { hardRules: [], strong: [], weighed: [], nonObviousRequired: false };
 const errText = (err: unknown) => (err instanceof Error ? err.message : String(err)).slice(0, 300);
 
-// Successful lookups are shared across runs; failures aren't cached, so they're retried.
-const factsCache = new Map<string, CatalogFacts>();
-async function facts(title: string, author: string): Promise<CatalogFacts> {
+// Catalog facts are saved and reused (evals/results/cache/facts.json) while the lookup rules are
+// unchanged: rescoring sees exactly the same evidence (reader counts drift daily, which would
+// otherwise change every judge question) and skips the slow lookups. Failed lookups, or ones
+// missing Hardcover's evidence, aren't kept. REFRESH_FACTS=1 looks every book up again.
+const factsMemo = new Map<string, Promise<CatalogFacts>>();
+function facts(title: string, author: string): Promise<CatalogFacts> {
   const key = `${title}|${author}`.toLowerCase();
-  const hit = factsCache.get(key);
-  if (hit) return hit;
-  const f = await lookupFacts(title, author);
-  if (f.status !== "error") factsCache.set(key, f);
+  let f = factsMemo.get(key);
+  if (!f) {
+    f = remember("facts", { v: CATALOG_VERSION, title, author }, () => lookupFacts(title, author), {
+      fresh: process.env.REFRESH_FACTS === "1",
+      keep: (x) => x.status !== "error" && !x.hardcoverError,
+    }).then((r) => {
+      // A failed lookup is retried for the next pick that needs it, not reused within the run.
+      if (r.value.status === "error" || r.value.hardcoverError) factsMemo.delete(key);
+      return r.value;
+    });
+    factsMemo.set(key, f);
+  }
   return f;
 }
 
@@ -67,7 +85,11 @@ async function pool<T, R>(items: T[], n: number, fn: (t: T, i: number) => Promis
 
 const runFiles = (process.env.RUNS ?? "").split(",").map((s) => s.trim()).filter(Boolean);
 if (!runFiles.length) throw new Error("Set RUNS to one or more results files in evals/results/, e.g. RUNS=profile-v1-run1.json");
-const secondN = Number(process.env.SECOND_JUDGE ?? 5);
+// The second judge only means something as a different model: the same model would agree with
+// itself (and answer from the same remembered verdicts), so it's skipped then.
+const sameJudge = modelFor("evalSecondJudge") === modelFor("evalJudge");
+if (sameJudge) console.warn("Second judge skipped: it's set to the same model as the judge");
+const secondN = sameJudge ? 0 : Number(process.env.SECOND_JUDGE ?? 5);
 const out = process.env.OUT || runFiles[0].replace(/\.json$/, "");
 
 const runsRaw = runFiles.map((f) => JSON.parse(readFileSync(path.join(RESULTS, f), "utf8")) as { set: string; results: RunResult[] });
@@ -110,8 +132,9 @@ async function scoreEngineRun(name: string, results: RunResult[]): Promise<Score
     try {
       base.score = await judgeCase({ brief: briefOf(def), checks, picks: judgePicks });
       if (secondN > 0 && i < secondN) base.second = await judgeCase({ brief: briefOf(def), checks, picks: judgePicks, job: "evalSecondJudge" });
-      console.log(`[${name}] ${r.id} scored`);
+      console.log(`[${name}] ${r.id} scored${base.score.reused ? " (remembered)" : ""}`);
     } catch (err) {
+      if (err instanceof StopScoringError) throw err;
       base.judgeError = errText(err);
       console.error(`[${name}] ${r.id} NOT scored: ${base.judgeError}`);
     }
@@ -125,13 +148,15 @@ async function scoreBaseline(ids: Set<string>): Promise<ScoredRun> {
     const checks = def.checks ?? NO_CHECKS;
     const base: ScoredCase = { id: def.id, label: def.label, doorway: def.profile?.doorway ?? "", checks, ok: false, picks: [], score: null };
     try {
-      const { picks: raw, ms } = await plainClaudePicks(briefOf(def));
+      const { picks: raw, ms, reused } = await plainClaudePicks(briefOf(def));
+      base.picksReused = reused;
       base.picks = await Promise.all(raw.map(async (p) => ({ title: p.title, author: p.author, card: p.why, facts: await facts(p.title, p.author) })));
       base.ok = base.picks.length === 3;
       base.serverMs = ms;
       base.score = await judgeCase({ brief: briefOf(def), checks, picks: base.picks });
-      console.log(`[plain Claude] ${def.id} scored`);
+      console.log(`[plain Claude] ${def.id} scored${base.score.reused ? " (remembered)" : ""}`);
     } catch (err) {
+      if (err instanceof StopScoringError) throw err;
       base.judgeError = errText(err);
       console.error(`[plain Claude] ${def.id} NOT scored: ${base.judgeError}`);
     }
@@ -141,13 +166,15 @@ async function scoreBaseline(ids: Set<string>): Promise<ScoredRun> {
 }
 
 const calPath = path.join(RESULTS, "calibration.json");
-const cal = existsSync(calPath) ? (JSON.parse(readFileSync(calPath, "utf8")) as { correct: number; total: number; passed: boolean; model: string }) : null;
+const cal = existsSync(calPath) ? (JSON.parse(readFileSync(calPath, "utf8")) as { correct: number; total: number; passed: boolean; model: string; judgeVersion?: string }) : null;
 const judgeModel = modelFor("evalJudge");
 const calibration = !cal
   ? "Judge calibration: not run (run evals/calibrate.mts first)"
   : cal.model !== judgeModel
     ? `Judge calibration: STALE (calibrated ${cal.model}, judging with ${judgeModel}; rerun evals/calibrate.mts)`
-    : `Judge calibration: ${cal.correct}/${cal.total} (${cal.passed ? "passed" : "FAILED: don't trust these scores"}, ${cal.model})`;
+    : cal.judgeVersion !== JUDGE_VERSION
+      ? "Judge calibration: STALE (the judge's instructions changed since it was calibrated; rerun evals/calibrate.mts)"
+      : `Judge calibration: ${cal.correct}/${cal.total} (${cal.passed ? "passed" : "FAILED: don't trust these scores"}, ${cal.model})`;
 
 const engineRuns: ScoredRun[] = [];
 let baseline: ScoredRun | undefined;
@@ -160,13 +187,20 @@ function save() {
   return { rows, agreement };
 }
 
-for (const [i, raw] of runsRaw.entries()) {
-  engineRuns.push(await scoreEngineRun(runFiles[i].replace(/\.json$/, ""), raw.results));
-  save();
-}
-if (process.env.BASELINE === "1") {
-  // Plain Claude answers exactly the readers the engine runs covered.
-  baseline = await scoreBaseline(new Set(engineRuns.flatMap((r) => r.cases.map((c) => c.id))));
+try {
+  for (const [i, raw] of runsRaw.entries()) {
+    engineRuns.push(await scoreEngineRun(runFiles[i].replace(/\.json$/, ""), raw.results));
+    save();
+  }
+  if (process.env.BASELINE === "1") {
+    // Plain Claude answers exactly the readers the engine runs covered.
+    baseline = await scoreBaseline(new Set(engineRuns.flatMap((r) => r.cases.map((c) => c.id))));
+  }
+} catch (err) {
+  if (!(err instanceof StopScoringError)) throw err;
+  // Every answer already paid for is remembered, so the rerun after a top-up only pays for the rest.
+  console.error(`\nStopped: ${err.message}`);
+  process.exit(1);
 }
 const { rows, agreement } = save();
 
