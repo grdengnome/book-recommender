@@ -50,6 +50,27 @@ export function authorsMatch(wanted: string, candidates: string[]): boolean {
   return !!s && candidates.some((c) => norm(c).split(" ").includes(s));
 }
 
+// A stricter author check for a search that had no author filter (title alone), where a common
+// title plus a common surname could pick the wrong book. A candidate matches when either:
+// - every part of the wanted name appears, in any order ("Kurlansky, Mark"; "Sōseki Natsume";
+//   "García Márquez, Gabriel"), or
+// - the surname appears and the first given name's initial agrees ("J.R.R. Tolkien" and
+//   "John Ronald Reuel Tolkien"; "Ursula K. Le Guin" and "Ursula Le Guin").
+// Accents, capitals, punctuation and hyphens are already ignored by norm().
+export function authorsMatchStrict(wanted: string, candidates: string[]): boolean {
+  const w = norm(wanted).split(" ").filter(Boolean);
+  if (!w.length) return false;
+  const s = w[w.length - 1];
+  return candidates.some((cand) => {
+    const c = norm(cand).split(" ").filter(Boolean);
+    if (w.every((t) => c.includes(t))) return true;
+    if (w.length < 2 || !c.includes(s)) return false;
+    // "Surname, Given" lists the given names after the comma; otherwise they come first.
+    const given = cand.includes(",") ? norm(cand.split(",").slice(1).join(" ")).split(" ").filter(Boolean) : c.filter((t) => t !== s);
+    return given.length > 0 && given[0][0] === w[0][0];
+  });
+}
+
 async function withRetry<T>(fn: () => Promise<T>): Promise<T> {
   let last: unknown;
   for (let attempt = 0; attempt < 3; attempt++) {
@@ -59,6 +80,7 @@ async function withRetry<T>(fn: () => Promise<T>): Promise<T> {
       last = err;
       // A refusal (400–499 other than 429 "slow down") won't change on retry: fail at once.
       if (/(status|HTTP) 4(?!29)\d\d/.test(err instanceof Error ? err.message : String(err))) break;
+      if (attempt === 2) break; // no point waiting after the last try
       const slowDown = /(status|HTTP) 429/.test(err instanceof Error ? err.message : String(err));
       await new Promise((r) => setTimeout(r, (slowDown ? 10_000 : 1000) * 2 ** attempt));
     }
@@ -120,7 +142,7 @@ function hcPaced<T>(fn: () => Promise<T>): Promise<T> {
 
 interface HcHit { document: { id: number | string; title: string; author_names?: string[] } }
 async function hardcoverBook(title: string, author: string): Promise<HcBook | undefined> {
-  if (!process.env.HARDCOVER_API_TOKEN) return undefined;
+  if (!process.env.HARDCOVER_API_TOKEN) throw new Error("HARDCOVER_API_TOKEN is not set");
   const found = await withRetry(() => hcPaced(() =>
     hcGraphql<{ search: { results: { hits?: HcHit[] } } }>(
       `query Find($q: String!) { search(query: $q, query_type: "Book", per_page: 10) { results } }`,
@@ -128,27 +150,37 @@ async function hardcoverBook(title: string, author: string): Promise<HcBook | un
       AbortSignal.timeout(TIMEOUT_MS),
     ),
   ));
-  const hit = (found.search?.results?.hits ?? []).find((h) => titlesMatch(h.document.title, title) && authorsMatch(author, h.document.author_names ?? []));
-  if (!hit) return undefined;
+  // Hardcover often holds several records of one book (editions, re-imports). Every matching
+  // record is fetched and the most-read one wins, so a famous book's real reader count is what
+  // the judge sees, not a duplicate's handful (which would make it look like a discovery).
+  const ids = (found.search?.results?.hits ?? [])
+    .filter((h) => titlesMatch(h.document.title, title) && authorsMatch(author, h.document.author_names ?? []))
+    .map((h) => Number(h.document.id));
+  if (!ids.length) return undefined;
   const data = await withRetry(() => hcPaced(() =>
     hcGraphql<{ books: HcBook[] }>(
-      `query Book($id: Int!) { books(where: { id: { _eq: $id } }, limit: 1) { title users_count pages release_year description contributions { author { name } } cached_tags } }`,
-      { id: Number(hit.document.id) },
+      `query Books($ids: [Int!]) { books(where: { id: { _in: $ids } }, order_by: { users_count: desc }, limit: 10) { title users_count pages release_year description contributions { author { name } } cached_tags } }`,
+      { ids },
       AbortSignal.timeout(TIMEOUT_MS),
     ),
   ));
-  return data.books[0];
+  return [...data.books].sort((a, b) => (b.users_count ?? 0) - (a.users_count ?? 0))[0];
 }
 
 // Open Library's own author search is strict about spelling ("Natsume Soseki" vs "Sōseki", a
 // translator listed first), so a last try searches by title alone and matches the author in code,
 // where accents are already ignored.
 async function openLibraryDoc(title: string, author: string): Promise<OlDoc | undefined> {
-  const tries = [...searchTitles(title).map((t) => ({ title: t, author, limit: "10" })), { title: mainTitle(title), limit: "30" }];
-  for (const t of tries) {
-    const params = new URLSearchParams({ ...t, fields: "key,title,author_name,author_alternative_name,first_publish_year,number_of_pages_median,subject,cover_i" });
+  const tries: Array<{ params: Record<string, string>; strict: boolean }> = [
+    ...searchTitles(title).map((t) => ({ params: { title: t, author, limit: "10" }, strict: false })),
+    // Last try: title alone, so the author check in code is the strict one.
+    { params: { title: mainTitle(title), limit: "30" }, strict: true },
+  ];
+  for (const { params: p, strict } of tries) {
+    const params = new URLSearchParams({ ...p, fields: "key,title,author_name,author_alternative_name,first_publish_year,number_of_pages_median,subject,cover_i" });
     const docs = ((await getJson(`${OL}/search.json?${params}`)) as { docs?: OlDoc[] }).docs ?? [];
-    const doc = docs.find((d) => titlesMatch(d.title, title) && authorsMatch(author, [...(d.author_name ?? []), ...(d.author_alternative_name ?? [])]));
+    const match = strict ? authorsMatchStrict : authorsMatch;
+    const doc = docs.find((d) => titlesMatch(d.title, title) && match(author, [...(d.author_name ?? []), ...(d.author_alternative_name ?? [])]));
     if (doc) return doc;
   }
   return undefined;

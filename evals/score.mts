@@ -46,14 +46,15 @@ interface RunResult { id: string; picks?: EnginePick[]; error?: unknown; driverM
 const NO_CHECKS: CaseChecks = { hardRules: [], strong: [], weighed: [], nonObviousRequired: false };
 const errText = (err: unknown) => (err instanceof Error ? err.message : String(err)).slice(0, 300);
 
-// Successful lookups are shared across runs; failures aren't cached, so they're retried.
+// Complete lookups are shared across runs; failed ones (or ones missing Hardcover's evidence
+// because its lookup failed) aren't kept, so they're tried again.
 const factsCache = new Map<string, CatalogFacts>();
 async function facts(title: string, author: string): Promise<CatalogFacts> {
   const key = `${title}|${author}`.toLowerCase();
   const hit = factsCache.get(key);
   if (hit) return hit;
   const f = await lookupFacts(title, author);
-  if (f.status !== "error") factsCache.set(key, f);
+  if (f.status !== "error" && !f.hardcoverError) factsCache.set(key, f);
   return f;
 }
 
@@ -72,7 +73,11 @@ async function pool<T, R>(items: T[], n: number, fn: (t: T, i: number) => Promis
 
 const runFiles = (process.env.RUNS ?? "").split(",").map((s) => s.trim()).filter(Boolean);
 if (!runFiles.length) throw new Error("Set RUNS to one or more results files in evals/results/, e.g. RUNS=profile-v1-run1.json");
-const secondN = Number(process.env.SECOND_JUDGE ?? 5);
+// The second judge only means something as a different model: the same model would agree with
+// itself (and answer from the same remembered verdicts), so it's skipped then.
+const sameJudge = modelFor("evalSecondJudge") === modelFor("evalJudge");
+if (sameJudge) console.warn("Second judge skipped: it's set to the same model as the judge");
+const secondN = sameJudge ? 0 : Number(process.env.SECOND_JUDGE ?? 5);
 const out = process.env.OUT || runFiles[0].replace(/\.json$/, "");
 
 const runsRaw = runFiles.map((f) => JSON.parse(readFileSync(path.join(RESULTS, f), "utf8")) as { set: string; results: RunResult[] });
@@ -131,7 +136,8 @@ async function scoreBaseline(ids: Set<string>): Promise<ScoredRun> {
     const checks = def.checks ?? NO_CHECKS;
     const base: ScoredCase = { id: def.id, label: def.label, doorway: def.profile?.doorway ?? "", checks, ok: false, picks: [], score: null };
     try {
-      const { picks: raw, ms } = await plainClaudePicks(briefOf(def));
+      const { picks: raw, ms, reused } = await plainClaudePicks(briefOf(def));
+      base.picksReused = reused;
       base.picks = await Promise.all(raw.map(async (p) => ({ title: p.title, author: p.author, card: p.why, facts: await facts(p.title, p.author) })));
       base.ok = base.picks.length === 3;
       base.serverMs = ms;

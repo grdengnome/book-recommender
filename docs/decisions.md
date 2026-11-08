@@ -2,7 +2,7 @@
 
 > **Status:** Living · Every product and architecture decision, and the paths rejected.
 
-*Covers decisions through the v0 engine, v0 product planning, the v0 scope and the repo restructure (November 6, 2026). Further decisions are added as they're made.*
+*Covers decisions through the v0 engine, v0 product planning, the v0 scope and the repo restructure (November 7, 2026). Further decisions are added as they're made.*
 
 The product and architecture decisions behind this recommender, and the paths I rejected. The [progress log](./progress-log.md) is the session-by-session diary; this file is the story told by decision. Each entry gives the decision and why, with a link to the full detail.
 
@@ -258,8 +258,12 @@ The full operating principles are in [question-flow-principles.md](./product/que
 
 
 ### 3.11 Preferences the evidence can't settle are reported, not scored
-**Decision:** The judge can answer "can't tell" (unknown) for a strong or weighed preference when the catalog facts can't settle it, such as how a book ends or its prose style. Those checks are reported ("couldn't verify N") and left out of the pass rate, which is out of the checkable verdicts. A bar can't pass on thin evidence: if fewer than half the checks are checkable, it misses. "Partly" still counts as not honoured, and hard rules stay strict (unproven is a miss, decision 3.9). The calibration records a fingerprint of the judge's instructions, so any change to them makes it stale.
+**Decision:** The judge can answer "can't tell" (unknown) for a strong or weighed preference when the catalog facts can't settle it, such as how a book ends or its prose style. Those checks are reported ("couldn't verify N") and left out of the pass rate, which is out of the checkable verdicts. A bar can't pass on thin evidence: if fewer than half the checks are checkable, it misses, and each rate also shows its worst case (every "can't tell" counted as a miss); a preference type that's mostly unverifiable is flagged. If Hardcover's lookup failed for more than 1 in 10 picks, the rows that lean on its tags (preferences, non-obvious) miss as "evidence incomplete". "Partly" still counts as not honoured, and hard rules stay strict (unproven is a miss, decision 3.9). The calibration records a fingerprint of the judge's instructions, so any change to them makes it stale.
 **Why:** The baseline's preference scores were mostly "partly" verdicts the judge explained as no evidence (36 strong, 66 weighed; only 3 and 12 contradicted). Counting missing evidence as a wrong pick measured how thin catalogs are, not the engine. Preferences aren't promises the way hard rules are. The same review found the judge's lookups were starving it: Hardcover refuses title pattern queries (every lookup failed silently, so no tags or reader counts reached the judge), and Open Library lists many translated authors in their own script; both fixed, and a failed Hardcover lookup now shows on the scorecard. ([progress log, Nov 6](./progress-log.md))
+
+### 3.12 Evals are efficient by design and don't drive cost
+**Decision:** No eval budget target; instead nothing paid is bought twice. Every judge answer and plain-Claude answer is remembered (keyed on the full question: judge fingerprint, model, brief, checks, picks and their catalog facts), so a rescore only pays for picks that changed and unchanged picks can't change grade by chance. Plain Claude's answers stay fixed until its prompt or model changes. The judge runs at temperature 0. The second judge is skipped if it's set to the judge's own model. Scoring stops at once when API credit runs out. Engine changes are checked on narrow reader subsets, with full runs for milestones. Batch scoring (50% off) follows in its own PR.
+**Why:** The Nov 6 baseline cost about $14, mostly scorings that re-bought identical answers, and two scorings of the same picks differed by 4 points of relevance from the judge's randomness alone. Remembering answers removes both the cost and that noise for unchanged picks, keeping results comparable to an unrestricted budget. Reviewed by an independent agent before merging. ([eval log, Nov 6](./quality/eval-log.md))
 ---
 
 ## 4. Defining "non-obvious"

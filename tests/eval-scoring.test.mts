@@ -6,11 +6,11 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { align, judgeCase, lengthVerdict, type CaseScore, type Grade, type PickScore } from "../evals/judge/judge";
 import { OutOfCreditsError } from "../evals/judge/errors";
-import { mkdtempSync } from "node:fs";
+import { existsSync, mkdtempSync, readdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { authorsMatch, lookupFacts, titlesMatch } from "../evals/judge/catalog";
-import { judgeAgreement, preferenceRow, scorecard, type ScoredCase, type ScoredRun } from "../evals/judge/scorecard";
+import { authorsMatch, authorsMatchStrict, lookupFacts, titlesMatch } from "../evals/judge/catalog";
+import { judgeAgreement, preferenceRow, scorecard, withEvidence, type ScoredCase, type ScoredRun } from "../evals/judge/scorecard";
 import { reviewPage } from "../evals/judge/review";
 
 const facts = { status: "found" as const, found: true, subjects: [], tags: [], description: "" };
@@ -146,19 +146,64 @@ test("Hardcover is found through its search endpoint, then its tags are fetched 
   });
 });
 
+test("Hardcover's most-read record of a book wins over a duplicate with few readers", async () => {
+  const hc = (query: string) => query.includes("search(")
+    ? new Response(JSON.stringify({ data: { search: { results: { hits: [
+      { document: { id: 7, title: "Kokoro", author_names: ["Natsume Sōseki"] } },
+      { document: { id: 8, title: "Kokoro", author_names: ["Natsume Soseki"] } },
+    ] } } } }))
+    : new Response(JSON.stringify({ data: { books: [
+      { title: "Kokoro", users_count: 14, pages: 200, release_year: 2010, description: "", contributions: [], cached_tags: {} },
+      { title: "Kokoro", users_count: 5000, pages: 248, release_year: 1914, description: "", contributions: [], cached_tags: {} },
+    ] } }));
+  await withCatalogs({ ol: () => [], hc }, async () => {
+    const f = await lookupFacts("Kokoro", "Natsume Soseki");
+    assert.equal(f.hardcoverReaders, 5000);
+  });
+});
+
 test("a refused Hardcover lookup is reported on the facts, not silently dropped", async () => {
-  const hc = () => new Response(JSON.stringify({ error: "ilike and related operations are not permitted on this server." }), { status: 403 });
+  let calls = 0;
+  const hc = () => {
+    calls++;
+    return new Response(JSON.stringify({ error: "ilike and related operations are not permitted on this server." }), { status: 403 });
+  };
   await withCatalogs({ ol: () => [], hc }, async () => {
     const f = await lookupFacts("Kokoro", "Natsume Soseki");
     assert.equal(f.status, "not_found");
     assert.match(f.hardcoverError ?? "", /403/);
+    assert.equal(calls, 1, "a refusal isn't retried");
   });
 });
 
 test("preferences the facts can't settle are reported, not scored, and can't pass on thin evidence", () => {
-  assert.deepEqual(preferenceRow(8, 12, 2, 75), ["80% (8/10) · couldn't verify 2", true]);
-  assert.deepEqual(preferenceRow(6, 12, 2, 75), ["60% (6/10) · couldn't verify 2", false]);
+  assert.deepEqual(preferenceRow(8, 12, 2, 75), ["80% (8/10) · couldn't verify 2 (worst case 67%)", true]);
+  assert.deepEqual(preferenceRow(6, 12, 2, 75), ["60% (6/10) · couldn't verify 2 (worst case 50%)", false]);
+  assert.deepEqual(preferenceRow(9, 12, 0, 75), ["75% (9/12) · couldn't verify 0", true]);
   assert.deepEqual(preferenceRow(4, 12, 7, 75), ["not enough evidence: 5/12 checkable · couldn't verify 7", false]);
+});
+
+test("the strict author check (title-only searches) accepts real naming differences and rejects a different author", () => {
+  const same: Array<[string, string]> = [
+    ["Mark Kurlansky", "Kurlansky, Mark"],
+    ["Natsume Soseki", "Sōseki Natsume"],
+    ["Gabriel Garcia Marquez", "García Márquez, Gabriel"],
+    ["J.R.R. Tolkien", "John Ronald Reuel Tolkien"],
+    ["John Ronald Reuel Tolkien", "J. R. R. Tolkien"],
+    ["Ursula K. Le Guin", "Ursula Le Guin"],
+    ["Ursula Le Guin", "Le Guin, Ursula K."],
+    ["Amal El-Mohtar", "Amal El Mohtar"],
+    ["Colette", "Sidonie-Gabrielle Colette"],
+    ["Bora Chung", "Chung, Bora"],
+  ];
+  for (const [wanted, cand] of same) assert.ok(authorsMatchStrict(wanted, [cand]), `${wanted} should match ${cand}`);
+  assert.ok(authorsMatchStrict("Natsume Soseki", ["夏目漱石", "Natsume Sōseki"]), "any listed spelling can match");
+  const different: Array<[string, string]> = [
+    ["Zadie Smith", "Ali Smith"],
+    ["Marilynne Robinson", "Kim Stanley Robinson"],
+    ["Mark Kurlansky", "Kurlansky"],
+  ];
+  for (const [wanted, cand] of different) assert.ok(!authorsMatchStrict(wanted, [cand]), `${wanted} shouldn't match ${cand}`);
 });
 
 test("a reader with no picks counts against 'every reader 2 of 3' and safety", () => {
@@ -210,7 +255,7 @@ test("plain Claude is compared on the same readers: one it failed to answer is l
   failed.score = null;
   const plain: ScoredRun = { ...run([scored("a", ["good", "weak", "weak"]), failed], "plain Claude"), kind: "baseline" };
   const row = rowOf(scorecard([engine], plain), "Beats plain Claude on relevance");
-  assert.match(row.values[0], /^\+66\.7 points \(100% vs 33%, 1 readers; 1 left out/);
+  assert.match(row.values[0], /^\+66\.7 points \(100% vs 33%, 1 readers; left out: 1 plain Claude failed\)$/);
   assert.deepEqual(row.pass, [true]);
 });
 
@@ -258,6 +303,37 @@ test("the judge runs at temperature 0, and an identical question is answered fro
     await judgeCase(oneCase);
     assert.equal(calls(), 3, "NO_CACHE=1 asks afresh");
   });
+});
+
+test("a verdict given while Hardcover's evidence was missing isn't remembered", async () => {
+  await withJudgeReplies(judgeAnswer, async (calls) => {
+    const thin = { ...oneCase, picks: [{ ...oneCase.picks[0], facts: { ...facts, hardcoverError: "status 429" } }] };
+    await judgeCase(thin);
+    await judgeCase(thin);
+    assert.equal(calls(), 2, "asked again, since the first answer was on incomplete evidence");
+  });
+});
+
+test("an unreadable saved-answers file is set aside, not fatal", async () => {
+  await withJudgeReplies(judgeAnswer, async (calls) => {
+    const dir = process.env.EVAL_CACHE_DIR!;
+    writeFileSync(path.join(dir, "judge.json"), '{"half-written');
+    const realWarn = console.warn;
+    console.warn = () => {};
+    try {
+      await judgeCase({ ...oneCase, brief: "A different reader." });
+    } finally {
+      console.warn = realWarn;
+    }
+    assert.equal(calls(), 1);
+    assert.ok(readdirSync(dir).some((f) => f.startsWith("judge.json.unreadable-")));
+    assert.ok(existsSync(path.join(dir, "judge.json")));
+  });
+});
+
+test("if Hardcover failed for over 1 in 10 picks, the rows that lean on it miss as evidence incomplete", () => {
+  assert.deepEqual(withEvidence({ hardcoverErrors: 1, lookedUp: 10 }, ["90%", true]), ["90%", true]);
+  assert.deepEqual(withEvidence({ hardcoverErrors: 2, lookedUp: 10 }, ["90%", true]), ["evidence incomplete: Hardcover failed for 2 of 10 picks · 90%", false]);
 });
 
 test("running out of API credit stops with a clear error instead of failing reader by reader", async () => {
