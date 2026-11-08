@@ -520,14 +520,28 @@ async function generateOnce(
   ];
   if (problems.length) return { ok: true, status: "rejected", detail: problems.join("; ") };
 
+  // Mood words (decision 2.26): the card writer may replace the selector's word when the
+  // records clearly contradict it, but the three must still differ, so a replacement that's
+  // empty or would repeat another pick's mood falls back to the selector's word.
+  const moods = finalMoods(ready.map((o) => ({ selector: o.selected.mood, card: o.card.mood })));
+  trace.add("W", { kind: "moods", moods: ready.map((o, i) => ({ selector: o.selected.mood, card: o.card.mood, final: moods[i] })) });
+
   return {
     ok: true,
     status: "ready",
-    picks: ready.map((o) => ({ ...o.selected, ...o.card })),
+    picks: ready.map((o, i) => ({ ...o.selected, ...o.card, mood: moods[i] })),
     grounding,
     pickMetadata: ready.map((o) => o.metadata),
     overLimit: ready.flatMap((o, index) => o.overLimit.map((field) => ({ index, field, length: o.card[field].length }))),
   };
+}
+
+export function finalMoods(picks: Array<{ selector: string; card: string }>): string[] {
+  const chosen = picks.map((p) => (p.card ? p.card : p.selector));
+  return chosen.map((m, i) => {
+    const clash = chosen.some((other, j) => j !== i && other.toLowerCase() === m.toLowerCase());
+    return clash && m !== picks[i].selector ? picks[i].selector : m;
+  });
 }
 
 // One pick's pipeline, started the moment its object arrives in the selection stream:

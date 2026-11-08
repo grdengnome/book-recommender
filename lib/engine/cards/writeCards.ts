@@ -36,6 +36,7 @@ Write these fields:
 - "why": why this book is for this reader, tied to the parts of their stated taste it genuinely delivers. About 2 sentences; if there's a real gap (see below), one of them is the heads-up.
 - "angleHeading": a heading for a section on why this pick genuinely fits rather than being a reflexive/default choice, written for this book (e.g. "Shelved in the wrong aisle"), not a generic label. About 5 words, 30 characters at most.
 - "angleText": that section's body, about 2 sentences. Don't state specific claims about a book's reception, fame, or obscurity unless you're confident they're accurate — if unsure, describe what makes the book fit rather than making a comparative claim about how well-known it is.
+- "mood": one word for how this book reads, shown to the reader as a clue before the book is revealed. Keep the selector's mood word unless the records clearly contradict it; then give one word true to the records.
 
 Be honest with the reader. Be enthusiastic and choose what to highlight, but never say the book is something it isn't or promise what it won't deliver. These rules apply to every field, the hook and angle included.
 - What you say the book is and contains must agree with the catalog records given. Where they are silent, keep claims general rather than inventing plot.

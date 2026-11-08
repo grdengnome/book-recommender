@@ -60,6 +60,10 @@ export interface CardText {
   why: string;
   angleHeading: string;
   angleText: string;
+  // The selector's mood word, or a replacement when the catalog records clearly contradict it
+  // (decision 2.26). recommend.ts keeps the selector's word if the replacement is empty or
+  // would repeat another pick's mood.
+  mood: string;
 }
 
 export const CARD_FORMAT = {
@@ -67,14 +71,15 @@ export const CARD_FORMAT = {
   schema: {
     type: "object",
     additionalProperties: false,
-    required: ["title", "author", "hook", "why", "angleHeading", "angleText"],
+    required: ["title", "author", "hook", "why", "angleHeading", "angleText", "mood"],
     properties: {
       title: field("English display title, cleaned of series or edition notes."),
       author: field('Author as "First Last" in English transliteration, no stress marks.'),
       hook: field("One short line for the revealed book, about 90 characters or fewer."),
-      why: field("Why it's for this reader, tied to their stated taste. About 2 sentences."),
+      why: field("Why it's for this reader, tied to what it genuinely delivers. About 2 sentences."),
       angleHeading: field("Heading written for this pick, about 5 words (30 characters)."),
       angleText: field("That section's body. About 2 sentences."),
+      mood: field("One word for how this book reads: the selector's word unless the records clearly contradict it."),
     },
   },
 } as const;
