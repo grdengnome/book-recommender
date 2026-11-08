@@ -116,8 +116,9 @@ try {
   }
 } catch (err) {
   if (!(err instanceof StopScoringError)) throw err;
+  // Everything paid for is remembered; the summary below covers the readers checked so far.
   console.error(`\nStopped: ${err.message}`);
-  process.exit(1);
+  process.exitCode = 1;
 }
 
 const out = runFile.replace(/\.json$/, "-cards.json");

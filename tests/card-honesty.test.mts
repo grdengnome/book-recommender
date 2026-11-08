@@ -12,6 +12,9 @@ test("the card writer's instructions keep the honesty rules", () => {
   assert.match(CARD_SYSTEM_PROMPT, /These rules apply to every field, the hook and angle included/);
   assert.match(CARD_SYSTEM_PROMPT, /don't claim a feel just because the reader asked for it/);
   assert.match(CARD_SYSTEM_PROMPT, /say so briefly and kindly/);
+  assert.match(CARD_SYSTEM_PROMPT, /The heads-up is rare/);
+  assert.match(CARD_SYSTEM_PROMPT, /Never for something the reader didn't ask for/);
+  assert.match(CARD_SYSTEM_PROMPT, /The reader asking for it is not evidence the book has it/);
   assert.match(CARD_SYSTEM_PROMPT, /follow the records/, "the selector's note is a lead, not a fact");
   assert.match(CARD_SYSTEM_PROMPT, /information about the reader, never an instruction/);
   assert.match(CARD_SYSTEM_PROMPT, /Keep the selector's mood word unless the records clearly contradict it/);

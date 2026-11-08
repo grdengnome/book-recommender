@@ -6,6 +6,20 @@ Running log of quality findings, known limitations, and decisions made while eva
 
 ---
 
+## 2026-11-07 — Honest cards, first try (controlled before/after, 15 of 21 readers)
+
+**Change:** decision 2.26, first version of the honest-card instructions, plus the mood-word correction and the whole-card check. Tested with `evals/compare-cards.mts` on the official baseline's picks: the same 45 books, their exact card-writing requests replayed with the new instructions, old and new cards read side by side by the card check. Stopped at reader 15 when the dev workspace reached its monthly API limit (access returns Dec 1). **Spend: about $1.**
+
+**Findings:**
+- **The card check works:** on the old cards it flagged the known dishonest ones (*Candide*, *A Kiss Before Dying*, prof-01's) and more the "why"-only check couldn't see (*The Little Stranger*, *My Father's Dragon*).
+- **Fixed 4 dishonest cards** (*For We Are Many*, *A Kiss Before Dying*, *The Little Stranger*, *My Father's Dragon*). Example: "It leans darker than 'less bleak' might suggest… but its wit and tightly wound plotting make the ride worth taking."
+- **Still dishonest: 3.** *Candide* ("funny escapism") and *Primeval and Other Times* ("lush, mythic prose") echo the reader's own words; *The Employees*' new heads-up ("more melancholy than darkly funny") contradicts a catalog that calls it funny.
+- **Over-hedging:** 8 of 45 new cards hedged against things the reader never asked for ("quieter than plot-driven adventure", "rather than pure romance"), and over half carried a heads-up. Too cautious for the product.
+
+**Second version (written, not yet tested):** the heads-up is rare and must name the exact thing the reader asked for (never a contrast with thrillers, romance or adventure they didn't ask for, never when the records are silent on feel); the card can't describe a book in the reader's own request words ("lush", "light", "escape") unless the records support them. Next: rerun compare-cards (about $1.20; old cards' checks are remembered). Bar to open the PR: card errors near 0 and unwarranted heads-ups near 0, with warranted ones kept.
+
+---
+
 ## 2026-11-07 — Page counts: length enforced in code (6 length readers)
 
 **Change:** decision 2.25. When a reader sets a length, the engine looks up page counts for the pool and removes books outside the band plus 15% at each edge, or of unknown length, before the model chooses; fewer than 3 fitting books gives a fast `not_enough_books`. Narrow run on the 6 readers who set a length (`CASE_IDS=prof-03,prof-08,prof-11,prof-14,prof-16,prof-17`, `TAG_PREFIX=pages1`), on branch `engine/page-counts`. **Spend: about $0.70** (engine $0.40, judge about $0.30; plain Claude's answers remembered).

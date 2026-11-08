@@ -960,3 +960,21 @@ Alongside: dependency checkup PR (npm reports 25 package vulnerabilities); claim
 3. Engine improvements, one at a time against the baseline: honest cards (no claims the catalog contradicts), page counts, speed (the 70s readers first: check traces for retries), profile-driven search, a prompt written for the profile.
 4. Then PR 5 app skeleton, PR 6 store and trust basics, then the pilot.
 
+---
+
+## November 7, 2026 — Official baseline set; page counts shipped; honest cards in progress
+
+**Conclusion:** The baseline is final under a fixed, cheaper judge: relevance 81% (just passes), plain Claude beaten by 9.5 points (bar 10), preferences 63%/56%, median 35.5s. Page counts shipped (PR #23): 0 broken length rules, relevance held, and the 6 length readers ran faster and cheaper. Honest cards are written and half-proven; a second version awaits a check once API access allows.
+
+- **Eval tools (PR #22):** the judge's evidence fixed (Hardcover search, translated authors, most-read records); "can't tell" reported, not scored (3.11); evals efficient by design (3.12): every paid answer and catalog lookup remembered, plain Claude fixed, stop on refusal or no credit. The judge's model refuses a temperature setting; remembered answers give the consistency. "Avoid" applied to relevance too (3.10). Independent review: 5 bugs, all fixed.
+- **Page counts (2.25):** length enforced in code before choosing, 15% forgiveness at the edges (Grim), unknown lengths left out, fast `not_enough_books` (Grim), page ranges shown on the length question. Independent review: no blocking bugs, findings fixed.
+- **Honest cards (2.26, branch `engine/honest-cards`, no PR yet):** enthusiastic but never misleading, feel included; a brief heads-up for a real gap (Grim chose B); the card can correct a contradicted mood word; a whole-card check in the eval; `compare-cards` tests card changes on the same picks for a third of a fresh run's cost (Grim pushed for cheaper). First try fixed 4 of 7 dishonest cards but over-hedged; second version written.
+- **Dev workspace hit its monthly API limit** mid-check; access returns Dec 1 unless raised.
+- **Card review findings saved as interview material:** PR #23 recorded as a success story.
+
+**Next:**
+1. Rerun compare-cards on the second version (about $1.20, once the limit allows): `RUN=profile-v1-run1.json TAG_PREFIX=run1 node --env-file=.env.local --import ./tests/support/resolve.mts evals/compare-cards.mts`. Bar: card errors and unwarranted heads-ups near 0. Then open the PR (independent review findings already applied).
+2. A prompt written for the taste profile (preferences, ingredient doorway, lead over plain Claude), then a full 21-reader run that also confirms the page-count speed gain.
+3. Speed: why some readers take ~70s, prompt caching, Hardcover page counts in its first request, a book-source contract with health checks.
+4. Batch scoring (50% off) in its own PR.
+
