@@ -11,7 +11,7 @@ import { renderBrief } from "@/lib/engine/profile/renderBrief";
 import { modelFor } from "@/lib/ai/gateway";
 import type { TasteProfile } from "@/lib/contracts/tasteProfile";
 import { lookupFacts } from "./judge/catalog";
-import { OutOfCreditsError } from "./judge/errors";
+import { StopScoringError } from "./judge/errors";
 import { GOOD_OR_BETTER, JUDGE_VERSION, judgeCase, type CaseChecks } from "./judge/judge";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -33,7 +33,7 @@ for (const item of items) {
   try {
     score = await judgeCase({ brief: renderBrief(c.profile), checks: c.checks, picks: [{ title: item.title, author: item.author, card: "", facts }] });
   } catch (err) {
-    if (err instanceof OutOfCreditsError) throw err;
+    if (err instanceof StopScoringError) throw err;
     // One failed call doesn't throw away the rest of the paid run; it counts as a miss.
     const error = err instanceof Error ? err.message : String(err);
     results.push({ ...item, relevance: null, correct: false, reason: `not scored: ${error}` });

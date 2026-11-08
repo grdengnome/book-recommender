@@ -30,7 +30,7 @@ import { JUDGE_VERSION, judgeCase, type CaseChecks } from "./judge/judge";
 import { plainClaudePicks } from "./judge/baseline";
 import { judgeAgreement, scorecard, type ScoredCase, type ScoredRun } from "./judge/scorecard";
 import { reviewPage } from "./judge/review";
-import { OutOfCreditsError } from "./judge/errors";
+import { StopScoringError } from "./judge/errors";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const RESULTS = path.join(HERE, "results");
@@ -134,7 +134,7 @@ async function scoreEngineRun(name: string, results: RunResult[]): Promise<Score
       if (secondN > 0 && i < secondN) base.second = await judgeCase({ brief: briefOf(def), checks, picks: judgePicks, job: "evalSecondJudge" });
       console.log(`[${name}] ${r.id} scored${base.score.reused ? " (remembered)" : ""}`);
     } catch (err) {
-      if (err instanceof OutOfCreditsError) throw err;
+      if (err instanceof StopScoringError) throw err;
       base.judgeError = errText(err);
       console.error(`[${name}] ${r.id} NOT scored: ${base.judgeError}`);
     }
@@ -156,7 +156,7 @@ async function scoreBaseline(ids: Set<string>): Promise<ScoredRun> {
       base.score = await judgeCase({ brief: briefOf(def), checks, picks: base.picks });
       console.log(`[plain Claude] ${def.id} scored${base.score.reused ? " (remembered)" : ""}`);
     } catch (err) {
-      if (err instanceof OutOfCreditsError) throw err;
+      if (err instanceof StopScoringError) throw err;
       base.judgeError = errText(err);
       console.error(`[plain Claude] ${def.id} NOT scored: ${base.judgeError}`);
     }
@@ -197,7 +197,7 @@ try {
     baseline = await scoreBaseline(new Set(engineRuns.flatMap((r) => r.cases.map((c) => c.id))));
   }
 } catch (err) {
-  if (!(err instanceof OutOfCreditsError)) throw err;
+  if (!(err instanceof StopScoringError)) throw err;
   // Every answer already paid for is remembered, so the rerun after a top-up only pays for the rest.
   console.error(`\nStopped: ${err.message}`);
   process.exit(1);

@@ -39,11 +39,11 @@ Running log of quality findings, known limitations, and decisions made while eva
 - Missing evidence counted as an unhonoured preference. Now "can't tell" is reported, not scored (decision 3.11).
 - Plain Claude's two failed readers were silently dropped from one side only. Now compared on shared readers, retried once.
 
-**Judge randomness:** the same picks scored twice with near-identical evidence gave 75% and 79%. 53 of 63 picks kept their grade; 5 crossed the good line, 4 of them with identical evidence. On a single doorway (5 readers) the swing reached 13 points. The judge ran at default temperature then; it now runs at temperature 0, and unchanged picks reuse their remembered verdict, so they can't flip between scorings. Until a fresh noise check says otherwise, a change under about 5 points on the headline, or any single-doorway change, isn't evidence on its own.
+**Judge randomness:** the same picks scored twice with near-identical evidence gave 75% and 79%. 53 of 63 picks kept their grade; 5 crossed the good line, 4 of them with identical evidence. On a single doorway (5 readers) the swing reached 13 points. Unchanged picks now reuse their remembered verdict, so they can't flip between scorings (the judge's model refuses a temperature setting). Until a fresh noise check says otherwise, a change under about 5 points on the headline, or any single-doorway change, isn't evidence on its own.
 
 **Judge checks:** calibration 10/10 after each judge change; second judge (Sonnet 5) agreed on 12 of 15 picks.
 
-**Efficiency (Nov 7, so evals don't drive cost):** remembered answers (identical judge questions and plain-Claude requests are free), plain Claude's answers fixed until its prompt or model changes, temperature 0, scoring stops cleanly when credit runs out. A typical "did this engine change help?" check becomes a narrow engine run plus judging only the changed picks. Batch scoring (50% off) is next, in its own PR.
+**Efficiency (Nov 7, so evals don't drive cost):** remembered answers (identical judge questions and plain-Claude requests are free), plain Claude's answers fixed until its prompt or model changes, catalog facts saved, scoring stops cleanly when credit runs out or a request is refused. A typical "did this engine change help?" check becomes a narrow engine run plus judging only the changed picks. Batch scoring (50% off) is next, in its own PR.
 
 ---
 

@@ -5,7 +5,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { align, judgeCase, lengthVerdict, type CaseScore, type Grade, type PickScore } from "../evals/judge/judge";
-import { OutOfCreditsError } from "../evals/judge/errors";
+import { OutOfCreditsError, StopScoringError } from "../evals/judge/errors";
 import { existsSync, mkdtempSync, readdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -290,10 +290,10 @@ const judgeAnswer = () => new Response(JSON.stringify({
 }));
 const oneCase = { brief: "A reader.", checks: { hardRules: [], strong: [], weighed: [], nonObviousRequired: false }, picks: [{ title: "T", author: "A", card: "why", facts }] };
 
-test("the judge runs at temperature 0, and an identical question is answered from memory for free", async () => {
+test("an identical question to the judge is answered from memory for free", async () => {
   await withJudgeReplies(judgeAnswer, async (calls, bodies) => {
     const first = await judgeCase(oneCase);
-    assert.equal(bodies[0].temperature, 0);
+    assert.equal(bodies[0].temperature, undefined, "the judge's model refuses a temperature setting");
     assert.equal(first.reused, false);
     const again = await judgeCase(oneCase);
     assert.equal(calls(), 1, "the second identical question isn't paid for");
@@ -336,6 +336,13 @@ test("an unreadable saved-answers file is set aside, not fatal", async () => {
 test("if Hardcover failed for over 1 in 10 picks, the rows that lean on it miss as evidence incomplete", () => {
   assert.deepEqual(withEvidence({ hardcoverErrors: 1, lookedUp: 10 }, ["90%", true]), ["90%", true]);
   assert.deepEqual(withEvidence({ hardcoverErrors: 2, lookedUp: 10 }, ["90%", true]), ["evidence incomplete: Hardcover failed for 2 of 10 picks · 90%", false]);
+});
+
+test("a request the API refuses as invalid stops scoring instead of failing every reader", async () => {
+  const refused = () => new Response(JSON.stringify({ type: "error", error: { type: "invalid_request_error", message: "`temperature` is deprecated for this model." } }), { status: 400 });
+  await withJudgeReplies(refused, async () => {
+    await assert.rejects(judgeCase(oneCase), StopScoringError);
+  });
 });
 
 test("running out of API credit stops with a clear error instead of failing reader by reader", async () => {
