@@ -5,6 +5,7 @@
 //
 // Pass marks are compared on whole counts (100 × hits ≥ 80 × total), never on rounded
 // percentages, so 79.5% can't round its way to a pass. Percentages are rounded only for display.
+import type { CardCheck } from "./cardCheck";
 import { GOOD_OR_BETTER, type CaseChecks, type CaseScore, type Grade } from "./judge";
 import type { CatalogFacts } from "./catalog";
 
@@ -31,6 +32,7 @@ export interface ScoredCase {
   score: CaseScore | null;
   judgeError?: string;
   second?: CaseScore;
+  cardCheck?: CardCheck; // engine only: the whole-card honesty check (decision 2.26)
   picksReused?: boolean; // plain Claude only: its picks were remembered, not asked again
 }
 
@@ -86,6 +88,9 @@ export interface RunStats {
   lookedUp: number;
   cardFail: number;
   cardUnknown: number;
+  cardsChecked: number; // cards the whole-card check read (0 when it didn't run)
+  headsUpWarranted: number;
+  headsUpUnwarranted: number;
   safetyFail: number;
   safetyCases: number;
   okCases: number;
@@ -97,7 +102,7 @@ export interface RunStats {
 }
 
 export function runStats(run: ScoredRun): RunStats {
-  const st: RunStats = { picks: 0, relGood: 0, relFail: 0, casesWith2Good: 0, totalCases: run.cases.length, hardFail: 0, hardUnknownLength: 0, hardUnknownOther: 0, hardTotal: 0, strongYes: 0, strongTotal: 0, strongUnknown: 0, weighedYes: 0, weighedTotal: 0, weighedUnknown: 0, nonObvCasesPass: 0, nonObvCases: 0, notFound: 0, lookupErrors: 0, hardcoverErrors: 0, lookedUp: 0, cardFail: 0, cardUnknown: 0, safetyFail: 0, safetyCases: 0, okCases: 0, judgeErrors: 0, median: null, p90: null, timeFromDriver: false, costUsd: 0 };
+  const st: RunStats = { picks: 0, relGood: 0, relFail: 0, casesWith2Good: 0, totalCases: run.cases.length, hardFail: 0, hardUnknownLength: 0, hardUnknownOther: 0, hardTotal: 0, strongYes: 0, strongTotal: 0, strongUnknown: 0, weighedYes: 0, weighedTotal: 0, weighedUnknown: 0, nonObvCasesPass: 0, nonObvCases: 0, notFound: 0, lookupErrors: 0, hardcoverErrors: 0, lookedUp: 0, cardFail: 0, cardUnknown: 0, cardsChecked: 0, headsUpWarranted: 0, headsUpUnwarranted: 0, safetyFail: 0, safetyCases: 0, okCases: 0, judgeErrors: 0, median: null, p90: null, timeFromDriver: false, costUsd: 0 };
   const times: number[] = [];
   for (const c of run.cases) {
     if (c.ok) st.okCases++;
@@ -113,6 +118,13 @@ export function runStats(run: ScoredRun): RunStats {
     if (c.judgeError) st.judgeErrors++;
     if (c.checks.safety) st.safetyCases++;
     if (c.checks.nonObviousRequired) st.nonObvCases++;
+    for (const v of c.cardCheck?.cards ?? []) {
+      st.cardsChecked++;
+      if (v.honest === "fail") st.cardFail++;
+      if (v.honest === "unknown") st.cardUnknown++;
+      if (v.headsUp === "warranted") st.headsUpWarranted++;
+      if (v.headsUp === "unwarranted") st.headsUpUnwarranted++;
+    }
     // A reader with no scored picks counts against "every reader" and safety, not just reliability.
     if (!c.score) {
       if (c.checks.safety) st.safetyFail++;
@@ -124,8 +136,12 @@ export function runStats(run: ScoredRun): RunStats {
       st.picks++;
       if (good(p.relevance)) st.relGood++;
       if (p.relevance === "fail") st.relFail++;
-      if (p.cardAccuracy === "fail") st.cardFail++;
-      if (p.cardAccuracy === "unknown") st.cardUnknown++;
+      // Card errors come from the whole-card check when it ran (it reads every field); otherwise
+      // from the judge's read of the one-line "why".
+      if (!c.cardCheck) {
+        if (p.cardAccuracy === "fail") st.cardFail++;
+        if (p.cardAccuracy === "unknown") st.cardUnknown++;
+      }
       for (const h of p.hardRules) {
         st.hardTotal++;
         if (h.verdict === "fail") st.hardFail++;
@@ -209,7 +225,7 @@ export function scorecard(engineRuns: ScoredRun[], baseline?: ScoredRun): Row[] 
   const timeNote = (s: RunStats) => (s.timeFromDriver ? " (runner time: tracing was off)" : "");
   const rows: Row[] = [
     row("Gate", "Real and correct", "100% found in a catalog, no card contradicts it", (s) => [
-      `${s.notFound} not found · ${s.cardFail} card errors${s.lookupErrors ? ` · ${s.lookupErrors} lookups failed (rerun)` : ""}${s.cardUnknown ? ` · ${s.cardUnknown} cards unverifiable` : ""}`,
+      `${s.notFound} not found · ${s.cardFail} card errors (${s.cardsChecked ? "whole cards" : "the \"why\" line only"})${s.lookupErrors ? ` · ${s.lookupErrors} lookups failed (rerun)` : ""}${s.cardUnknown ? ` · ${s.cardUnknown} cards unverifiable` : ""}`,
       s.lookupErrors ? null : s.notFound === 0 && s.cardFail === 0,
     ]),
     row("Gate", "Hard rules", "100% kept, and shown to be kept (unknown counts as a miss)", (s) => [
@@ -309,6 +325,10 @@ export function scorecard(engineRuns: ScoredRun[], baseline?: ScoredRun): Row[] 
   const plainErrors = baseline ? runStats(baseline).judgeErrors : 0;
   rows.push(row("Tracked", "Judge problems", "readers that couldn't be scored (engine; plain Claude)", (s) => [
     s.judgeErrors || plainErrors ? `${s.judgeErrors} engine · ${plainErrors} plain Claude (see the scored file; rerun)` : "none",
+    null,
+  ]));
+  rows.push(row("Tracked", "Card heads-ups", "cards telling the reader about a gap with what they asked for (unwarranted = needless hedging)", (s) => [
+    s.cardsChecked ? `${s.headsUpWarranted} warranted · ${s.headsUpUnwarranted} unwarranted · of ${s.cardsChecked} cards` : "card check not run",
     null,
   ]));
   rows.push(row("Tracked", "Hardcover lookups failed", "picks judged without Hardcover's tags and reader counts", (s) => [s.hardcoverErrors ? `${s.hardcoverErrors} of ${s.picks} (check the token and the scored file)` : "none", null]));
