@@ -25,10 +25,10 @@ const scored = (id: string, grades: Grade[], over: Partial<ScoredCase> = {}, sco
 const run = (cases: ScoredCase[], name = "run1"): ScoredRun => ({ name, kind: "engine", set: "t", cases });
 const rowOf = (rows: ReturnType<typeof scorecard>, name: string) => rows.find((r) => r.name === name)!;
 
-test("length rules are checked from page counts, with 20 pages of slack", () => {
-  assert.equal(lengthVerdict("quick: up to 200 pages", 215).verdict, "pass");
+test("length rules are checked from page counts, with 15% past each edge allowed (decision 2.25)", () => {
+  assert.equal(lengthVerdict("quick: up to 200 pages", 225).verdict, "pass");
   assert.equal(lengthVerdict("quick: up to 200 pages", 260).verdict, "fail");
-  assert.equal(lengthVerdict("long: over 500 pages", 470).verdict, "fail");
+  assert.equal(lengthVerdict("long: over 500 pages", 420).verdict, "fail");
   assert.equal(lengthVerdict("short: about 200 to 300 pages", null).verdict, "unknown");
   assert.throws(() => lengthVerdict("tiny: under 50 pages", 40), /matches no band/);
 });

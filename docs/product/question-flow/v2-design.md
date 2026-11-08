@@ -81,7 +81,7 @@ Each format is themed in all five skins (Café, Mystery, Fantasy, Superhero, Sci
 - **J. Think or escape** [ideas].
 - **K. Judge a book by its cover** [familiar ↔ surprising + avoid]: three real covers, Yes / Seen it / Nope. An occasional option, not core; best once a cover database exists.
 - **L. Finish the sentence** [emotional effect]: "I want to finish this book feeling ___".
-- **M. How long's the trip?** [length, optional]: four themed bands.
+- **M. How long's the trip?** [length, optional]: four themed bands, each showing its page range (quick: under about 200 pages · short: about 200–300 · medium: about 300–500 · long: 500+), so the reader picks knowing what each means ([decision 2.25](../../decisions.md)). The ranges come from the same slot data the engine enforces.
 - **N. The Nope shelf** [avoid, optional].
 - **O. Clarifier** [contradictions]: "*Blood Meridian*, but cozy? Which wins tonight?"
 - **Q. Pack your bag** [setting / mood / genre]: drag 3 items into a themed bag.

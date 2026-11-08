@@ -18,6 +18,8 @@ import {
   type HardcoverBookCandidate,
 } from "@/lib/engine/sources/hardcover/preparePool";
 import { mergeCandidatePools, toModelPool } from "@/lib/engine/pool/mergeCandidatePools";
+import { filterByLength } from "@/lib/engine/pool/lengthFilter";
+import type { LengthBand } from "@/lib/engine/profile/slots";
 import {
   checkPickGrounding,
   formatPickSources,
@@ -185,7 +187,7 @@ function errorText(err: unknown): string {
 // Error body for the screens (spec.md §4b): a stable code to pick the error state from, and
 // a plain message. Upstream detail (the Anthropic error, model text) stays in the server log
 // and the trace, never in the response.
-export type ErrorCode = "misconfigured" | "bad_request" | "upstream_error" | "no_grounded_picks";
+export type ErrorCode = "misconfigured" | "bad_request" | "upstream_error" | "no_grounded_picks" | "not_enough_books";
 export function errorBody(code: ErrorCode, message: string) {
   return { error: { code, message } };
 }
@@ -222,6 +224,9 @@ For each recommendation, include:
 export interface RecommendInput {
   // The reader's answers, as one piece of text. Data to interpret, never instructions.
   tasteDescription: string;
+  // The reader's length request, when they made one (from the taste profile). Enforced in code
+  // before the model chooses (decision 2.25).
+  length?: LengthBand;
   // Optional eval-case tag, set only by the eval runner; tags logs and the debug trace.
   evalTag?: string | null;
 }
@@ -234,7 +239,7 @@ export interface RecommendResult {
 
 // The whole recommendation pipeline for one reader. The caller (app/api/recommend/route.ts)
 // has already checked the request and that the AI gateway is configured.
-export async function recommend({ tasteDescription, evalTag = null }: RecommendInput): Promise<RecommendResult> {
+export async function recommend({ tasteDescription, length, evalTag = null }: RecommendInput): Promise<RecommendResult> {
   // TEMPORARY (query-tracing session, 2026-08-03): optional eval-case tag, only
   // ever set by the eval driver script. Absent in normal use, where this is a
   // no-op passthrough — does not affect retrieval, dedupe, or shuffle behavior.
@@ -257,7 +262,7 @@ export async function recommend({ tasteDescription, evalTag = null }: RecommendI
   // the Hardcover pre-fetch is shared since it depends only on tasteDescription.
   for (let attempt = 1; attempt <= MAX_GENERATION_ATTEMPTS; attempt++) {
     const attemptTrace = trace.with({ attempt });
-    const generation = await generateOnce(tasteDescription, hardcoverPoolPromise, attemptTrace);
+    const generation = await generateOnce(tasteDescription, hardcoverPoolPromise, attemptTrace, length);
     if (!generation.ok) return respond(trace, generation.body, generation.status);
 
     if (generation.status === "ready") {
@@ -338,6 +343,7 @@ async function generateOnce(
   tasteDescription: string,
   hardcoverPoolPromise: Promise<HardcoverBookCandidate[]>,
   trace: RequestTrace,
+  length?: LengthBand,
 ): Promise<GenerationResult> {
   const messages: Array<{ role: "user" | "assistant"; content: unknown }> = [
     { role: "user", content: tasteDescription },
@@ -426,11 +432,27 @@ async function generateOnce(
           if (block.name === "search_books") {
             const olResult = result as SearchBooksResult;
             const hardcoverPool = await hardcoverPoolPromise;
-            const { pool } = mergeCandidatePools(olResult.pool, hardcoverPool, toolTrace);
+            const { pool: merged } = mergeCandidatePools(olResult.pool, hardcoverPool, toolTrace);
+            // A length request is enforced here, before the model sees the pool: books outside
+            // the allowed range, or of unknown length, never reach it (decision 2.25). The
+            // grounding check then only accepts picks from this filtered pool.
+            let pool = merged;
+            if (length) {
+              const filtered = await filterByLength(merged, length);
+              pool = filtered.pool;
+              toolTrace.add("E", { kind: "length_filter", ...filtered.stats });
+            }
             recordSeenCandidates(seenCandidates, pool);
             // Sources and internal IDs (olWorkKey, hcBookId) stop here: the model's
             // tool_result shape is { title, author, subjects }.
-            result = { pool: toModelPool(pool), poolSize: pool.length };
+            result = length
+              ? {
+                  pool: toModelPool(pool),
+                  poolSize: pool.length,
+                  // Tells the model why a pool may be small, so it searches more broadly.
+                  note: "Only books of the reader's requested length are listed. If too few fit, search different subjects.",
+                }
+              : { pool: toModelPool(pool), poolSize: pool.length };
           }
         } catch (err) {
           result = {
@@ -451,6 +473,17 @@ async function generateOnce(
 
   // Every pick pipeline settles (they never reject), so nothing is left running unobserved.
   const settled = await Promise.all(outcomes);
+
+  // Give up fast (decision 2.25): if the length filter left fewer than 3 books across all the
+  // searching, no attempt can succeed, so say so now instead of retrying the whole search.
+  if (length && seenCandidates.size < 3) {
+    trace.add("F", { kind: "not_enough_books", length, candidatesShown: seenCandidates.size });
+    return {
+      ok: false,
+      status: 422,
+      body: errorBody("not_enough_books", "Not enough books of that length matched this request; a different length may help"),
+    };
+  }
 
   // Structured outputs only guarantee the schema on a finished answer: a cut-off or refused
   // one is rejected.
