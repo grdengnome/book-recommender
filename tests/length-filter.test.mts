@@ -60,10 +60,12 @@ test("with a length set, only books that fit reach the model, and the picks come
   assert.equal(res.status, 200, res.responseText);
   const shown = shownToModel(res.requests);
   assert.ok(shown.length > 0);
-  // The canned catalog gives Open Library books 250 pages (fit), 600 (too long) or no count
-  // (unknown), and Hardcover-only books 280 (fit) or 900 (too long). Only fitting ones get through.
-  for (const title of ["Gilead", "Stoner", "Our Souls at Night"]) assert.ok(!shown.includes(title), `${title} (600 pages or unknown) must not reach the model`);
+  // The canned catalog gives Open Library books 250 pages (fit), 600 (too long) or no count, and
+  // Hardcover books 280 (fit) or 900 (too long). Hardcover fills in where Open Library has no count.
+  for (const title of ["Gilead", "Stoner"]) assert.ok(!shown.includes(title), `${title} (600 pages) must not reach the model`);
+  assert.ok(!shown.includes("Kokoro"), "no Open Library count, and Hardcover says 900 pages: left out");
   for (const title of ["The Go-Between", "Hotel du Lac"]) assert.ok(shown.includes(title), `${title} (250 pages) reaches the model`);
+  assert.ok(shown.includes("Our Souls at Night"), "no Open Library count, but Hardcover's 280 pages fits");
   const picks = JSON.parse(res.responseText).picks.map((p: { title: string }) => p.title);
   for (const t of picks) assert.ok(shown.includes(t), `${t} was a pick but never shown`);
   assert.ok(res.requests.some((r) => r.url.includes("search.json") && r.url.includes("key%3A")), "page counts were looked up");
