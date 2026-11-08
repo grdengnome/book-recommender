@@ -6,6 +6,22 @@ Running log of quality findings, known limitations, and decisions made while eva
 
 ---
 
+## 2026-11-07 — Page counts: length enforced in code (6 length readers)
+
+**Change:** decision 2.25. When a reader sets a length, the engine looks up page counts for the pool and removes books outside the band plus 15% at each edge, or of unknown length, before the model chooses; fewer than 3 fitting books gives a fast `not_enough_books`. Narrow run on the 6 readers who set a length (`CASE_IDS=prof-03,prof-08,prof-11,prof-14,prof-16,prof-17`, `TAG_PREFIX=pages1`), on branch `engine/page-counts`. **Spend: about $0.70** (engine $0.40, judge about $0.30; plain Claude's answers remembered).
+
+| These 6 readers | Baseline | Page counts |
+|---|---|---|
+| Length rules broken | 2 | **0** (30 hard-rule checks: 0 broken, 1 unproven) |
+| Relevance | 13/18 good+ (72%) | 13/18 good+ (72%) · 0 fail · 4/6 readers 2 of 3 |
+| Plain Claude, same readers | 72% | 72% |
+| Median time | about 41s | **26.1s** (9 in 10 within 34.6s) |
+| Cost | $0.74 | **$0.40** |
+
+**Findings:** the length rule now holds, with relevance unchanged on these readers. Unexpectedly, it was faster and cheaper on all 6, most of all on prof-08 (68s → 21s): a smaller pool of books that fit means less to read and less back-and-forth before choosing. One run of 6 readers, so the speed gain is a lead to confirm on the full set, not a result yet. Two card errors remain (honest cards are next). Calibration 10/10; second judge agreed on 11 of 15.
+
+---
+
 ## 2026-11-07 — Official baseline under the final judge (profile-v1, run 1)
 
 **Change:** none to the engine; the Nov 6 run rescored once after PR #22 (the judge's evidence fixes, remembered answers, and the "avoid" clarification for relevance), so every engine improvement is compared against the same judge. Calibration 10/10. **Spend: about $2.50.**
