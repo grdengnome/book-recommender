@@ -48,6 +48,9 @@ The selector chose this book from its title and subjects alone, so its note and 
 
 Don't use emoji. Keep to the lengths above.`;
 
+export const THIN_RECORDS_NOTE =
+  "<records_note>These records have no description and no reader moods. Describe the book only from its title and subjects, and make no claims about its tone, mood, pace or prose style.</records_note>";
+
 interface CardFacts {
   descriptions: string[];
   subjects: string[];
@@ -98,6 +101,10 @@ function cardPrompt(tasteDescription: string, pick: SelectedPick, facts: CardFac
   if (facts.genres.length) lines.push(`Hardcover genres: ${facts.genres.join("; ")}`);
   if (facts.moods.length) lines.push(`Hardcover moods: ${facts.moods.join("; ")}`);
   lines.push("</book>");
+  // Thin records (no description, no reader moods) are named by code, right next to the book,
+  // so the card can't fill the gap from memory or from the reader's wishes: the Nov 8 check
+  // found "lush, mythic prose" written for a book whose records held only subjects (decision 2.26).
+  if (!facts.descriptions.length && !facts.moods.length) lines.push("", THIN_RECORDS_NOTE);
   // The selector's lead sits outside <book>, so the records-only notes can't mistake it for a
   // catalog record (decision 2.26).
   lines.push("", "<selector_lead>", `note: ${pick.fitNote}`, `mood: ${pick.mood}`, "</selector_lead>");

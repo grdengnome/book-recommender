@@ -94,3 +94,15 @@ test("a repeated pick isn't searched again (Hardcover's rate limit)", async () =
     restore();
   }
 });
+
+test("a book with thin records (no description, no moods) gets a note forbidding claims about its feel", async () => {
+  let prompt = "";
+  const restore = stubHardcover([], (b) => { prompt = b.messages[0].content; });
+  try {
+    const checked = { title: "Prawiek i inne czasy", author: "Olga Tokarczuk", sources: [], groundingKey: null, record: { title: "Prawiek i inne czasy", author: "Olga Tokarczuk", subjects: ["Polish fiction", "Allegories"] } } as never;
+    await writeCard("A reader who wants lush prose.", { poolTitle: "Prawiek i inne czasy", poolAuthor: "Olga Tokarczuk", fitNote: "lush", mood: "dreamy" }, checked, { title: "Prawiek i inne czasy", author: "Olga Tokarczuk", lookups: [] }, []);
+    assert.match(prompt, /<records_note>These records have no description and no reader moods/);
+  } finally {
+    restore();
+  }
+});

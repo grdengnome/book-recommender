@@ -6,6 +6,29 @@ Running log of quality findings, known limitations, and decisions made while eva
 
 ---
 
+## 2026-11-08 — Card writer rebuilt; checker calibrated; root cause found upstream
+
+**Change:** honest cards (decision 2.26), measured with `compare-cards` on the official baseline's 63 picks (same books, old vs new cards). **Spend: about $5** across five rounds plus the checker calibration.
+
+| Same 63 picks | Dishonest cards | Needless hedges | Heads-ups, no-avoid readers |
+|---|---|---|---|
+| Old cards (baseline) | 11–12 | 3 | – |
+| Instructions v2 | 7 | 6 | – |
+| + Hardcover evidence for every card | 7 | 10 | – |
+| + heads-ups for avoid list only | 7 | 6 | 14 |
+| **Rebuilt writer** (records-only notes first; "distinctive" angle) | **5** | **3** | 13 |
+
+**Findings:**
+- **The card check is trustworthy:** 12/12 on planted cards, including 4 subtle ones about feel (`evals/calibrate-cards.mts`). Its fails are real; the few borderline ones (*Candide*: comic satire with dark tags) weren't covered by plants.
+- **Root cause is upstream:** picks with a dishonest card were 57% relevant (good+) vs 82% for the rest, and honoured 50% vs 69% of preferences. The selector chooses from title, author and subjects only, so it can't see that a book is dark or blunt; the writer is then asked to sell a mismatch. The same cause likely drives the preference gap. Fixing selection comes next.
+- **Evidence gaps:** cards misdescribing feel had no Hardcover moods (fixed: every card gets them, found by strict title-and-author match, median 0.18s). *Primeval and Other Times* reached the writer as *Prawiek i inne czasy* with subjects only, so Hardcover's English-titled record wasn't found and the writer filled "lush prose" from the reader's wish. Fixed for the card (thin records are now named in the prompt); translated titles missing Hardcover is a known gap for the book-source work.
+- **Instructions alone can't stop honest contrasts** ("quieter than a mystery"): four versions left 13–14 on readers with no avoid list. Now structural: a separate "good to know" note that code keeps only for avoid-list readers.
+- **Speed:** the rebuilt writer took 5.5s vs 4.4s per card (367 vs 256 output words), about +1s per request since cards run in parallel. Notes capped at 40 words.
+
+**Not yet measured:** the "good to know" note and the thin-records note. They ride along in one combined 21-reader run after the selection rewrite (fresh picks, cards and speed together), plus Grim's blind read of about 15 cards as the quality gate. The readiness bar's "0 card errors" gate keeps any remaining errors away from readers.
+
+---
+
 ## 2026-11-07 — Honest cards, first try (controlled before/after, 15 of 21 readers)
 
 **Change:** decision 2.26, first version of the honest-card instructions, plus the mood-word correction and the whole-card check. Tested with `evals/compare-cards.mts` on the official baseline's picks: the same 45 books, their exact card-writing requests replayed with the new instructions, old and new cards read side by side by the card check. Stopped at reader 15 when the dev workspace reached its monthly API limit (access returns Dec 1). **Spend: about $1.**

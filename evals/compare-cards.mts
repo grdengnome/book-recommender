@@ -15,7 +15,7 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { callModel, modelFor } from "@/lib/ai/gateway";
-import { CARD_SYSTEM_PROMPT, avoidBlock } from "@/lib/engine/cards/writeCards";
+import { CARD_SYSTEM_PROMPT, THIN_RECORDS_NOTE, avoidBlock } from "@/lib/engine/cards/writeCards";
 import { CARD_FORMAT } from "@/lib/engine/picks/pickSchema";
 import { firstWord } from "@/lib/engine/picks/validatePicks";
 import { finalMoods } from "@/lib/engine/recommend";
@@ -136,8 +136,14 @@ function withSelectorLead(prompt: string): string {
   return rest.join("\n");
 }
 
+// As in the engine: thin records (no description, no reader moods) get the note naming them.
+function withThinNote(prompt: string): string {
+  if (prompt.includes("<records_note>") || /\ncatalog description: /.test(prompt) || /\nHardcover moods: /.test(prompt)) return prompt;
+  return prompt.replace("\n</book>", `\n</book>\n\n${THIN_RECORDS_NOTE}`);
+}
+
 async function rewrite(call: CardCall, avoid: string[]): Promise<{ fields: CardFields; selectorMood: string }> {
-  const content = withSelectorLead(withAvoid(await withHardcoverEvidence(String(call.request.messages[0]?.content ?? ""), call.hadHardcover ?? false), avoid));
+  const content = withSelectorLead(withThinNote(withAvoid(await withHardcoverEvidence(String(call.request.messages[0]?.content ?? ""), call.hadHardcover ?? false), avoid)));
   const body = { ...call.request, messages: [{ ...call.request.messages[0], content }], model: modelFor("cardWriting"), system: CARD_SYSTEM_PROMPT, output_config: { format: CARD_FORMAT } };
   const selectorMood = /\nmood: (.*)/.exec(String(call.request.messages[0]?.content))?.[1]?.trim() ?? "";
   // Timed like the engine's card call, so the old and new card writing can be compared on speed.
