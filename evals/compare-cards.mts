@@ -121,8 +121,23 @@ function withAvoid(prompt: string, avoid: string[]): string {
   return prompt.replace("</reader_taste>\n\n", `</reader_taste>\n\n${block.join("\n")}\n`);
 }
 
+// The engine now puts the selector's note and mood word in their own <selector_lead> block after
+// </book>, so the private notes can't mistake them for catalog records; replayed requests from
+// before that change are rearranged the same way.
+function withSelectorLead(prompt: string): string {
+  if (prompt.includes("<selector_lead>")) return prompt;
+  const lines = prompt.split("\n");
+  const note = lines.find((l) => l.startsWith("selector's note: "));
+  const mood = lines.find((l) => l.startsWith("mood: "));
+  if (!note || !mood) return prompt;
+  const rest = lines.filter((l) => l !== note && l !== mood);
+  const close = rest.indexOf("</book>");
+  rest.splice(close + 1, 0, "", "<selector_lead>", `note: ${note.slice("selector's note: ".length)}`, mood, "</selector_lead>");
+  return rest.join("\n");
+}
+
 async function rewrite(call: CardCall, avoid: string[]): Promise<{ fields: CardFields; selectorMood: string }> {
-  const content = withAvoid(await withHardcoverEvidence(String(call.request.messages[0]?.content ?? ""), call.hadHardcover ?? false), avoid);
+  const content = withSelectorLead(withAvoid(await withHardcoverEvidence(String(call.request.messages[0]?.content ?? ""), call.hadHardcover ?? false), avoid));
   const body = { ...call.request, messages: [{ ...call.request.messages[0], content }], model: modelFor("cardWriting"), system: CARD_SYSTEM_PROMPT, output_config: { format: CARD_FORMAT } };
   const selectorMood = /\nmood: (.*)/.exec(String(call.request.messages[0]?.content))?.[1]?.trim() ?? "";
   // Timed like the engine's card call, so the old and new card writing can be compared on speed.

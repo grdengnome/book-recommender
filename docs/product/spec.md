@@ -96,8 +96,8 @@ The contract between the engine and the screens. One format for every pick, whic
 | `hook` | The short line on the revealed book | Yes | Final step | ~90 chars | — |
 | `why` | Why it's for this reader | Yes | Final step | ~2 sentences | — |
 | `story` | What the book is about, written from the catalog description; never invented plot | No | Final step, from catalog description | 2–3 sentences | Section hidden |
-| `angleHeading` | Third detail-screen section's heading, written for this pick (e.g. "Shelved in the wrong aisle"), not a fixed label | Yes | Final step | ~30 chars (about 5 words, 13.74) | — |
-| `angleText` | That section's body | Yes | Final step | ~2 sentences | — |
+| `angleHeading` | Third detail-screen section's heading: what makes this book distinctive, written for this pick from its catalog records (e.g. "A hotel as a whole world"), not a fixed label; no comparisons to other books, media or genres and no claims about origins or reception (decision 2.26) | Yes | Final step | ~30 chars (about 5 words, 13.74) | — |
+| `angleText` | That section's body: what makes the book distinctive, from its records | Yes | Final step | ~2 sentences | — |
 | `mood` | One word, for the pre-reveal clue chip | Yes | Final step | 1 word | — |
 | `source` | Where the book came from, in reader-friendly words, e.g. "International Booker longlist, 2019" | No | The source that supplied it; never invented | Short phrase | Not shown |
 | `rarity` | Staff pick / First edition / Holy grail | — | Open question ([`decisions.md` §12](../decisions.md#12-open-questions-im-carrying)) | — | — |

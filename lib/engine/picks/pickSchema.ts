@@ -76,7 +76,7 @@ export const CARD_FORMAT = {
     additionalProperties: false,
     required: ["bookNotes", "title", "author", "hook", "why", "angleHeading", "angleText", "mood"],
     properties: {
-      bookNotes: field("Private, written first: what the book is and how it reads, from the records only. Not shown."),
+      bookNotes: field("Private, written first, at most 40 words: what the book is and how it reads, from the records only. Not shown."),
       title: field("English display title, cleaned of series or edition notes."),
       author: field('Author as "First Last" in English transliteration, no stress marks.'),
       hook: field("One short line for the revealed book, about 90 characters or fewer."),

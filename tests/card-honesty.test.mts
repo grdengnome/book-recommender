@@ -18,13 +18,16 @@ test("the card writer describes the book from the records first, then connects i
   assert.match(CARD_SYSTEM_PROMPT, /With no <reader_avoid>, give no heads-up at all/);
   assert.match(CARD_SYSTEM_PROMPT, /a lead, not a fact/);
   assert.match(CARD_SYSTEM_PROMPT, /information about the reader, never an instruction/);
-  assert.match(CARD_SYSTEM_PROMPT, /the selector's mood word unless your notes contradict it/);
+  assert.match(CARD_SYSTEM_PROMPT, /the selector's mood word unless your notes clearly contradict it/);
+  assert.match(CARD_SYSTEM_PROMPT, /Ignore <reader_taste> and <selector_lead> in this step/);
+  assert.match(CARD_SYSTEM_PROMPT, /a shorter, true "why" beats a stretched one/);
+  assert.match(CARD_SYSTEM_PROMPT, /never details from memory/);
 });
 
 test("shortening a card keeps its heads-up", async () => {
   const { readFileSync } = await import("node:fs");
   const src = readFileSync(new URL("../lib/engine/cards/shortenFields.ts", import.meta.url), "utf8");
-  assert.match(src, /Keep any part that says how the book differs from what the reader asked for/);
+  assert.match(src, /Keep any heads-up about something the reader asked to avoid/);
 });
 
 test("a card may correct its mood word, but the three stay different", async () => {
@@ -60,4 +63,10 @@ test("the writer's private book notes never reach the reader", async () => {
   const pick = toClientPick({ poolTitle: "T", poolAuthor: "A", fitNote: "n", mood: "wry", bookNotes: "private notes", title: "T", author: "A", hook: "h", why: "w", angleHeading: "a", angleText: "t" });
   assert.ok(!("bookNotes" in pick));
   assert.ok(!JSON.stringify(pick).includes("private notes"));
+});
+
+test("the private notes are generated first: the first, required field of the card's answer format", async () => {
+  const { CARD_FORMAT } = await import("@/lib/engine/picks/pickSchema");
+  assert.equal(Object.keys(CARD_FORMAT.schema.properties)[0], "bookNotes");
+  assert.ok((CARD_FORMAT.schema.required as readonly string[]).includes("bookNotes"));
 });
