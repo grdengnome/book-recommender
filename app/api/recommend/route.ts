@@ -23,6 +23,7 @@ export async function POST(request: NextRequest) {
 
   let tasteDescription: string;
   let length: LengthBand | undefined;
+  let avoid: string[] = [];
   if (body?.profile !== undefined) {
     const check = validateProfile(body.profile);
     if (!check.ok) {
@@ -30,12 +31,13 @@ export async function POST(request: NextRequest) {
     }
     tasteDescription = renderBrief(check.profile);
     length = check.profile.slots.length?.value;
+    avoid = check.profile.slots.avoid?.value ?? [];
   } else if (typeof body?.tasteDescription === "string" && body.tasteDescription.trim()) {
     tasteDescription = body.tasteDescription;
   } else {
     return NextResponse.json(errorBody("bad_request", "profile (object) or tasteDescription (string) is required"), { status: 400 });
   }
 
-  const result = await recommend({ tasteDescription, length, evalTag });
+  const result = await recommend({ tasteDescription, length, avoid, evalTag });
   return NextResponse.json(result.body, { status: result.status });
 }

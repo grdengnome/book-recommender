@@ -148,10 +148,13 @@ export function align(items: string[], given: Verdict[], missing: string): Verdi
 }
 
 function describePick(p: JudgePick, i: number): string {
+  return [`Pick ${i + 1}: "${p.title}" by ${p.author}`, `Reason given for the pick: ${p.card || "(none)"}`, ...catalogLines(p)].join("\n");
+}
+
+// The catalog facts for one pick, as the judge and the card check see them.
+export function catalogLines(p: Pick<JudgePick, "facts" | "pages">): string[] {
   const f = p.facts;
   const lines = [
-    `Pick ${i + 1}: "${p.title}" by ${p.author}`,
-    `Reason given for the pick: ${p.card || "(none)"}`,
     `Catalog: ${f.found ? `found in ${f.source} as "${f.title}" by ${f.author ?? "unknown"}` : "not found in the catalogs (this may be a lookup gap, not proof the book doesn't exist)"}`,
   ];
   if (f.firstYear) lines.push(`First published: ${f.firstYear}`);
@@ -161,7 +164,7 @@ function describePick(p: JudgePick, i: number): string {
   if (f.subjects.length) lines.push(`Subjects: ${f.subjects.join("; ")}`);
   if (f.tags.length) lines.push(`Reader tags (Hardcover genres and moods): ${f.tags.join("; ")}`);
   if (f.description) lines.push(`Description: ${f.description}`);
-  return lines.join("\n");
+  return lines;
 }
 
 // A malformed answer (wrong number of picks, cut off, unreadable) is retried once before it

@@ -54,12 +54,22 @@ export const SELECTION_FORMAT = {
 
 // What a card-writing call returns for one pick.
 export interface CardText {
+  // The writer's private, records-only description of the book, written first so the card agrees
+  // with it (decision 2.26). Never sent to the client (toClientPick leaves it out).
+  bookNotes?: string;
+  // "Good to know": the one place a caveat may go, so the pitch fields stay free of them. Kept
+  // only for readers with an avoid list (recommend.ts drops it otherwise), shown as a small note.
+  headsUp?: string;
   title: string;
   author: string;
   hook: string;
   why: string;
   angleHeading: string;
   angleText: string;
+  // The selector's mood word, or a replacement when the catalog records clearly contradict it
+  // (decision 2.26). recommend.ts keeps the selector's word if the replacement is empty or
+  // would repeat another pick's mood.
+  mood: string;
 }
 
 export const CARD_FORMAT = {
@@ -67,14 +77,17 @@ export const CARD_FORMAT = {
   schema: {
     type: "object",
     additionalProperties: false,
-    required: ["title", "author", "hook", "why", "angleHeading", "angleText"],
+    required: ["bookNotes", "title", "author", "hook", "why", "angleHeading", "angleText", "mood", "headsUp"],
     properties: {
+      bookNotes: field("Private, written first, at most 40 words: what the book is and how it reads, from the records only. Not shown."),
       title: field("English display title, cleaned of series or edition notes."),
       author: field('Author as "First Last" in English transliteration, no stress marks.'),
       hook: field("One short line for the revealed book, about 90 characters or fewer."),
-      why: field("Why it's for this reader, tied to their stated taste. About 2 sentences."),
-      angleHeading: field("Heading written for this pick, about 5 words (30 characters)."),
-      angleText: field("That section's body. About 2 sentences."),
+      why: field("Why it suits this reader: what it really is, connected to what it delivers for them. About 2 sentences."),
+      angleHeading: field("What makes this book distinctive, about 5 words (30 characters)."),
+      angleText: field("What makes this book distinctive, from the records. About 2 sentences."),
+      mood: field("One word for how this book reads: the selector's word unless the records clearly contradict it."),
+      headsUp: field('"Good to know": one short sentence only if the book touches something the reader asked to avoid; otherwise empty.'),
     },
   },
 } as const;
@@ -104,6 +117,9 @@ export interface Pick {
   angleHeading: string;
   angleText: string;
   mood: string;
+  // "Good to know" (decision 2.26): a short note when the book touches something the reader asked
+  // to avoid; null otherwise. Shown quietly, apart from the pitch.
+  headsUp: string | null;
   source: string | null;
 }
 
@@ -125,6 +141,7 @@ export function toClientPick(p: ModelPick): Pick {
     angleHeading: p.angleHeading,
     angleText: p.angleText,
     mood: p.mood,
+    headsUp: p.headsUp?.trim() ? p.headsUp.trim() : null,
     source: null,
   };
 }

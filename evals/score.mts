@@ -28,6 +28,7 @@ import { CATALOG_VERSION, lookupFacts, type CatalogFacts } from "./judge/catalog
 import { remember } from "./judge/cache";
 import { JUDGE_VERSION, judgeCase, type CaseChecks } from "./judge/judge";
 import { plainClaudePicks } from "./judge/baseline";
+import { checkCards } from "./judge/cardCheck";
 import { judgeAgreement, scorecard, type ScoredCase, type ScoredRun } from "./judge/scorecard";
 import { reviewPage } from "./judge/review";
 import { StopScoringError } from "./judge/errors";
@@ -42,7 +43,7 @@ interface CaseDef {
   tasteDescription?: string;
   checks?: CaseChecks;
 }
-interface EnginePick { title: string; author: string; hook?: string; why?: string; angleText?: string; coverUrl?: string | null; pages?: number | null }
+interface EnginePick { title: string; author: string; hook?: string; why?: string; angleHeading?: string; angleText?: string; mood?: string; headsUp?: string | null; coverUrl?: string | null; pages?: number | null }
 interface RunResult { id: string; picks?: EnginePick[]; error?: unknown; driverMs?: number; trace?: { totalMs?: number; totalUsd?: number | null } | null }
 
 const NO_CHECKS: CaseChecks = { hardRules: [], strong: [], weighed: [], nonObviousRequired: false };
@@ -132,6 +133,13 @@ async function scoreEngineRun(name: string, results: RunResult[]): Promise<Score
     try {
       base.score = await judgeCase({ brief: briefOf(def), checks, picks: judgePicks });
       if (secondN > 0 && i < secondN) base.second = await judgeCase({ brief: briefOf(def), checks, picks: judgePicks, job: "evalSecondJudge" });
+      // The card check reads each whole card (hook, why, angle, mood word), engine picks only.
+      if (enginePicks.every((p) => p.hook && p.why)) {
+        base.cardCheck = await checkCards(briefOf(def), picks.map((p, k) => ({
+          ...p,
+          fields: { hook: enginePicks[k].hook ?? "", why: enginePicks[k].why ?? "", angleHeading: enginePicks[k].angleHeading ?? "", angleText: enginePicks[k].angleText ?? "", mood: enginePicks[k].mood ?? "", headsUp: enginePicks[k].headsUp ?? null },
+        })));
+      }
       console.log(`[${name}] ${r.id} scored${base.score.reused ? " (remembered)" : ""}`);
     } catch (err) {
       if (err instanceof StopScoringError) throw err;

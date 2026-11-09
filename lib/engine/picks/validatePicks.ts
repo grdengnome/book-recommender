@@ -51,7 +51,7 @@ const strings = <K extends string>(raw: unknown, fields: readonly K[]): Record<K
 
 // First run of letters (any script), keeping inner hyphens/apostrophes: "bittersweet, quiet"
 // → "bittersweet", "Slow-burning" stays whole.
-function firstWord(mood: string): string {
+export function firstWord(mood: string): string {
   return mood.trim().match(/[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/u)?.[0] ?? "";
 }
 
@@ -102,8 +102,18 @@ export type CardValidation =
   | { status: "invalid"; problems: string[] };
 
 export function validateCard(raw: unknown): CardValidation {
-  const card = strings(raw, CARD_FIELDS);
-  const problems = CARD_FIELDS.filter((f) => !card[f]).map((f) => `${f} is empty`);
+  const texts = strings(raw, CARD_FIELDS);
+  const problems = CARD_FIELDS.filter((f) => !texts[f]).map((f) => `${f} is empty`);
+  // The mood word is optional here: empty means "keep the selector's" (recommend.ts).
+  const rawMood = (raw as { mood?: unknown } | null)?.mood;
+  const rawNotes = (raw as { bookNotes?: unknown } | null)?.bookNotes;
+  const rawHeadsUp = (raw as { headsUp?: unknown } | null)?.headsUp;
+  const card: CardText = {
+    ...texts,
+    mood: typeof rawMood === "string" ? firstWord(rawMood) : "",
+    ...(typeof rawNotes === "string" ? { bookNotes: rawNotes } : {}),
+    ...(typeof rawHeadsUp === "string" && rawHeadsUp.trim() ? { headsUp: rawHeadsUp.trim() } : {}),
+  };
   const overLimit = (Object.keys(LENGTH_CEILINGS) as LimitedField[]).filter((f) => card[f].length > LENGTH_CEILINGS[f]);
   return problems.length ? { status: "invalid", problems } : { status: "valid", card, overLimit };
 }

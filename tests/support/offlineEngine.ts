@@ -101,6 +101,17 @@ function cannedHardcover(body: { query: string; variables: Record<string, unknow
     const ids = (body.variables.ids as number[]) ?? [];
     return json({ data: { books: ids.map((id) => ({ id, pages: id % 2 === 0 ? 280 : 900 })) } });
   }
+  // Finding a pick's record by title and author (lib/engine/sources/hardcover/findBook.ts),
+  // for picks that came from Open Library only: a hit for any book in the canned catalog.
+  if (body.query.includes("search(")) {
+    const q = String(body.variables.q ?? "");
+    const i = BOOKS.findIndex(([title]) => q.startsWith(title));
+    return json({ data: { search: { results: { hits: i < 0 ? [] : [{ document: { id: 9000 + i, title: BOOKS[i][0], author_names: [BOOKS[i][1]] } }] } } } });
+  }
+  if (body.query.includes("query Books(")) {
+    const ids = (body.variables.ids as number[]) ?? [];
+    return json({ data: { books: ids.map((id) => ({ id, title: BOOKS[id - 9000][0], users_count: 50, pages: 250, release_year: 1990, description: "Found by search: a darkly funny book.", contributions: [{ author: { name: BOOKS[id - 9000][1] } }], cached_tags: { Genre: [{ tag: "Satire" }], Mood: [{ tag: "funny" }, { tag: "dark" }] } })) } });
+  }
   if (body.query.includes("books_by_pk")) {
     return json({ data: { books_by_pk: { description: "Hardcover's description.", cached_tags: { Genre: [{ tag: "Literary" }], Mood: [{ tag: "reflective" }] } } } });
   }
@@ -158,7 +169,7 @@ function cannedAnthropic(body: any): Response {
     const author = String(first).match(/catalog author: (.*)/)?.[1] ?? "";
     return reply([{ type: "text", text: JSON.stringify({
       title, author, hook: "A quiet book that stays with you.", why: "Quiet and restrained.",
-      angleHeading: "Restraint as a key", angleText: "Fits the brief.",
+      angleHeading: "Restraint as a key", angleText: "Fits the brief.", headsUp: "It touches on grief, but gently.",
     }) }], "end_turn");
   }
   if (body.tools && body.messages.length === 1) {

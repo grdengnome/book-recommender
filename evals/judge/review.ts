@@ -15,6 +15,7 @@ function picksHtml(c: ScoredCase): string {
   return `${problems.map((p) => `<p class="err">${esc(p)}</p>`).join("")}<div class="picks">${c.picks
     .map((p, i) => {
       const s = c.score?.picks[i];
+      const cc = c.cardCheck?.cards[i];
       const cover = p.coverUrl || p.facts.coverUrl;
       const pages = p.pages ?? p.facts.pages;
       const lookup = p.facts.status === "not_found" ? "not found in the catalogs" : p.facts.status === "error" ? "catalog lookup failed" : "";
@@ -22,7 +23,7 @@ function picksHtml(c: ScoredCase): string {
       const scores = s
         ? `<div class="score"><b>Relevance: ${esc(s.relevance)}</b> — ${esc(s.relevanceReason)}<br><b>Non-obvious: ${esc(s.nonObvious)}</b> — ${esc(s.nonObviousReason)}${[...s.hardRules, ...s.strong, ...s.weighed]
             .map((v) => `<br><span class="v ${esc(v.verdict)}">${esc(v.verdict)}</span> ${esc(v.item)}: ${esc(v.reason)}`)
-            .join("")}<br><b>Card: ${esc(s.cardAccuracy)}</b> — ${esc(s.cardReason)}</div>`
+            .join("")}${cc ? `<br><b>Whole card: ${esc(cc.honest)}</b> (heads-up: ${esc(cc.headsUp)}) — ${esc(cc.reason)}` : `<br><b>Card: ${esc(s.cardAccuracy)}</b> — ${esc(s.cardReason)}`}</div>`
         : "";
       return `<div class="pick">${cover ? `<img src="${esc(cover)}" alt="" loading="lazy">` : `<div class="nocover"></div>`}<div><div class="t">${esc(p.title)}</div><div class="a">${esc(p.author)}${facts ? ` · ${esc(facts)}` : ""}</div><div class="c">${esc(p.card)}</div>${scores}</div></div>`;
     })

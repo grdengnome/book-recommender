@@ -352,6 +352,19 @@ test("running out of API credit stops with a clear error instead of failing read
   });
 });
 
+test("the whole-card check, when it ran, decides card errors and counts heads-ups", () => {
+  const c = scored("a", ["good", "good", "good"]);
+  c.cardCheck = { model: "judge", cards: [
+    { reason: "", honest: "fail", headsUp: "none" },
+    { reason: "", honest: "pass", headsUp: "warranted" },
+    { reason: "", honest: "pass", headsUp: "unwarranted" },
+  ] };
+  const rows = scorecard([run([c])]);
+  assert.match(rowOf(rows, "Real and correct").values[0], /1 card errors \(whole cards\)/);
+  assert.deepEqual(rowOf(rows, "Real and correct").pass, [false]);
+  assert.equal(rowOf(rows, "Card heads-ups").values[0], "1 warranted · 1 unwarranted · of 3 cards");
+});
+
 test("second-judge agreement counts picks landing in the same bucket", () => {
   const c = scored("a", ["good", "weak", "excellent"]);
   c.second = { ...c.score!, picks: [pickScore("excellent"), pickScore("good"), pickScore("good")] };

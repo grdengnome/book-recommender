@@ -227,6 +227,9 @@ export interface RecommendInput {
   // The reader's length request, when they made one (from the taste profile). Enforced in code
   // before the model chooses (decision 2.25).
   length?: LengthBand;
+  // What the reader asked to avoid (from the taste profile). A card may give a heads-up only
+  // about these (decision 2.26).
+  avoid?: string[];
   // Optional eval-case tag, set only by the eval runner; tags logs and the debug trace.
   evalTag?: string | null;
 }
@@ -239,7 +242,7 @@ export interface RecommendResult {
 
 // The whole recommendation pipeline for one reader. The caller (app/api/recommend/route.ts)
 // has already checked the request and that the AI gateway is configured.
-export async function recommend({ tasteDescription, length, evalTag = null }: RecommendInput): Promise<RecommendResult> {
+export async function recommend({ tasteDescription, length, avoid = [], evalTag = null }: RecommendInput): Promise<RecommendResult> {
   // TEMPORARY (query-tracing session, 2026-08-03): optional eval-case tag, only
   // ever set by the eval driver script. Absent in normal use, where this is a
   // no-op passthrough — does not affect retrieval, dedupe, or shuffle behavior.
@@ -262,7 +265,7 @@ export async function recommend({ tasteDescription, length, evalTag = null }: Re
   // the Hardcover pre-fetch is shared since it depends only on tasteDescription.
   for (let attempt = 1; attempt <= MAX_GENERATION_ATTEMPTS; attempt++) {
     const attemptTrace = trace.with({ attempt });
-    const generation = await generateOnce(tasteDescription, hardcoverPoolPromise, attemptTrace, length);
+    const generation = await generateOnce(tasteDescription, hardcoverPoolPromise, attemptTrace, length, avoid);
     if (!generation.ok) return respond(trace, generation.body, generation.status);
 
     if (generation.status === "ready") {
@@ -344,6 +347,7 @@ async function generateOnce(
   hardcoverPoolPromise: Promise<HardcoverBookCandidate[]>,
   trace: RequestTrace,
   length?: LengthBand,
+  avoid: string[] = [],
 ): Promise<GenerationResult> {
   const messages: Array<{ role: "user" | "assistant"; content: unknown }> = [
     { role: "user", content: tasteDescription },
@@ -387,7 +391,7 @@ async function generateOnce(
       const earlierTitles = arrivedTitles.slice();
       const title = (raw as { poolTitle?: unknown } | null)?.poolTitle;
       if (typeof title === "string" && title.trim()) arrivedTitles.push(title.trim());
-      roundOutcomes.push(runPick(tasteDescription, raw, index, seenCandidates, earlierTitles, roundTrace));
+      roundOutcomes.push(runPick(tasteDescription, raw, index, seenCandidates, earlierTitles, roundTrace, avoid));
     });
     const streamed = await streamModel(requestBody, scan);
     data = streamed.data;
@@ -520,14 +524,31 @@ async function generateOnce(
   ];
   if (problems.length) return { ok: true, status: "rejected", detail: problems.join("; ") };
 
+  // Mood words (decision 2.26): the card writer may replace the selector's word when the
+  // records clearly contradict it, but the three must still differ, so a replacement that's
+  // empty or would repeat another pick's mood falls back to the selector's word.
+  const moods = finalMoods(ready.map((o) => ({ selector: o.selected.mood, card: o.card.mood })));
+  trace.add("W", { kind: "moods", moods: ready.map((o, i) => ({ selector: o.selected.mood, card: o.card.mood, final: moods[i] })) });
+  trace.add("W", { kind: "heads_up", kept: avoid.length > 0, notes: ready.map((o) => o.card.headsUp ?? "") });
+
   return {
     ok: true,
     status: "ready",
-    picks: ready.map((o) => ({ ...o.selected, ...o.card })),
+    // "Good to know" notes are kept only for readers with an avoid list (decision 2.26); for
+    // everyone else they're dropped here, and the count shows how often picks miss the brief.
+    picks: ready.map((o, i) => ({ ...o.selected, ...o.card, mood: moods[i], headsUp: avoid.length ? o.card.headsUp : undefined })),
     grounding,
     pickMetadata: ready.map((o) => o.metadata),
     overLimit: ready.flatMap((o, index) => o.overLimit.map((field) => ({ index, field, length: o.card[field].length }))),
   };
+}
+
+export function finalMoods(picks: Array<{ selector: string; card: string }>): string[] {
+  const chosen = picks.map((p) => (p.card ? p.card : p.selector));
+  return chosen.map((m, i) => {
+    const clash = chosen.some((other, j) => j !== i && other.toLowerCase() === m.toLowerCase());
+    return clash && m !== picks[i].selector ? picks[i].selector : m;
+  });
 }
 
 // One pick's pipeline, started the moment its object arrives in the selection stream:
@@ -542,6 +563,7 @@ async function runPick(
   seen: SeenCandidates,
   earlierTitles: string[],
   trace: RequestTrace,
+  avoid: string[] = [],
 ): Promise<PickOutcome> {
   const pickTrace = trace.with({ pick: index });
   try {
@@ -557,7 +579,7 @@ async function runPick(
     console.log(formatPickMetadata([metadata], lookupMs));
     pickTrace.add("G", { kind: "result", ms: lookupMs, picks: [metadata] });
 
-    const card = await writeCard(tasteDescription, selected, checked, metadata, earlierTitles, pickTrace);
+    const card = await writeCard(tasteDescription, selected, checked, metadata, earlierTitles, pickTrace, avoid);
     pickTrace.add("W", { kind: "result", ...card });
     if (!card.ok) return { ok: false, reason: `card writing failed: ${card.error}`, checked };
     return { ok: true, selected, checked, metadata, card: card.card, overLimit: card.overLimit };
