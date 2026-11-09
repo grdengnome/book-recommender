@@ -99,6 +99,7 @@ The contract between the engine and the screens. One format for every pick, whic
 | `angleHeading` | Third detail-screen section's heading: what makes this book distinctive, written for this pick from its catalog records (e.g. "A hotel as a whole world"), not a fixed label; no comparisons to other books, media or genres and no claims about origins or reception (decision 2.26) | Yes | Final step | ~30 chars (about 5 words, 13.74) | — |
 | `angleText` | That section's body: what makes the book distinctive, from its records | Yes | Final step | ~2 sentences | — |
 | `mood` | One word, for the pre-reveal clue chip | Yes | Final step | 1 word | — |
+| `headsUp` | "Good to know": a short note, only when the book touches something the reader asked to avoid; shown quietly, apart from the pitch (decision 2.26) | No | Final step | 1 sentence | Not shown |
 | `source` | Where the book came from, in reader-friendly words, e.g. "International Booker longlist, 2019" | No | The source that supplied it; never invented | Short phrase | Not shown |
 | `rarity` | Staff pick / First edition / Holy grail | — | Open question ([`decisions.md` §12](../decisions.md#12-open-questions-im-carrying)) | — | — |
 

@@ -43,7 +43,7 @@ interface CaseDef {
   tasteDescription?: string;
   checks?: CaseChecks;
 }
-interface EnginePick { title: string; author: string; hook?: string; why?: string; angleHeading?: string; angleText?: string; mood?: string; coverUrl?: string | null; pages?: number | null }
+interface EnginePick { title: string; author: string; hook?: string; why?: string; angleHeading?: string; angleText?: string; mood?: string; headsUp?: string | null; coverUrl?: string | null; pages?: number | null }
 interface RunResult { id: string; picks?: EnginePick[]; error?: unknown; driverMs?: number; trace?: { totalMs?: number; totalUsd?: number | null } | null }
 
 const NO_CHECKS: CaseChecks = { hardRules: [], strong: [], weighed: [], nonObviousRequired: false };
@@ -137,7 +137,7 @@ async function scoreEngineRun(name: string, results: RunResult[]): Promise<Score
       if (enginePicks.every((p) => p.hook && p.why)) {
         base.cardCheck = await checkCards(briefOf(def), picks.map((p, k) => ({
           ...p,
-          fields: { hook: enginePicks[k].hook ?? "", why: enginePicks[k].why ?? "", angleHeading: enginePicks[k].angleHeading ?? "", angleText: enginePicks[k].angleText ?? "", mood: enginePicks[k].mood ?? "" },
+          fields: { hook: enginePicks[k].hook ?? "", why: enginePicks[k].why ?? "", angleHeading: enginePicks[k].angleHeading ?? "", angleText: enginePicks[k].angleText ?? "", mood: enginePicks[k].mood ?? "", headsUp: enginePicks[k].headsUp ?? null },
         })));
       }
       console.log(`[${name}] ${r.id} scored${base.score.reused ? " (remembered)" : ""}`);

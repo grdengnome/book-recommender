@@ -169,7 +169,7 @@ function cannedAnthropic(body: any): Response {
     const author = String(first).match(/catalog author: (.*)/)?.[1] ?? "";
     return reply([{ type: "text", text: JSON.stringify({
       title, author, hook: "A quiet book that stays with you.", why: "Quiet and restrained.",
-      angleHeading: "Restraint as a key", angleText: "Fits the brief.",
+      angleHeading: "Restraint as a key", angleText: "Fits the brief.", headsUp: "It touches on grief, but gently.",
     }) }], "end_turn");
   }
   if (body.tools && body.messages.length === 1) {

@@ -529,11 +529,14 @@ async function generateOnce(
   // empty or would repeat another pick's mood falls back to the selector's word.
   const moods = finalMoods(ready.map((o) => ({ selector: o.selected.mood, card: o.card.mood })));
   trace.add("W", { kind: "moods", moods: ready.map((o, i) => ({ selector: o.selected.mood, card: o.card.mood, final: moods[i] })) });
+  trace.add("W", { kind: "heads_up", kept: avoid.length > 0, notes: ready.map((o) => o.card.headsUp ?? "") });
 
   return {
     ok: true,
     status: "ready",
-    picks: ready.map((o, i) => ({ ...o.selected, ...o.card, mood: moods[i] })),
+    // "Good to know" notes are kept only for readers with an avoid list (decision 2.26); for
+    // everyone else they're dropped here, and the count shows how often picks miss the brief.
+    picks: ready.map((o, i) => ({ ...o.selected, ...o.card, mood: moods[i], headsUp: avoid.length ? o.card.headsUp : undefined })),
     grounding,
     pickMetadata: ready.map((o) => o.metadata),
     overLimit: ready.flatMap((o, index) => o.overLimit.map((field) => ({ index, field, length: o.card[field].length }))),

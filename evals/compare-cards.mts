@@ -170,6 +170,7 @@ const tally = (vs: CardVerdict[]) => ({
 const report: unknown[] = [];
 const oldAll: CardVerdict[] = [];
 let headsUpWithoutAvoid = 0;
+let notesDropped = 0;
 const newAll: CardVerdict[] = [];
 try {
   for (const r of run.results) {
@@ -185,7 +186,10 @@ try {
     }));
     const moods = finalMoods(rewritten.map((x) => ({ selector: x.selectorMood, card: x.fields.mood })));
     const oldCheck = await checkCards(brief, withFacts.map((p) => ({ ...p, fields: { hook: p.hook, why: p.why, angleHeading: p.angleHeading, angleText: p.angleText, mood: p.mood } })));
-    const newCheck = await checkCards(brief, withFacts.map((p, i) => ({ ...p, fields: { ...rewritten[i].fields, mood: moods[i] } })));
+    // As in the engine: the "good to know" note is kept only for readers with an avoid list.
+    const keepNote = avoidOf(r.id).length > 0;
+    if (!keepNote) notesDropped += rewritten.filter((x) => x.fields.headsUp?.trim()).length;
+    const newCheck = await checkCards(brief, withFacts.map((p, i) => ({ ...p, fields: { ...rewritten[i].fields, mood: moods[i], headsUp: keepNote ? rewritten[i].fields.headsUp ?? null : null } })));
     if (!avoidOf(r.id).length) headsUpWithoutAvoid += newCheck.cards.filter((v) => v.headsUp !== "none").length;
     oldAll.push(...oldCheck.cards);
     newAll.push(...newCheck.cards);
@@ -220,4 +224,5 @@ console.log(`Unverifiable:         ${o.unknown} → ${n.unknown}`);
 console.log(`Heads-ups warranted:  ${o.warranted} → ${n.warranted}`);
 console.log(`Heads-ups unwarranted (needless hedging): ${o.unwarranted} → ${n.unwarranted}`);
 console.log(`New heads-ups for readers with no avoid list (should be 0): ${headsUpWithoutAvoid}`);
+console.log(`"Good to know" notes written but dropped (readers with no avoid list; a sign of mismatched picks): ${notesDropped}`);
 console.log(`\nWrote evals/results/${out} (every card, old and new, with the check's reasons)`);

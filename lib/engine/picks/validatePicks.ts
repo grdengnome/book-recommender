@@ -107,7 +107,13 @@ export function validateCard(raw: unknown): CardValidation {
   // The mood word is optional here: empty means "keep the selector's" (recommend.ts).
   const rawMood = (raw as { mood?: unknown } | null)?.mood;
   const rawNotes = (raw as { bookNotes?: unknown } | null)?.bookNotes;
-  const card: CardText = { ...texts, mood: typeof rawMood === "string" ? firstWord(rawMood) : "", ...(typeof rawNotes === "string" ? { bookNotes: rawNotes } : {}) };
+  const rawHeadsUp = (raw as { headsUp?: unknown } | null)?.headsUp;
+  const card: CardText = {
+    ...texts,
+    mood: typeof rawMood === "string" ? firstWord(rawMood) : "",
+    ...(typeof rawNotes === "string" ? { bookNotes: rawNotes } : {}),
+    ...(typeof rawHeadsUp === "string" && rawHeadsUp.trim() ? { headsUp: rawHeadsUp.trim() } : {}),
+  };
   const overLimit = (Object.keys(LENGTH_CEILINGS) as LimitedField[]).filter((f) => card[f].length > LENGTH_CEILINGS[f]);
   return problems.length ? { status: "invalid", problems } : { status: "valid", card, overLimit };
 }
