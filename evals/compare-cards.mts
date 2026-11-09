@@ -48,7 +48,7 @@ const briefOf = (id: string) => {
 const facts = async (title: string, author: string): Promise<CatalogFacts> =>
   (await remember("facts", { v: CATALOG_VERSION, title, author }, () => lookupFacts(title, author), { keep: (x) => x.status !== "error" && !x.hardcoverError })).value;
 
-interface CardCall { hadHardcover?: boolean; attempt?: number; pick?: number; request: { system: string; messages: Array<{ content: string }>; output_config: unknown; [k: string]: unknown }; response?: { content?: Array<{ type: string; text?: string }> } }
+interface CardCall { ms?: number; usage?: { output_tokens?: number } | null; hadHardcover?: boolean; attempt?: number; pick?: number; request: { system: string; messages: Array<{ content: string }>; output_config: unknown; [k: string]: unknown }; response?: { content?: Array<{ type: string; text?: string }> } }
 
 // The final attempt's successful card-writing request for each pick, from the reader's trace.
 function cardRequests(evalTag: string): Map<string, CardCall> {
@@ -125,13 +125,25 @@ async function rewrite(call: CardCall, avoid: string[]): Promise<{ fields: CardF
   const content = withAvoid(await withHardcoverEvidence(String(call.request.messages[0]?.content ?? ""), call.hadHardcover ?? false), avoid);
   const body = { ...call.request, messages: [{ ...call.request.messages[0], content }], model: modelFor("cardWriting"), system: CARD_SYSTEM_PROMPT, output_config: { format: CARD_FORMAT } };
   const selectorMood = /\nmood: (.*)/.exec(String(call.request.messages[0]?.content))?.[1]?.trim() ?? "";
-  const { value } = await remember("cardRewrite", body, async () => {
+  // Timed like the engine's card call, so the old and new card writing can be compared on speed.
+  const { value, reused } = await remember("cardRewriteTimed", body, async () => {
+    const start = performance.now();
     const res = await callModel(body, { timeoutMs: 30_000 });
     if (!res.ok) throw callFailed("card rewrite", res.status, res.data);
-    return JSON.parse(res.data.content?.find((b) => b.type === "text")?.text ?? "") as CardFields;
+    const fields = JSON.parse(res.data.content?.find((b) => b.type === "text")?.text ?? "") as CardFields;
+    return { fields, ms: Math.round(performance.now() - start), outTokens: (res.data.usage as { output_tokens?: number } | undefined)?.output_tokens ?? null };
   });
-  return { fields: { ...value, mood: firstWord(value.mood ?? "") }, selectorMood };
+  if (!reused) {
+    if (typeof call.ms === "number") timing.oldMs.push(call.ms);
+    timing.newMs.push(value.ms);
+    if (typeof call.usage?.output_tokens === "number") timing.oldTokens.push(call.usage.output_tokens);
+    if (typeof value.outTokens === "number") timing.newTokens.push(value.outTokens);
+  }
+  return { fields: { ...value.fields, mood: firstWord(value.fields.mood ?? "") }, selectorMood };
 }
+
+const timing = { oldMs: [] as number[], newMs: [] as number[], oldTokens: [] as number[], newTokens: [] as number[] };
+const median = (xs: number[]) => (xs.length ? [...xs].sort((a, b) => a - b)[Math.floor(xs.length / 2)] : null);
 
 const tally = (vs: CardVerdict[]) => ({
   errors: vs.filter((v) => v.honest === "fail").length,
@@ -184,6 +196,9 @@ const o = tally(oldAll), n = tally(newAll);
 console.log(`\nSame ${oldAll.length} picks, old cards vs new cards`);
 const sorted = [...searchMs].sort((a, b) => a - b);
 if (sorted.length) console.log(`Hardcover search time (the engine's own lookup, live): median ${sorted[Math.floor(sorted.length / 2)]}ms · slowest ${sorted[sorted.length - 1]}ms over ${sorted.length} searches`);
+if (timing.newMs.length) {
+  console.log(`Card writing time per card (median): old ${median(timing.oldMs)}ms → new ${median(timing.newMs)}ms · words written (output tokens, median): old ${median(timing.oldTokens)} → new ${median(timing.newTokens)}`);
+}
 console.log(`Hardcover evidence: ${evidence.alreadyHad} cards already had it · ${evidence.added} newly added · ${evidence.noMatch} no matching record · ${evidence.failed} lookups failed`);
 console.log(`Card errors:          ${o.errors} → ${n.errors}`);
 console.log(`Unverifiable:         ${o.unknown} → ${n.unknown}`);
