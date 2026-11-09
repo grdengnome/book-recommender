@@ -15,7 +15,7 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { callModel, modelFor } from "@/lib/ai/gateway";
-import { CARD_SYSTEM_PROMPT } from "@/lib/engine/cards/writeCards";
+import { CARD_SYSTEM_PROMPT, avoidBlock } from "@/lib/engine/cards/writeCards";
 import { CARD_FORMAT } from "@/lib/engine/picks/pickSchema";
 import { firstWord } from "@/lib/engine/picks/validatePicks";
 import { finalMoods } from "@/lib/engine/recommend";
@@ -39,6 +39,7 @@ const only = new Set((process.env.ONLY ?? "").split(",").map((s) => s.trim()).fi
 interface RunPick { title: string; author: string; hook: string; why: string; angleHeading: string; angleText: string; mood: string; pages?: number | null }
 const run = JSON.parse(readFileSync(path.join(RESULTS, runFile), "utf8")) as { set: string; results: Array<{ id: string; picks?: RunPick[] }> };
 const { cases } = JSON.parse(readFileSync(path.join(HERE, "cases", `${run.set}.json`), "utf8")) as { cases: Array<{ id: string; profile?: TasteProfile; tasteDescription?: string }> };
+const avoidOf = (id: string) => cases.find((x) => x.id === id)?.profile?.slots.avoid?.value ?? [];
 const briefOf = (id: string) => {
   const c = cases.find((x) => x.id === id);
   return c?.profile ? renderBrief(c.profile) : c?.tasteDescription ?? "";
@@ -112,8 +113,16 @@ async function withHardcoverEvidence(prompt: string, hadHardcover: boolean): Pro
   return lines.join("\n");
 }
 
-async function rewrite(call: CardCall): Promise<{ fields: CardFields; selectorMood: string }> {
-  const content = await withHardcoverEvidence(String(call.request.messages[0]?.content ?? ""), call.hadHardcover ?? false);
+// The engine now gives the card writer the reader's avoid list (the only things a heads-up may be
+// about); a replayed request gets it in the same place.
+function withAvoid(prompt: string, avoid: string[]): string {
+  const block = avoidBlock(avoid);
+  if (!block.length || prompt.includes("<reader_avoid>")) return prompt;
+  return prompt.replace("</reader_taste>\n\n", `</reader_taste>\n\n${block.join("\n")}\n`);
+}
+
+async function rewrite(call: CardCall, avoid: string[]): Promise<{ fields: CardFields; selectorMood: string }> {
+  const content = withAvoid(await withHardcoverEvidence(String(call.request.messages[0]?.content ?? ""), call.hadHardcover ?? false), avoid);
   const body = { ...call.request, messages: [{ ...call.request.messages[0], content }], model: modelFor("cardWriting"), system: CARD_SYSTEM_PROMPT, output_config: { format: CARD_FORMAT } };
   const selectorMood = /\nmood: (.*)/.exec(String(call.request.messages[0]?.content))?.[1]?.trim() ?? "";
   const { value } = await remember("cardRewrite", body, async () => {
@@ -133,6 +142,7 @@ const tally = (vs: CardVerdict[]) => ({
 
 const report: unknown[] = [];
 const oldAll: CardVerdict[] = [];
+let headsUpWithoutAvoid = 0;
 const newAll: CardVerdict[] = [];
 try {
   for (const r of run.results) {
@@ -144,11 +154,12 @@ try {
     const rewritten = await Promise.all(r.picks.map(async (p) => {
       const call = calls.get(p.title);
       if (!call) throw new Error(`${r.id}: no card-writing request found for "${p.title}"`);
-      return rewrite(call);
+      return rewrite(call, avoidOf(r.id));
     }));
     const moods = finalMoods(rewritten.map((x) => ({ selector: x.selectorMood, card: x.fields.mood })));
     const oldCheck = await checkCards(brief, withFacts.map((p) => ({ ...p, fields: { hook: p.hook, why: p.why, angleHeading: p.angleHeading, angleText: p.angleText, mood: p.mood } })));
     const newCheck = await checkCards(brief, withFacts.map((p, i) => ({ ...p, fields: { ...rewritten[i].fields, mood: moods[i] } })));
+    if (!avoidOf(r.id).length) headsUpWithoutAvoid += newCheck.cards.filter((v) => v.headsUp !== "none").length;
     oldAll.push(...oldCheck.cards);
     newAll.push(...newCheck.cards);
     r.picks.forEach((p, i) => {
@@ -178,4 +189,5 @@ console.log(`Card errors:          ${o.errors} → ${n.errors}`);
 console.log(`Unverifiable:         ${o.unknown} → ${n.unknown}`);
 console.log(`Heads-ups warranted:  ${o.warranted} → ${n.warranted}`);
 console.log(`Heads-ups unwarranted (needless hedging): ${o.unwarranted} → ${n.unwarranted}`);
+console.log(`New heads-ups for readers with no avoid list (should be 0): ${headsUpWithoutAvoid}`);
 console.log(`\nWrote evals/results/${out} (every card, old and new, with the check's reasons)`);

@@ -67,7 +67,8 @@ test("an Open Library pick's card prompt carries Hardcover's description and moo
   try {
     const checked = { title: "The Employees", author: "Olga Ravn", sources: ["openlibrary"], groundingKey: null, record: { title: "The Employees", author: "Olga Ravn", subjects: ["Fiction"], olWorkKey: "/works/OL9W" } } as never;
     const [meta] = await lookupPickMetadata([checked]);
-    await writeCard("A reader who wants darkly funny.", { poolTitle: "The Employees", poolAuthor: "Olga Ravn", fitNote: "fits", mood: "eerie" }, checked, meta, []);
+    await writeCard("A reader who wants darkly funny.", { poolTitle: "The Employees", poolAuthor: "Olga Ravn", fitNote: "fits", mood: "eerie" }, checked, meta, [], undefined, ["gore"]);
+    assert.match(prompt, /<reader_avoid>\n- gore\n<\/reader_avoid>/);
     assert.match(prompt, /catalog description: Funny and doom-drenched\./);
     assert.match(prompt, /Hardcover moods: funny; dark/);
     assert.ok(prompt.indexOf("Hardcover moods:") < prompt.indexOf("</book>"));

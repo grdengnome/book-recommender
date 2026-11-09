@@ -227,6 +227,9 @@ export interface RecommendInput {
   // The reader's length request, when they made one (from the taste profile). Enforced in code
   // before the model chooses (decision 2.25).
   length?: LengthBand;
+  // What the reader asked to avoid (from the taste profile). A card may give a heads-up only
+  // about these (decision 2.26).
+  avoid?: string[];
   // Optional eval-case tag, set only by the eval runner; tags logs and the debug trace.
   evalTag?: string | null;
 }
@@ -239,7 +242,7 @@ export interface RecommendResult {
 
 // The whole recommendation pipeline for one reader. The caller (app/api/recommend/route.ts)
 // has already checked the request and that the AI gateway is configured.
-export async function recommend({ tasteDescription, length, evalTag = null }: RecommendInput): Promise<RecommendResult> {
+export async function recommend({ tasteDescription, length, avoid = [], evalTag = null }: RecommendInput): Promise<RecommendResult> {
   // TEMPORARY (query-tracing session, 2026-08-03): optional eval-case tag, only
   // ever set by the eval driver script. Absent in normal use, where this is a
   // no-op passthrough — does not affect retrieval, dedupe, or shuffle behavior.
@@ -262,7 +265,7 @@ export async function recommend({ tasteDescription, length, evalTag = null }: Re
   // the Hardcover pre-fetch is shared since it depends only on tasteDescription.
   for (let attempt = 1; attempt <= MAX_GENERATION_ATTEMPTS; attempt++) {
     const attemptTrace = trace.with({ attempt });
-    const generation = await generateOnce(tasteDescription, hardcoverPoolPromise, attemptTrace, length);
+    const generation = await generateOnce(tasteDescription, hardcoverPoolPromise, attemptTrace, length, avoid);
     if (!generation.ok) return respond(trace, generation.body, generation.status);
 
     if (generation.status === "ready") {
@@ -344,6 +347,7 @@ async function generateOnce(
   hardcoverPoolPromise: Promise<HardcoverBookCandidate[]>,
   trace: RequestTrace,
   length?: LengthBand,
+  avoid: string[] = [],
 ): Promise<GenerationResult> {
   const messages: Array<{ role: "user" | "assistant"; content: unknown }> = [
     { role: "user", content: tasteDescription },
@@ -387,7 +391,7 @@ async function generateOnce(
       const earlierTitles = arrivedTitles.slice();
       const title = (raw as { poolTitle?: unknown } | null)?.poolTitle;
       if (typeof title === "string" && title.trim()) arrivedTitles.push(title.trim());
-      roundOutcomes.push(runPick(tasteDescription, raw, index, seenCandidates, earlierTitles, roundTrace));
+      roundOutcomes.push(runPick(tasteDescription, raw, index, seenCandidates, earlierTitles, roundTrace, avoid));
     });
     const streamed = await streamModel(requestBody, scan);
     data = streamed.data;
@@ -556,6 +560,7 @@ async function runPick(
   seen: SeenCandidates,
   earlierTitles: string[],
   trace: RequestTrace,
+  avoid: string[] = [],
 ): Promise<PickOutcome> {
   const pickTrace = trace.with({ pick: index });
   try {
@@ -571,7 +576,7 @@ async function runPick(
     console.log(formatPickMetadata([metadata], lookupMs));
     pickTrace.add("G", { kind: "result", ms: lookupMs, picks: [metadata] });
 
-    const card = await writeCard(tasteDescription, selected, checked, metadata, earlierTitles, pickTrace);
+    const card = await writeCard(tasteDescription, selected, checked, metadata, earlierTitles, pickTrace, avoid);
     pickTrace.add("W", { kind: "result", ...card });
     if (!card.ok) return { ok: false, reason: `card writing failed: ${card.error}`, checked };
     return { ok: true, selected, checked, metadata, card: card.card, overLimit: card.overLimit };
