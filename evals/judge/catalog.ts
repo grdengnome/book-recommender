@@ -10,6 +10,7 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { hcGraphql } from "@/lib/engine/sources/hardcover/preparePool";
+import { findHardcoverBook, hardcoverTags, type HardcoverBookRecord } from "@/lib/engine/sources/hardcover/findBook";
 
 // A fingerprint of this file: saved catalog facts are reused only while the lookup rules are
 // unchanged, so a fix here re-looks-up every book.
@@ -40,46 +41,10 @@ export interface CatalogFacts {
   error?: string;
 }
 
-export const norm = (s: string) =>
-  s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/&/g, " and ").replace(/[^\p{L}\p{N}]+/gu, " ").trim();
-
-const surname = (name: string) => norm(name).split(" ").pop() ?? "";
-
-// Titles match when their main titles agree after normalising: a subtitle after ":", "(", a dash
-// or " - " is ignored ("Salt: A World History" matches "Salt"; "Salt Fat Acid Heat" doesn't).
-export const mainTitle = (t: string) => t.split(/\s*[:(—–]\s*|\s+-\s+/)[0];
-export function titlesMatch(a: string, b: string): boolean {
-  return norm(mainTitle(a)) === norm(mainTitle(b)) || norm(a) === norm(b);
-}
-
-export function authorsMatch(wanted: string, candidates: string[]): boolean {
-  const s = surname(wanted);
-  return !!s && candidates.some((c) => norm(c).split(" ").includes(s));
-}
-
-// A stricter author check for a search that had no author filter (title alone), where a common
-// title plus a common surname could pick the wrong book. A candidate matches when either:
-// - every part of the wanted name appears, in any order ("Kurlansky, Mark"; "Sōseki Natsume";
-//   "García Márquez, Gabriel"), or
-// - the surname appears and the first given name's initial agrees ("J.R.R. Tolkien" and
-//   "John Ronald Reuel Tolkien"; "Ursula K. Le Guin" and "Ursula Le Guin").
-// Accents, capitals, punctuation and hyphens are already ignored by norm().
-export function authorsMatchStrict(wanted: string, candidates: string[]): boolean {
-  // Co-authors ("Amal El-Mohtar and Max Gladstone"): any one of them matching is enough.
-  const people = wanted.split(/\s*(?:,|&|\band\b)\s*/i).filter((p) => p.trim().split(/\s+/).length > 1);
-  if (people.length > 1) return people.some((p) => authorsMatchStrict(p, candidates));
-  const w = norm(wanted).split(" ").filter(Boolean);
-  if (!w.length) return false;
-  const s = w[w.length - 1];
-  return candidates.some((cand) => {
-    const c = norm(cand).split(" ").filter(Boolean);
-    if (w.every((t) => c.includes(t))) return true;
-    if (w.length < 2 || !c.includes(s)) return false;
-    // "Surname, Given" lists the given names after the comma; otherwise they come first.
-    const given = cand.includes(",") ? norm(cand.split(",").slice(1).join(" ")).split(" ").filter(Boolean) : c.filter((t) => t !== s);
-    return given.length > 0 && given[0][0] === w[0][0];
-  });
-}
+// Title and author matching lives in shared engine code (decision 2.26): the engine's card
+// evidence and this checker must agree on which record is the same book.
+export { authorsMatch, authorsMatchStrict, mainTitle, norm, titlesMatch } from "@/lib/engine/sources/bookMatch";
+import { authorsMatch, authorsMatchStrict, mainTitle, titlesMatch } from "@/lib/engine/sources/bookMatch";
 
 async function withRetry<T>(fn: () => Promise<T>): Promise<T> {
   let last: unknown;
@@ -119,27 +84,15 @@ interface OlDoc {
   cover_i?: number;
 }
 
-interface HcBook {
-  title: string;
-  users_count: number | null;
-  pages: number | null;
-  release_year: number | null;
-  description: string | null;
-  contributions: Array<{ author: { name: string } | null }>;
-  cached_tags: Record<string, Array<{ tag?: string }>> | null;
-}
+type HcBook = HardcoverBookRecord;
 
-const hcTags = (b?: HcBook) =>
-  b ? ["Genre", "Mood"].flatMap((k) => (b.cached_tags?.[k] ?? []).map((t) => t.tag).filter((t): t is string => typeof t === "string")).slice(0, 25) : [];
+const hcTags = (b?: HcBook) => (b ? [...hardcoverTags(b, "Genre"), ...hardcoverTags(b, "Mood")].slice(0, 25) : []);
 
 // Catalogs file a subtitle separately from the main title, so a search sent with the subtitle
 // ("Salt: A World History") can miss the book entirely. Open Library searches try the title as
 // given, then the main title alone; titlesMatch and authorsMatch still decide what's a match.
 const searchTitles = (title: string) => [...new Set([title, mainTitle(title)])].filter(Boolean);
 
-// Hardcover's API refuses title pattern queries (_ilike), so the book is found with its search
-// endpoint (title + author, the same call the cover research used), matched in code, then its
-// tags and reader count are fetched by id.
 // Hardcover allows about 60 requests a minute; the scorer looks up several picks at once, so its
 // calls go out one at a time, at least a second apart (the rescore hit "429 Too Many Requests").
 const HC_GAP_MS = 1100;
@@ -150,31 +103,12 @@ function hcPaced<T>(fn: () => Promise<T>): Promise<T> {
   return turn;
 }
 
-interface HcHit { document: { id: number | string; title: string; author_names?: string[] } }
-async function hardcoverBook(title: string, author: string): Promise<HcBook | undefined> {
-  if (!process.env.HARDCOVER_API_TOKEN) throw new Error("HARDCOVER_API_TOKEN is not set");
-  const found = await withRetry(() => hcPaced(() =>
-    hcGraphql<{ search: { results: { hits?: HcHit[] } } }>(
-      `query Find($q: String!) { search(query: $q, query_type: "Book", per_page: 10) { results } }`,
-      { q: `${mainTitle(title)} ${author}` },
-      AbortSignal.timeout(TIMEOUT_MS),
-    ),
-  ));
-  // Hardcover often holds several records of one book (editions, re-imports). Every matching
-  // record is fetched and the most-read one wins, so a famous book's real reader count is what
-  // the judge sees, not a duplicate's handful (which would make it look like a discovery).
-  const ids = (found.search?.results?.hits ?? [])
-    .filter((h) => titlesMatch(h.document.title, title) && authorsMatch(author, h.document.author_names ?? []))
-    .map((h) => Number(h.document.id));
-  if (!ids.length) return undefined;
-  const data = await withRetry(() => hcPaced(() =>
-    hcGraphql<{ books: HcBook[] }>(
-      `query Books($ids: [Int!]) { books(where: { id: { _in: $ids } }, order_by: { users_count: desc }, limit: 10) { title users_count pages release_year description contributions { author { name } } cached_tags } }`,
-      { ids },
-      AbortSignal.timeout(TIMEOUT_MS),
-    ),
-  ));
-  return [...data.books].sort((a, b) => (b.users_count ?? 0) - (a.users_count ?? 0))[0];
+// Finding the record is shared with the engine (findBook.ts); here its calls are paced and
+// retried.
+export async function hardcoverBook(title: string, author: string): Promise<HcBook | undefined> {
+  return findHardcoverBook(title, author, {
+    gql: <T,>(q: string, v: Record<string, unknown>) => withRetry(() => hcPaced(() => hcGraphql<T>(q, v, AbortSignal.timeout(TIMEOUT_MS)))),
+  });
 }
 
 // Open Library's own author search is strict about spelling ("Natsume Soseki" vs "Sōseki", a

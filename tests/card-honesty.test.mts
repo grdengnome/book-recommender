@@ -35,3 +35,15 @@ test("a card may correct its mood word, but the three stay different", async () 
   // A correction that would repeat another pick's mood falls back to the selector's word.
   assert.deepEqual(finalMoods([{ selector: "breezy", card: "tender" }, { selector: "tender", card: "tender" }, { selector: "wry", card: "wry" }]), ["breezy", "tender", "wry"]);
 });
+
+test("a pick from Open Library only gets Hardcover's description and moods for its card, found by title and author", async () => {
+  await import("./support/offlineEngine"); // canned catalogs
+  const { lookupPickMetadata } = await import("@/lib/engine/verify/lookupPickMetadata");
+  const pick = { title: "Gilead", author: "Marilynne Robinson", sources: [], groundingKey: null, record: { olWorkKey: "/works/OL1000W" } } as never;
+  const [meta] = await lookupPickMetadata([pick]);
+  const hc = meta.lookups.find((l) => l.source === "hardcover");
+  assert.ok(hc && hc.source === "hardcover");
+  assert.equal(hc.via, "search");
+  assert.deepEqual(hc.moods, ["funny", "dark"]);
+  assert.match(hc.description, /darkly funny/);
+});

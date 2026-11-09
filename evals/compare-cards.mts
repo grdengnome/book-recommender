@@ -1,5 +1,6 @@
 // Tests a change to the card writer on the same picks, without rerunning the engine (decision
-// 2.26): a controlled before/after. For each reader in a past run, it takes the exact card-writing
+// 2.26): a controlled before/after. Replayed requests also get the Hardcover evidence the engine
+// now adds for Open Library picks. For each reader in a past run, it takes the exact card-writing
 // requests from that run's debug traces, sends them again with today's card instructions, then
 // has the card check read the old and the new cards side by side. Only the cards differ, so any
 // change in honesty or heads-ups is the card writer's doing, not different books.
@@ -21,7 +22,8 @@ import { finalMoods } from "@/lib/engine/recommend";
 import { renderBrief } from "@/lib/engine/profile/renderBrief";
 import type { TasteProfile } from "@/lib/contracts/tasteProfile";
 import { remember } from "./judge/cache";
-import { CATALOG_VERSION, lookupFacts, type CatalogFacts } from "./judge/catalog";
+import { CATALOG_VERSION, hardcoverBook, lookupFacts, type CatalogFacts } from "./judge/catalog";
+import { hardcoverTags } from "@/lib/engine/sources/hardcover/findBook";
 import { checkCards, type CardFields, type CardVerdict } from "./judge/cardCheck";
 import { callFailed, StopScoringError } from "./judge/errors";
 
@@ -67,8 +69,28 @@ function cardRequests(evalTag: string): Map<string, CardCall> {
   return byTitle;
 }
 
+// The engine now gives every pick's card Hardcover's description and moods, finding the record
+// by title and author when the pick came from Open Library only (decision 2.26). A replayed
+// request from before that change gets the same lines added, so the comparison tests it.
+async function withHardcoverEvidence(prompt: string): Promise<string> {
+  if (/\nHardcover (moods|genres): /.test(prompt)) return prompt;
+  const title = /\ncatalog title: (.*)/.exec(prompt)?.[1]?.trim();
+  const author = /\ncatalog author: (.*)/.exec(prompt)?.[1]?.trim();
+  if (!title || !author) return prompt;
+  const { value: book } = await remember("hardcoverForCard", { title, author }, async () => (await hardcoverBook(title, author)) ?? null);
+  if (!book) return prompt;
+  const flat = (book.description ?? "").replace(/\s+/g, " ").trim();
+  const lines = [
+    ...(flat ? [`catalog description: ${flat.length > 1200 ? `${flat.slice(0, 1200)}…` : flat}`] : []),
+    ...(hardcoverTags(book, "Genre").length ? [`Hardcover genres: ${hardcoverTags(book, "Genre").join("; ")}`] : []),
+    ...(hardcoverTags(book, "Mood").length ? [`Hardcover moods: ${hardcoverTags(book, "Mood").join("; ")}`] : []),
+  ];
+  return lines.length ? prompt.replace("\n</book>", `\n${lines.join("\n")}\n</book>`) : prompt;
+}
+
 async function rewrite(call: CardCall): Promise<{ fields: CardFields; selectorMood: string }> {
-  const body = { ...call.request, model: modelFor("cardWriting"), system: CARD_SYSTEM_PROMPT, output_config: { format: CARD_FORMAT } };
+  const content = await withHardcoverEvidence(String(call.request.messages[0]?.content ?? ""));
+  const body = { ...call.request, messages: [{ ...call.request.messages[0], content }], model: modelFor("cardWriting"), system: CARD_SYSTEM_PROMPT, output_config: { format: CARD_FORMAT } };
   const selectorMood = /\nmood: (.*)/.exec(String(call.request.messages[0]?.content))?.[1]?.trim() ?? "";
   const { value } = await remember("cardRewrite", body, async () => {
     const res = await callModel(body, { timeoutMs: 30_000 });

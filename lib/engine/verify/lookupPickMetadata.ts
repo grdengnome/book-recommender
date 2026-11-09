@@ -12,6 +12,7 @@
 // caught and reported as data rather than thrown.
 import type { CheckedPick } from "@/lib/engine/pool/pickGrounding";
 import { hcGraphql } from "@/lib/engine/sources/hardcover/preparePool";
+import { findHardcoverBook, hardcoverTags } from "@/lib/engine/sources/hardcover/findBook";
 
 const LOOKUP_TIMEOUT_MS = 5000;
 const OPEN_LIBRARY_BASE_URL = "https://openlibrary.org";
@@ -42,7 +43,10 @@ export interface OpenLibraryLookup extends LookupBase {
 
 export interface HardcoverLookup extends LookupBase {
   source: "hardcover";
-  id: number;
+  id: number; // 0 when found by search and nothing matched
+  // "pool": the pick came from Hardcover's pool with its ID; "search": found by title and author
+  // because the pick came from Open Library only (decision 2.26).
+  via?: "pool" | "search";
   genres: string[];
   moods: string[];
 }
@@ -160,14 +164,34 @@ async function lookupHardcover(bookId: number): Promise<HardcoverLookup> {
   }
 }
 
-// All lookups for all picks run concurrently; a book with both IDs gets both. Never
-// rejects — each lookup catches its own failure.
+// For a pick that came from Open Library only, its Hardcover record is found by title and author,
+// so the card writer gets Hardcover's description and mood tags too (decision 2.26: the cards
+// that misdescribed a book's feel had none). Evidence for the card, not a hard rule: a miss or
+// failure just leaves the card with what Open Library gave.
+async function lookupHardcoverBySearch(title: string, author: string): Promise<HardcoverLookup> {
+  const start = performance.now();
+  try {
+    const book = await findHardcoverBook(title, author, { signal: AbortSignal.timeout(LOOKUP_TIMEOUT_MS) });
+    if (!book) return { source: "hardcover", via: "search", id: 0, status: "empty", ms: Math.round(performance.now() - start), description: "", genres: [], moods: [] };
+    const description = book.description ?? "";
+    const genres = hardcoverTags(book, "Genre");
+    const moods = hardcoverTags(book, "Mood");
+    return { source: "hardcover", via: "search", id: book.id, status: statusFor(description, [...genres, ...moods]), ms: Math.round(performance.now() - start), description, genres, moods };
+  } catch (err) {
+    return { source: "hardcover", via: "search", id: 0, status: "failed", ms: Math.round(performance.now() - start), description: "", genres: [], moods: [], error: errorMessage(err) };
+  }
+}
+
+// All lookups for all picks run concurrently; a book with both IDs gets both, and a book with
+// only an Open Library ID gets a Hardcover search. Never rejects — each lookup catches its own
+// failure.
 export async function lookupPickMetadata(picks: CheckedPick[]): Promise<PickMetadata[]> {
   return Promise.all(
     picks.map(async (pick) => {
       const pending: Promise<SourceLookup>[] = [];
       if (pick.record?.olWorkKey) pending.push(lookupOpenLibrary(pick.record.olWorkKey));
       if (pick.record?.hcBookId !== undefined) pending.push(lookupHardcover(pick.record.hcBookId));
+      else if (process.env.HARDCOVER_API_TOKEN) pending.push(lookupHardcoverBySearch(pick.title, pick.author));
       return { title: pick.title, author: pick.author, lookups: await Promise.all(pending) };
     }),
   );
