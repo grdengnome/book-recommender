@@ -978,3 +978,20 @@ Alongside: dependency checkup PR (npm reports 25 package vulnerabilities); claim
 3. Speed: why some readers take ~70s, prompt caching, Hardcover page counts in its first request, a book-source contract with health checks.
 4. Batch scoring (50% off) in its own PR.
 
+
+---
+
+## November 8, 2026 — Honest cards shipped; the remaining card errors trace back to the picks
+
+**Conclusion:** Honest cards merged (PR #24). Dishonest cards fell from 12 to 5 of 63, needless hedges are back to 3, and the card check is calibrated 12/12. The remaining errors sit almost entirely on picks that don't fit the reader (57% relevant vs 82%), so the next gain comes from better choosing, not more card-writer tuning.
+
+- **Five rounds of card instructions plateaued**, which pointed to two real causes: the writer often never saw a book's description or moods (fixed: Hardcover's record for every card, decision 2.26), and the selector chooses books without seeing what they're like.
+- **Rebuilt writer:** describes the book from its records first (private notes), then pitches; a shorter true "why" beats a stretched one; a separate "good to know" note only for readers with an avoid list (Grim); thin records are named instead of guessed at.
+- **`compare-cards`** tests card changes on the same picks at a fraction of a run's cost.
+- **Not yet measured:** the good-to-know note and the thin-records note. Known gaps: translated titles can miss Hardcover; card writing adds about 1s.
+
+**Next:**
+1. A selection prompt written for the taste profile (the planned step: firm vs loose preferences, avoid list, ingredient doorway, lead over plain Claude). Narrow test on the readers whose picks didn't fit (about $0.50–1).
+2. If mismatches remain, decide (Grim) whether the final choice also sees catalog descriptions and mood tags for a shortlist; this changes the "title, author, subjects only" rule and sits next to decision 6.5.
+3. Recalibrate the card check (its message changed), then one full 21-reader run (about $4): relevance, preferences, cards, speed. Then Grim's blind read of about 15 cards.
+4. Speed, batch scoring, then PR 5 app skeleton, PR 6 store and trust basics, the pilot.
