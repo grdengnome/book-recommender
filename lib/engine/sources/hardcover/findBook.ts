@@ -7,7 +7,7 @@
 // Shared by the engine (Hardcover evidence for a pick's card, when the pick came from Open
 // Library) and the eval judge's catalog lookups. A caller can wrap the API calls (the eval paces
 // and retries them); the engine passes a timeout.
-import { authorsMatch, mainTitle, titlesMatch } from "@/lib/engine/sources/bookMatch";
+import { authorsMatch, authorsMatchStrict, mainTitle, norm, titlesMatch } from "@/lib/engine/sources/bookMatch";
 import { hcGraphql } from "@/lib/engine/sources/hardcover/preparePool";
 
 export interface HardcoverBookRecord {
@@ -31,11 +31,18 @@ export function hardcoverTags(b: Pick<HardcoverBookRecord, "cached_tags">, categ
   return (b.cached_tags?.[category] ?? []).map((t) => t?.tag).filter((t): t is string => typeof t === "string");
 }
 
+// `strict` (the engine's card evidence) requires the author's full name to match (all name parts,
+// or surname plus first initial), checks the author list again on the fetched records, and
+// prefers records whose full title matches over ones that match only without subtitles: a
+// same-title book by another author with the same surname would feed the card wrong evidence,
+// and since Squirmly's picks are often little-read, "most-read wins" would favour the famous
+// impostor. The eval judge keeps the lenient match its calibration was run with.
 export async function findHardcoverBook(
   title: string,
   author: string,
-  opts: { signal?: AbortSignal; gql?: Gql } = {},
+  opts: { signal?: AbortSignal; gql?: Gql; strict?: boolean } = {},
 ): Promise<HardcoverBookRecord | undefined> {
+  const authorOk = opts.strict ? authorsMatchStrict : authorsMatch;
   if (!process.env.HARDCOVER_API_TOKEN) throw new Error("HARDCOVER_API_TOKEN is not set");
   const gql: Gql = opts.gql ?? (<T,>(q: string, v: Record<string, unknown>) => hcGraphql<T>(q, v, opts.signal));
   const found = await gql<{ search: { results: { hits?: Hit[] } } }>(
@@ -43,12 +50,18 @@ export async function findHardcoverBook(
     { q: `${mainTitle(title)} ${author}` },
   );
   const ids = (found.search?.results?.hits ?? [])
-    .filter((h) => titlesMatch(h.document.title, title) && authorsMatch(author, h.document.author_names ?? []))
+    .filter((h) => titlesMatch(h.document.title, title) && authorOk(author, h.document.author_names ?? []))
     .map((h) => Number(h.document.id));
   if (!ids.length) return undefined;
   const data = await gql<{ books: HardcoverBookRecord[] }>(
     `query Books($ids: [Int!]) { books(where: { id: { _in: $ids } }, order_by: { users_count: desc }, limit: 10) { id title users_count pages release_year description contributions { author { name } } cached_tags } }`,
     { ids },
   );
-  return [...data.books].sort((a, b) => (b.users_count ?? 0) - (a.users_count ?? 0))[0];
+  let books = [...data.books];
+  if (opts.strict) {
+    books = books.filter((b) => authorsMatchStrict(author, b.contributions.map((c) => c.author?.name ?? "")));
+    const exact = books.filter((b) => norm(b.title) === norm(title));
+    if (exact.length) books = exact;
+  }
+  return books.sort((a, b) => (b.users_count ?? 0) - (a.users_count ?? 0))[0];
 }

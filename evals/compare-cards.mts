@@ -22,8 +22,8 @@ import { finalMoods } from "@/lib/engine/recommend";
 import { renderBrief } from "@/lib/engine/profile/renderBrief";
 import type { TasteProfile } from "@/lib/contracts/tasteProfile";
 import { remember } from "./judge/cache";
-import { CATALOG_VERSION, hardcoverBook, lookupFacts, type CatalogFacts } from "./judge/catalog";
-import { hardcoverTags } from "@/lib/engine/sources/hardcover/findBook";
+import { CATALOG_VERSION, lookupFacts, type CatalogFacts } from "./judge/catalog";
+import { lookupHardcoverBySearch } from "@/lib/engine/verify/lookupPickMetadata";
 import { checkCards, type CardFields, type CardVerdict } from "./judge/cardCheck";
 import { callFailed, StopScoringError } from "./judge/errors";
 
@@ -47,7 +47,7 @@ const briefOf = (id: string) => {
 const facts = async (title: string, author: string): Promise<CatalogFacts> =>
   (await remember("facts", { v: CATALOG_VERSION, title, author }, () => lookupFacts(title, author), { keep: (x) => x.status !== "error" && !x.hardcoverError })).value;
 
-interface CardCall { attempt?: number; pick?: number; request: { system: string; messages: Array<{ content: string }>; output_config: unknown; [k: string]: unknown }; response?: { content?: Array<{ type: string; text?: string }> } }
+interface CardCall { hadHardcover?: boolean; attempt?: number; pick?: number; request: { system: string; messages: Array<{ content: string }>; output_config: unknown; [k: string]: unknown }; response?: { content?: Array<{ type: string; text?: string }> } }
 
 // The final attempt's successful card-writing request for each pick, from the reader's trace.
 function cardRequests(evalTag: string): Map<string, CardCall> {
@@ -57,11 +57,15 @@ function cardRequests(evalTag: string): Map<string, CardCall> {
   const trace = JSON.parse(readFileSync(path.join(TRACES, name), "utf8")) as { stages: Record<string, Array<CardCall & { kind?: string }>> };
   const calls = (trace.stages.W_card_writing ?? []).filter((e) => e.kind === "model_call" && e.response);
   const last = Math.max(...calls.map((c) => c.attempt ?? 1));
+  // Whether each pick's original lookup already had a Hardcover record (then the engine wouldn't search).
+  const lookups = (trace.stages.G_pick_lookup ?? []) as unknown as Array<{ kind?: string; attempt?: number; pick?: number; picks?: Array<{ lookups?: Array<{ source: string }> }> }>;
+  const hadHardcover = (c: CardCall) =>
+    lookups.some((g) => g.kind === "result" && (g.attempt ?? 1) === (c.attempt ?? 1) && g.pick === c.pick && (g.picks?.[0]?.lookups ?? []).some((l) => l.source === "hardcover"));
   const byTitle = new Map<string, CardCall>();
   for (const c of calls.filter((c) => (c.attempt ?? 1) === last)) {
     try {
       const card = JSON.parse(c.response?.content?.find((b) => b.type === "text")?.text ?? "") as { title: string };
-      byTitle.set(card.title, c);
+      byTitle.set(card.title, { ...c, hadHardcover: hadHardcover(c) });
     } catch {
       // a failed card; the retry that worked is kept instead
     }
@@ -71,25 +75,45 @@ function cardRequests(evalTag: string): Map<string, CardCall> {
 
 // The engine now gives every pick's card Hardcover's description and moods, finding the record
 // by title and author when the pick came from Open Library only (decision 2.26). A replayed
-// request from before that change gets the same lines added, so the comparison tests it.
-async function withHardcoverEvidence(prompt: string): Promise<string> {
-  if (/\nHardcover (moods|genres): /.test(prompt)) return prompt;
+// request from before that change gets the same evidence, found the same way (the engine's own
+// lookup: strict match, same timeout), only where that pick's original lookup had no Hardcover
+// record, and placed where the engine puts it (its description after the other descriptions,
+// genres and moods last). Counts are kept so the result can be read in proportion.
+const evidence = { added: 0, noMatch: 0, failed: 0, alreadyHad: 0 };
+const searchMs: number[] = [];
+async function withHardcoverEvidence(prompt: string, hadHardcover: boolean): Promise<string> {
+  if (hadHardcover) {
+    evidence.alreadyHad++;
+    return prompt;
+  }
   const title = /\ncatalog title: (.*)/.exec(prompt)?.[1]?.trim();
   const author = /\ncatalog author: (.*)/.exec(prompt)?.[1]?.trim();
   if (!title || !author) return prompt;
-  const { value: book } = await remember("hardcoverForCard", { title, author }, async () => (await hardcoverBook(title, author)) ?? null);
-  if (!book) return prompt;
-  const flat = (book.description ?? "").replace(/\s+/g, " ").trim();
-  const lines = [
-    ...(flat ? [`catalog description: ${flat.length > 1200 ? `${flat.slice(0, 1200)}…` : flat}`] : []),
-    ...(hardcoverTags(book, "Genre").length ? [`Hardcover genres: ${hardcoverTags(book, "Genre").join("; ")}`] : []),
-    ...(hardcoverTags(book, "Mood").length ? [`Hardcover moods: ${hardcoverTags(book, "Mood").join("; ")}`] : []),
+  const { value: hc, reused } = await remember("hardcoverForCard", { v: 2, title, author }, () => lookupHardcoverBySearch(title, author), { keep: (x) => x.status !== "failed" });
+  if (!reused && hc.ms > 0) searchMs.push(hc.ms);
+  if (hc.status === "failed") evidence.failed++;
+  else if (hc.status !== "ok") evidence.noMatch++;
+  if (hc.status !== "ok") return prompt;
+  evidence.added++;
+  const lines = prompt.split("\n");
+  const flat = hc.description.replace(/\s+/g, " ").trim();
+  if (flat) {
+    const desc = `catalog description: ${flat.length > 1200 ? `${flat.slice(0, 1200)}…` : flat}`;
+    const lastDesc = lines.map((l) => l.startsWith("catalog description: ")).lastIndexOf(true);
+    const at = lastDesc >= 0 ? lastDesc + 1 : lines.findIndex((l) => l.startsWith("subjects: ") || l.startsWith("Hardcover genres: ") || l === "</book>");
+    lines.splice(at, 0, desc);
+  }
+  const close = lines.indexOf("</book>");
+  const tail = [
+    ...(hc.genres.length ? [`Hardcover genres: ${hc.genres.join("; ")}`] : []),
+    ...(hc.moods.length ? [`Hardcover moods: ${hc.moods.join("; ")}`] : []),
   ];
-  return lines.length ? prompt.replace("\n</book>", `\n${lines.join("\n")}\n</book>`) : prompt;
+  lines.splice(close, 0, ...tail);
+  return lines.join("\n");
 }
 
 async function rewrite(call: CardCall): Promise<{ fields: CardFields; selectorMood: string }> {
-  const content = await withHardcoverEvidence(String(call.request.messages[0]?.content ?? ""));
+  const content = await withHardcoverEvidence(String(call.request.messages[0]?.content ?? ""), call.hadHardcover ?? false);
   const body = { ...call.request, messages: [{ ...call.request.messages[0], content }], model: modelFor("cardWriting"), system: CARD_SYSTEM_PROMPT, output_config: { format: CARD_FORMAT } };
   const selectorMood = /\nmood: (.*)/.exec(String(call.request.messages[0]?.content))?.[1]?.trim() ?? "";
   const { value } = await remember("cardRewrite", body, async () => {
@@ -147,6 +171,9 @@ const out = runFile.replace(/\.json$/, "-cards.json");
 writeFileSync(path.join(RESULTS, out), JSON.stringify(report, null, 2));
 const o = tally(oldAll), n = tally(newAll);
 console.log(`\nSame ${oldAll.length} picks, old cards vs new cards`);
+const sorted = [...searchMs].sort((a, b) => a - b);
+if (sorted.length) console.log(`Hardcover search time (the engine's own lookup, live): median ${sorted[Math.floor(sorted.length / 2)]}ms · slowest ${sorted[sorted.length - 1]}ms over ${sorted.length} searches`);
+console.log(`Hardcover evidence: ${evidence.alreadyHad} cards already had it · ${evidence.added} newly added · ${evidence.noMatch} no matching record · ${evidence.failed} lookups failed`);
 console.log(`Card errors:          ${o.errors} → ${n.errors}`);
 console.log(`Unverifiable:         ${o.unknown} → ${n.unknown}`);
 console.log(`Heads-ups warranted:  ${o.warranted} → ${n.warranted}`);

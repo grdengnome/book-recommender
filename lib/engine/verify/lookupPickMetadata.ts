@@ -123,7 +123,7 @@ interface CachedTag {
 
 async function lookupHardcover(bookId: number): Promise<HardcoverLookup> {
   const start = performance.now();
-  const base = { source: "hardcover" as const, id: bookId };
+  const base = { source: "hardcover" as const, id: bookId, via: "pool" as const };
   try {
     const data = await hcGraphql<{
       books_by_pk: { description: string | null; cached_tags: Record<string, CachedTag[]> | null } | null;
@@ -168,15 +168,32 @@ async function lookupHardcover(bookId: number): Promise<HardcoverLookup> {
 // so the card writer gets Hardcover's description and mood tags too (decision 2.26: the cards
 // that misdescribed a book's feel had none). Evidence for the card, not a hard rule: a miss or
 // failure just leaves the card with what Open Library gave.
-async function lookupHardcoverBySearch(title: string, author: string): Promise<HardcoverLookup> {
+// Capped tighter than the other lookups: it's extra evidence, and the card waits for it.
+const SEARCH_TIMEOUT_MS = 2500;
+// Picks repeat across readers; a found record is remembered for a day (a miss for an hour) so
+// busy periods don't spend Hardcover's rate limit (about 60 requests a minute) on the same books.
+const SEARCH_REMEMBER_MS = 24 * 60 * 60 * 1000;
+const SEARCH_MISS_REMEMBER_MS = 60 * 60 * 1000;
+const searchMemo = new Map<string, { at: number; lookup: HardcoverLookup }>();
+
+export async function lookupHardcoverBySearch(title: string, author: string): Promise<HardcoverLookup> {
+  const key = `${title}|${author}`.toLowerCase();
+  const hit = searchMemo.get(key);
+  if (hit && Date.now() - hit.at < (hit.lookup.status === "ok" ? SEARCH_REMEMBER_MS : SEARCH_MISS_REMEMBER_MS)) return { ...hit.lookup, ms: 0 };
   const start = performance.now();
   try {
-    const book = await findHardcoverBook(title, author, { signal: AbortSignal.timeout(LOOKUP_TIMEOUT_MS) });
-    if (!book) return { source: "hardcover", via: "search", id: 0, status: "empty", ms: Math.round(performance.now() - start), description: "", genres: [], moods: [] };
+    const book = await findHardcoverBook(title, author, { signal: AbortSignal.timeout(SEARCH_TIMEOUT_MS), strict: true });
+    if (!book) {
+      const miss: HardcoverLookup = { source: "hardcover", via: "search", id: 0, status: "empty", ms: Math.round(performance.now() - start), description: "", genres: [], moods: [], error: "no matching Hardcover record" };
+      searchMemo.set(key, { at: Date.now(), lookup: miss });
+      return miss;
+    }
     const description = book.description ?? "";
     const genres = hardcoverTags(book, "Genre");
     const moods = hardcoverTags(book, "Mood");
-    return { source: "hardcover", via: "search", id: book.id, status: statusFor(description, [...genres, ...moods]), ms: Math.round(performance.now() - start), description, genres, moods };
+    const found: HardcoverLookup = { source: "hardcover", via: "search", id: book.id, status: statusFor(description, [...genres, ...moods]), ms: Math.round(performance.now() - start), description, genres, moods };
+    searchMemo.set(key, { at: Date.now(), lookup: found });
+    return found;
   } catch (err) {
     return { source: "hardcover", via: "search", id: 0, status: "failed", ms: Math.round(performance.now() - start), description: "", genres: [], moods: [], error: errorMessage(err) };
   }
@@ -185,6 +202,11 @@ async function lookupHardcoverBySearch(title: string, author: string): Promise<H
 // All lookups for all picks run concurrently; a book with both IDs gets both, and a book with
 // only an Open Library ID gets a Hardcover search. Never rejects — each lookup catches its own
 // failure.
+// For tests: forget remembered searches.
+export function clearHardcoverSearches(): void {
+  searchMemo.clear();
+}
+
 export async function lookupPickMetadata(picks: CheckedPick[]): Promise<PickMetadata[]> {
   return Promise.all(
     picks.map(async (pick) => {
