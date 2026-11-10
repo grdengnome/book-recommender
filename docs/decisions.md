@@ -2,7 +2,7 @@
 
 > **Status:** Living · Every product and architecture decision, and the paths rejected.
 
-*Covers decisions through the v0 engine, v0 product planning, the v0 scope and the repo restructure (November 7, 2026). Further decisions are added as they're made.*
+*Covers decisions through the v0 engine, v0 product planning, the v0 scope and the repo restructure (November 9, 2026). Further decisions are added as they're made.*
 
 The product and architecture decisions behind this recommender, and the paths I rejected. The [progress log](./progress-log.md) is the session-by-session diary; this file is the story told by decision. Each entry gives the decision and why, with a link to the full detail.
 
@@ -272,6 +272,10 @@ The full operating principles are in [question-flow-principles.md](./product/que
 ### 3.12 Evals are efficient by design and don't drive cost
 **Decision:** No eval budget target; instead nothing paid is bought twice. Every judge answer and plain-Claude answer is remembered (keyed on the full question: judge fingerprint, model, brief, checks, picks and their catalog facts), so a rescore only pays for picks that changed and unchanged picks can't change grade by chance. Plain Claude's answers stay fixed until its prompt or model changes. The judge's model refuses a temperature setting, so remembered answers carry the consistency. The second judge is skipped if it's set to the judge's own model. Scoring stops at once when API credit runs out. Engine changes are checked on narrow reader subsets, with full runs for milestones. Batch scoring (50% off) follows in its own PR.
 **Why:** The Nov 6 baseline cost about $14, mostly scorings that re-bought identical answers, and two scorings of the same picks differed by 4 points of relevance from the judge's randomness alone. Remembering answers removes both the cost and that noise for unchanged picks, keeping results comparable to an unrestricted budget. Reviewed by an independent agent before merging. ([eval log, Nov 6](./quality/eval-log.md))
+### 3.13 Engine versions are compared side by side, cheaply
+**Decision:** When an engine change has more than one part, each part sits behind one setting and the versions run in the same session on the same readers, so each part's gain is measured on its own without an extra test round. Comparisons against the official baseline (Nov 7; the Nov 7 page-count run for the 6 length readers) use a picks-only mode (no card writing or card check; cards are tested in the milestone run), run each version once, and run a second time only when the gap is under the noise line (about 5 points). Remembered verdicts and batch scoring apply as in 3.12. First use: round 1 of the selection work (6.13), estimated $2–3.
+**Why:** Grim asked for the next tests to cost much less without losing quality. Same-day versions remove drift between them; cards don't change which books are chosen; stopping early only skips reruns a clear result doesn't need. ([progress log, Nov 9](./progress-log.md))
+
 ---
 
 ## 4. Defining "non-obvious"
@@ -383,6 +387,14 @@ The full operating principles are in [question-flow-principles.md](./product/que
 ### 6.12 The table keeps its full breadth
 **Decision:** The selector keeps seeing each subject list's top 100. Speed has to come from elsewhere. Adding deeper pages (results 101–200) is a quality experiment for later, not a speed lever.
 **Why:** Sampling 40 of each top 100 halved the table and saved only about 2s. The version that mixed in deeper pages wasn't faster, but it won the blind read 4 of 6. ([eval log, Oct 21](./quality/eval-log.md))
+
+### 6.13 Shortlist, then choose with descriptions (round 1, to be proven)
+**Decision:** Round 1 of the selection work tests two versions behind one setting against the baseline: **B**, a selection prompt rewritten for the taste profile (hard rules never broken, strong preferences in every pick, weighed preferences covered across the set, one search per must, surprise only when the reader leans surprising, decision 2.24); and **C**, the same prompt with a first cut of about 30 books (a setting) followed by a final choice that also sees each finalist's catalog description and Hardcover moods. Still never popularity, scores, catalog source or IDs. The pool stays as broad as today (6.12). The test also logs the 30 finalists to measure whether good books are cut too early. The rule "the model sees only title, author and subjects" changes only if C wins; the losing version's code is then removed. Next rounds, each measured on its own: smarter search (a mood dictionary mapping our mood words to Hardcover moods and Open Library subjects; loved-book seeds), then reserves (choose 5, show 3).
+**Why:** Most remaining card errors sit on picks that don't fit the reader (57% relevant vs 82%), because the picker can't see what a book is like (eval log, Nov 8). Professional recommenders give the final ranking step the richest information; ours had the thinnest. 30 rather than 10: lookups run in parallel, so the wider cut costs about the same wait and gives a good book cut on thin data a second look. Descriptions for the whole pool were rejected: hundreds of lookups per request, and partial coverage would bias the first cut toward described books. Built and tested as two versions, not one bundle, so each part's effect is known. ([progress log, Nov 9](./progress-log.md))
+
+### 6.14 Our own book index is the long-term engine upgrade
+**Decision:** Every book the engine sees gets stored ahead of time with its description, moods, page count, editions, cover and translated titles, then searched by meaning. Planned after the pilot basics (it needs the data store, PR 6); it also serves the card bank, Shelf and Collection.
+**Why:** It puts rich information at every step, including the first cut and search, and takes lookups out of the reader's wait. This is how large recommenders work: item features are prepared offline, not fetched per request. ([progress log, Nov 9](./progress-log.md))
 
 ---
 
