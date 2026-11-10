@@ -6,6 +6,20 @@ Running log of quality findings, known limitations, and decisions made while eva
 
 ---
 
+
+## 2026-11-09 — Round 1, first try: the new prompt over-searches (stopped)
+
+**Change:** decision 6.13, versions B (`profile`) and C (`shortlist`), on 13 readers (the 10 weakest in the Nov 7 baseline plus 3 controls: `CASE_IDS=prof-02,prof-01,prof-04,prof-03,prof-09,prof-16,prof-08,prof-07,prof-11,prof-12,prof-20,prof-15,prof-21`). **Spend: about $3–3.5** (B $2.19; C stopped after 2 readers). Not scored.
+
+**Findings:**
+- **B ran clean but cost more:** 13/13 readers got 3 picks, median 30.6s, $0.17 per reader. prof-01 ($0.42, 56s) and prof-09 ($0.44, 61s) drove the cost.
+- **C failed on prof-01:** its first cut stopped at the output limit (`max_tokens`) on attempts 1 and 2; attempt 3 took 5 minutes and finished after the runner had given up.
+- **Root cause, both versions:** the new prompt's "search for the mood, each ingredient and setting" led to about 12 searches per attempt for detailed readers, each around 300 books. The engine limits search rounds (3) but not searches per round, so the model read thousands of entries. Today's prompt usually makes 1–2 searches.
+- **Not a crash:** the dev server stayed up; the runner's fetch gave up at about 5 minutes.
+
+**Fix (next):** cap searches per round in code (about 3), give C's first cut more output room, and reword the prompt to plan a few well-chosen searches. Then a smoke test on prof-01 and prof-09 before rerunning B and C (decision 3.14). B's results file (`profile-v1-r1b.json`) is kept for reference but will be rerun after the fix.
+
+---
 ## 2026-11-08 — Card writer rebuilt; checker calibrated; root cause found upstream
 
 **Change:** honest cards (decision 2.26), measured with `compare-cards` on the official baseline's 63 picks (same books, old vs new cards). **Spend: about $5** across five rounds plus the checker calibration.

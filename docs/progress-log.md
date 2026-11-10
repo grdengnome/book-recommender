@@ -998,16 +998,16 @@ Alongside: dependency checkup PR (npm reports 25 package vulnerabilities); claim
 
 ---
 
-## November 9, 2026 — Selection work planned: prompt and shortlist as round 1
+## November 9, 2026 — Round 1 built and merged; first test run stopped by a search blow-up
 
-**Conclusion:** The next engine step is round 1 of the selection work (decision 6.13): a selection prompt written for the taste profile (B), and the same prompt plus a 30-book shortlist whose final choice reads each finalist's description and Hardcover moods (C), compared side by side against the Nov 7 baseline in a cheap picks-only test (decision 3.13, about $2–3). Our own book index is the long-term upgrade (6.14).
+**Conclusion:** Round 1 of the selection work (decision 6.13) is built and merged (PR #27): version B (a prompt written for the taste profile) and version C (a 30-book shortlist whose final choice reads descriptions and moods), behind `ENGINE_SELECTION`, with today's version unchanged as the default. The first test run exposed a flaw in the new prompt: detailed readers triggered about 12 searches per attempt, making B costly and C time out on prof-01 (eval log, Nov 9). Stopped before scoring. Eval spend reached about $30 for the month, so cost control comes first next session.
 
-- **Why selection:** today's prompt still describes the old paragraph input and puts surprise ahead of fit, and the picker sees only title, author and subjects; most remaining card errors sit on picks that don't fit (eval log, Nov 8).
-- **Research:** professional recommenders run retrieve → rank → re-rank, with the richest information at the ranking step (ours had the thinnest); librarians' appeal factors (pace, tone, style) match our slots and are what subject tags miss; Netflix-style calibration supports "every preference covered across the set".
-- **Roadmap:** round 2 smarter search (mood dictionary, loved-book seeds), round 3 reserves, plus a fit check, searching during the question flow, held-out readers, search measurement, repeat damping and pilot signals ([roadmap](./product/roadmap-and-backlog.md)).
+- **Plan docs (PR #26):** decisions 3.13 (side-by-side tests on the same readers), 6.13, 6.14 (our own book index); roadmap rows for rounds 2–3 and later engine work. Research: professional recommenders put the richest information at the ranking step; librarians' appeal factors match our slots.
+- **Build (PR #27):** independent cold review, nothing blocking; fixes applied (dropped a line that pulled toward familiar books; scoring compares the same readers; catalog text marked as data; finalist cap; 90 tests). `evals/weak-readers.mts` picks test readers for free.
+- **Decisions:** 3.14 (smoke test first, spend limit per run, monthly eval plan); 14.6 (every AI job keeps its own model slot; a model pass follows each finished design).
 
 **Next:**
-1. Grim reads the full round 1 prompts (first cut and final choice).
-2. Build B and C behind one setting, with the picks-only test mode and the finalist log; independent cold review (engine prompt).
-3. Run the test in the Codespace; second run only if the gap is within noise.
-4. Then round 2, round 3, the full 21-reader run with cards, and Grim's blind read.
+1. **Cost plan first:** where eval money goes per reader, a monthly budget, a spend cap in the runner, cheaper models for the judge and engine steps where quality holds (14.6), batch scoring at half price.
+2. **Fix the search blow-up:** cap searches per round in code (about 3), more output room for C's first cut, prompt asks for a few well-chosen searches. One test per rule.
+3. **Smoke test** on prof-01 and prof-09 (about $0.50), then rerun B and C on the 13 readers and score them side by side (`evals/README.md`, Round 1).
+4. Then round 2 (smarter search), round 3 (reserves), the full run with cards, and Grim's blind read.
