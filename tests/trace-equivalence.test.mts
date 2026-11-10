@@ -5,7 +5,7 @@
 // harness (tests/support/offlineEngine.ts) answers every request with canned replies.
 //
 // Also checks: no file is written with tracing off, or on Vercel even with ENGINE_TRACE=1;
-// all ten stage keys are present; the model input the trace recorded equals what was sent;
+// all eleven stage keys are present; the model input the trace recorded equals what was sent;
 // no key or header ends up in the file, and a leaked key value is redacted.
 //
 // Usage: node --import ./tests/support/resolve.mts tests/trace-equivalence.test.mts [copy-trace-to.json]
@@ -39,9 +39,9 @@ check("no trace file on Vercel even with ENGINE_TRACE=1", vercel.newTraces.lengt
 const tracePath = path.join(traceDir, on.newTraces[0]);
 const traceText = readFileSync(tracePath, "utf8");
 const trace = JSON.parse(traceText);
-const expectedStages = ["A_tag_picking", "B_hardcover_pool", "C_model_search_loop", "D_open_library_search", "E_merge", "F_grounding_check", "G_pick_lookup", "W_card_writing", "H_description_check", "I_response"];
-check("all ten stage keys present, in order", JSON.stringify(Object.keys(trace.stages)) === JSON.stringify(expectedStages));
-check("every stage recorded something", expectedStages.every((k) => trace.stages[k].length > 0),
+const expectedStages = ["A_tag_picking", "B_hardcover_pool", "C_model_search_loop", "D_open_library_search", "E_merge", "F_grounding_check", "S_shortlist", "G_pick_lookup", "W_card_writing", "H_description_check", "I_response"];
+check("all eleven stage keys present, in order", JSON.stringify(Object.keys(trace.stages)) === JSON.stringify(expectedStages));
+check("every stage recorded something (the shortlist runs only in version C)", expectedStages.filter((k) => k !== "S_shortlist").every((k) => trace.stages[k].length > 0),
   expectedStages.map((k) => `${k[0]}:${trace.stages[k].length}`).join(" "));
 
 // The model input the trace recorded is exactly what was sent, call for call.

@@ -97,6 +97,12 @@ function cannedHardcover(body: { query: string; variables: Record<string, unknow
     }
     return json({ data: { taggable_counts: rows } });
   }
+  // Version C's finalist lookup (lib/engine/verify/lookupPickMetadata.ts lookupFinalists): one
+  // batched request by ID.
+  if (body.query.includes("query Finalists")) {
+    const ids = (body.variables.ids as number[]) ?? [];
+    return json({ data: { books: ids.map((id) => ({ id, description: "Hardcover's finalist description: a tender, wry novel.", cached_tags: { Genre: [{ tag: "Literary" }], Mood: [{ tag: "tender" }, { tag: "wry" }] } })) } });
+  }
   if (body.query.includes("query Pages")) {
     const ids = (body.variables.ids as number[]) ?? [];
     return json({ data: { books: ids.map((id) => ({ id, pages: id % 2 === 0 ? 280 : 900 })) } });
@@ -148,6 +154,10 @@ function sse(message: CannedMessage): Response {
   return new Response(text, { status: 200, headers: { "content-type": "text/event-stream" } });
 }
 
+// Knobs for version C's failure-path tests (tests/selection-versions.test.mts).
+export const fakeOptions: { finalOutside?: boolean; shortlistSize?: number } = {};
+let lastOffShortlist: { title: string; author: string } | null = null;
+
 function cannedAnthropic(body: any): Response {
   const usage = { input_tokens: Math.ceil(JSON.stringify(body).length / 4), output_tokens: 400, output_tokens_details: { thinking_tokens: 150 } };
   const reply = (content: CannedBlock[], stop_reason: string) =>
@@ -178,9 +188,26 @@ function cannedAnthropic(body: any): Response {
       { type: "tool_use", id: "toolu_offline_2", name: "search_books", input: { query: "melancholic character study", subjects: ["english_fiction"] } },
     ], "tool_use");
   }
+  // Version C's final choice (decision 6.13): three finalists from the shortlist in the message.
+  // With finalOutside set, the first pick is a pool book that isn't on the shortlist.
+  if (String(body.system?.[0]?.text ?? "").startsWith("You choose the final three")) {
+    const finalists: Array<[string, string, string]> = [...String(first).matchAll(/^- "(.*)" by (.*)$/gm)].slice(0, 3).map((m) => [m[0], m[1], m[2]]);
+    if (fakeOptions.finalOutside && lastOffShortlist) finalists[0] = ["", lastOffShortlist.title, lastOffShortlist.author];
+    const moods = ["melancholic", "tender", "wistful"];
+    const picks = finalists.map(([, title, author], i) => ({ poolTitle: title, poolAuthor: author, fitNote: "Fits on its record.", mood: moods[i] }));
+    return reply([{ type: "text", text: JSON.stringify({ picks }) }], "end_turn");
+  }
   // Final answer: the first three candidates of the first pool the model was shown.
   const toolResults = body.messages[body.messages.length - 1].content;
   const pool = JSON.parse(toolResults[0].content).pool.slice(0, 3);
+  // Version C's search call answers with finalists (the shortlist schema), not picks.
+  if (body.output_config?.format?.schema?.required?.[0] === "shortlist") {
+    const fullPool = JSON.parse(toolResults[0].content).pool;
+    const all = fullPool.slice(0, fakeOptions.shortlistSize ?? 8);
+    lastOffShortlist = fullPool[fakeOptions.shortlistSize ?? 8] ?? null;
+    const shortlist = all.map((c: { title: string; author: string }) => ({ poolTitle: c.title, poolAuthor: c.author }));
+    return reply([{ type: "text", text: JSON.stringify({ shortlist }) }], "end_turn");
+  }
   // Same shape the selection schema enforces (lib/engine/picks/pickSchema.ts).
   const moods = ["melancholic", "tender", "wistful"];
   const picks = pool.map((c: { title: string; author: string }, i: number) => ({

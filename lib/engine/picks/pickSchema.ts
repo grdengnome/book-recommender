@@ -52,6 +52,33 @@ export const SELECTION_FORMAT = {
   },
 } as const;
 
+// What version C's search call returns (decision 6.13): the finalists, pool strings only, for
+// the grounding check. No notes, so the call stays short; the reasoning happens in the final
+// choice, which returns SELECTION_FORMAT.
+export const SHORTLIST_FORMAT = {
+  type: "json_schema",
+  schema: {
+    type: "object",
+    additionalProperties: false,
+    required: ["shortlist"],
+    properties: {
+      shortlist: {
+        type: "array",
+        description: "The strongest candidates for this reader, each from the retrieved candidate pools.",
+        items: {
+          type: "object",
+          additionalProperties: false,
+          required: ["poolTitle", "poolAuthor"],
+          properties: {
+            poolTitle: field("The title exactly as it appears in the candidate pool."),
+            poolAuthor: field("The author exactly as it appears in the candidate pool."),
+          },
+        },
+      },
+    },
+  },
+} as const;
+
 // What a card-writing call returns for one pick.
 export interface CardText {
   // The writer's private, records-only description of the book, written first so the card agrees

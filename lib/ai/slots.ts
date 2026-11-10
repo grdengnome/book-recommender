@@ -26,6 +26,11 @@ export const AI_SLOTS: Record<AiJob, AiSlot> = {
     envOverride: "AI_SLOT_SELECTION",
     purpose: "Searches the catalogs and chooses the three picks, streamed (app/api/recommend/route.ts)",
   },
+  finalChoice: {
+    model: "claude-sonnet-5",
+    envOverride: "AI_SLOT_FINAL_CHOICE",
+    purpose: "Version C only: picks the final three from the shortlist, with each finalist's records (lib/engine/picks/shortlist.ts)",
+  },
   cardWriting: {
     model: "claude-sonnet-5",
     envOverride: "AI_SLOT_CARD_WRITING",

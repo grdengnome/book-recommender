@@ -11,6 +11,7 @@
 export type AiJob =
   | "tagMapping"
   | "selection"
+  | "finalChoice"
   | "cardWriting"
   | "shortening"
   | "descriptionCheck"

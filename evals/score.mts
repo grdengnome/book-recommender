@@ -91,9 +91,24 @@ if (!runFiles.length) throw new Error("Set RUNS to one or more results files in 
 const sameJudge = modelFor("evalSecondJudge") === modelFor("evalJudge");
 if (sameJudge) console.warn("Second judge skipped: it's set to the same model as the judge");
 const secondN = sameJudge ? 0 : Number(process.env.SECOND_JUDGE ?? 5);
-const out = process.env.OUT || runFiles[0].replace(/\.json$/, "");
+const out = process.env.OUT || runFiles[0].split("+")[0].replace(/\.json$/, "");
 
-const runsRaw = runFiles.map((f) => JSON.parse(readFileSync(path.join(RESULTS, f), "utf8")) as { set: string; results: RunResult[] });
+// A run can combine files with "+": later files replace earlier ones reader by reader, e.g.
+// profile-v1-run1.json+profile-v1-pages1.json is the baseline with the length readers' page-count
+// run (decision 3.13). CASE_IDS scores only those readers in every run, so runs of different
+// sizes are compared on the same readers.
+const onlyIds = (process.env.CASE_IDS ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+const loadRun = (spec: string) => {
+  const parts = spec.split("+").map((f) => JSON.parse(readFileSync(path.join(RESULTS, f), "utf8")) as { set: string; results: RunResult[] });
+  if (parts.some((p) => p.set !== parts[0].set)) throw new Error(`${spec}: all combined files must be from the same case set`);
+  const merged = new Map<string, RunResult>();
+  for (const p of parts) for (const r of p.results) merged.set(r.id, r);
+  let results = [...merged.values()];
+  if (onlyIds.length) results = results.filter((r) => onlyIds.includes(r.id));
+  return { set: parts[0].set, results };
+};
+const runsRaw = runFiles.map(loadRun);
+if (onlyIds.length) runsRaw.forEach((r, i) => { const missing = onlyIds.filter((id) => !r.results.some((x) => x.id === id)); if (missing.length) console.warn(`${runFiles[i]}: no result for ${missing.join(", ")}`); });
 const setName = runsRaw[0].set;
 if (runsRaw.some((r) => r.set !== setName)) throw new Error("All RUNS must be from the same case set");
 const { cases } = JSON.parse(readFileSync(path.join(HERE, "cases", `${setName}.json`), "utf8")) as { cases: CaseDef[] };
@@ -197,7 +212,7 @@ function save() {
 
 try {
   for (const [i, raw] of runsRaw.entries()) {
-    engineRuns.push(await scoreEngineRun(runFiles[i].replace(/\.json$/, ""), raw.results));
+    engineRuns.push(await scoreEngineRun(runFiles[i].replace(/\.json/g, ""), raw.results));
     save();
   }
   if (process.env.BASELINE === "1") {

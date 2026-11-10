@@ -259,3 +259,48 @@ export function formatPickMetadata(results: PickMetadata[], wallMs: number): str
   }
   return lines.join("\n");
 }
+
+// Version C's finalist lookup (decision 6.13): the same records the cards use, for about 30
+// books at once, so the final choice can read what each one is like. Open Library work records
+// for every finalist with a work key, in parallel; Hardcover records for finalists from its pool
+// in one batched request (by ID). No Hardcover title search here: about 30 per request would
+// exceed Hardcover's rate limit (about 60 requests a minute), so Open-Library-only finalists
+// carry Open Library's record alone. The three final picks still get the full lookup for their
+// cards. Stored descriptions for every book are the book index's job (decision 6.14).
+export async function lookupFinalists(picks: CheckedPick[]): Promise<PickMetadata[]> {
+  const hcIds = [...new Set(picks.map((p) => p.record?.hcBookId).filter((id): id is number => id !== undefined))];
+  const hcStart = performance.now();
+  const hcBatch: Promise<Map<number, HardcoverLookup>> = hcIds.length
+    ? hcGraphql<{ books: Array<{ id: number; description: string | null; cached_tags: Record<string, CachedTag[]> | null }> }>(
+        `query Finalists($ids: [Int!]) { books(where: { id: { _in: $ids } }) { id description cached_tags } }`,
+        { ids: hcIds },
+        AbortSignal.timeout(LOOKUP_TIMEOUT_MS),
+      ).then(
+        (data) => {
+          const ms = Math.round(performance.now() - hcStart);
+          const out = new Map<number, HardcoverLookup>();
+          for (const b of data.books ?? []) {
+            const description = b.description ?? "";
+            const genres = hardcoverTags(b, "Genre");
+            const moods = hardcoverTags(b, "Mood");
+            out.set(b.id, { source: "hardcover", via: "pool", id: b.id, status: statusFor(description, [...genres, ...moods]), ms, description, genres, moods });
+          }
+          return out;
+        },
+        (err) => {
+          console.error(`finalist lookup: Hardcover batch failed: ${errorMessage(err)}`);
+          return new Map<number, HardcoverLookup>();
+        },
+      )
+    : Promise.resolve(new Map());
+  const olLookups = Promise.all(picks.map((p) => (p.record?.olWorkKey ? lookupOpenLibrary(p.record.olWorkKey) : Promise.resolve(null))));
+  const [hc, ol] = await Promise.all([hcBatch, olLookups]);
+  return picks.map((p, i) => {
+    const lookups: SourceLookup[] = [];
+    const o = ol[i];
+    if (o) lookups.push(o);
+    const h = p.record?.hcBookId !== undefined ? hc.get(p.record.hcBookId) : undefined;
+    if (h) lookups.push(h);
+    return { title: p.title, author: p.author, lookups };
+  });
+}
