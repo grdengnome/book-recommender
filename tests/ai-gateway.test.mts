@@ -12,7 +12,7 @@ import { MODELS } from "@/lib/ai/models";
 import type { AiJob } from "@/lib/contracts/ai";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const JOBS: AiJob[] = ["tagMapping", "selection", "cardWriting", "shortening", "descriptionCheck", "evalJudge", "evalSecondJudge", "evalBaseline"];
+const JOBS: AiJob[] = ["tagMapping", "selection", "finalChoice", "cardWriting", "shortening", "descriptionCheck", "evalJudge", "evalSecondJudge", "evalBaseline"];
 
 test("every AI job has a slot with a known, priced model and its own override setting", () => {
   assert.deepEqual(Object.keys(AI_SLOTS).sort(), [...JOBS].sort());

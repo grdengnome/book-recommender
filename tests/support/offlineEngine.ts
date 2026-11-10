@@ -178,9 +178,22 @@ function cannedAnthropic(body: any): Response {
       { type: "tool_use", id: "toolu_offline_2", name: "search_books", input: { query: "melancholic character study", subjects: ["english_fiction"] } },
     ], "tool_use");
   }
+  // Version C's final choice (decision 6.13): three finalists from the shortlist in the message.
+  if (String(body.system?.[0]?.text ?? "").startsWith("You choose the final three")) {
+    const finalists = [...String(first).matchAll(/^- "(.*)" by (.*)$/gm)].slice(0, 3);
+    const moods = ["melancholic", "tender", "wistful"];
+    const picks = finalists.map(([, title, author], i) => ({ poolTitle: title, poolAuthor: author, fitNote: "Fits on its record.", mood: moods[i] }));
+    return reply([{ type: "text", text: JSON.stringify({ picks }) }], "end_turn");
+  }
   // Final answer: the first three candidates of the first pool the model was shown.
   const toolResults = body.messages[body.messages.length - 1].content;
   const pool = JSON.parse(toolResults[0].content).pool.slice(0, 3);
+  // Version C's search call answers with finalists (the shortlist schema), not picks.
+  if (body.output_config?.format?.schema?.required?.[0] === "shortlist") {
+    const all = JSON.parse(toolResults[0].content).pool.slice(0, 8);
+    const shortlist = all.map((c: { title: string; author: string }) => ({ poolTitle: c.title, poolAuthor: c.author }));
+    return reply([{ type: "text", text: JSON.stringify({ shortlist }) }], "end_turn");
+  }
   // Same shape the selection schema enforces (lib/engine/picks/pickSchema.ts).
   const moods = ["melancholic", "tender", "wistful"];
   const picks = pool.map((c: { title: string; author: string }, i: number) => ({

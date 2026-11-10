@@ -76,3 +76,16 @@ Each file in `cases/` is one set:
 | `profile-v1.json` | 21 readers in the taste profile format, across every doorway, for the readiness baseline ([readiness bar](../docs/quality/readiness-bar.md)). Each case lists its `checks`: the hard rules, strong and weighed preferences the picks must honour, and whether non-obvious picks are required. Grounded in real-request patterns; refreshed from pilot readers later. |
 
 **Planned:** sets refreshed from pilot readers. Per-job evals for the AI gateway slots follow when a model swap is first tested.
+
+
+## Round 1: comparing selection versions (decision 3.13)
+
+Versions B and C (decision 6.13) run from the same code, switched by `ENGINE_SELECTION`, and are scored beside the Nov 7 baseline.
+
+1. **Choose the readers (free):** `SCORED=profile-v1-run1-rescored2-scored.json LIMIT=10 CONTROLS=3 node --import ./tests/support/resolve.mts evals/weak-readers.mts` prints the weakest readers plus a few strong ones as controls, and a `CASE_IDS=` line.
+2. **Version B:** in terminal 1, `ENGINE_SELECTION=profile ENGINE_TRACE=1 npm run dev`; in terminal 2, `SET=profile-v1 CASE_IDS=... TAG_PREFIX=r1b node evals/run.mjs`.
+3. **Version C:** stop the server, restart it with `ENGINE_SELECTION=shortlist ENGINE_TRACE=1 npm run dev`, then the same run with `TAG_PREFIX=r1c`.
+4. **Score side by side:** `RUNS=profile-v1-run1.json,profile-v1-r1b.json,profile-v1-r1c.json SECOND_JUDGE=0 node --env-file=.env.local --import ./tests/support/resolve.mts evals/score.mts`. The baseline's verdicts are remembered, so only B's and C's picks are paid for. Length readers are compared with the Nov 7 page-count run, since page counts changed their pools.
+5. **Second run only if needed:** when B and C are within about 5 points on relevance, run both again (`TAG_PREFIX=r1b2`, `r1c2`).
+
+Version C's traces (stage S) record the finalists, how many had a description or mood tags, and the lookup time, for checking whether good books are cut too early.

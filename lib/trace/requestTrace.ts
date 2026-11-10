@@ -31,6 +31,8 @@ export const TRACE_STAGES = {
   D: "D_open_library_search",
   E: "E_merge",
   F: "F_grounding_check",
+  // Version C's shortlist (decision 6.13): the finalists, their lookup and the final choice.
+  S: "S_shortlist",
   G: "G_pick_lookup",
   // Card writing (fix PR 1): after the lookup, before the description check. Keyed W, not a
   // new letter in sequence, so H and I keep the names earlier traces used.

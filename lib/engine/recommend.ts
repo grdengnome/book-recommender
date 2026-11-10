@@ -28,10 +28,12 @@ import {
   type GroundingResult,
   type SeenCandidates,
 } from "@/lib/engine/pool/pickGrounding";
-import { formatPickMetadata, lookupPickMetadata, type PickMetadata } from "@/lib/engine/verify/lookupPickMetadata";
+import { formatPickMetadata, lookupFinalists, lookupPickMetadata, type PickMetadata } from "@/lib/engine/verify/lookupPickMetadata";
+import { searchPromptFor, selectionMode, SHORTLIST_SIZE } from "@/lib/engine/picks/selectionPrompts";
+import { finalChoiceRequest, formatFinalists, readShortlist, shortlistAsSeen } from "@/lib/engine/picks/shortlist";
 import { checkPickDescriptions, formatPickCheck } from "@/lib/engine/verify/checkPickDescriptions";
 import { createRequestTrace, type RequestTrace } from "@/lib/trace/requestTrace";
-import { SELECTION_FORMAT, toClientPick, type CardText, type ModelPick, type SelectedPick } from "@/lib/engine/picks/pickSchema";
+import { SELECTION_FORMAT, SHORTLIST_FORMAT, toClientPick, type CardText, type ModelPick, type SelectedPick } from "@/lib/engine/picks/pickSchema";
 import {
   duplicateMoods,
   validateSelectedPick,
@@ -200,26 +202,6 @@ function respond(trace: RequestTrace, body: Record<string, unknown>, status = 20
   return { status, body };
 }
 
-// Encodes spec.md Section 4d ("What 'good' means") as explicit model instructions.
-const SYSTEM_PROMPT = `You are a book recommendation engine. Your entire value proposition is taste, not popularity — you recommend books based on genuine fit and quality, actively resisting the pull toward safe, over-recommended picks. Popularity itself is never a mark against a book — only defaulting to a pick because it's popular, rather than because it genuinely fits, is a failure.
-
-Apply these rules to every recommendation:
-
-1. Impression over popularity. Target books that leave a mark — ones a reader would be itching to recommend afterward, chosen because they're genuinely great and genuinely fit the reader's stated taste, not because they're famous or because they're obscure. Obscurity is not the goal; genuine quality and fit are.
-2. Resist the reflex toward the bandwagon. Before finalizing a pick, ask whether you're reaching for it because it's the first familiar answer that comes to mind, rather than because it's the best fit for this specific reader. A widely-read book that authentically matches the reader's taste is a legitimate, even ideal, recommendation — the failure mode is defaulting to a familiar pick out of habit, not recommending a popular book on its merits. Reward range: vary era, author, and genre across your picks rather than giving three flavors of the same thing.
-3. A pick fails on non-obviousness if it's the answer a well-read reader would already expect for this specific request — the one they'd land on after a five-minute search or find atop a "books like this" list. This has nothing to do with whether the book is decorated: a Booker winner can be a genuinely surprising, well-earned pick, and an award-free book can still be the most predictable possible answer. Before finalizing a pick, ask: would someone who already knows this territory shrug and say "well, obviously" — regardless of whether it happens to have won a prize?
-4. Multi-source, not single-source. Draw from many corners of literature — different decades, countries, presses, and traditions. Never lean on a single canon (mainstream or "counter-canon") as if it were the only source worth considering.
-
-You have access to a search_books tool, and you MUST call it before answering. All 3 recommendations MUST be selected from the candidate pools that search_books returned in this conversation. Do not recommend any book that is not present in a retrieved pool, under any circumstance — even if the pool is small, and even if you know of a better fit from your own knowledge. If a pool feels too narrow, call search_books again with different terms; never fill the gap from memory. Copy each pick's title and author into "poolTitle" and "poolAuthor" exactly as they appear in the pool. Your final answer is checked in code against the retrieved pools, and any pick not found in them is rejected. The candidate list it returns is unordered — an accident of API response order, not a ranking — so never favor earlier entries over later ones. Restricting picks to the pool changes where candidates come from, not the judgment applied to them: still weigh every candidate against the taste-fit rules above.
-
-The user's taste description will typically include three categories of signal: an anchor (a book they loved), why it stuck with them, and their appetite (comfort vs. surprise) — these three are always present, though the exact wording of how each was asked may vary. It may also include mood, how much time/commitment they want, and specific turn-offs — genres or themes to avoid — when present. Treat a stated turn-off as a hard boundary, not a soft preference: never recommend against it. Focus on the substance of each answer, not the phrasing of the question that produced it. If the input is freeform or unlabeled, use your best judgment to identify these signals from context.
-
-Given this, return exactly 3 book recommendations.
-
-For each recommendation, include:
-- "poolTitle" and "poolAuthor": copied exactly from the pool, as above.
-- "fitNote": one short sentence, under 25 words, on why this pick genuinely fits this reader's stated taste rather than being a reflexive/default choice. A writer turns it into the reader-facing text later, so make it specific. Don't state specific claims about a book's reception, fame, or obscurity unless you're confident they're accurate.
-- "mood": one word for the book's mood, shown to the reader as a clue before the book is revealed. Give each of the 3 picks a different mood word.`;
 
 export interface RecommendInput {
   // The reader's answers, as one piece of text. Data to interpret, never instructions.
@@ -352,6 +334,8 @@ async function generateOnce(
   const messages: Array<{ role: "user" | "assistant"; content: unknown }> = [
     { role: "user", content: tasteDescription },
   ];
+  // Which selection version runs (decision 6.13; ENGINE_SELECTION, default "current").
+  const mode = selectionMode();
 
   // Every candidate the model was shown this generation (with its internal IDs), keyed by
   // pickGrounding's groundingKey — the reference set the final picks are checked against.
@@ -369,12 +353,12 @@ async function generateOnce(
       // Cache breakpoint on the fixed instructions (tools render first, then system), ~3k
       // tokens, above Sonnet 5's 1,024-token minimum. Later rounds and later requests within
       // the cache TTL read this prefix from cache instead of re-processing it.
-      system: [{ type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } }],
+      system: [{ type: "text", text: searchPromptFor(mode), cache_control: { type: "ephemeral" } }],
       messages,
       // On every round, not just the last: the model usually answers right after its first
       // searches, while tools are still offered. Constrains only the final text; tool
       // calls are unaffected.
-      output_config: { format: SELECTION_FORMAT },
+      output_config: { format: mode === "shortlist" ? SHORTLIST_FORMAT : SELECTION_FORMAT },
       ...(allowToolUse ? { tools: toolDefinitions } : {}),
       // Streamed so each pick's lookup and card can start as soon as it arrives.
       stream: true,
@@ -386,7 +370,8 @@ async function generateOnce(
     const callStart = performance.now();
     const arrivals: number[] = [];
     const arrivedTitles: string[] = [];
-    const scan = createPickScanner((raw, index) => {
+    // Version C's search call lists finalists, not picks: nothing starts until the final choice.
+    const scan = mode === "shortlist" ? () => {} : createPickScanner((raw, index) => {
       arrivals.push(Math.round(performance.now() - callStart));
       const earlierTitles = arrivedTitles.slice();
       const title = (raw as { poolTitle?: unknown } | null)?.poolTitle;
@@ -475,6 +460,16 @@ async function generateOnce(
     messages.push({ role: "user", content: toolResults });
   }
 
+  // Version C (decision 6.13): the search call's answer is the shortlist; the final choice runs
+  // now and its picks go through the same checks below as a one-call selection's.
+  if (mode === "shortlist" && data?.stop_reason === "end_turn" && !(length && seenCandidates.size < 3)) {
+    const stage = await chooseFromShortlist(tasteDescription, data, seenCandidates, trace, avoid);
+    if (stage.kind === "rejected") return { ok: true, status: "rejected", detail: stage.detail };
+    if (stage.kind === "error") return { ok: false, status: 502, body: errorBody("upstream_error", "The recommendation service is unavailable. Please try again.") };
+    data = stage.data;
+    outcomes = stage.outcomes;
+  }
+
   // Every pick pipeline settles (they never reject), so nothing is left running unobserved.
   const settled = await Promise.all(outcomes);
 
@@ -541,6 +536,74 @@ async function generateOnce(
     pickMetadata: ready.map((o) => o.metadata),
     overLimit: ready.flatMap((o, index) => o.overLimit.map((field) => ({ index, field, length: o.card[field].length }))),
   };
+}
+
+// Version C's second half (decision 6.13): read the finalists, look up their records, and stream
+// the final choice. Picks start their pipelines as they arrive, grounded against the shortlist
+// only, so a final pick can't come from outside it.
+type ShortlistStage =
+  | { kind: "ok"; data: Awaited<ReturnType<typeof streamModel>>["data"]; outcomes: Promise<PickOutcome>[] }
+  | { kind: "rejected"; detail: string }
+  | { kind: "error" };
+
+async function chooseFromShortlist(
+  tasteDescription: string,
+  searchAnswer: { content?: unknown[] },
+  seen: SeenCandidates,
+  trace: RequestTrace,
+  avoid: string[],
+): Promise<ShortlistStage> {
+  const text = String((searchAnswer.content as Array<{ type: string; text?: string }> | undefined)?.find((b) => b.type === "text")?.text ?? "");
+  const shortlist = readShortlist(text, seen);
+  if (shortlist.finalists.length < 3) {
+    const detail = `shortlist had ${shortlist.finalists.length} grounded finalists of ${shortlist.listed} listed`;
+    trace.add("S", { kind: "rejected", reason: detail, ungrounded: shortlist.ungrounded });
+    return { kind: "rejected", detail };
+  }
+
+  const lookupStart = performance.now();
+  const metadata = await lookupFinalists(shortlist.finalists);
+  const lookupMs = Math.round(performance.now() - lookupStart);
+  const { text: shortlistText, stats } = formatFinalists(shortlist.finalists, metadata);
+  console.log(
+    `shortlist: ${stats.finalists} finalists (asked for ${SHORTLIST_SIZE}; ${shortlist.listed} listed, ${shortlist.ungrounded.length} ungrounded, ${shortlist.duplicates} repeated) · ${stats.withDescription} with a description · ${stats.withMoods} with mood tags · lookup ${lookupMs}ms`,
+  );
+  // The finalist log (decision 6.13): which books made the cut, for measuring whether good books
+  // are cut too early.
+  trace.add("S", {
+    kind: "shortlist",
+    asked: SHORTLIST_SIZE,
+    listed: shortlist.listed,
+    ungrounded: shortlist.ungrounded,
+    duplicates: shortlist.duplicates,
+    lookupMs,
+    ...stats,
+    finalists: shortlist.finalists.map((f, i) => ({
+      title: f.title,
+      author: f.author,
+      sources: f.sources,
+      lookups: metadata[i].lookups.map((l) => ({ source: l.source, status: l.status, hasDescription: !!l.description.trim() })),
+    })),
+  });
+
+  const restricted = shortlistAsSeen(shortlist.finalists);
+  const body = finalChoiceRequest(tasteDescription, shortlistText);
+  const outcomes: Promise<PickOutcome>[] = [];
+  const arrivedTitles: string[] = [];
+  const callStart = performance.now();
+  const scan = createPickScanner((raw, index) => {
+    const earlierTitles = arrivedTitles.slice();
+    const title = (raw as { poolTitle?: unknown } | null)?.poolTitle;
+    if (typeof title === "string" && title.trim()) arrivedTitles.push(title.trim());
+    outcomes.push(runPick(tasteDescription, raw, index, restricted, earlierTitles, trace, avoid));
+  });
+  const streamed = await streamModel(body, scan);
+  trace.modelCall("S", { model: body.model, request: body, response: streamed.data, httpStatus: streamed.status, ms: Math.round(performance.now() - callStart) });
+  if (!streamed.ok) {
+    console.error(`recommend: Anthropic API error ${streamed.status} in the final choice: ${JSON.stringify(streamed.data?.error ?? streamed.data).slice(0, 300)}`);
+    return { kind: "error" };
+  }
+  return { kind: "ok", data: streamed.data, outcomes };
 }
 
 export function finalMoods(picks: Array<{ selector: string; card: string }>): string[] {
