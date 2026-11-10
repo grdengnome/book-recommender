@@ -1,6 +1,6 @@
 # Roadmap and backlog
 
-> **Status:** Living · Built from the Oct 28, 2026 idea brainstorm (51 ideas). New ideas are added here; anything that lands after the v0 scope freeze goes to "Later" by default. Last updated Nov 4, 2026.
+> **Status:** Living · Built from the Oct 28, 2026 idea brainstorm (51 ideas). New ideas are added here; anything that lands after the v0 scope freeze goes to "Later" by default. Last updated Nov 9, 2026.
 
 ## The vision
 Squirmly helps readers find the next book they'll love, and makes finding, collecting and ranking books feel like play.
@@ -45,6 +45,19 @@ Bucket: **v0** (in [scope](./v0-scope.md)) · **Later** (real app, after v0) · 
 | Eval set refresh: a new case set in the exact shape the question flow sends the engine (favourites, appeal factors, mood, turn-offs), drawn from patterns in real readers' answers, 20–30 cases, with machine-scored checks (grounded, 3 picks, distinct moods, turn-offs respected, how famous the picks are) beside blind human scoring | In progress (before PR 5, decided Nov 2) | `legacy-v0` stays frozen as the baseline (decision 14.5); cases worth adding sooner: an injection attempt, accented titles, the case 5 famous-picks drift |
 | Dependency checkup: review npm's 25 reported package vulnerabilities (Nov 1) and update safely, in its own PR | Later | Before anyone outside sees the app; checks must stay green |
 | Eval on demand: a "Run eval" button in GitHub Actions, with the API key stored as a GitHub secret | Later | Worth it once model swaps become frequent (decision 14.3); today evals run by hand |
+| Shortlist, then choose with descriptions (decision 6.13) | v0 (round 1) | Tested against a prompt-only version |
+| Smarter search: mood dictionary (our mood words → Hardcover moods and Open Library subjects) and loved-book seeds (search from the loved book's own record) | v0 (round 2) | Mood is the strongest preference and maps worst today |
+| Reserves: choose 5, show 3 | v0 (round 3) | A failed check swaps in a reserve instead of rerunning the request |
+| Fit check before the reveal: each pick checked against the musts from its description | Later (before pilot) | Swap a reserve on a fail |
+| Start searching during the question flow, once the core answers are in | Later (before pilot) | Hides most of the wait |
+| Curated shelves: Hardcover lists, Wikidata prize shelf | Later (before pilot) | The new Hardcover key allows lists |
+| Translated titles that miss Hardcover | Later (before pilot) | Thin records lead to weak cards |
+| Repeat damping: lightly penalise books recommended to many readers | Later | Needs the data store |
+| Held-out readers: 15–20 real requests never used for tuning | v0 (eval tooling) | Guards against tuning the prompt to our 21 readers |
+| Search measurement: were good fits in the pool at all? | v0 (eval tooling) | Tells search problems from choosing problems |
+| Pilot signals per pick: "already read it", save and finish rates | v0 (pilot) | The real-world test of discovery and fit |
+| Our own book index (decision 6.14) | Later (after PR 6) | Descriptions and moods stored ahead of time; search by meaning |
+| Learning from readers: saves, finishes and rankings improve picks | Growth | The long-term moat |
 | Avoid list / Nope shelf | Later | Low priority |
 | Influencer or curated reading lists | Vision | Fits the engine as another book source |
 

@@ -995,3 +995,19 @@ Alongside: dependency checkup PR (npm reports 25 package vulnerabilities); claim
 2. If mismatches remain, decide (Grim) whether the final choice also sees catalog descriptions and mood tags for a shortlist; this changes the "title, author, subjects only" rule and sits next to decision 6.5.
 3. Recalibrate the card check (its message changed), then one full 21-reader run (about $4): relevance, preferences, cards, speed. Then Grim's blind read of about 15 cards.
 4. Speed, batch scoring, then PR 5 app skeleton, PR 6 store and trust basics, the pilot.
+
+---
+
+## November 9, 2026 — Selection work planned: prompt and shortlist as round 1
+
+**Conclusion:** The next engine step is round 1 of the selection work (decision 6.13): a selection prompt written for the taste profile (B), and the same prompt plus a 30-book shortlist whose final choice reads each finalist's description and Hardcover moods (C), compared side by side against the Nov 7 baseline in a cheap picks-only test (decision 3.13, about $2–3). Our own book index is the long-term upgrade (6.14).
+
+- **Why selection:** today's prompt still describes the old paragraph input and puts surprise ahead of fit, and the picker sees only title, author and subjects; most remaining card errors sit on picks that don't fit (eval log, Nov 8).
+- **Research:** professional recommenders run retrieve → rank → re-rank, with the richest information at the ranking step (ours had the thinnest); librarians' appeal factors (pace, tone, style) match our slots and are what subject tags miss; Netflix-style calibration supports "every preference covered across the set".
+- **Roadmap:** round 2 smarter search (mood dictionary, loved-book seeds), round 3 reserves, plus a fit check, searching during the question flow, held-out readers, search measurement, repeat damping and pilot signals ([roadmap](./product/roadmap-and-backlog.md)).
+
+**Next:**
+1. Grim reads the full round 1 prompts (first cut and final choice).
+2. Build B and C behind one setting, with the picks-only test mode and the finalist log; independent cold review (engine prompt).
+3. Run the test in the Codespace; second run only if the gap is within noise.
+4. Then round 2, round 3, the full 21-reader run with cards, and Grim's blind read.
