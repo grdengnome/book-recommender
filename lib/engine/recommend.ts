@@ -29,7 +29,7 @@ import {
   type SeenCandidates,
 } from "@/lib/engine/pool/pickGrounding";
 import { formatPickMetadata, lookupFinalists, lookupPickMetadata, type PickMetadata } from "@/lib/engine/verify/lookupPickMetadata";
-import { searchPromptFor, selectionMode, SHORTLIST_SIZE } from "@/lib/engine/picks/selectionPrompts";
+import { modeForInput, searchPromptFor, selectionMode, SHORTLIST_SIZE } from "@/lib/engine/picks/selectionPrompts";
 import { finalChoiceRequest, formatFinalists, readShortlist, shortlistAsSeen } from "@/lib/engine/picks/shortlist";
 import { checkPickDescriptions, formatPickCheck } from "@/lib/engine/verify/checkPickDescriptions";
 import { createRequestTrace, type RequestTrace } from "@/lib/trace/requestTrace";
@@ -335,7 +335,7 @@ async function generateOnce(
     { role: "user", content: tasteDescription },
   ];
   // Which selection version runs (decision 6.13; ENGINE_SELECTION, default "current").
-  const mode = selectionMode();
+  const mode = modeForInput(selectionMode(), tasteDescription);
 
   // Every candidate the model was shown this generation (with its internal IDs), keyed by
   // pickGrounding's groundingKey — the reference set the final picks are checked against.
@@ -566,7 +566,7 @@ async function chooseFromShortlist(
   const lookupMs = Math.round(performance.now() - lookupStart);
   const { text: shortlistText, stats } = formatFinalists(shortlist.finalists, metadata);
   console.log(
-    `shortlist: ${stats.finalists} finalists (asked for ${SHORTLIST_SIZE}; ${shortlist.listed} listed, ${shortlist.ungrounded.length} ungrounded, ${shortlist.duplicates} repeated) · ${stats.withDescription} with a description · ${stats.withMoods} with mood tags · lookup ${lookupMs}ms`,
+    `shortlist: ${stats.finalists} finalists (asked for ${SHORTLIST_SIZE}; ${shortlist.listed} listed, ${shortlist.ungrounded.length} ungrounded, ${shortlist.duplicates} repeated, ${shortlist.overCap} over the cap) · ${stats.withDescription} with a description · ${stats.withMoods} with mood tags · lookup ${lookupMs}ms`,
   );
   // The finalist log (decision 6.13): which books made the cut, for measuring whether good books
   // are cut too early.
@@ -576,6 +576,7 @@ async function chooseFromShortlist(
     listed: shortlist.listed,
     ungrounded: shortlist.ungrounded,
     duplicates: shortlist.duplicates,
+    overCap: shortlist.overCap,
     lookupMs,
     ...stats,
     finalists: shortlist.finalists.map((f, i) => ({

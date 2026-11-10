@@ -6,7 +6,7 @@ import { modelFor } from "@/lib/ai/gateway";
 import { checkPickGrounding, type CheckedPick, type SeenCandidates } from "@/lib/engine/pool/pickGrounding";
 import type { PickMetadata } from "@/lib/engine/verify/lookupPickMetadata";
 import { SELECTION_FORMAT } from "./pickSchema";
-import { FINAL_CHOICE_PROMPT } from "./selectionPrompts";
+import { FINAL_CHOICE_PROMPT, SHORTLIST_SIZE, SHORTLIST_SLACK } from "./selectionPrompts";
 
 const DESCRIPTION_CHARS = 500;
 const SUBJECTS_SHOWN = 8;
@@ -16,6 +16,7 @@ export interface Shortlist {
   listed: number; // entries the model returned
   ungrounded: string[]; // listed but not in any pool shown (dropped)
   duplicates: number; // listed twice (dropped)
+  overCap: number; // grounded finalists past SHORTLIST_SIZE + SHORTLIST_SLACK (dropped)
 }
 
 // Reads the search call's answer. Every finalist must be in a pool the model was shown, the same
@@ -48,7 +49,10 @@ export function readShortlist(answerText: string, seen: SeenCandidates): Shortli
     keys.add(p.groundingKey);
     finalists.push(p);
   }
-  return { finalists, listed: entries.length, ungrounded, duplicates };
+  // A runaway list would mean dozens of lookups and a long final message: keep the first ones.
+  const cap = SHORTLIST_SIZE + SHORTLIST_SLACK;
+  const overCap = Math.max(0, finalists.length - cap);
+  return { finalists: finalists.slice(0, cap), listed: entries.length, ungrounded, duplicates, overCap };
 }
 
 // The finalists as the only pool the final picks may come from: its grounding check rejects a
@@ -67,6 +71,9 @@ function clip(text: string, max: number): string {
 // Data, never instructions: catalog text is quoted, and angle brackets are swapped out so it
 // can't close the tags around it (the same treatment as the reader brief).
 const safe = (s: string) => s.replace(/</g, "‹").replace(/>/g, "›");
+// Descriptions are quoted, so a quote mark inside one is swapped too, so it can't end the quote.
+// (Titles and authors keep theirs: the final call copies them exactly for the grounding check.)
+const safeQuoted = (s: string) => safe(s).replace(/"/g, "”");
 
 export interface FinalistStats {
   finalists: number;
@@ -91,7 +98,7 @@ export function formatFinalists(finalists: CheckedPick[], metadata: PickMetadata
     return [
       `- "${safe(f.title)}" by ${safe(f.author)}`,
       `  Subjects: ${subjects.length ? safe(subjects.join("; ")) : "(none)"}`,
-      `  Description: ${description ? `"${safe(clip(description, DESCRIPTION_CHARS))}"` : "(none in the catalogs)"}`,
+      `  Description: ${description ? `"${safeQuoted(clip(description, DESCRIPTION_CHARS))}"` : "(none in the catalogs)"}`,
       `  Reader mood tags: ${moods.length ? safe(moods.join(", ")) : "(none)"}`,
     ].join("\n");
   });

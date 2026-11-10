@@ -26,10 +26,15 @@ const rows = (engine.cases as Array<{ id: string; doorway: string; score: { pick
     return { id: c.id, doorway: c.doorway, belowGood, missed };
   });
 
-const weak = rows.filter((r) => r.belowGood > 0 || r.missed > 0).sort((a, b) => b.belowGood - a.belowGood || b.missed - a.missed);
-const strong = rows.filter((r) => !weak.includes(r)).slice(0, controls);
+const unscored = (engine.cases as Array<{ id: string; score: unknown }>).filter((c) => !c.score).map((c) => c.id);
+// Weakest first: picks below good, then preference misses.
+const ranked = [...rows].sort((a, b) => b.belowGood - a.belowGood || b.missed - a.missed);
+const weak = ranked.filter((r) => r.belowGood > 0 || r.missed > 0).slice(0, limit);
+// Controls: the strongest readers not already in the test (clean ones first, then the least weak).
+const strong = ranked.filter((r) => !weak.includes(r)).reverse().slice(0, controls);
 
 console.log("reader    | doorway    | picks below good | preference misses");
-for (const r of rows) console.log(`${r.id.padEnd(9)} | ${r.doorway.padEnd(10)} | ${String(r.belowGood).padEnd(16)} | ${r.missed}${weak.includes(r) ? "" : "  (control candidate)"}`);
-console.log(`\n${weak.length} weak readers (testing the weakest ${Math.min(limit, weak.length)}), ${strong.length} controls`);
-console.log(`CASE_IDS=${[...weak.slice(0, limit), ...strong].map((r) => r.id).join(",")}`);
+for (const r of ranked) console.log(`${r.id.padEnd(9)} | ${r.doorway.padEnd(10)} | ${String(r.belowGood).padEnd(16)} | ${r.missed}${weak.includes(r) ? "  test" : strong.includes(r) ? "  control" : ""}`);
+if (unscored.length) console.log(`\nNot scored in that file (left out): ${unscored.join(", ")}`);
+console.log(`\n${weak.length} weakest readers + ${strong.length} controls`);
+console.log(`CASE_IDS=${[...weak, ...strong].map((r) => r.id).join(",")}`);
