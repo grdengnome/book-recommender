@@ -7,6 +7,12 @@
 //   TAG_PREFIX=gateway1101    prefix for each request's eval tag, so its logs and traces are separable
 //   OUT=my-run.json           results file name in evals/results/ (default <set>-<tag prefix or "run">.json)
 //   PORT=3000                 where the dev server is running
+//   MAX_USD=3                 spend limit: stop after the case that takes the run's total past this
+//                             (default 5; needs ENGINE_TRACE=1 on the server, which is where costs come from)
+//   SMOKE=2                   smoke test (decision 3.14): run only the first N cases, then stop so
+//                             their time and cost can be checked before the rest
+//   RESUME=1                  continue a run: keep the results already in the output file and run
+//                             only the cases not in it (e.g. after a smoke test, same OUT/TAG_PREFIX)
 //
 // Start the dev server first, with tracing on so time, cost and models are in the summary:
 //   ENGINE_TRACE=1 npm run dev
@@ -73,13 +79,34 @@ fs.mkdirSync(new URL("./results/", import.meta.url), { recursive: true });
 const outName = process.env.OUT || `${SET}-${process.env.TAG_PREFIX || "run"}.json`;
 const outPath = new URL(`./results/${outName}`, import.meta.url);
 
+const MAX_USD = Number(process.env.MAX_USD ?? 5);
+const SMOKE = process.env.SMOKE ? Number(process.env.SMOKE) : null;
+if (!(MAX_USD > 0)) throw new Error("MAX_USD must be a positive number of dollars");
+if (SMOKE !== null && !(Number.isInteger(SMOKE) && SMOKE > 0)) throw new Error("SMOKE must be a whole number of cases, e.g. SMOKE=2");
+
 const results = [];
-for (const c of toRun) {
+if (process.env.RESUME && fs.existsSync(outPath)) {
+  const previous = JSON.parse(fs.readFileSync(outPath, "utf8"));
+  if (previous.set !== SET) throw new Error(`${outName} is from set ${previous.set}, not ${SET}`);
+  results.push(...previous.results.filter((r) => toRun.some((c) => c.id === r.id) && !r.error));
+  if (results.length) console.log(`Resuming: keeping ${results.length} finished case(s) from ${outName}`);
+}
+const spent = () => results.reduce((sum, r) => sum + (typeof r.trace?.totalUsd === "number" ? r.trace.totalUsd : 0), 0);
+const pending = toRun.filter((c) => !results.some((r) => r.id === c.id)).slice(0, SMOKE ?? Infinity);
+let stoppedForSpend = false;
+for (const c of pending) {
   // Sequential on purpose: keeps the module-level log tag in searchBooks.ts unambiguous,
   // so no two cases' search_books calls are ever in flight at once.
   results.push(await runCase(c));
   // Written after every case so a crash mid-run doesn't lose completed results.
   fs.writeFileSync(outPath, JSON.stringify({ set: SET, ranAt: new Date().toISOString(), results }, null, 2));
+  const last = results[results.length - 1];
+  if (typeof last.trace?.totalUsd !== "number") console.warn(`[${c.id}] no cost recorded: start the server with ENGINE_TRACE=1, or the spend limit can't work`);
+  if (spent() >= MAX_USD && c !== pending[pending.length - 1]) {
+    stoppedForSpend = true;
+    console.warn(`\nSpend limit reached: $${spent().toFixed(2)} of MAX_USD=$${MAX_USD}. Stopping. Continue with RESUME=1 (and a higher MAX_USD) if that's intended.`);
+    break;
+  }
 }
 
 // Summary: no reader data and no keys, safe to paste into a PR or chat.
@@ -102,3 +129,7 @@ console.log(
     (costs.length ? ` · total cost $${costs.reduce((a, b) => a + b, 0).toFixed(3)}` : " · cost: start the dev server with ENGINE_TRACE=1 to see it"),
 );
 console.log(`Wrote evals/results/${outName}`);
+const left = toRun.filter((c) => !results.some((r) => r.id === c.id)).length;
+if (SMOKE !== null && !stoppedForSpend && left) {
+  console.log(`\nSmoke test done (${SMOKE} case(s)); ${left} left. If the time and cost above look right, run the same command without SMOKE and with RESUME=1 to continue.`);
+}

@@ -2,7 +2,7 @@
 
 > **Status:** Living · Every product and architecture decision, and the paths rejected.
 
-*Covers decisions through the v0 engine, v0 product planning, the v0 scope and the repo restructure (November 9, 2026). Further decisions are added as they're made.*
+*Covers decisions through the v0 engine, v0 product planning, the v0 scope and the repo restructure (November 10, 2026). Further decisions are added as they're made.*
 
 The product and architecture decisions behind this recommender, and the paths I rejected. The [progress log](./progress-log.md) is the session-by-session diary; this file is the story told by decision. Each entry gives the decision and why, with a link to the full detail.
 
@@ -399,6 +399,10 @@ The full operating principles are in [question-flow-principles.md](./product/que
 ### 6.14 Our own book index is the long-term engine upgrade
 **Decision:** Every book the engine sees gets stored ahead of time with its description, moods, page count, editions, cover and translated titles, then searched by meaning. Planned after the pilot basics (it needs the data store, PR 6); it also serves the card bank, Shelf and Collection.
 **Why:** It puts rich information at every step, including the first cut and search, and takes lookups out of the reader's wait. This is how large recommenders work: item features are prepared offline, not fetched per request. ([progress log, Nov 9](./progress-log.md))
+
+### 6.15 Searches per turn are capped in code, as a setting
+**Decision:** The search loop runs at most `ENGINE_SEARCHES_PER_ROUND` searches (default 3) per turn; extra searches get a short "skipped" answer. With 3 turns, a request can still make up to 9 searches. The round 1 prompt now asks for "a few well-chosen searches, usually two or three", and version C's first cut gets 16,000 output tokens instead of 8,000. Applies to every version; today's version rarely makes more than 2 searches, so its behaviour is unchanged in practice.
+**Why:** On Nov 9 the round 1 prompt led to about 12 searches per attempt for a detailed reader: thousands of books read, attempts cut off, 5-minute requests and $0.42–0.44 readers. Rules the model must follow are enforced in code, as with grounding and length. 3 matches what today's engine uses and the Oct 21 finding that halving the pool didn't hurt picks; it's a setting so the data can move it. ([eval log, Nov 9](./quality/eval-log.md))
 
 ---
 

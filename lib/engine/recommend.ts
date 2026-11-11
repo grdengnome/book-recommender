@@ -29,7 +29,7 @@ import {
   type SeenCandidates,
 } from "@/lib/engine/pool/pickGrounding";
 import { formatPickMetadata, lookupFinalists, lookupPickMetadata, type PickMetadata } from "@/lib/engine/verify/lookupPickMetadata";
-import { modeForInput, searchPromptFor, selectionMode, SHORTLIST_SIZE } from "@/lib/engine/picks/selectionPrompts";
+import { modeForInput, searchesPerRound, searchPromptFor, selectionMaxTokens, selectionMode, SHORTLIST_SIZE } from "@/lib/engine/picks/selectionPrompts";
 import { finalChoiceRequest, formatFinalists, readShortlist, shortlistAsSeen } from "@/lib/engine/picks/shortlist";
 import { checkPickDescriptions, formatPickCheck } from "@/lib/engine/verify/checkPickDescriptions";
 import { createRequestTrace, type RequestTrace } from "@/lib/trace/requestTrace";
@@ -349,7 +349,7 @@ async function generateOnce(
 
     const requestBody = {
       model: modelFor("selection"),
-      max_tokens: 8000,
+      max_tokens: selectionMaxTokens(mode),
       // Cache breakpoint on the fixed instructions (tools render first, then system), ~3k
       // tokens, above Sonnet 5's 1,024-token minimum. Later rounds and later requests within
       // the cache TTL read this prefix from cache instead of re-processing it.
@@ -410,9 +410,21 @@ async function generateOnce(
 
     messages.push({ role: "assistant", content: data.content });
 
+    // At most searchesPerRound() searches run in one turn; the rest get a short "skipped"
+    // answer (every tool call needs a result) and never reach the catalogs or the pool.
+    const cap = searchesPerRound();
+    let searchesThisRound = 0;
     const toolResults = await Promise.all(
       toolUseBlocks.map(async (block) => {
         const toolTrace = roundTrace.with({ toolUseId: block.id });
+        if (block.name === "search_books" && ++searchesThisRound > cap) {
+          toolTrace.add("D", { kind: "search_skipped", input: block.input, cap });
+          return {
+            type: "tool_result",
+            tool_use_id: block.id,
+            content: JSON.stringify({ skipped: `Search limit reached: only ${cap} searches run per turn. Work with the results above, or choose your best searches next turn.` }),
+          };
+        }
         let result: unknown;
         try {
           result = await callTool(block.name, block.input, toolTrace);

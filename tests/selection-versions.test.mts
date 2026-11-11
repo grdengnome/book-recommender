@@ -11,6 +11,8 @@ import {
   PROFILE_PROMPT,
   SHORTLIST_PROMPT,
   modeForInput,
+  searchesPerRound,
+  selectionMaxTokens,
   selectionMode,
   SHORTLIST_SIZE,
   SHORTLIST_SLACK,
@@ -173,4 +175,41 @@ test("a runaway shortlist is cut to the cap", () => {
   const s = readShortlist(JSON.stringify({ shortlist: many.map((b) => ({ poolTitle: b.title, poolAuthor: b.author })) }), seen);
   assert.equal(s.finalists.length, SHORTLIST_SIZE + SHORTLIST_SLACK);
   assert.equal(s.overCap, 60 - SHORTLIST_SIZE - SHORTLIST_SLACK);
+});
+
+test("the search cap: past the limit in one turn, searches are skipped, not run", async () => {
+  fakeOptions.searchesPerTurn = 6;
+  try {
+    const result = await run({ ENGINE_TRACE: undefined, ENGINE_SELECTION: "profile", ENGINE_SEARCHES_PER_ROUND: undefined }, asReader());
+    assert.equal(result.status, 200, result.responseText);
+    const secondCall = anthropic(result.requests).find((b) => b.tools && b.messages.length === 3);
+    const results = secondCall.messages[2].content as Array<{ tool_use_id: string; content: string }>;
+    assert.equal(results.length, 6, "every search asked for gets an answer");
+    const skipped = results.filter((r) => r.content.includes("Search limit reached"));
+    assert.equal(skipped.length, 3, "only the first 3 run");
+    assert.deepEqual(skipped.map((r) => r.tool_use_id), ["toolu_offline_x2", "toolu_offline_x3", "toolu_offline_x4"]);
+  } finally {
+    delete fakeOptions.searchesPerTurn;
+  }
+});
+
+test("the search cap is a setting, and C's first cut gets more room to write", () => {
+  const before = process.env.ENGINE_SEARCHES_PER_ROUND;
+  const warn = console.warn;
+  console.warn = () => {};
+  try {
+    delete process.env.ENGINE_SEARCHES_PER_ROUND;
+    assert.equal(searchesPerRound(), 3);
+    process.env.ENGINE_SEARCHES_PER_ROUND = "5";
+    assert.equal(searchesPerRound(), 5);
+    process.env.ENGINE_SEARCHES_PER_ROUND = "zero";
+    assert.equal(searchesPerRound(), 3);
+  } finally {
+    console.warn = warn;
+    if (before === undefined) delete process.env.ENGINE_SEARCHES_PER_ROUND;
+    else process.env.ENGINE_SEARCHES_PER_ROUND = before;
+  }
+  assert.equal(selectionMaxTokens("current"), 8000, "today's version unchanged");
+  assert.ok(selectionMaxTokens("shortlist") > 8000);
+  assert.ok(PROFILE_PROMPT.includes("usually two or three") && PROFILE_PROMPT.includes("at most 3 searches run per turn"));
 });

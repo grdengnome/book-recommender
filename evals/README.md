@@ -83,9 +83,9 @@ Each file in `cases/` is one set:
 Versions B and C (decision 6.13) run from the same code, switched by `ENGINE_SELECTION`, and are scored beside the Nov 7 baseline.
 
 1. **Choose the readers (free):** `SCORED=profile-v1-run1-rescored2-scored.json LIMIT=10 CONTROLS=3 node --import ./tests/support/resolve.mts evals/weak-readers.mts` prints the weakest readers plus a few strong ones as controls, and a `CASE_IDS=` line.
-2. **Version B:** in terminal 1, `ENGINE_SELECTION=profile ENGINE_TRACE=1 npm run dev`; in terminal 2, `SET=profile-v1 CASE_IDS=... TAG_PREFIX=r1b node evals/run.mjs`.
-3. **Version C:** stop the server, restart it with `ENGINE_SELECTION=shortlist ENGINE_TRACE=1 npm run dev`, then the same run with `TAG_PREFIX=r1c`.
+2. **Version B, smoke test first (decision 3.14):** in terminal 1, `ENGINE_SELECTION=profile ENGINE_TRACE=1 npm run dev`; in terminal 2, `SET=profile-v1 CASE_IDS=prof-01,prof-09 TAG_PREFIX=r1b SMOKE=2 MAX_USD=1 node evals/run.mjs` (the two heaviest readers). If time and cost look right, run the full list with `RESUME=1` (same `TAG_PREFIX`), which keeps the two already done: `SET=profile-v1 CASE_IDS=... TAG_PREFIX=r1b RESUME=1 MAX_USD=3 node evals/run.mjs`.
+3. **Version C:** stop the server (Ctrl+C in its terminal, and check nothing else is on port 3000), restart it with `ENGINE_SELECTION=shortlist ENGINE_TRACE=1 npm run dev`, then the same two steps with `TAG_PREFIX=r1c`.
 4. **Score side by side, on the same readers:** `RUNS=profile-v1-run1.json+profile-v1-pages1.json,profile-v1-r1b.json,profile-v1-r1c.json CASE_IDS=... OUT=round1 SECOND_JUDGE=0 node --env-file=.env.local --import ./tests/support/resolve.mts evals/score.mts`. The first run is the Nov 7 baseline with the length readers' page-count run swapped in (`+` combines files; later files win reader by reader). `CASE_IDS` (the same list as the runs) keeps every run on the same readers, so the percentages compare like with like. The baseline's verdicts are remembered, so only B's and C's picks are paid for.
 5. **Second run only if needed:** when B and C are within about 5 points on relevance, run both again (`TAG_PREFIX=r1b2`, `r1c2`).
 
-Version C's traces (stage S) record the finalists, how many had a description or mood tags, and the lookup time, for checking whether good books are cut too early.
+Every run stops once its spend passes `MAX_USD` (default $5; it can go over by one reader). Version C's traces (stage S) record the finalists, how many had a description or mood tags, and the lookup time, for checking whether good books are cut too early.
