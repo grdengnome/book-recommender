@@ -62,7 +62,7 @@ One API route, `app/api/recommend/route.ts`: POST `{ profile }` (a taste profile
 
 The engine lives in `lib/engine/`, one folder per pipeline stage:
 - `profile/`: the taste profile's slot settings as data (`slots.ts`: firmness, wording, length bands), `validateProfile.ts` (untrusted input checks; avoid never inferred) and `renderBrief.ts` (plain-code reader brief, grouped by firmness; reader text quoted, never instructions). Spec: `docs/product/question-flow/taste-profile.md`.
-- `recommend.ts`: the recipe. The search loop, the Hardcover deadline, the 3-attempt retry, starting each pick's work as it streams in, error codes.
+- `recommend.ts`: the recipe. The search loop (at most 3 turns, and `ENGINE_SEARCHES_PER_ROUND` searches per turn), the Hardcover deadline, the 3-attempt retry, starting each pick's work as it streams in, error codes.
 - `sources/openlibrary/`: the `search_books` tool (Open Library subjects + search) and the tool registry. The model calls it up to 3 rounds; the 4th call omits tools to force an answer. Subject lists are cached for 24h; every Open Library call times out at 5s.
 - `sources/hardcover/`: maps the taste description to reader tags (one model call), then fetches a tag-matched pool. Runs once per request, in parallel with the Open Library loop; dropped if not back within 5s.
 - `pool/`: `mergeCandidatePools.ts` dedups, merges, and shuffles the pools; `lengthFilter.ts` removes books outside the reader's length band (plus 15% at each edge) or of unknown length before the model sees the pool, using page counts from `sources/pageCounts.ts` (only when a length is set; decision 2.25); `pickGrounding.ts` checks every pick against the pools the model was shown.
@@ -90,7 +90,7 @@ Shared infrastructure the engine uses:
 
 - **Next.js** (App Router); the engine is a co-located API route, not a separate service.
 - Plain `fetch` to the Anthropic `/v1/messages` endpoint; no SDK unless there's a concrete need.
-- Env vars in `.env.local` (gitignored): `ANTHROPIC_API_KEY` (required), `HARDCOVER_API_TOKEN` (optional; without it the engine runs on Open Library alone), `ENGINE_TRACE` (optional, local only; `1` turns on the debug trace), `AI_SLOT_<JOB>` (optional; overrides one job's model, see `lib/ai/slots.ts`).
+- Env vars in `.env.local` (gitignored): `ANTHROPIC_API_KEY` (required), `HARDCOVER_API_TOKEN` (optional; without it the engine runs on Open Library alone), `ENGINE_TRACE` (optional, local only; `1` turns on the debug trace), `AI_SLOT_<JOB>` (optional; overrides one job's model, see `lib/ai/slots.ts`), `ENGINE_SELECTION` (optional; round 1's selection version, decision 6.13), `ENGINE_SEARCHES_PER_ROUND` (optional; searches run per turn, default 3, decision 6.15).
 - No database yet. v0 adds a small data store for feedback, rate limits and the card bank (decisions 10.5, 10.6), behind a `Store` contract; it stores no personal details.
 - Hosted on Vercel (Hobby plan), project `book-recommender` under `grdengnome`. Deployment Protection is on for all deployments. Production keys are Vercel Secrets (separate, spend-capped Console workspace); never copy them into the repo or chat. The recommend route sets `maxDuration = 300`.
 - The app's live logs (`query-log.json`, `hardcover-failure-log.json`) and debug traces go to `.local/`, which is gitignored: they can hold real readers' answers.

@@ -422,7 +422,9 @@ async function generateOnce(
           return {
             type: "tool_result",
             tool_use_id: block.id,
-            content: JSON.stringify({ skipped: `Search limit reached: only ${cap} searches run per turn. Work with the results above, or choose your best searches next turn.` }),
+            content: JSON.stringify({
+              skipped: `Search limit reached: only ${cap} searches run per turn. ${round < MAX_TOOL_ROUNDS - 1 ? "Work with the results above, or choose your best searches next turn." : "Work with the results above."}`,
+            }),
           };
         }
         let result: unknown;
