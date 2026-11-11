@@ -155,7 +155,7 @@ function sse(message: CannedMessage): Response {
 }
 
 // Knobs for version C's failure-path tests (tests/selection-versions.test.mts).
-export const fakeOptions: { finalOutside?: boolean; shortlistSize?: number } = {};
+export const fakeOptions: { finalOutside?: boolean; shortlistSize?: number; searchesPerTurn?: number } = {};
 let lastOffShortlist: { title: string; author: string } | null = null;
 
 function cannedAnthropic(body: any): Response {
@@ -183,9 +183,14 @@ function cannedAnthropic(body: any): Response {
     }) }], "end_turn");
   }
   if (body.tools && body.messages.length === 1) {
+    // With searchesPerTurn set, the fake asks for that many searches at once (the search cap test).
+    const extra = Array.from({ length: Math.max(0, (fakeOptions.searchesPerTurn ?? 2) - 2) }, (_, i) => (
+      { type: "tool_use", id: `toolu_offline_x${i + 1}`, name: "search_books", input: { query: `extra search ${i + 1}`, subjects: ["fiction"] } }
+    ));
     return reply([
       { type: "tool_use", id: "toolu_offline_1", name: "search_books", input: { query: "quiet restrained novel", subjects: ["psychological_fiction", "literary_fiction"] } },
       { type: "tool_use", id: "toolu_offline_2", name: "search_books", input: { query: "melancholic character study", subjects: ["english_fiction"] } },
+      ...extra,
     ], "tool_use");
   }
   // Version C's final choice (decision 6.13): three finalists from the shortlist in the message.

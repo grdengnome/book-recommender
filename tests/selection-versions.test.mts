@@ -11,6 +11,9 @@ import {
   PROFILE_PROMPT,
   SHORTLIST_PROMPT,
   modeForInput,
+  searchesPerRound,
+  searchPromptFor,
+  selectionMaxTokens,
   selectionMode,
   SHORTLIST_SIZE,
   SHORTLIST_SLACK,
@@ -60,7 +63,7 @@ test("version B sends the profile prompt to the selection call and returns 3 pic
   assert.equal(result.status, 200);
   const selection = anthropic(result.requests).filter((b) => b.tools || b.output_config?.format?.schema?.required?.[0] === "picks");
   assert.ok(selection.length > 0);
-  assert.ok(selection.every((b) => systemText(b) === PROFILE_PROMPT));
+  assert.ok(selection.every((b) => systemText(b) === searchPromptFor("profile")));
   assert.equal(JSON.parse(result.responseText).picks.length, 3);
 });
 
@@ -68,7 +71,7 @@ test("version C lists finalists, reads their records, and picks 3 from them only
   const result = await run({ ENGINE_TRACE: undefined, ENGINE_SELECTION: "shortlist" }, asReader());
   assert.equal(result.status, 200, result.responseText);
   const calls = anthropic(result.requests);
-  const search = calls.filter((b) => systemText(b) === SHORTLIST_PROMPT);
+  const search = calls.filter((b) => systemText(b) === searchPromptFor("shortlist"));
   assert.ok(search.length > 0 && search.every((b) => b.output_config.format.schema.required[0] === "shortlist"));
   const final = calls.filter((b) => systemText(b) === FINAL_CHOICE_PROMPT);
   assert.equal(final.length, 1, "one final-choice call");
@@ -133,7 +136,7 @@ test("B and C fall back to today's version for an old-style paragraph request", 
   assert.equal(modeForInput("shortlist", "<reader_profile>\n..."), "shortlist");
   const result = await run({ ENGINE_TRACE: undefined, ENGINE_SELECTION: "shortlist" });
   assert.equal(result.status, 200);
-  assert.ok(anthropic(result.requests).every((b) => systemText(b) !== SHORTLIST_PROMPT && systemText(b) !== FINAL_CHOICE_PROMPT));
+  assert.ok(anthropic(result.requests).every((b) => systemText(b) !== searchPromptFor("shortlist") && systemText(b) !== FINAL_CHOICE_PROMPT));
 });
 
 test("C: a final pick that isn't on the shortlist is rejected, every attempt, ending in a clean 502", async () => {
@@ -173,4 +176,64 @@ test("a runaway shortlist is cut to the cap", () => {
   const s = readShortlist(JSON.stringify({ shortlist: many.map((b) => ({ poolTitle: b.title, poolAuthor: b.author })) }), seen);
   assert.equal(s.finalists.length, SHORTLIST_SIZE + SHORTLIST_SLACK);
   assert.equal(s.overCap, 60 - SHORTLIST_SIZE - SHORTLIST_SLACK);
+});
+
+test("the search cap: past the limit in one turn, searches are skipped, not run", async () => {
+  fakeOptions.searchesPerTurn = 6;
+  try {
+    const result = await run({ ENGINE_TRACE: undefined, ENGINE_SELECTION: "profile", ENGINE_SEARCHES_PER_ROUND: undefined }, asReader());
+    assert.equal(result.status, 200, result.responseText);
+    const secondCall = anthropic(result.requests).find((b) => b.tools && b.messages.length === 3);
+    const results = secondCall.messages[2].content as Array<{ tool_use_id: string; content: string }>;
+    assert.equal(results.length, 6, "every search asked for gets an answer");
+    const skipped = results.filter((r) => r.content.includes("Search limit reached"));
+    assert.equal(skipped.length, 3, "only the first 3 run");
+    assert.deepEqual(skipped.map((r) => r.tool_use_id), ["toolu_offline_x2", "toolu_offline_x3", "toolu_offline_x4"]);
+    const olQueries = result.requests.filter((r) => r.url.includes("openlibrary.org")).map((r) => decodeURIComponent(r.url.replace(/\+/g, " ")));
+    for (const n of [2, 3, 4]) assert.ok(!olQueries.some((u) => u.includes(`extra search ${n}`)), `skipped search ${n} never reached Open Library`);
+    assert.ok(olQueries.some((u) => u.includes("extra search 1")), "the third search did run");
+  } finally {
+    delete fakeOptions.searchesPerTurn;
+  }
+});
+
+test("the search cap is a setting, and C's first cut gets more room to write", () => {
+  const before = process.env.ENGINE_SEARCHES_PER_ROUND;
+  const warn = console.warn;
+  console.warn = () => {};
+  try {
+    delete process.env.ENGINE_SEARCHES_PER_ROUND;
+    assert.equal(searchesPerRound(), 3);
+    process.env.ENGINE_SEARCHES_PER_ROUND = "5";
+    assert.equal(searchesPerRound(), 5);
+    process.env.ENGINE_SEARCHES_PER_ROUND = "zero";
+    assert.equal(searchesPerRound(), 3);
+  } finally {
+    console.warn = warn;
+    if (before === undefined) delete process.env.ENGINE_SEARCHES_PER_ROUND;
+    else process.env.ENGINE_SEARCHES_PER_ROUND = before;
+  }
+  assert.equal(selectionMaxTokens("current"), 8000, "today's version unchanged");
+  assert.ok(selectionMaxTokens("shortlist") > 8000);
+  assert.ok(searchPromptFor("profile").includes("usually two or three") && searchPromptFor("profile").includes("at most 3 searches run per turn"));
+  process.env.ENGINE_SEARCHES_PER_ROUND = "5";
+  assert.ok(searchPromptFor("shortlist").includes("at most 5 searches run per turn"), "the prompt states the cap the code enforces");
+  assert.equal(searchPromptFor("current"), CURRENT_PROMPT, "today's prompt unchanged");
+  for (const bad of ["0", "11"]) {
+    process.env.ENGINE_SEARCHES_PER_ROUND = bad;
+    console.warn = () => {};
+    assert.equal(searchesPerRound(), 3);
+    console.warn = warn;
+  }
+  delete process.env.ENGINE_SEARCHES_PER_ROUND;
+});
+
+test("with the setting at 1, one search runs per turn, in today's version too", async () => {
+  const result = await run({ ENGINE_TRACE: undefined, ENGINE_SELECTION: undefined, ENGINE_SEARCHES_PER_ROUND: "1" });
+  assert.equal(result.status, 200, result.responseText);
+  const secondCall = anthropic(result.requests).find((b) => b.tools && b.messages.length === 3);
+  const results = secondCall.messages[2].content as Array<{ content: string }>;
+  assert.equal(results.filter((r) => r.content.includes("Search limit reached")).length, 1);
+  process.env.ENGINE_SEARCHES_PER_ROUND = "";
+  delete process.env.ENGINE_SEARCHES_PER_ROUND;
 });
