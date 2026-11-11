@@ -7,6 +7,20 @@ Running log of quality findings, known limitations, and decisions made while eva
 ---
 
 
+
+## 2026-11-10 — Round 1 decided: B not adopted, C parked until the book index
+
+**Change:** the search cap (decision 6.15, PR #29), then round 1 again on the same 13 readers, with smoke tests first (decision 3.14). **Spend: about $5** (B $1.75, C smoke $0.98, two scorings about $2.50; the dev workspace hit its spend limit afterwards).
+
+**Findings:**
+- **Search cap:** prof-01 and prof-09 fell from $0.42–0.44 to $0.15–0.19 per reader. B's median time rose from 30.6s to 41.2s: capped searches spread over more turns, each a full model call.
+- **C (shortlist):** works but can't ship. $0.47–0.51 and 143–266s per reader. The finalist lookups hit the 5s limit: prof-01 had 20 of 30 finalists with a description and 0 with moods; prof-09 had 1 and 1. No rejected attempts; the rest of the time is model thinking. Fetching records for 30 books while the reader waits is too slow and unreliable.
+- **B vs the Nov 7 baseline, same readers** (rescored once after 15 judge lookups failed): relevance 69% → 82% good+ (75% baseline after rescoring); strong preferences 64% → 57% (prof-11's baseline went unscored, so about 60% vs 64% like for like); weighed 50% → 53%; loved-book readers 67% → 100%; ingredient 50% → 67%; dishonest cards 8 → 2; median 33s → 41s. Every strong-preference miss was a mood, almost all "partly", on nuanced moods (dreamy, quietly spooky, eerie) where catalog tags are mixed.
+- **Paired check, per reader:** B better for 5, worse for 3, same for 4 (one without a baseline). All 5 wins were readers chosen *because* the baseline did badly on them; all 3 losses were readers the baseline got perfect. That fits regression to the mean as well as a real gain. **Below the pre-set bar (6+ better vs 2 or fewer worse): B not adopted.**
+- **Pattern across the last two weeks:** instruction changes (five card rounds, now B) give gains inside the noise; information changes (card records, page counts) give clear gains. The bottleneck is data.
+- **Scoring cost leak:** combining the baseline with the page-count run (`+`) didn't reuse its remembered grades on the first scoring (10 of 13 re-judged).
+
+---
 ## 2026-11-09 — Round 1, first try: the new prompt over-searches (stopped)
 
 **Change:** decision 6.13, versions B (`profile`) and C (`shortlist`), on 13 readers (the 10 weakest in the Nov 7 baseline plus 3 controls: `CASE_IDS=prof-02,prof-01,prof-04,prof-03,prof-09,prof-16,prof-08,prof-07,prof-11,prof-12,prof-20,prof-15,prof-21`). **Spend: about $3–3.5** (B $2.19; C stopped after 2 readers). Not scored.
