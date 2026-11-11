@@ -1011,3 +1011,20 @@ Alongside: dependency checkup PR (npm reports 25 package vulnerabilities); claim
 2. **Fix the search blow-up:** cap searches per round in code (about 3), more output room for C's first cut, prompt asks for a few well-chosen searches. One test per rule.
 3. **Smoke test** on prof-01 and prof-09 (about $0.50), then rerun B and C on the 13 readers and score them side by side (`evals/README.md`, Round 1).
 4. Then round 2 (smarter search), round 3 (reserves), the full run with cards, and Grim's blind read.
+
+---
+
+## November 10, 2026 — Round 1 decided; data, not prompts, is the next lever
+
+**Conclusion:** The search cap (PR #29) fixed the runaway searching and halved the heaviest readers' cost, and the runner now has a spend limit, smoke tests and resume. Round 1 is decided: today's prompt stays (B didn't clear the bar; its 5–3 per-reader split fits regression to the mean), and C is parked until the book index (decision 6.16). Recent gains have all come from better information, not better instructions, so the book index moves up, after a dedicated design session (6.14). Tests get a same-day control, more readers and held-out readers (3.15). The dev workspace hit its spend limit again; cost-effectiveness stays a standing priority.
+
+- **Cost:** this month's ~$30 went mostly to judging and calibration (about 45%), then card experiments, then engine runs. Levers agreed: Console spend limit (set), smoke tests and run caps (built), batch judging, reusing baseline grades, a Sonnet-judge check.
+- **Book sources reviewed:** Open Library stays the backbone; Google Books (free key) is the best addition for descriptions; Gutendex skipped (public-domain only); ISBNdb and semantic-search APIs revisited for the index.
+
+**Next:**
+1. **Step-back session:** compare progress against the v0 scope and the full scope, see what's done and where to improve, and refit the plan.
+2. **Cost-effectiveness:** batch judging, fix baseline-grade reuse for combined runs, test Sonnet as judge, a monthly eval budget that fits.
+3. **Book index design session, in depth:** what each book record holds, sources and their terms, appeal tags, search by meaning, how reader data feeds in, storage, how it's built and refreshed, and how the engine and judge use it.
+4. **Bigger reader set:** held-out readers and a mixed test set (3.15).
+5. **Grim decides:** remove versions B and C's code now, or keep them behind the setting.
+
