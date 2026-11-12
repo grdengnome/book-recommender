@@ -1,4 +1,4 @@
-# Squirmly plan
+# Book Recommender plan
 
 > **Updated:** Nov 12, 2026 · **Next checkpoint:** early December 2026
 > The one-page view of where the project is and what's next. Detail lives elsewhere: [progress log](./progress-log.md) (what happened) · [decisions](./decisions.md) (why) · [roadmap](./product/roadmap-and-backlog.md) (ideas) · [v0 scope](./product/v0-scope.md) (the full v0 list).
@@ -6,7 +6,7 @@
 ## 🎯 Current target: v0
 A private preview for a few friends that proves three things: **the engine works, the question flow is enjoyable, and the books fit.**
 
-**Waiting on Grim:** Recraft and fal accounts (for the bake-off) · claim @squirmly and getsquirmly.com
+**Waiting on Grim:** Recraft and fal accounts (for the bake-off) · decide on the app name (Squirmly is the working name)
 
 ## Now / Next / Later
 
