@@ -1,11 +1,11 @@
 # v0 scope
 
-> **Status:** Living · Agreed Oct 28, 2026 ([decision 1.11](../decisions.md)). Scope is frozen: new ideas go to the [roadmap and backlog](./roadmap-and-backlog.md) as "Later" unless they're a true must-have. Last updated Nov 4, 2026.
+> **Status:** Living · Agreed Oct 28, 2026 ([decision 1.11](../decisions.md)). Refit Nov 12, 2026 ([decision 1.12](../decisions.md)); order and status are in the [plan](../plan.md). New ideas go to the [roadmap and backlog](./roadmap-and-backlog.md) as "Later" unless they're a true must-have.
 
 ## What v0 is
-**A polished preview of the full Discover experience, shared on a private link.** It proves the product works, gathers feedback from a first set of readers, and doubles as a portfolio link.
+**A polished preview of the full Discover experience, shared on a private link with a few friends first.** It tests three things: the engine works, the question flow is enjoyable, and the books fit. It also doubles as a portfolio link.
 
-**Soft target:** end of 2026, not a hard date. Checkpoint in early December to see how it's tracking ([decision 9.12](../decisions.md)).
+**No fixed date** ([decision 9.13](../decisions.md)): quality first, with a full review at each checkpoint (the first in early December).
 
 ## In v0
 **Question flow**
@@ -17,19 +17,20 @@
 - Three varied picks: variety, without predefined pick types that could bias the model.
 - Loading screen with a "Looking for" line from the answers, and something engaging to read while waiting (author facts or similar).
 - "Not quite? Try again" after the reveal.
-- Faster recommendations, helped by the swappable model setup.
+- Faster recommendations (a median of about 30s for v0), helped by the swappable model setup.
+- A starter book index: stored descriptions, moods and appeal tags for the books the engine meets ([decision 6.14](../decisions.md)).
 
 **Reveal and cards**
 - Themed wrapping, tap to unwrap.
 - Rarity tiers (basic first).
-- Card enhancer and card bank (faithful upscale of the real cover, never altered).
-- 3D reveal book from real edition data.
+- 3D reveal book from real edition data, improved in the reveal-book study (with the cover enhancer test). The card bank waits until after v0.
 - Detail screen.
 
 **Look and feel**
-- All five themes (Café, Mystery, Fantasy, Superhero, Sci-fi) at "satisfactory" polish: the café is built first as the template, and the other worlds are built off it. As good as possible from a production standpoint, with accepted trade-offs.
+- A design baseline built to be improved, not replaced: the image bake-off, updated art direction, refreshed key screens and shared design tokens.
+- Themes: the café as the floor, up to all five (Café, Mystery, Fantasy, Superhero, Sci-fi) if they prove cheap to add.
 - A different scene on every screen; worm cameos.
-- Clean main tabs: Discover live, other tabs shown as "coming soon".
+- Clean main tabs: Discover live; Collection and You shown as "coming soon" teasers, plus an "add to shelf" doorway. Taps are tracked to learn where readers want to go.
 
 **Feedback and trust**
 - In-app feedback, stored: thumbs up or down per pick, an optional short note, which picks were shown, and a general "send feedback" option. No personal details.
@@ -42,7 +43,7 @@
 - Web app on a private link. No sign-in.
 
 ## Not in v0
-Sign-in (required before public launch) · shelf, card collection, finish → earn card, pairwise ranking · profile, reading insights, taste profile on the You tab · sharing, social, book clubs, reading challenges, a yearly "Wrapped" · push notifications · dark/light toggle · where-to-buy beyond a skeleton · cover game · returning-reader shortcut · avoid list · shows and films as favourites · app store version · curated influencer lists.
+A trained style model · advanced motion · logo, mascot and per-theme typography · the design-system lock · card bank · sign-in (required before public launch) · shelf, card collection, finish → earn card, pairwise ranking · profile, reading insights, taste profile on the You tab · sharing, social, book clubs, reading challenges, a yearly "Wrapped" · push notifications · dark/light toggle · where-to-buy beyond a skeleton · cover game · returning-reader shortcut · avoid list · shows and films as favourites · app store version · curated influencer lists.
 
 All of these are in the [roadmap and backlog](./roadmap-and-backlog.md).
 

@@ -2,7 +2,7 @@
 
 > **Status:** Living · Every product and architecture decision, and the paths rejected.
 
-*Covers decisions through the v0 engine, v0 product planning, the v0 scope and the repo restructure (November 10, 2026). Further decisions are added as they're made.*
+*Covers decisions through the v0 engine, v0 product planning, the v0 scope and the repo restructure (November 12, 2026). Further decisions are added as they're made.*
 
 The product and architecture decisions behind this recommender, and the paths I rejected. The [progress log](./progress-log.md) is the session-by-session diary; this file is the story told by decision. Each entry gives the decision and why, with a link to the full detail.
 
@@ -86,6 +86,11 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 ### 1.11 v0 is a polished preview of the full Discover experience
 **Decision:** v0 is the whole Discover flow at production quality (adaptive questions, loading, three picks with "Not quite? Try again", themed unwrap, 3D reveal book with rarity and enhanced covers, detail screen) in all five themes at "satisfactory" polish, built café-first. Other tabs show "coming soon". Shared on a private link, no sign-in, as a web app first; app store later. Shelf, collection, ranking, profile and social come after v0. Full list: [v0 scope](./product/v0-scope.md).
 **Why:** A preview that feels finished is more useful for feedback and as a portfolio link than a half-built full app, and it keeps v0 from growing forever. Scope is frozen: new ideas default to "Later". ([progress log, Nov 1](./progress-log.md))
+
+
+### 1.12 v0 refit: what the friend preview must prove, and what it includes
+**Decision:** v0 tests three things: the engine works, the question flow is enjoyable, and the books fit. It includes an engine at a v0 bar (strict on made-up books, hard rules and dishonest cards; at least 2 of 3 picks good for most readers on the bigger reader set; preferences clearly better once the starter index is in; a median of about 30s); the complete question flow with nudge, retry, rejection and error paths; loading, reveal and detail; "coming soon" doorways (add to shelf, Collection and You tabs) with taps tracked; stored feedback; trust basics; a starter book index (6.14); and a design baseline built to be improved, not thrown away: the bake-off (style, then tool), updated art direction, a refresh of the key screens, the reveal-book study with the cover enhancer test, and shared design tokens. Themes: one as the floor (café), up to five if they prove cheap. After v0: a trained style model, advanced motion, logo, mascot and per-theme typography, the design-system lock. This updates 1.11 and the [v0 scope](./product/v0-scope.md).
+**Why:** The Nov 12 step-back review found no real screens built and three large tracks (engine and data, app build, look and feel) competing. Grim wants testers to see a design close to final, since feedback on an outdated look is partly wasted and screens would otherwise be built twice, but wants the open-ended parts of the design track held back. ([progress log, Nov 12](./progress-log.md))
 
 ---
 
@@ -560,6 +565,11 @@ The full operating principles are in [question-flow-principles.md](./product/que
 **Decision:** v0 aims for the end of 2026, as a soft target, with a checkpoint in early December.
 **Why:** A date keeps the work moving, but quality matters more than an arbitrary deadline; the checkpoint allows a calm adjustment. ([progress log, Nov 1](./progress-log.md))
 
+
+### 9.13 No fixed v0 date; checkpoints instead
+**Decision:** The end-of-2026 target (9.12) is dropped. v0 ships when it feels right, with a full plan review at each checkpoint (the first in early December). A rough expectation is a friend test in February or March 2027.
+**Why:** Including a design baseline and the book index makes end of 2026 unrealistic, and Grim prefers getting it right to hitting a date. ([progress log, Nov 12](./progress-log.md))
+
 ---
 
 ## 10. Identity, privacy, and security
@@ -637,6 +647,11 @@ The full operating principles are in [question-flow-principles.md](./product/que
 ### 11.9 AI attribution stays on PRs and commits
 **Decision:** PRs keep the "Generated with Claude Code" line and the session link; commits keep the Co-Authored-By line. Not added to CLAUDE.md, since it's the default.
 **Why:** Provenance (which work was AI-assisted, useful in any future due diligence) and a "why" trail back to the conversation behind each change; it also fits building in public. Revisit if Squirmly gets collaborators and a contributing policy. ([progress log, Nov 5](./progress-log.md))
+
+
+### 11.10 One-page plan in the repo
+**Decision:** `docs/plan.md` is the single high-level view: the current target, Now / Next / Later (at most 3 items in Now), milestones with an appetite and a status, out of scope, budget and risks, shipped, and what comes after. It's updated only when something changes and reviewed in full at checkpoints; when a target ships, the page is archived and rewritten for the next one. It takes over from the Production Plan artifact, whose look-and-feel steps are folded into the plan and the roadmap. The other docs keep their jobs.
+**Why:** The plan was spread across the progress log, the artifact, the v0 scope and the roadmap. Grim wanted one short, proven format he can read at a glance: Now / Next / Later (ProdPad), appetites and figuring-out vs executing (Shape Up), and a one-page brief. ([progress log, Nov 12](./progress-log.md))
 
 ---
 

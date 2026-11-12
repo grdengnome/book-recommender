@@ -1028,3 +1028,18 @@ Alongside: dependency checkup PR (npm reports 25 package vulnerabilities); claim
 4. **Bigger reader set:** held-out readers and a mixed test set (3.15).
 5. **Grim decides:** remove versions B and C's code now, or keep them behind the setting.
 
+---
+
+## November 12, 2026 — Step-back review: v0 refit and a one-page plan
+
+**Conclusion:** v0 is refit around three questions (the engine works, the question flow is enjoyable, the books fit) and now includes a design baseline and a starter book index, with no fixed date (decisions 1.12, 9.13). The project has a one-page plan, `docs/plan.md`, that replaces the Production Plan artifact as the high-level view (11.10).
+
+- **Status found:** engine works but is below its bar; question flow, reveal and themes are designed, not built; trust basics not started; the look-and-feel track's 23 planner steps almost all not started.
+- **Design in v0, bounded:** bake-off, art direction, key screens, reveal-book study and tokens are in; the trained model, advanced motion, logo and the design lock wait.
+
+**Next:**
+1. Book index design session, in depth.
+2. Eval cost fixes and a bigger reader set (batch judging, baseline-grade reuse, Sonnet-judge check, held-out readers).
+3. Image bake-off, once Grim has set up the Recraft and fal accounts.
+4. Grim decides: remove versions B and C's code, or keep them behind the setting.
+

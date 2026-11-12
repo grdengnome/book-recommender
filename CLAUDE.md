@@ -7,6 +7,7 @@ Read automatically by Claude Code at the start of every session in this repo. De
 Squirmly (working name) is an AI book discovery app. Readers answer a few playful, themed questions; the engine reveals three intriguing, relevant books from real catalogs, unwrapped as collectible cards. Its core engine problem is resisting the model's pull toward famous, obvious picks. The full vision adds a Collection tab (shelf, cards, pairwise ranking) and a You tab (taste profile, insights).
 
 Start here:
+- `docs/plan.md`: the one-page plan (current target, Now / Next / Later, milestones). Update it when a status or the plan changes; review it in full at checkpoints.
 - `docs/README.md`: map of every doc, with status.
 - `docs/product/v0-scope.md`: what v0 includes and excludes. Scope is frozen; new ideas go to `docs/product/roadmap-and-backlog.md`.
 - `docs/decisions.md`: every product and architecture decision and why. Check it before questioning something that looks odd; it's usually deliberate.
@@ -15,11 +16,11 @@ Start here:
 
 ## Current priority
 
-**v0 is a polished preview of the full Discover experience on a private link** (decision 1.11), soft target end of 2026. The engine is complete and deployed privately.
+**v0 is a private preview for a few friends that proves the engine works, the question flow is enjoyable, and the books fit** (decisions 1.11, 1.12). The order of work and its status are in `docs/plan.md`. No fixed date: quality first, reviewed at each checkpoint (decision 9.13).
 
 Now: the eval refresh (decided Nov 2: test the engine on the new question flow before building screens): taste profile format (done, decision 2.24) → readiness bar (done, `docs/quality/readiness-bar.md`, decision 3.8) → new case set in the profile format (done, `evals/cases/profile-v1.json`) → judge (done, calibrated 10/10, decisions 3.9–3.10) → baseline (done, Nov 7: relevance 81%, speed and preferences the big gaps) → engine improvements, each proven against the baseline: page counts (done, PR #23) → honest cards (done, PR #24) → round 1 (decided Nov 10: today's prompt stays, decision 6.16) → **next: a step-back scope review, cost-effectiveness, then the book index (6.14), designed in depth first** → mood dictionary and loved-book seeds on the index → reserves → speed. Comparisons follow decision 3.15 (same-day control, more readers). How everything gets measured: `docs/quality/eval-strategy.md`. Then the rest of the repo restructure, one pull request at a time (`docs/engineering/repo-guide.md`; PRs 1–4b are done): PR 5 app skeleton → PR 6 store, feedback, rate limit, input guard → the café vertical slice.
 
-Don't build screens until explicitly asked. Screens follow `docs/design/design-system.md` and `docs/design/art-direction.md`; question flow work follows `docs/product/question-flow/principles.md` and `v2-design.md`. The illustration style and tool are under review in an image generator bake-off, so don't redraw scene artwork from scratch; the prototypes in `prototypes/` are the reference until that's decided. The data store, rate limit and input guard must be in place before anyone outside sees the app.
+Next up (see `docs/plan.md`): the book index design, eval cost fixes with a bigger reader set, and the image bake-off. Don't build screens until explicitly asked. Screens follow `docs/design/design-system.md` and `docs/design/art-direction.md`; question flow work follows `docs/product/question-flow/principles.md` and `v2-design.md`. The illustration style and tool are under review in an image generator bake-off, so don't redraw scene artwork from scratch; the prototypes in `prototypes/` are the reference until that's decided. The data store, rate limit and input guard must be in place before anyone outside sees the app.
 
 ## How we think: the top-professional check
 
