@@ -10,6 +10,7 @@ Each doc starts with a status line:
 ## Start here
 | Doc | What it's for | Status |
 |---|---|---|
+| [Plan](./plan.md) | One page: where the project is and what's next (Now / Next / Later, milestones) | Living |
 | [v0 scope](./product/v0-scope.md) | What the first preview includes, and what it doesn't | Living |
 | [Decisions](./decisions.md) | Every product and architecture decision, and the paths rejected | Living |
 | [Architecture](./engineering/architecture.md) | How the engine works today, and where it's heading | Living |
