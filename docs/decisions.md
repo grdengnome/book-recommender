@@ -2,7 +2,7 @@
 
 > **Status:** Living · Every product and architecture decision, and the paths rejected.
 
-*Covers decisions through the v0 engine, v0 product planning, the v0 scope and the repo restructure (November 12, 2026). Further decisions are added as they're made.*
+*Covers decisions through the v0 engine, v0 product planning, the v0 scope, the repo restructure and the book index design (November 16, 2026). Further decisions are added as they're made.*
 
 The product and architecture decisions behind this recommender, and the paths I rejected. The [progress log](./progress-log.md) is the session-by-session diary; this file is the story told by decision. Each entry gives the decision and why, with a link to the full detail.
 
@@ -417,6 +417,22 @@ The full operating principles are in [question-flow-principles.md](./product/que
 **Decision:** The search loop runs at most `ENGINE_SEARCHES_PER_ROUND` searches (default 3) per turn; extra searches get a short "skipped" answer. With 3 turns, an attempt can still make up to 9 searches. The prompt states the same number the setting enforces. The round 1 prompt now asks for "a few well-chosen searches, usually two or three", and version C's first cut gets 16,000 output tokens instead of 8,000. Applies to every version; today's version rarely makes more than 2 searches, so its behaviour is unchanged in practice.
 **Why:** On Nov 9 the round 1 prompt led to about 12 searches per attempt for a detailed reader: thousands of books read, attempts cut off, 5-minute requests and $0.42–0.44 readers. Rules the model must follow are enforced in code, as with grounding and length. 3 matches what today's engine uses and the Oct 21 finding that halving the pool didn't hurt picks; it's a setting so the data can move it. ([eval log, Nov 9](./quality/eval-log.md))
 
+### 6.17 Book records: works and editions, three layers, our own IDs
+**Decision:** The index stores works and their editions, like library catalogs. Each record has three layers: collected (each source's data as received), merged (the clean view the engine and judge read) and ours (tags and meaning data, with the model and vocabulary version that made them). Every book has our own ID linked to outside IDs; authors are their own records; old source IDs are kept as pointers. Records carry a form and an audience label, with a one-way safety rule: children's requests get only positively-labelled children's books, adults never get them, and unknown counts as adult. Content notes, availability and popularity are reserved slots, not filled for v0.
+**Why:** Designed once for the whole product (collection, rankings, stats, premium) so nothing needs rebuilding, while v0 fills only what it uses. Keeping source data raw lets us re-merge and backfill later. ([book index design](./engineering/book-index-design.md); [progress log, Nov 16](./progress-log.md))
+
+### 6.18 Index sources: Open Library as the backbone, Hardcover as enrichment, Google Books out
+**Decision:** The index is built from Open Library's free monthly download (CC0), not its live API. Hardcover adds moods and descriptions. Wikidata comes later for ID links, clean facts and awards. Google Books stays out of the index: its terms forbid charging users without Google's permission, and premium is planned. This changes decision 6.14, which listed it. Goodreads' catalog and the academic-only UCSD dataset are out; a reader's own Goodreads export is a must-have import after v0. Before any paid feature we ask Hardcover about using moods and host covers ourselves.
+**Why:** Each source's terms were read on Nov 16 instead of assumed. Hardcover's rules separate free projects from paid ones, so v0 is fine but premium needs their answer. Hardcover's own policies page couldn't be read from the session; the paid-app points rest on a third-party summary and should be confirmed. ([book index design](./engineering/book-index-design.md); [progress log, Nov 16](./progress-log.md))
+
+### 6.19 One shared tag vocabulary, with three sources of evidence
+**Decision:** The question flow and the book tags use one word list, kept as a versioned data file and changed only through pull requests; a check fails if a question-flow option has no tag or the reverse. Fixed-choice traits take the taste profile's words; mood gets a fuller list built from what readers say, checked against established mood lists and extended by testing. Tags come from three sources: model tags (v0), Hardcover moods as a second opinion (v0), and reader tags (after v0), each kept as evidence, with readers outweighing the model once there are enough. Our tags must be able to replace Hardcover's moods entirely.
+**Why:** Mood is the strongest preference and mapped worst, because readers answered in our words and books were tagged in Hardcover's. One vocabulary removes the translation step, and owning the tags removes the dependency on Hardcover's terms. ([book index design](./engineering/book-index-design.md); [progress log, Nov 16](./progress-log.md))
+
+### 6.20 Search by meaning sits alongside tags
+**Decision:** Each book's description is stored as a meaning vector in the same Postgres database (pgvector). Tags handle the fixed choices; search by meaning handles free-typed moods, ingredients and settings. It adds one AI job (an embedding model) to the gateway, chosen by a small test. Picks still come only from our pool.
+**Why:** Open traits can't all be fixed tags, and matching on meaning has no fame bias, which is the engine's core problem. ([book index design](./engineering/book-index-design.md); [progress log, Nov 16](./progress-log.md))
+
 ---
 
 ## 7. Hardcover: using reader tags as a taste signal
@@ -601,6 +617,14 @@ The full operating principles are in [question-flow-principles.md](./product/que
 ### 10.7 Local logs and traces never live in the repo
 **Decision:** The app's search log, Hardcover failure log and debug traces are written to a gitignored `.local/` folder instead of tracked files in the repo. The historical `query-log.json` stays in `experiments/` as evidence.
 **Why:** Once outside readers use v0, these logs can hold their answers, and the repo is public. Production logging moves to the data store (PR 6). ([progress log, Nov 1](./progress-log.md))
+
+### 10.8 Reader data: dated events, an anonymous visitor ID, and capture-now rules
+**Decision:** Reader actions are stored as dated events that are only ever added, tied to a random visitor ID kept in a cookie (no name, email, IP address or fingerprint); accounts link to it later with consent. The app reads summary tables rebuilt from events. From day one each recommendation stores what the reader actually saw (card text, cover, order), version stamps (code version, settings in effect, data version), the candidate list, and failures with their reason; internal and test traffic is flagged. v0 also gets an event dictionary, one command that deletes a visitor's data, and one tested backup restore.
+**Why:** Events answer questions we haven't thought of yet (year summaries, stats, rankings), and the capture-now items can't be recovered later. Warehouses and streaming tools were ruled out as unneeded at this scale. ([book index design](./engineering/book-index-design.md); [progress log, Nov 16](./progress-log.md))
+
+### 10.9 v0 feedback: thumbs, reveal-time reasons, an open box and watched sessions
+**Decision:** Builds on 10.6. A thumbs-down offers optional reasons a tester can judge at the reveal ("already read it", "not my mood", "doesn't sound like me", "too long or heavy"). One optional open box sits at the end for the first few versions, with a note not to include personal details. Three or four friends are watched using the app. Reasons are for diagnosis only in v0; they don't change tags or picks. Results are read from a plain report, not a dashboard.
+**Why:** Preview testers react to the reveal; they won't have read the books, so reading-based reasons would go unused (Grim, Nov 16). "Already read it" separates a taste hit from a miss, and with few testers their words and behaviour are worth more than counts. ([book index design](./engineering/book-index-design.md); [progress log, Nov 16](./progress-log.md))
 
 ---
 

@@ -56,7 +56,10 @@ Bucket: **v0** (in [scope](./v0-scope.md)) · **Later** (real app, after v0) · 
 | Held-out readers: 15–20 real requests never used for tuning | v0 (eval tooling) | Guards against tuning the prompt to our 21 readers |
 | Search measurement: were good fits in the pool at all? | v0 (eval tooling) | Tells search problems from choosing problems |
 | Pilot signals per pick: "already read it", save and finish rates | v0 (pilot) | The real-world test of discovery and fit |
-| Our own book index (decision 6.14) | Later (after PR 6) | Descriptions and moods stored ahead of time; search by meaning |
+| Our own book index (decisions 6.14, 6.17–6.20) | v0 (starter set) | Design in `docs/engineering/book-index-design.md`; our own tags and search by meaning |
+| Reader tags: readers tap a few buttons after finishing a book | Later | Same vocabulary as the question flow; outweighs model tags with enough votes (decision 6.19) |
+| Ask Hardcover whether moods may be used in a paid app; host covers ourselves | Later (before any paid feature) | v0 is a free preview, so not needed yet (decision 6.18) |
+| Wikidata for ID links, clean facts and awards | Later | A quality signal that isn't popularity |
 | Learning from readers: saves, finishes and rankings improve picks | Growth | The long-term moat |
 | Avoid list / Nope shelf | Later | Low priority |
 | Influencer or curated reading lists | Vision | Fits the engine as another book source |
@@ -85,6 +88,10 @@ Bucket: **v0** (in [scope](./v0-scope.md)) · **Later** (real app, after v0) · 
 | Finish → earn card → optional rank | Later | |
 | Pairwise ranking (Beli-style) | Later | Key differentiator; feeds favourites, social and insights |
 | Card collection | Later | The main draw |
+| Goodreads history import: a reader uploads their own export | Later (must-have, needs sign-in) | Brings ratings and history for taste profiles, rankings and collection from day one (decision 6.18) |
+| Earned rarity: a card levels up through the reader's actions (finishing, app-recommended, top-ranked) | Later | Preferred direction (Nov 16); scarcity later; popularity-based rarity skipped |
+| Other rarity slices: achievements for reading and ranking lesser-known books | Later | Parked Nov 16; to be designed |
+| Rarity tier shown at the reveal | Later | Parked Nov 16 |
 | Seasonal sets; rarer cards for Squirmly picks | Vision | |
 | Reading challenges that unlock cards | Vision | |
 | Selling cards | Vision | Not upfront (copyright and legal risk) |
