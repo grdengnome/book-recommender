@@ -1043,3 +1043,20 @@ Alongside: dependency checkup PR (npm reports 25 package vulnerabilities); claim
 3. Image bake-off, once Grim has set up the Recraft and fal accounts.
 4. Grim decides: remove versions B and C's code, or keep them behind the setting.
 
+---
+
+## November 16, 2026 — Book index design, Parts 1–3
+
+**Conclusion:** The book index's records, sources and our own layer are designed and agreed, along with the reader-data rules; Parts 4–7 remain (decisions 6.17–6.20, 10.8, 10.9). The design is in `docs/engineering/book-index-design.md`. Nothing is built.
+
+- **Records:** works and editions, three layers (collected, merged, ours), our own IDs, form and audience labels.
+- **Sources:** each source's terms were read. Open Library's download is the backbone and Hardcover is enrichment; Google Books is out of the index because its terms forbid charging users.
+- **Our layer:** one tag vocabulary shared with the question flow, model tags checked against Hardcover moods, reader tags later, and search by meaning for free text.
+- **Reader data:** append-only events on an anonymous visitor ID, with a capture-now list (what was shown, version stamps, candidates, failures).
+- **Parked for the roadmap:** earned rarity and achievements, Goodreads history import, the Hardcover question before any paid feature.
+
+**Next:**
+1. Finish the design: confirm Part 4, then Part 5 (build stages, refresh, provider limits), Part 6 (how the engine and judge use the index) and Part 7 (the v0 starter set).
+2. Then the tag vocabulary's first draft and the 20-book tag test.
+3. Eval cost fixes and a bigger reader set.
+4. Image bake-off, once Grim has set up the Recraft and fal accounts.
