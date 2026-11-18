@@ -40,7 +40,7 @@ Each doc starts with a status line:
 | [Architecture](./engineering/architecture.md) | The engine pipeline today and the target structure | Living |
 | [Contracts and adapters](./engineering/contracts-and-adapters.md) | How every part stays swappable, and when not to bother | Living |
 | [Repo guide](./engineering/repo-guide.md) | How the repo is organized, its rules, and restructure progress | Living |
-| [Book index design](./engineering/book-index-design.md) | Our own book database: records, sources, tags, reader data (Parts 1–3 agreed, 4–7 open) | Draft |
+| [Book index design](./engineering/book-index-design.md) | Our own book database: records, sources, tags, reader data (Parts 1–4 agreed, 5–7 open) | Draft |
 
 ## Quality
 | Doc | What it's for | Status |

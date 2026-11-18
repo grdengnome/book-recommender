@@ -13,7 +13,7 @@ Start here:
 - `docs/decisions.md`: every product and architecture decision and why. Check it before questioning something that looks odd; it's usually deliberate.
 - `docs/engineering/repo-guide.md`: how the repo is organized, its rules, and restructure progress.
 - `docs/engineering/contracts-and-adapters.md`: how every part stays swappable.
-- `docs/engineering/book-index-design.md`: the book index design (draft; Parts 1–3 agreed, 4–7 open). Read it before any index or data-store work.
+- `docs/engineering/book-index-design.md`: the book index design (draft; Parts 1–4 agreed, 5–7 open). Read it before any index or data-store work.
 
 ## Current priority
 

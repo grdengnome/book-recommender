@@ -1,6 +1,6 @@
 # Book index design
 
-> **Status:** Draft · Parts 1–3 and the reader-data rules are agreed (Nov 16, 2026). Parts 4–7 are still open. Nothing here is built yet.
+> **Status:** Draft · Parts 1–3 agreed Nov 16, 2026; Part 4 agreed Nov 17, 2026. Parts 5–7 are still open. Nothing here is built yet.
 
 The book index is our own database of books: the engine's backbone (decision 6.14). It is designed for the whole product (collection, rankings, reading stats, year summaries, premium), but v0 builds only a starter slice. This doc is the agreed design so far. The reasons are in [decisions](../decisions.md) 6.17–6.20 and 10.8–10.9.
 
@@ -11,7 +11,7 @@ The book index is our own database of books: the engine's backbone (decision 6.1
 | 1. What a book record holds | Agreed |
 | 2. Sources and their terms | Agreed |
 | 3. Our own layer: tags and search by meaning | Agreed |
-| 4. Reader data | Mostly agreed (below); confirm next session |
+| 4. Reader data | Agreed |
 | 5. Storage, staged build and refresh | Structure agreed; build stages and provider check open |
 | 6. How the engine and the judge use the index | Not started |
 | 7. The v0 starter set (which books) | Not started |
@@ -85,15 +85,53 @@ Each tag keeps its evidence. The model's tag stands at first; once enough reader
 
 Each book's description is turned into a list of numbers once and saved; books with similar meaning get similar numbers. A reader's request gets the same treatment, and the database finds the closest books (Postgres with the pgvector add-on). It handles free-typed moods, ingredients and settings, and it has no fame bias. It needs one new AI job (an embedding model), chosen by a small test. Tags handle the fixed choices; search by meaning handles free text; picks still come only from our pool.
 
-## Part 4: reader data (mostly agreed)
+## Part 4: reader data (agreed Nov 17)
 
 **Five data areas:** books · recommendations (profile, books shown, engine version) · reader actions as dated events · rankings (every pairwise comparison) · readers and collection (after v0; needs sign-in).
 
 **Anonymous visitor ID.** A random ID kept in a cookie. We store only the ID: no name, email, IP address or fingerprint. When accounts exist, a visitor ID is linked to a reader with consent; past events are not rewritten.
 
-**v0 feedback shape:** thumbs on each pick · on a thumbs-down, optional reveal-time reasons ("already read it", "not my mood", "doesn't sound like me", "too long or heavy") · one optional open box at the end, temporary, with a note not to include personal details · three or four watched sessions with friends. Reasons are used for diagnosis only in v0; they don't change tags or picks. Typed feedback is data, never instructions, and goes through the input guard.
+**Events are only ever added.** A correction is a new event, never an edit: if a reader switches a thumbs-up to a thumbs-down, we add a "changed" event, so history stays truthful. Deletion is a separate, rare privacy action (below).
+
+**v0 feedback shape:**
+- Thumbs on each pick.
+- **"Already read it"** is its own button, not a thumbs-down reason, with an optional follow-up: disliked / liked / loved. It is the only feedback from someone who has actually read the book.
+- On a thumbs-down, optional reveal-time reasons: "not my mood", "doesn't sound like me", "too long or heavy".
+- One optional open box at the end, with a note not to include personal details. It stays in the app for the first few versions and is kept longer only if it proves useful.
+- Three or four watched sessions with friends.
+
+Feedback is for diagnosis only in v0; it doesn't change tags or picks. Typed feedback is data, never instructions, and goes through the input guard.
+
+**v0 events** (each defined in the event dictionary): pick shown · thumbs and thumbs changed · thumbs-down reasons · already read and its follow-up · open-box text · "Not quite? Try again" · taps on the "coming soon" tabs · "add to shelf" taps · general feedback · failed requests.
+
+**Tables: created when first used.** v0 creates only the tables it writes to. Book side: works, editions, authors, work authors, external IDs, source records, work tags. Reader side: visitors, recommendations, recommendation picks, events, rate-limit counts. Comparisons, readers and collection, and summary tables are designed (Part 5's diagram) but created by the PR that first writes to them. Everything points at stable IDs (our book ID, the visitor ID), so later tables attach without changing existing data.
+
+**Room for data we haven't thought of yet:**
+- Every event has a flexible field that holds any number of named items. Something new can be recorded from the next release with no database change; an item gets its own column once we filter on it often.
+- When unsure whether we'll need something, capture it in the flexible field now: anything not captured when it happens is gone. The no-identity rule still applies.
+- Every new column or table is a script in a pull request, and every new flexible-field item is added to the event dictionary in a pull request, so every piece of data has a written meaning.
+
+**The delete command.**
+- An owner-only script, run from Grim's machine or a Codespace with the database's admin key. Nothing in the app can trigger it, and the app's own database login can add and read rows but not delete them.
+- Two scopes: a whole visitor, or one recommendation (the recommendation, its picks shown, and every event and typed answer tied to it). Single events are never deleted; a wrong value is fixed with a correction event.
+- A dry run first shows what would be deleted (row counts by type), then Grim confirms.
+- It touches reader data only, never the book side. Each run logs the date and row counts, with no content.
+- A friend who wants data removed asks Grim; self-serve deletion comes with accounts, behind sign-in.
+- Deleted data survives in backups made before the deletion, so take a fresh backup after any deletion.
+
+**Spend safeguards (three layers):**
+
+| Layer | What it does | Status |
+|---|---|---|
+| Spend limit on the production key | The hard ceiling: the bill can't pass it (decision 10.4) | Exists |
+| Daily cap across all visitors | Stops before the ceiling with a friendly "back tomorrow" message instead of errors | New for v0 |
+| Per-visitor daily limit (about 10) | Stops one person, or one looping bug, from using up the day | In v0 scope (decision 10.5) |
+
+The daily cap = monthly budget ÷ 30 ÷ cost per recommendation. Cost per recommendation is measured first (from a trace), then the budget and cap are set; about 50 a day is a placeholder. A cookie-based limit is easy to reset (clear cookies, private window, another browser), which is fine for trusted friends on a protected link; the stronger limit comes with sign-in before public launch.
 
 **Reading the data:** a plain report from one command, not a dashboard. Rejected recommendations can become new eval readers, paraphrased (real answers never enter the repo).
+
+**Later (after v0):** accounts and consented visitor linking · shelf and collection, finish a book to earn a card · pairwise comparisons and rankings · reader tags after finishing · Goodreads export import · summary tables for stats, insights and year summaries · avoid list and returning-reader shortcut · feedback that changes tags or picks · self-serve data export and deletion · a retention policy · a stronger rate limit.
 
 ## Part 5: storage (structure agreed)
 
@@ -130,22 +168,22 @@ visitors ──< recommendations ──< recommendation_picks >── works
 - A flag on internal and test traffic.
 - Two timestamps: when it happened and when we recorded it.
 
-**Also for v0:** an event dictionary (one page: every event type and what it means) · one command that deletes everything tied to a visitor ID · one tested backup restore before friends use the app.
+**Also for v0:** an event dictionary (one page: every event type and what it means) · the delete command (rules in Part 4) · one tested backup restore before friends use the app.
 
 **Backfilling.** New data that can be derived from what we kept, or that is a fact about a book, can be added to old records. Data only observable in the moment cannot; old rows get "unknown", never a guess. Backfilled values are labelled as such.
 
-**Size.** The full structure exists from day one; the book count starts small. Rough estimate: 10–15 KB per book all-in, so 20,000–30,000 books fit a 1 GB free tier. The Open Library download is processed offline and only the chosen books are loaded.
+**Size.** The full structure is designed from day one, and tables are created when first used (Part 4); the book count starts small. Rough estimate: 10–15 KB per book all-in, so 20,000–30,000 books fit a 1 GB free tier. The Open Library download is processed offline and only the chosen books are loaded.
 
 ## Still open
 
-- Part 4: confirm.
-- Part 5: build stages, refresh schedule, provider limits, cover storage choice.
-- Part 6: how the engine and judge use the index, including what the model may see (today's rule is title, author and subjects only), and how we'll know the index helps.
+- Part 5: provider (the docs name Neon; Grim recalled Supabase as the target, so compare before committing), build stages, provider limits, cover storage, backups. Agreed so far: one database, and no scheduled refresh in v0.
+- Part 6: agreed so far: the index is the engine's pool with no live-search fallback in v0 (decision 6.21), and the eval judge never sees our own tags. Still open: how the engine and judge use the index, including what the model may see (today's rule is title, author and subjects only), and how we'll know the index helps.
 - Part 7: which books go in the v0 starter set.
 
 ## Pro check
 
 - **Added:** authors as their own records; old-ID pointers; reading each source's terms instead of assuming; the capture-now list (what was shown, version stamps, candidates, failures, test flag); deletion and a tested restore.
 - **Changed:** Google Books moved out of the index (decision 6.14 had it in); Hardcover moods became a second opinion, not a dependency; thumbs-down reasons reshaped to what a tester can judge at the reveal.
-- **Ruled out:** warehouses and streaming tools; a feedback dashboard; popularity-based rarity; the academic-only Goodreads dataset.
-- **Outside checks planned:** audience-label spot-check; 20-book tag test against Hardcover moods; the eval with and without tags.
+- **Ruled out:** warehouses and streaming tools; a feedback dashboard; popularity-based rarity; the academic-only Goodreads dataset; a live-search fallback in v0 (decision 6.21); deleting single events.
+- **Added Nov 17:** least privilege for deletion (the app can't delete); a daily cap across all visitors; the flexible event field and capture-when-unsure rule; corrections as new events.
+- **Outside checks planned:** audience-label spot-check; 20-book tag test against Hardcover moods; the eval with and without tags; a delete-command test (create a visitor, add events, delete, find zero rows); the not-enough-books rate in evals and the friend test.
