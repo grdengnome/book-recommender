@@ -1060,3 +1060,20 @@ Alongside: dependency checkup PR (npm reports 25 package vulnerabilities); claim
 2. Then the tag vocabulary's first draft and the 20-book tag test.
 3. Eval cost fixes and a bigger reader set.
 4. Image bake-off, once Grim has set up the Recraft and fal accounts.
+
+## November 17, 2026 — Book index design, Part 4 agreed
+
+**Conclusion:** Part 4 (reader data) is agreed; Part 5 is reopened for next session because we weren't on the same page about the provider and storage (decisions 6.21, 10.8–10.11). Nothing is built.
+
+- **Pool:** the index is the engine's pool, with no live-search fallback in v0. Gaps show up as logged "not enough books" failures, with a 5% trigger to fill gaps first.
+- **Reader data:** corrections are new events; tables are created when first used; a flexible event field and a capture-when-unsure rule leave room for data nobody planned for.
+- **Feedback:** "Already read it" became its own button with disliked / liked / loved.
+- **Delete command:** owner-only, two scopes (a visitor or one recommendation), and the app can't delete.
+- **Spend:** three layers; the daily cap across all visitors is set once cost per recommendation is measured.
+- **Judge:** it never sees our own tags.
+
+**Next:**
+1. Part 5: compare Supabase with Neon (the docs named Neon), then build stages, cover storage and backups.
+2. Parts 6 and 7, starting from the Nov 17 proposals in the Project note (`claude/book-index-part4-decisions.md`).
+3. Measure cost per recommendation and where the 35s goes, from one trace.
+4. Then the tag vocabulary's first draft and the tag test.
