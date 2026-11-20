@@ -6,7 +6,7 @@
 ## 🎯 Current target: v0
 A private preview for a few friends that proves three things: **the engine works, the question flow is enjoyable, and the books fit.**
 
-**Waiting on Grim:** Recraft and fal accounts (for the bake-off) · decide on the app name (Squirmly is the working name)
+**Waiting on Grim:** Recraft and fal accounts (for the bake-off) · decide on the app name ("the book recommender" until branding is final)
 
 ## Now / Next / Later
 
