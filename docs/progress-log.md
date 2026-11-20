@@ -1077,3 +1077,20 @@ Alongside: dependency checkup PR (npm reports 25 package vulnerabilities); claim
 2. Parts 6 and 7, starting from the Nov 17 proposals in the Project note (`claude/book-index-part4-decisions.md`).
 3. Measure cost per recommendation and where the 35s goes, from one trace.
 4. Then the tag vocabulary's first draft and the tag test.
+
+## November 20, 2026 — Book index design, Part 5 agreed; legal register started
+
+**Conclusion:** Part 5 (storage) is agreed (decisions 6.22–6.24, 10.12, 10.13, 14.7):
+- **Database:** Postgres, hosted on Neon's free plan. Neon, Supabase, Prisma Postgres and AWS Aurora were compared against each host's pricing page and docs. Supabase was ruled out for v0 by its weekly pause; no bake-off, but Neon's speed is measured in the pilot.
+- **Covers:** found once at build time, with every source recorded. Every variant has a recipe and is never overwritten. **Enhanced covers are in v0**, so v0 needs file storage and a bulk cover download.
+- **Contracts:** four on the storage side (books, reader data, card files, image engine).
+- **Backups:** saved files with set targets and a tested restore.
+- **Legal:** legal items now have their own register (`docs/legal/register.md`). Covers are never altered, with a four-level fallback ladder and questions for an IP lawyer before public launch.
+- **Name:** "the book recommender" is the generic name until branding is final (1.13).
+
+**Next:**
+1. Part 6: how the engine and the judge use the index, starting from the Nov 17 proposals in the Project note.
+2. Part 7: which books go in the v0 starter set.
+3. Measure cost per recommendation and where the 35s goes, from one trace.
+4. Decide on live monitoring in v0 (a quality-control item, now in the plan as proposed).
+5. At the December checkpoint: raise the "Database and starter book index" appetite (Grim agreed it will run over).

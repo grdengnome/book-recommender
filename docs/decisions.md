@@ -2,7 +2,7 @@
 
 > **Status:** Living · Every product and architecture decision, and the paths rejected.
 
-*Covers decisions through the v0 engine, v0 product planning, the v0 scope, the repo restructure and the book index design (November 17, 2026). Further decisions are added as they're made.*
+*Covers decisions through the v0 engine, v0 product planning, the v0 scope, the repo restructure, the book index design and legal (November 20, 2026). Further decisions are added as they're made.*
 
 The product and architecture decisions behind this recommender, and the paths I rejected. The [progress log](./progress-log.md) is the session-by-session diary; this file is the story told by decision. Each entry gives the decision and why, with a link to the full detail.
 
@@ -91,6 +91,10 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 ### 1.12 v0 refit: what the friend preview must prove, and what it includes
 **Decision:** v0 tests three things: the engine works, the question flow is enjoyable, and the books fit. It includes an engine at a v0 bar (strict on made-up books, hard rules and dishonest cards; at least 2 of 3 picks good for most readers on the bigger reader set; preferences clearly better once the starter index is in; a median of about 30s); the complete question flow with nudge, retry, rejection and error paths; loading, reveal and detail; "coming soon" doorways (add to shelf, Collection and You tabs) with taps tracked; stored feedback; trust basics; a starter book index (6.14); and a design baseline built to be improved, not thrown away: the bake-off (style, then tool), updated art direction, a refresh of the key screens, the reveal-book study with the cover enhancer test, and shared design tokens. Themes: one as the floor (café), up to five if they prove cheap. After v0: a trained style model, advanced motion, logo, mascot and per-theme typography, the design-system lock. This updates 1.11 and the [v0 scope](./product/v0-scope.md).
 **Why:** The Nov 12 step-back review found no real screens built and three large tracks (engine and data, app build, look and feel) competing. Grim wants testers to see a design close to final, since feedback on an outdated look is partly wasted and screens would otherwise be built twice, but wants the open-ended parts of the design track held back. ([progress log, Nov 12](./progress-log.md))
+
+### 1.13 A generic name until branding is final
+**Decision:** The app is called "the book recommender" in docs and conversation until its branding is final. "Squirmly" (13.77) is paused, not chosen. Existing mentions are updated as docs are next edited.
+**Why:** Grim's call (Nov 20): the name waits until the branding work is finished. ([progress log, Nov 20](./progress-log.md))
 
 ---
 
@@ -437,6 +441,18 @@ The full operating principles are in [question-flow-principles.md](./product/que
 **Decision:** The book index is the engine's candidate pool. v0 has no live-search fallback: when too few books fit, the reader gets the existing "not enough books" message and the gap is logged as a failed request. The not-enough-books rate is tracked in evals and the friend test, against a trigger set in advance: above about 5%, fill the index's gaps first; consider a fallback only if gaps keep appearing. Today's live-search engine stays behind its setting as the eval control until the index wins, then it's removed. The eval judge never sees our own tags.
 **Why:** A fallback means keeping two ways of finding books, blends what evals measure so the index's effect can't be seen, hides gaps, and gives fallback picks thin records and weaker cards; logged gaps instead tell us exactly which books to add (Grim agreed, Nov 17, wary of growing v0 scope). A judge that saw our tags would approve picks made from wrong tags, so the index would grade itself. ([book index design](./engineering/book-index-design.md); [progress log, Nov 17](./progress-log.md))
 
+### 6.22 Postgres for the index and reader data, hosted on Neon
+**Decision:** The database engine is Postgres; v0 is hosted on Neon's free plan. Supabase, Prisma Postgres and AWS Aurora were compared on Nov 20 using each host's pricing page and docs; SQLite-based, MySQL-based, document databases, dedicated vector databases and search engines were ruled out as categories. The app reaches the database only through contracts and uses standard Postgres only; Neon-only features (such as branching) are for development and testing, never the app's runtime path. No bake-off, but Neon's wake-up and query speed from Vercel are measured in the 500-book pilot.
+**Why:** Engine and host are separate choices: the engine (linked tables, pgvector, keyword search, flexible fields, roles) is what's expensive to change, while moving between Postgres hosts is one export and one import. Neon fits v0, never bills by surprise, has usage-based pricing that suits bursty use, and upgrades without migrating. Supabase's free plan pauses after a week idle until restarted by hand; Prisma's has no free backups and doesn't say what happens at its limit; Aurora's credits expire within 12 months. ([book index design](./engineering/book-index-design.md); [progress log, Nov 20](./progress-log.md))
+
+### 6.23 Covers: found once at build time, every source recorded, files in file storage
+**Decision:** Covers are found once while building the index (Open Library, then Hardcover, then Google Books; stand-ins rejected) and saved in the book record, with where each came from (source, publisher, date, terms, check result, visibility). Books with no real cover are flagged. Image files live in file storage, not the database; the database keeps the records. The cover section of the record is designed for every stage of the roadmap: links, our own copies, variants, licensed high-res.
+**Why:** No reader waits on a cover search, and every card is consistent. Recorded sources make the kill switch and any takedown a one-line action. Open Library's Covers API is meant for display on public sites, not bulk download or a high-traffic backend, so our own copies come from its bulk files. Storing images in Postgres would break Neon's size and transfer limits and skip fast delivery. ([book index design](./engineering/book-index-design.md); [progress log, Nov 20](./progress-log.md))
+
+### 6.24 Variants: one registry, recorded recipes, files never overwritten; enhanced covers in v0
+**Decision:** Every generated cover or card variant is registered in the database with its recipe (engine or provider, model and version, prompt as a versioned file in the repo, settings, input cover, code version, date, approval, cost). Files are never overwritten; an improved version is a new file and a new version. v0 uses enhanced covers (the reveal-book study's cover enhancer test, already in v0 scope), so v0 needs file storage and the bulk cover download, after Part 7 fixes the book list. Rarity variants wait for the card bank, after v0. Whether to enhance the whole index ahead of time or books as first recommended is decided by the enhancer test.
+**Why:** Grim's direction (Nov 20): variants are central to the app's appeal, so everyone must get the same card, and design engines will change, so how each card was made must be recorded to reference or recreate it. AI tools don't always reproduce exactly, so the saved file is the source of truth. Enhanced covers are a big part of the proof of concept and the feedback wanted. ([book index design](./engineering/book-index-design.md); [progress log, Nov 20](./progress-log.md))
+
 ---
 
 ## 7. Hardcover: using reader tags as a taste signal
@@ -638,6 +654,14 @@ The full operating principles are in [question-flow-principles.md](./product/que
 **Decision:** Builds on 10.4 and 10.5. Three layers: the spend limit on the production key (the hard ceiling, exists), a new daily cap across all visitors that shows a friendly "back tomorrow" message, and the per-visitor limit of about 10 a day. The daily cap is the monthly budget ÷ 30 ÷ cost per recommendation; cost per recommendation is measured from a trace first, then the budget and cap are set (about 50 a day is a placeholder).
 **Why:** A cookie-based limit resets when a visitor clears cookies or switches browser, which is fine for trusted friends on a protected link, but a leaked link or a looping bug could still drain the month. The global cap stops that before the hard ceiling and fails gracefully instead of erroring, with no personal data. Sign-in brings the stronger per-reader limit before public launch. ([book index design](./engineering/book-index-design.md); [progress log, Nov 17](./progress-log.md))
 
+### 10.12 v0 backups: saved files, set targets, a tested restore
+**Decision:** v0 keeps the pipeline's output files (to rebuild without re-tagging or re-enhancing), exports reader data before the friend test and after any deletion, keeps a second copy of card files away from their main storage, and runs one restore drill before friends use the app, writing the steps as a checklist. Targets: lose no more than back to the last export; recover within a day. Reader exports are encrypted and never in the repo; keys live in a password manager. Scheduled automatic backups come later.
+**Why:** Neon Free can only rewind 6 hours, enhanced covers cost money and can't always be remade exactly, and an untested backup isn't a backup. Automatic backups aren't worth building until real readers depend on the app. ([book index design](./engineering/book-index-design.md); [progress log, Nov 20](./progress-log.md))
+
+### 10.13 A legal and IP register; covers are never altered
+**Decision:** Legal and IP items live in one register, [docs/legal/register.md](./legal/register.md), separate from the design docs. Covers are its first entry: the cover image is never altered (our art goes around it), every card works without a cover, every cover's source is recorded, a kill switch hides covers per book, per publisher or everywhere, there's a visible takedown contact, and sources get credit and a link back. A four-level risk ladder steps down from the full experience to no covers on specific triggers. An IP lawyer reviews it before public launch.
+**Why:** Grim's direction (Nov 20): start with the most engaging cards possible inside the rules, with fallbacks prepared before they're needed; legal pressure most likely arrives with adoption, "a semi-good problem." Legal items will keep coming up, so they get their own home. ([progress log, Nov 20](./progress-log.md))
+
 ---
 
 ## 11. How I work with AI tools
@@ -704,7 +728,7 @@ The full operating principles are in [question-flow-principles.md](./product/que
 - **Reveal-prompt wording for Fantasy, Superhero, Mystery and Sci-fi.** Every theme's wrapping is decided; only the café's "Tap to unwrap" wording is settled, and the other four are placeholders. ([design §9](./design/design-system.md))
 - **How to keep the question flow fresh:** wording variety (answer formats settled in 13.35, scenes in 13.45; longer-term ideas in [spec §6](./product/spec.md)). The existing first-question template stays. ([design §7](./design/design-system.md))
 - **How rarity tiers are assigned** (Staff pick, First edition, Holy grail). ([design §10](./design/design-system.md))
-- **The final app name.** "Squirmly" is the working name (13.77); before public launch it still needs a proper trademark search, a domain, and the Instagram and TikTok handles.
+- **The final app name.** "The book recommender" is the generic name until branding is final (1.13; "Squirmly", 13.77, is paused); the final name still needs a trademark search, a domain, and the Instagram and TikTok handles.
 
 ---
 
@@ -1054,3 +1078,7 @@ The full operating principles are in [question-flow-principles.md](./product/que
 ### 14.6 Every AI job has its own model slot; a model pass follows each finished design
 **Decision:** Every AI job, including new ones (like version C's final choice), gets its own slot in `lib/ai/slots.ts`. Once each piece's design is settled, a model pass tries faster, cheaper models slot by slot and keeps one only where that job's eval shows quality holds. First candidates: C's first cut, tag mapping, card writing.
 **Why:** Grim's direction (Nov 9): faster models are a major speed and cost lever, but changing design and model at once hides which one helped. Builds on decision 14.3. ([progress log, Nov 9](./progress-log.md))
+
+### 14.7 Four storage-side contracts for the book index
+**Decision:** The index work adds contracts for books (only the build pipeline writes; the app reads), reader data (the app adds and reads; only the owner's delete script removes), card files (original and enhanced covers, later rarity variants; v0 provider from a small storage bake-off, Cloudflare R2 the likely default) and the image engine (the cover enhancer now, rarity design later, recording each recipe). Each gets a fake stand-in so tests stay offline. A Neon branch is used for development and evals; Neon, file storage and Vercel share a region; the app connects through Neon's connection pooler.
+**Why:** Each part changes for different reasons, so each provider must be swappable alone (14.1). Grim wants the design engine swappable in particular. Separate test data keeps experiments away from friends' data. ([book index design](./engineering/book-index-design.md); [progress log, Nov 20](./progress-log.md))

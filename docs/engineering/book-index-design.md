@@ -1,8 +1,8 @@
 # Book index design
 
-> **Status:** Draft · Parts 1–3 agreed Nov 16, 2026; Part 4 agreed Nov 17, 2026. Parts 5–7 are still open. Nothing here is built yet.
+> **Status:** Draft · Parts 1–3 agreed Nov 16, 2026; Part 4 agreed Nov 17; Part 5 agreed Nov 20. Parts 6–7 are still open. Nothing here is built yet.
 
-The book index is our own database of books: the engine's backbone (decision 6.14). It is designed for the whole product (collection, rankings, reading stats, year summaries, premium), but v0 builds only a starter slice. This doc is the agreed design so far. The reasons are in [decisions](../decisions.md) 6.17–6.20 and 10.8–10.9.
+The book index is our own database of books: the engine's backbone (decision 6.14). It is designed for the whole product (collection, rankings, reading stats, year summaries, premium), but v0 builds only a starter slice. This doc is the agreed design so far. The reasons are in [decisions](../decisions.md) 6.17–6.24, 10.8–10.13 and 14.7.
 
 ## Where the design stands
 
@@ -12,7 +12,7 @@ The book index is our own database of books: the engine's backbone (decision 6.1
 | 2. Sources and their terms | Agreed |
 | 3. Our own layer: tags and search by meaning | Agreed |
 | 4. Reader data | Agreed |
-| 5. Storage, staged build and refresh | Structure agreed; build stages and provider check open |
+| 5. Storage, covers, contracts and backups | Agreed |
 | 6. How the engine and the judge use the index | Not started |
 | 7. The v0 starter set (which books) | Not started |
 
@@ -104,7 +104,7 @@ Feedback is for diagnosis only in v0; it doesn't change tags or picks. Typed fee
 
 **v0 events** (each defined in the event dictionary): pick shown · thumbs and thumbs changed · thumbs-down reasons · already read and its follow-up · open-box text · "Not quite? Try again" · taps on the "coming soon" tabs · "add to shelf" taps · general feedback · failed requests.
 
-**Tables: created when first used.** v0 creates only the tables it writes to. Book side: works, editions, authors, work authors, external IDs, source records, work tags. Reader side: visitors, recommendations, recommendation picks, events, rate-limit counts. Comparisons, readers and collection, and summary tables are designed (Part 5's diagram) but created by the PR that first writes to them. Everything points at stable IDs (our book ID, the visitor ID), so later tables attach without changing existing data.
+**Tables: created when first used.** v0 creates only the tables it writes to. Book side: works, editions, authors, work authors, external IDs, source records, work tags, covers and cover variants. Reader side: visitors, recommendations, recommendation picks, events, rate-limit counts. Comparisons, readers and collection, and summary tables are designed (Part 5's diagram) but created by the PR that first writes to them. Everything points at stable IDs (our book ID, the visitor ID), so later tables attach without changing existing data.
 
 **Room for data we haven't thought of yet:**
 - Every event has a flexible field that holds any number of named items. Something new can be recorded from the next release with no database change; an item gets its own column once we filter on it often.
@@ -133,13 +133,39 @@ The daily cap = monthly budget ÷ 30 ÷ cost per recommendation. Cost per recomm
 
 **Later (after v0):** accounts and consented visitor linking · shelf and collection, finish a book to earn a card · pairwise comparisons and rankings · reader tags after finishing · Goodreads export import · summary tables for stats, insights and year summaries · avoid list and returning-reader shortcut · feedback that changes tags or picks · self-serve data export and deletion · a retention policy · a stronger rate limit.
 
-## Part 5: storage (structure agreed)
+## Part 5: storage (agreed Nov 20)
 
-One Postgres database, shared with PR 6's data store. Neon's free tier is the first candidate; its current limits are to be confirmed before we commit.
+### The database: Postgres, hosted on Neon
+
+**The engine and the host are separate choices.** Postgres is the long-term engine: linked tables, search by meaning (pgvector), keyword search, flexible fields, permission roles and a standard export, all in one place. The host is swappable: moving between Postgres hosts is one export and one import (about 100 MB for v0), so lock-in comes from the engine, not the host.
+
+**Neon's free plan for v0.** Compared on Nov 20 against Supabase, Prisma Postgres and AWS Aurora, using each host's official pricing page and docs:
+
+| | Neon | Supabase | Prisma Postgres | AWS Aurora |
+|---|---|---|---|---|
+| Free storage | 1 GB | 500 MB | 2 GB | 1 GiB |
+| When idle | Sleeps after 5 min, wakes on the next request | Pauses after 1 week until restarted by hand | Vendor claims no cold starts | Optional pause |
+| At the limit | Writes fail; no bill | Not stated | Not stated | Credits-based |
+| Restore window (free) | 6 hours | None | None | Not checked |
+| First paid step | No minimum; $0.106 per CU-hour | $25 a month | $10 a month | Pay as you go |
+
+- **Why Neon:** fits v0, never bills by surprise, has the cheapest path to paid (usage-based, which suits bursty use), and upgrading is a billing change, not a migration.
+- **Ruled out:** Supabase for v0 (the weekly pause would take the app offline between friend sessions; its sign-in and storage bundle is worth a second look when accounts arrive). Prisma Postgres (no free backups, unstated limit behavior, a per-query allowance a 10,000-book load would eat into). Aurora (credits expire within 12 months; kept as the large-scale benchmark).
+- **Also ruled out, by category:** SQLite-based, MySQL-based, document databases, dedicated vector databases and search engines. Our data is heavily linked, and a second system would need keeping in sync.
+- **Keeping it swappable:** the app reaches the database only through contracts; standard Postgres only. Neon-only features such as branching are used for development and testing, never in the app's runtime path. Backups are standard exports we keep ourselves.
+- **Speed check:** no bake-off (Grim's call), but Neon's wake-up time and query speed from Vercel are measured in the 500-book pilot.
+
+**Professional setup:**
+- A Neon branch (a copy of the database) for development and evals, so experiments never touch real reader data.
+- A fake stand-in for every contract, so automatic tests stay offline with no keys.
+- Neon, file storage and Vercel in one region.
+- Neon's connection pooler, built for serverless apps that open many short connections.
+
+### What the database holds
 
 ```
 BOOK SIDE (changes slowly, read constantly)
-works ──< editions ──< covers
+works ──< editions ──< covers ──< cover_variants   (original, enhanced; rarity later)
   │└──< work_authors >── authors
   ├──< external_ids      (Open Library, Hardcover, ISBN…)
   ├──< source_records    (data as received, kept raw)
@@ -151,6 +177,8 @@ visitors ──< recommendations ──< recommendation_picks >── works
    └──< events >────┘     (one row per action, never edited)
    └──< comparisons       (one row per "A beat B")
 ```
+
+Image files don't go in the database (size, transfer limits, speed). **The record lives in the database; the file lives in file storage.**
 
 **Habits that keep it scalable:**
 1. Each fact is stored once and referenced by ID.
@@ -168,15 +196,92 @@ visitors ──< recommendations ──< recommendation_picks >── works
 - A flag on internal and test traffic.
 - Two timestamps: when it happened and when we recorded it.
 
-**Also for v0:** an event dictionary (one page: every event type and what it means) · the delete command (rules in Part 4) · one tested backup restore before friends use the app.
-
 **Backfilling.** New data that can be derived from what we kept, or that is a fact about a book, can be added to old records. Data only observable in the moment cannot; old rows get "unknown", never a guess. Backfilled values are labelled as such.
 
-**Size.** The full structure is designed from day one, and tables are created when first used (Part 4); the book count starts small. Rough estimate: 10–15 KB per book all-in, so 20,000–30,000 books fit a 1 GB free tier. The Open Library download is processed offline and only the chosen books are loaded.
+**Size.** The full structure is designed from day one, and tables are created when first used (Part 4); the book count starts small. Rough estimate: 10–15 KB per book all-in, so 20,000–30,000 books fit Neon's 1 GB; the pilot measures the real figure. The Open Library download is processed offline and only the chosen books are loaded.
+
+### Covers
+
+Covers are a core part of what makes the app distinctive: having the images, presenting them in a way that's mesmerizing, and giving readers a sense of ownership and collection. The legal side lives in the [legal and IP register](../legal/register.md); this section holds the technical design.
+
+**Found once, at build time.** When the pipeline builds the index, each book's cover is looked for once, in order: Open Library, then Hardcover, then Google Books. The first real cover wins; labelled stand-ins and auto-generated covers are rejected. The result is saved in the book record, so no reader ever waits on a cover search. Books with no real cover are flagged, and that list is kept to fill over time.
+
+**Every cover records where it came from:**
+
+| Field | Example |
+|---|---|
+| Source | Open Library |
+| Source's own ID or link | the cover's ID on Open Library |
+| Publisher | Graywolf Press |
+| Date fetched | Nov 20, 2026 |
+| Terms | "display only, credit and link back required" |
+| Check result | real cover / stand-in rejected |
+| Visibility | shown / hidden (the kill switch: per book, per publisher, or everything) |
+
+**Every generated variant records how it was made** (its recipe), so it can be referenced or recreated even after the design engine changes: engine or provider, model and version, prompt (a versioned prompt file in the repo), settings (seed, scale, other parameters), the input cover, the code version, date, approval and cost. AI tools don't always reproduce exactly, so the saved file is the source of truth and the recipe is the record.
+
+**Everyone gets the same card.** The database is the registry of every variant (ID, version, recipe, approved). Files are never overwritten: an improved version is a new file with a new version number, and the registry points to the current one.
+
+**The cover section is designed now for every stage below,** so later stages fill in fields rather than reshaping data. It is a foundation that will evolve.
+
+**Staged roadmap (a living plan):**
+
+| Stage | What | When |
+|---|---|---|
+| 1. Links | Cover link, source and "no cover" flag in each record | First, during the build |
+| 2. Our own copies | Covers downloaded in bulk the legitimate way (Open Library's archive.org bulk files, or by asking Open Library; never by crawling its Covers API), stored in our file storage | v0, after Part 7 fixes the book list |
+| 3. Variants | Enhanced covers (v0, the reveal-book study's cover enhancer test); rarity variants after v0, with the card bank | Enhanced in v0 |
+| 4. Licensed high-res | Official artwork from publisher partnerships | When the app has traction to offer publishers |
+
+Enhanced covers are in v0 because they are a big part of the proof of concept and of the feedback we want. **Still open:** enhance the whole index ahead of time, or books as they're first recommended. The enhancer test (cost and time per cover) decides.
+
+### Contracts
+
+Each part talks to its provider through a contract, so any provider can be swapped alone.
+
+| Contract | Covers | Writes / reads | v0 provider |
+|---|---|---|---|
+| Books | Catalog, tags, cover records and sources, the variant registry | Only the build pipeline writes; the app reads | Neon |
+| Reader data | Visitors, recommendations, events, feedback, rate limits | The app adds and reads; only the owner's delete script removes | Neon |
+| Card files (new) | Original covers, enhanced versions, later rarity variants | The pipeline saves; the app serves | A small storage bake-off (Cloudflare R2 the likely default) |
+| Image engine (new) | The cover enhancer now, rarity design later; records each recipe | The pipeline calls it | Decided by the cover enhancer test |
+
+Existing contracts cover the rest: the AI gateway (including the model that powers search by meaning) and book sources. Sign-in, analytics and error tracking get theirs when chosen.
+
+### Backups (v0)
+
+A backup is a saved file, not a second database.
+
+| What | How | Why |
+|---|---|---|
+| Book index | Keep the pipeline's output files | Rebuild without paying to re-tag or re-enhance |
+| Reader data | One export before the friend test, plus one after any deletion | Neon Free can only rewind 6 hours |
+| Card files | A second copy somewhere other than the main storage | Enhanced covers cost money and time to remake, and can't always be reproduced exactly |
+| Proof | One restore drill before friends use the app | An untested backup isn't a backup |
+
+- **Targets:** v0 can afford to lose data back to the last export, and must recover within a day.
+- **Privacy:** reader exports contain typed answers, so they never go in the repo and are stored encrypted.
+- **Keys:** API keys and database passwords are kept in a password manager.
+- **Runbook:** the restore steps are written as a short checklist during the drill.
+- Prompts and recipe files live in git, so they're already backed up.
+- Scheduled automatic backups come later, once real readers depend on the app.
+
+**Also for v0:** an event dictionary (one page: every event type and what it means) and the delete command (rules in Part 4).
+
+### Refresh
+
+No schedule in v0: one import from Open Library's download plus Hardcover's API. A refresh schedule is decided after v0.
+
+### Outside checks for Part 5
+
+- Neon's wake-up time and query speed, measured from Vercel in the pilot.
+- How many pilot books get a real cover, and from which source; 20 covers spot-checked by eye.
+- A test that the kill switch hides a cover instantly.
+- The restore drill.
+- A test that the app's database login can't delete anything.
 
 ## Still open
 
-- Part 5: provider (the docs name Neon; Grim recalled Supabase as the target, so compare before committing), build stages, provider limits, cover storage, backups. Agreed so far: one database, and no scheduled refresh in v0.
 - Part 6: agreed so far: the index is the engine's pool with no live-search fallback in v0 (decision 6.21), and the eval judge never sees our own tags. Still open: how the engine and judge use the index, including what the model may see (today's rule is title, author and subjects only), and how we'll know the index helps.
 - Part 7: which books go in the v0 starter set.
 
@@ -186,4 +291,5 @@ visitors ──< recommendations ──< recommendation_picks >── works
 - **Changed:** Google Books moved out of the index (decision 6.14 had it in); Hardcover moods became a second opinion, not a dependency; thumbs-down reasons reshaped to what a tester can judge at the reveal.
 - **Ruled out:** warehouses and streaming tools; a feedback dashboard; popularity-based rarity; the academic-only Goodreads dataset; a live-search fallback in v0 (decision 6.21); deleting single events.
 - **Added Nov 17:** least privilege for deletion (the app can't delete); a daily cap across all visitors; the flexible event field and capture-when-unsure rule; corrections as new events.
+- **Added Nov 20:** separating engine from host; a development branch so evals never touch real data; a test stand-in for every contract; one region; recorded sources and recipes for every cover and variant; files never overwritten; a kill switch; backup targets, encrypted reader exports and a written restore checklist.
 - **Outside checks planned:** audience-label spot-check; 20-book tag test against Hardcover moods; the eval with and without tags; a delete-command test (create a visitor, add events, delete, find zero rows); the not-enough-books rate in evals and the friend test.

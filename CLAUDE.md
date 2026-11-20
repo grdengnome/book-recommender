@@ -4,7 +4,7 @@ Read automatically by Claude Code at the start of every session in this repo. De
 
 ## What this project is
 
-Squirmly (working name) is an AI book discovery app. Readers answer a few playful, themed questions; the engine reveals three intriguing, relevant books from real catalogs, unwrapped as collectible cards. Its core engine problem is resisting the model's pull toward famous, obvious picks. The full vision adds a Collection tab (shelf, cards, pairwise ranking) and a You tab (taste profile, insights).
+The book recommender (generic name until branding is final; decision 1.13) is an AI book discovery app. Readers answer a few playful, themed questions; the engine reveals three intriguing, relevant books from real catalogs, unwrapped as collectible cards. Its core engine problem is resisting the model's pull toward famous, obvious picks. The full vision adds a Collection tab (shelf, cards, pairwise ranking) and a You tab (taste profile, insights).
 
 Start here:
 - `docs/plan.md`: the one-page plan (current target, Now / Next / Later, milestones). Update it when a status or the plan changes; review it in full at checkpoints.
@@ -13,7 +13,7 @@ Start here:
 - `docs/decisions.md`: every product and architecture decision and why. Check it before questioning something that looks odd; it's usually deliberate.
 - `docs/engineering/repo-guide.md`: how the repo is organized, its rules, and restructure progress.
 - `docs/engineering/contracts-and-adapters.md`: how every part stays swappable.
-- `docs/engineering/book-index-design.md`: the book index design (draft; Parts 1–4 agreed, 5–7 open). Read it before any index or data-store work.
+- `docs/engineering/book-index-design.md`: the book index design (draft; Parts 1–5 agreed, 6–7 open). Read it before any index or data-store work.
 
 ## Current priority
 
@@ -93,7 +93,7 @@ Shared infrastructure the engine uses:
 - **Next.js** (App Router); the engine is a co-located API route, not a separate service.
 - Plain `fetch` to the Anthropic `/v1/messages` endpoint; no SDK unless there's a concrete need.
 - Env vars in `.env.local` (gitignored): `ANTHROPIC_API_KEY` (required), `HARDCOVER_API_TOKEN` (optional; without it the engine runs on Open Library alone), `ENGINE_TRACE` (optional, local only; `1` turns on the debug trace), `AI_SLOT_<JOB>` (optional; overrides one job's model, see `lib/ai/slots.ts`), `ENGINE_SELECTION` (optional; round 1's selection version, decision 6.13), `ENGINE_SEARCHES_PER_ROUND` (optional; searches run per turn, default 3, decision 6.15).
-- No database yet. v0 adds a small data store for feedback, rate limits and the card bank (decisions 10.5, 10.6), behind a `Store` contract; it stores no personal details.
+- No database yet. v0 adds Postgres on Neon (decision 6.22) for the book index, feedback and rate limits, behind contracts (decision 14.7), plus file storage for covers (6.23–6.24); it stores no personal details.
 - Hosted on Vercel (Hobby plan), project `book-recommender` under `grdengnome`. Deployment Protection is on for all deployments. Production keys are Vercel Secrets (separate, spend-capped Console workspace); never copy them into the repo or chat. The recommend route sets `maxDuration = 300`.
 - The app's live logs (`query-log.json`, `hardcover-failure-log.json`) and debug traces go to `.local/`, which is gitignored: they can hold real readers' answers.
 - `evals/`: one eval runner, `run.mjs` (paid, run deliberately); case sets as data in `evals/cases/` (`legacy-v0.json` is the frozen original 11; `profile-v1.json` is the 21-reader readiness set); the judge and scorecard in `evals/judge/`, run by `score.mts` and calibrated by `calibrate.mts` (`evals/README.md`). `scripts/`: maintenance tools. `experiments/`: one-off investigations and evidence (not linted or type-checked; see its README before deleting anything). `prototypes/`: design prototypes.
