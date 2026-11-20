@@ -270,7 +270,7 @@ A backup is a saved file, not a second database.
 
 ### Refresh
 
-No schedule in v0: one import from Open Library's download plus Hardcover's API. Later, a monthly refresh that re-tags only records whose description changed.
+No schedule in v0: one import from Open Library's download plus Hardcover's API. A refresh schedule is decided after v0.
 
 ### Outside checks for Part 5
 
@@ -284,7 +284,6 @@ No schedule in v0: one import from Open Library's download plus Hardcover's API.
 
 - Part 6: agreed so far: the index is the engine's pool with no live-search fallback in v0 (decision 6.21), and the eval judge never sees our own tags. Still open: how the engine and judge use the index, including what the model may see (today's rule is title, author and subjects only), and how we'll know the index helps.
 - Part 7: which books go in the v0 starter set.
-- Proposed, not yet agreed: live monitoring in v0 (each request's cost, time and failures recorded as events, plus a simple error alert), as one small PR within the store work.
 
 ## Pro check
 

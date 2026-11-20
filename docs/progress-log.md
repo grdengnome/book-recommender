@@ -1092,5 +1092,5 @@ Alongside: dependency checkup PR (npm reports 25 package vulnerabilities); claim
 1. Part 6: how the engine and the judge use the index, starting from the Nov 17 proposals in the Project note.
 2. Part 7: which books go in the v0 starter set.
 3. Measure cost per recommendation and where the 35s goes, from one trace.
-4. Decide on live monitoring in v0 (proposed, not agreed).
+4. Decide on live monitoring in v0 (a quality-control item, now in the plan as proposed).
 5. At the December checkpoint: raise the "Database and starter book index" appetite (Grim agreed it will run over).
