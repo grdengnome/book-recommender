@@ -1,8 +1,8 @@
 # Book index design
 
-> **Status:** Draft · Parts 1–3 agreed Nov 16, 2026; Part 4 agreed Nov 17; Part 5 agreed Nov 20. Parts 6–7 are still open. Nothing here is built yet.
+> **Status:** Draft · Parts 1–3 agreed Nov 16, 2026; Part 4 agreed Nov 17; Part 5 agreed Nov 20; Part 6 agreed Nov 22. Part 7 is still open. Nothing here is built yet.
 
-The book index is our own database of books: the engine's backbone (decision 6.14). It is designed for the whole product (collection, rankings, reading stats, year summaries, premium), but v0 builds only a starter slice. This doc is the agreed design so far. The reasons are in [decisions](../decisions.md) 6.17–6.24, 10.8–10.13 and 14.7.
+The book index is our own database of books: the engine's backbone (decision 6.14). It is designed for the whole product (collection, rankings, reading stats, year summaries, premium), but v0 builds only a starter slice. This doc is the agreed design so far. The reasons are in [decisions](../decisions.md) 6.17–6.27, 3.16–3.17, 9.14, 10.8–10.13, 11.11 and 14.7.
 
 ## Where the design stands
 
@@ -13,7 +13,7 @@ The book index is our own database of books: the engine's backbone (decision 6.1
 | 3. Our own layer: tags and search by meaning | Agreed |
 | 4. Reader data | Agreed |
 | 5. Storage, covers, contracts and backups | Agreed |
-| 6. How the engine and the judge use the index | Not started |
+| 6. How the engine and the judge use the index | Agreed |
 | 7. The v0 starter set (which books) | Not started |
 
 ## Part 1: what a book record holds
@@ -280,10 +280,115 @@ No schedule in v0: one import from Open Library's download plus Hardcover's API.
 - The restore drill.
 - A test that the app's database login can't delete anything.
 
+## Part 6: how the engine and the judge use the index (agreed Nov 22)
+
+**The whole process:**
+- **A real reader asks:** answers become a taste profile → code builds a shortlist of about 40 books from the index → code turns it into the model's view (allowed fields only, numbered) → the model picks 3 by number → code maps the numbers back to books, writes the cards and shows them → everything is recorded.
+- **An eval:** the engine runs on written test readers → code builds the judge's view of each pick (source facts only) → the judge scores each pick → a scorecard → compared against today's engine.
+- **Improving:** change one thing → run an eval → record the result and the decision.
+
+The engine (`lib/engine/`) serves readers. The judge (`evals/judge/`) runs only in evals and never touches a reader.
+
+### 1. Retrieval: code builds the shortlist
+
+One quick query to our own database replaces the model's search rounds; the model only chooses. The taste profile's firmness (`lib/engine/profile/slots.ts`) decides how each answer is used:
+
+| Firmness | Answers | Use |
+|---|---|---|
+| Hard | Category, audience, length, avoid | Filter |
+| Strong | Mood; standalone or series | Mood scored heavily; "standalone" filters out later books in a series |
+| Weighed | Pace, people or plot, style, think or escape, ending, published, setting, should-have | Points for matching tags or year |
+| Context | Loved books, familiar or surprising, moment | Loved books seed search by meaning; the rest goes to the model only |
+
+- **Filter:** hard rules, plus the reader's loved books. "Avoid" text is matched to tags where possible; the rest goes to the model and the judge checks it. If a hard-rule fact is unknown, the book is left out, as with today's length rule.
+- **Score:** tag and keyword matching plus search by meaning, combined with reciprocal rank fusion (a book earns points for ranking high on either list, with no hand-tuned weights).
+- **Variety:** the best 25 plus 15 drawn at random from the next 150; at most 2 per author; one entry per series; shuffled so the model can't infer a ranking.
+- **Size:** under 3 books gives "not enough books" (logged); 3–19 proceeds and is logged as a thin shortlist; about 40 is normal. 40 is a starting value, tuned with the shortlist check (try 30, 40 and 60; keep the smallest that doesn't lose good options).
+- **Randomness** is fixed by a seed in evals, so runs are repeatable; real readers get fresh variety.
+- **Fame:** each book has a hidden fame number from Open Library edition counts. The model never sees it, and it isn't used to rank in v0. It's measured in evals; if picks drift famous, we decide then (options: cap famous books per shortlist, or let the "surprising" answer tilt).
+- **Changeable:** every number lives in one settings file; the recipe sits behind a shortlist contract; each recommendation records the recipe version.
+- **Runs with no profile** (scoring off), keeping a zero-question "surprise" option open (backlog).
+
+### 2. The two views: what the model and the judge see
+
+| | Model's view (choosing) | Judge's view (evals only) |
+|---|---|---|
+| Sees | A per-request number ("book 17"), title, author, publication year, form, subjects (bestseller-list and award entries removed), our tags, our summary | The reader's profile, and for each pick the source facts: raw description, source subjects, page count, form, audience |
+| Never | Popularity, ratings, reader counts, awards, catalog source, real IDs, scores, rank, tag confidence, raw publisher blurbs | Our tags or summaries (otherwise the index grades itself) |
+
+- **Our summary, not the blurb:** blurbs carry fame signals and can contain manipulative text. Our summary is written once at build time by the same call that writes the tags.
+- **Picking by number:** code maps numbers back to real books, so picks can't be mistyped and grounding retries go away.
+- **Lean on purpose:** every extra field costs time and money on every request. Page count, series position and audience stay out because code enforces them.
+- **Equal records:** both versions in any comparison get identical records for their picks. The judge is recalibrated against Grim's blind ratings after its inputs change.
+- **Enforced in code:** one view file each, in `lib/engine/` and `evals/judge/`; a "never" test fails if a forbidden field appears in either. Changing a view needs a decision entry and an eval.
+- **Rollout:** index fields first, then tags, then the summary, each measured on its own. A field that doesn't help isn't added. Later test: whether subjects become redundant once tags are in.
+
+### 3. Speed
+
+- **No fixed overall goal.** Measure what the reader feels: time to first card and time to all three, as the median and the slowest 1 in 10. Real targets are set from one trace and the pilot; until then, as fast as possible without losing quality.
+- **Per-step budget (provisional):** shortlist under 0.5s; the Hardcover tag-mapping model call removed (tags are in the index); card lookups under 0.2s (read from the index); choosing the same or faster (no grounding retries).
+- **Waking the database:** at the start of the question flow, only if the pilot shows it matters. The full app can wake it when any tab opens.
+- **Card text is split:** book-level text comes from our build-time summary, checked once against the catalog records; only the personal "why it's for you" line is written live, and the choosing step's fit note may cover most of it.
+- **Also:** prompt caching for the model's fixed instructions; a timeout per step that fails cleanly; perceived speed through the loading screen and cards appearing one at a time; a model pass after the index (decision 14.6).
+
+### 4. Measuring the gain
+
+A before-and-after eval proves the index picks at least as well as today's engine while being faster or cheaper, before readers are switched onto it.
+
+- **Free measures, on every run (counted by code):** hard rules (must be 100%); speed; cost per recommendation; fame mix against the index average; variety (repeats across test readers); gap rates (not enough books, thin shortlists).
+- **The paid judge only at decision points:**
+  - Step A (card facts from the index): no paid eval. The golden test plus timing.
+  - Step B (shortlist from the index): a shortlist check first, then one full same-day comparison.
+  - Steps C1 (tags) and C2 (summary): replay saved shortlists through the choosing step only.
+- **Cheaper after the switch:** the index is a frozen snapshot and evals use a fixed seed, so later versions compare against a saved run instead of a same-day control.
+- **A cheaper judge** if it matches Grim's blind ratings as well as today's.
+- **$25 a month is a ceiling, not a target.** Each paid run gets a cost estimate first, and a one-reader smoke test runs before it.
+- **Test readers grow to about 50, built for coverage:** every doorway, every hard rule, and edge cases. About 20 are tuning readers (we study their failures) and about 30 are held out (they only grade, and are never used to build the tag vocabulary or the starter set). Tiers: smoke (1 reader), quick (about 10), full (all held-out readers). Each reader runs under both engines.
+- **The pass mark is set before looking:** hard rules 100%; pick quality no worse than today's, within a small margin; a clear win on quality, speed or cost; fame and variety no worse.
+- **Honest scoring:** every score carries the reader-set and judge versions, and scores from different versions are never compared directly. Results are reported as ranges, not single numbers.
+- **Learning from failures:** past failures become a permanent "never break" set. Friend-test thumbs-downs become new made-up test readers with similar requests (never their real answers).
+- **Outside checks:** Grim's blind ratings; hard rules checked in code; precise timings; friends' thumbs and "already read it" taps as a reality check.
+
+### 5. Build order
+
+Each stage is one PR with its check. ⚖️ marks high-stakes stages (they change what the model is sent or how hard rules are enforced), which get the full independent cold review.
+
+| # | Stage | Check |
+|---|---|---|
+| 0 | Docs: Parts 6 and 7 recorded | Grim's review |
+| 0b | Review and safety tooling (decision 11.11): scanners; the reviewer as one versioned file (Anthropic's code-review plugin plus our checklist and output format); `/security-review`; review on every code PR; the escaped-bug log; a baseline review of existing code | Tools running; baseline findings triaged with Grim |
+| 1 | Test readers v2 (about 50, versioned, split) | Grim's review; every profile valid |
+| 2 | Tag vocabulary v1 and the tag-and-summary prompt, tried on sample books with no database | The 50–100 book tag test against Hardcover moods, plus Grim's blind read |
+| **Gate 1** | **Are tags worth it?** | Pass threshold set in the stage 2 PR; if it fails, fix the vocabulary or prompt before building infrastructure |
+| 3 | Database foundation: Neon, the books and reader-data contracts with test stand-ins, setup scripts, read-only and no-delete logins | Offline contract tests; the "can't delete" test; wake-up and query times from Vercel |
+| 4 | Pipeline and 500-book pilot: import, tags, summaries, cover links with sources, fame numbers | Bytes and dollars per book; cover counts by source; a 20-cover spot-check |
+| 4b | Thin end-to-end run on pilot books, behind a setting, not judged for quality | It works end to end; real timings |
+| **Gate 2** | **Do the numbers hold?** | Size, cost and speed fit the design; enough real covers; if not, adjust before the full load |
+| 5 | The v0 starter set (Part 7) | Part 7's checks |
+| 6 | Step A: card facts from the index | Golden test plus timing |
+| 7 ⚖️ | The two views, picking by number, the "never" test (today's fields only) | The "never" test; golden diff reviewed; judge recalibrated |
+| 8 ⚖️ | Step B: the shortlist from the index, behind a setting; saved shortlists; free measures and fame in the scorecard; fixed seed | Shortlist check, then the full comparison against the pass mark |
+| **Gate 3** | **Does the index pick well?** | The pass mark; if it fails, the shortlist check shows whether search or choosing failed |
+| 9 | Speed basics: prompt caching, per-step timeouts | Timing; golden diff reviewed |
+| 10 ⚖️ | Step C1: the replay tool, and tags in the model's view | Replay against the pass mark |
+| 11 ⚖️ | Step C2: the summary, and split card text | Replay; honest-cards check |
+| **Gate 4** | **Did we build what we designed?** | A conformance checklist from Parts 1–6; every difference fixed or recorded as a decision |
+| 12 | Switch over: the index engine becomes the default; the old search path removed; `CLAUDE.md` rules updated | Checks green; one final full eval |
+
+- **Alongside, not blocking:** the cover track (the storage bake-off, card-files and image-engine contracts, the enhancer, and the bulk cover download after stage 5).
+- **Needed from Grim:** one engine trace before stage 8 (to set speed targets and the real cost per eval reader); Part 7 before stage 5.
+- **Every stage:**
+  - **Definition of done:** the check passes, docs are updated, and any change from the design has a decision entry.
+  - **An undo:** each engine change ships behind a setting.
+  - **Data checks:** the pipeline refuses bad data (missing descriptions, impossible page counts, tags outside the vocabulary, duplicates).
+  - **Snapshots:** the previous index snapshot is kept.
+  - **A time box:** if a stage overruns, stop and re-plan.
+  - **Gate results** are written up in the progress or eval log.
+
 ## Still open
 
-- Part 6: agreed so far: the index is the engine's pool with no live-search fallback in v0 (decision 6.21), and the eval judge never sees our own tags. Still open: how the engine and judge use the index, including what the model may see (today's rule is title, author and subjects only), and how we'll know the index helps.
-- Part 7: which books go in the v0 starter set.
+- Part 7: which books go in the v0 starter set, including whether children's books are in v0 (the taste profile already offers "written for children").
+- Live monitoring in v0 is proposed in the plan, not yet decided.
 
 ## Pro check
 
@@ -292,4 +397,5 @@ No schedule in v0: one import from Open Library's download plus Hardcover's API.
 - **Ruled out:** warehouses and streaming tools; a feedback dashboard; popularity-based rarity; the academic-only Goodreads dataset; a live-search fallback in v0 (decision 6.21); deleting single events.
 - **Added Nov 17:** least privilege for deletion (the app can't delete); a daily cap across all visitors; the flexible event field and capture-when-unsure rule; corrections as new events.
 - **Added Nov 20:** separating engine from host; a development branch so evals never touch real data; a test stand-in for every contract; one region; recorded sources and recipes for every cover and variant; files never overwritten; a kill switch; backup targets, encrypted reader exports and a written restore checklist.
+- **Added Nov 22:** measuring the shortlist separately from picks; saved shortlists for replay; fame tracking; view files with a "never" test; picking by number; repeatable eval randomness; versioned exams and ranges; a "never break" set; stage gates; a thin end-to-end run; undo settings, data checks and kept snapshots; a reviewer on every code PR.
 - **Outside checks planned:** audience-label spot-check; 20-book tag test against Hardcover moods; the eval with and without tags; a delete-command test (create a visitor, add events, delete, find zero rows); the not-enough-books rate in evals and the friend test.

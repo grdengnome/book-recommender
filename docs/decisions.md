@@ -2,7 +2,7 @@
 
 > **Status:** Living · Every product and architecture decision, and the paths rejected.
 
-*Covers decisions through the v0 engine, v0 product planning, the v0 scope, the repo restructure, the book index design and legal (November 20, 2026). Further decisions are added as they're made.*
+*Covers decisions through the v0 engine, v0 product planning, the v0 scope, the repo restructure, the book index design and legal (November 22, 2026). Further decisions are added as they're made.*
 
 The product and architecture decisions behind this recommender, and the paths I rejected. The [progress log](./progress-log.md) is the session-by-session diary; this file is the story told by decision. Each entry gives the decision and why, with a link to the full detail.
 
@@ -293,6 +293,14 @@ The full operating principles are in [question-flow-principles.md](./product/que
 **Decision:** Every engine comparison runs the current engine on the same readers the same day, next to the new version, and uses a mix of weak and strong readers (not only the weakest). The reader set grows: all 21 profile readers plus 15–20 held-out readers that are never used for tuning. A per-reader paired check (better / worse / same) is read alongside the totals, with the adopt bar set before looking.
 **Why:** Round 1 (Nov 10) tested only the baseline's weakest readers against an old baseline. B's 5 wins were all on those readers and its 3 losses all on readers the baseline got perfect, which regression to the mean explains as well as a real gain. With 13 readers and no control, only changes above about 10 points can be seen. ([eval log, Nov 10](./quality/eval-log.md))
 
+### 3.16 Measuring the index: free measures always, the paid judge only at decisions
+**Decision:** Code counts hard rules (must be 100%), speed (time to first card and to all three, median and slowest 1 in 10), cost per recommendation, fame mix, variety and gap rates on every run, free. The paid judge runs only at decision points: none for card facts from the index (golden test plus timing), a shortlist check then one full same-day comparison for the shortlist step, and replay of saved shortlists for adding tags and then the summary. The pass mark is set before looking: hard rules 100%, pick quality no worse than today's within a small margin, a clear win on quality, speed or cost, fame and variety no worse. $25 a month is a ceiling, not a target; each paid run gets a cost estimate first. Once the index is the engine, later versions compare against a saved run (frozen data, fixed seed) instead of a same-day control. A cheaper judge is used if it matches Grim's blind ratings as well. Every score carries the reader-set and judge versions, results are reported as ranges, and past failures form a permanent "never break" set.
+**Why:** Grim wanted the eval step to be necessary, efficient and not spend for its own sake. Most of the scorecard costs nothing, and only real decisions need paid judging. A bar set in advance stops us from talking ourselves into a result, and ranges keep noise visible with small reader sets. ([book index design, Part 6](./engineering/book-index-design.md); [progress log, Nov 22](./progress-log.md))
+
+### 3.17 Test readers v2: about 50, built for coverage, tuning and held out
+**Decision:** The test set grows from 21 to about 50 written profiles, built to cover every doorway, every hard rule and edge cases (very specific requests, contradictory answers, avoid lists, loved books). About 20 are tuning readers we study and adjust for; about 30 are held out and only grade, and are never used to build the tag vocabulary or the starter set. Tiers: smoke (1 reader), quick (about 10), full (all held-out readers, for decisions). Each reader runs under both engines being compared. Written by Claude and reviewed by Grim as the first build stage, before the vocabulary and starter set. Friend-test thumbs-downs later become new made-up test readers with similar requests, never their real answers.
+**Why:** About 21 readers only detect big differences. Grading on readers you've tuned for flatters the score (overfitting), so held-out readers must exist before anything is built that they could shape. Writing profiles costs time, not budget. ([book index design, Part 6](./engineering/book-index-design.md); [progress log, Nov 22](./progress-log.md))
+
 ---
 
 ## 4. Defining "non-obvious"
@@ -453,6 +461,18 @@ The full operating principles are in [question-flow-principles.md](./product/que
 **Decision:** Every generated cover or card variant is registered in the database with its recipe (engine or provider, model and version, prompt as a versioned file in the repo, settings, input cover, code version, date, approval, cost). Files are never overwritten; an improved version is a new file and a new version. v0 uses enhanced covers (the reveal-book study's cover enhancer test, already in v0 scope), so v0 needs file storage and the bulk cover download, after Part 7 fixes the book list. Rarity variants wait for the card bank, after v0. Whether to enhance the whole index ahead of time or books as first recommended is decided by the enhancer test.
 **Why:** Grim's direction (Nov 20): variants are central to the app's appeal, so everyone must get the same card, and design engines will change, so how each card was made must be recorded to reference or recreate it. AI tools don't always reproduce exactly, so the saved file is the source of truth. Enhanced covers are a big part of the proof of concept and the feedback wanted. ([book index design](./engineering/book-index-design.md); [progress log, Nov 20](./progress-log.md))
 
+### 6.25 Code builds the shortlist from the index; the model only chooses
+**Decision:** One query to the index builds a shortlist of about 40 books, replacing the model's search rounds and the Hardcover tag-mapping call. Hard answers filter (unknown facts mean the book is left out); mood is scored heavily and "standalone" filters; weighed answers add points; loved books seed search by meaning. Tag and keyword matching and search by meaning are combined with reciprocal rank fusion. Variety: the best 25 plus 15 at random from the next 150, at most 2 per author, one per series, shuffled. Under 3 books gives "not enough books"; 3–19 is logged as a thin shortlist. Randomness uses a fixed seed in evals. Fame is a hidden number, never shown to the model and not used to rank in v0, only measured. Every number lives in one settings file; the recipe sits behind a shortlist contract and is versioned on each recommendation; it can run with no profile. 40 is a starting value, tuned with the shortlist check.
+**Why:** The model's search rounds are the likely main cost in time, and code filtering is exact where the model is not. The taste profile's firmness levels map directly onto filter, score and context. Measuring fame before acting on it answers the open question of whether tag relevance still favours popular books. ([book index design, Part 6](./engineering/book-index-design.md); [progress log, Nov 22](./progress-log.md))
+
+### 6.26 The model's view and the judge's view are separate allow-lists, enforced by a test
+**Decision:** The model sees a per-request number, title, author, publication year, form, subjects without bestseller-list or award entries, our tags and our summary; never popularity, ratings, reader counts, awards, catalog source, real IDs, scores, rank, tag confidence or raw blurbs. The judge sees the reader's profile and each pick's source facts (raw description, source subjects, page count, form, audience), never our tags or summaries; both sides of a comparison get identical records. Each view is one file (`lib/engine/`, `evals/judge/`); a "never" test fails if a forbidden field appears; changing a view needs a decision entry and an eval. The model picks by number. Tags, then the summary, are added one step at a time and kept only if they help. This replaces the "title, author and subjects only" rule once each step passes.
+**Why:** A list in a file, checked by a test, can't drift the way a habit can. Our build-time summary avoids the fame signals and manipulative text in blurbs. A judge that saw our tags would approve picks made from wrong tags. Picking by number removes mistyped picks and their retries. ([book index design, Part 6](./engineering/book-index-design.md); [progress log, Nov 22](./progress-log.md))
+
+### 6.27 Speed is measured as readers feel it; no fixed 30-second goal
+**Decision:** The fixed 30-second goal is retired. Speed is measured as time to first card and time to all three, median and slowest 1 in 10, with targets set from one trace and the pilot. Provisional per-step budget: shortlist under 0.5s, card lookups under 0.2s. Card text is split: book-level text from the build-time summary, only the personal line written live. Prompt caching, a timeout per step, and waking the database at the start of the question flow only if the pilot shows it matters.
+**Why:** A total set before the index exists is arbitrary (Grim, Nov 22). Readers feel the first card and the worst cases, not an average. The book-level text doesn't depend on the reader, so writing it once is faster and keeps the honest-cards rule. ([book index design, Part 6](./engineering/book-index-design.md); [progress log, Nov 22](./progress-log.md))
+
 ---
 
 ## 7. Hardcover: using reader tags as a taste signal
@@ -606,6 +626,10 @@ The full operating principles are in [question-flow-principles.md](./product/que
 **Decision:** The end-of-2026 target (9.12) is dropped. v0 ships when it feels right, with a full plan review at each checkpoint (the first in early December). A rough expectation is a friend test in February or March 2027.
 **Why:** Including a design baseline and the book index makes end of 2026 unrealistic, and Grim prefers getting it right to hitting a date. ([progress log, Nov 12](./progress-log.md))
 
+### 9.14 The book index is built in stages with four gates
+**Decision:** The index is built stage by stage, one PR per stage with its own check (full order in the book index design, Part 6). Four gates stop the work for a go, adjust or stop decision against criteria written in advance: are tags worth it (after the tag test), do the numbers hold (after the 500-book pilot and a thin end-to-end run on it), does the index pick well (after the shortlist step's comparison), and did we build what we designed (a conformance checklist from the design doc, before switching over). Every stage has a definition of done (check passed, docs updated, any deviation recorded as a decision), an undo setting for engine changes, data checks in the pipeline, the previous index snapshot kept, and a time box.
+**Why:** Grim wanted checkpoints that keep the build accurate to the design while allowing adjustments based on findings. The cheapest proofs come first, a thin end-to-end run surfaces integration and speed surprises early, and gates make changes deliberate rather than drift. ([book index design, Part 6](./engineering/book-index-design.md); [progress log, Nov 22](./progress-log.md))
+
 ---
 
 ## 10. Identity, privacy, and security
@@ -699,7 +723,7 @@ The full operating principles are in [question-flow-principles.md](./product/que
 ---
 
 ### 11.8 How PRs are reviewed, and main is protected
-**Decision:** Every PR description has a "Review focus" section naming the 1–3 files or sections worth Grim's eyes; Grim's review is: the description matches the agreed plan, checks are green, the flagged files read right, and anything surprising gets asked about. High-stakes PRs (the engine's prompt, hard-rule enforcement, the input guard, anything that reaches readers, safety or money) also get an independent cold review by a separate reviewer agent that didn't build the change, with its findings posted for Grim. `main` is protected by a GitHub ruleset: no deletion or force push, a PR is required (merge commits only), and the `checks` and `Vercel` status checks must pass before merging.
+**Decision:** (Extended by 11.11: every code PR now gets an independent review.) Every PR description has a "Review focus" section naming the 1–3 files or sections worth Grim's eyes; Grim's review is: the description matches the agreed plan, checks are green, the flagged files read right, and anything surprising gets asked about. High-stakes PRs (the engine's prompt, hard-rule enforcement, the input guard, anything that reaches readers, safety or money) also get an independent cold review by a separate reviewer agent that didn't build the change, with its findings posted for Grim. `main` is protected by a GitHub ruleset: no deletion or force push, a PR is required (merge commits only), and the `checks` and `Vercel` status checks must pass before merging.
 **Why:** Machines check mechanics; people check intent and risk. Grim isn't a developer, so his review focuses on what he can judge (does it match what we agreed, are decisions recorded in his words), and an independent reviewer covers the code where a mistake would reach readers. The ruleset turns "never merge on red" from memory into enforcement. ([progress log, Nov 5](./progress-log.md))
 
 ---
@@ -712,6 +736,29 @@ The full operating principles are in [question-flow-principles.md](./product/que
 ### 11.10 One-page plan in the repo
 **Decision:** `docs/plan.md` is the single high-level view: the current target, Now / Next / Later (at most 3 items in Now), milestones with an appetite and a status, out of scope, budget and risks, shipped, and what comes after. It's updated only when something changes and reviewed in full at checkpoints; when a target ships, the page is archived and rewritten for the next one. It takes over from the Production Plan artifact, whose look-and-feel steps are folded into the plan and the roadmap. The other docs keep their jobs.
 **Why:** The plan was spread across the progress log, the artifact, the v0 scope and the roadmap. Grim wanted one short, proven format he can read at a glance: Now / Next / Later (ProdPad), appetites and figuring-out vs executing (Shape Up), and a one-page brief. ([progress log, Nov 12](./progress-log.md))
+
+### 11.11 Every code PR gets an independent review, against our own rules
+**Decision:** Builds on 11.8. Review layers:
+- **Automatic checks** (type check, linter, tests, golden test), as today.
+- **Security and dependency scanning,** switched on.
+- **An AI reviewer on every code PR:** a light pass for low-stakes changes, the full cold review for high-stakes ones. It works from a checklist of our own rules (the views and "never" list, contracts, no direct provider calls, YAGNI, the design doc and v0 scope).
+- **A one-time baseline review** of the code we build on: the AI gateway, profile checks and input handling, the eval runner and judge, and the engine parts that survive the index.
+- **A human expert review** at a major gate, such as before public launch.
+
+**Triage, so suggestions don't create churn:** a finding blocks a merge only if it shows a concrete failure (a bug, a security risk, a broken rule of ours, or a measured cost or speed problem), stated as "given X, Y goes wrong." Style rewrites with no measurable benefit are declined. Out-of-scope ideas go to the backlog. Clean-ups wait until we're working on that code anyway.
+
+**Proof of improvement:** every fix comes with a test that fails before and passes after. The golden test confirms nothing else changed. Anything that touches picks or speed is checked with the eval or timings.
+
+**Measuring the reviewer:** an escaped-bug log records any bug found after merge that review missed. Claude remains the reviewer unless that log shows a need for a second model or a dedicated tool. AI code review tools go on the Tool Radar.
+
+**The reviewer itself:** one versioned file in the repo (its instructions, our checklist, a fixed output format), used for every review so every part of the code gets the same lens; it can still flag anything else it spots. It is built on proven tools rather than from scratch:
+- Anthropic's official code-review plugin: several specialist reviewers, with a confidence score per finding.
+- Claude Code's built-in `/security-review` command for security, run inside working sessions.
+
+The paid GitHub Action version (the same analysis, run automatically on every PR) stays off until Grim turns it on: when code changes happen outside our sessions, when others contribute, or before public launch, with its own spend-capped key. Until then, running `/security-review` is a required step: every code PR's description includes a "Security review" line saying it was run and what it found, and a code PR without it isn't ready to merge. Community review plugins are skipped (unknown quality). CodeRabbit is the first trial if the escaped-bug log shows misses.
+
+Set up as one small PR at the start of the index build.
+**Why:** Grim isn't a developer and wants his blind spots covered without friction. A Claude reviewer checking Claude-written code can share blind spots, so the stack mixes deterministic tools, a cold reviewer, our own checklist and an occasional human. Strict triage and test-backed fixes keep changes to real, provable improvements that serve the app's direction. ([progress log, Nov 22](./progress-log.md))
 
 ---
 

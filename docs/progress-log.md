@@ -1094,3 +1094,21 @@ Alongside: dependency checkup PR (npm reports 25 package vulnerabilities); claim
 3. Measure cost per recommendation and where the 35s goes, from one trace.
 4. Decide on live monitoring in v0 (a quality-control item, now in the plan as proposed).
 5. At the December checkpoint: raise the "Database and starter book index" appetite (Grim agreed it will run over).
+
+## November 22, 2026 — Book index design, Part 6 agreed
+
+**Conclusion:** Part 6 is agreed: how the engine and the judge use the index (decisions 3.16–3.17, 6.25–6.27, 9.14, 11.11).
+- **Retrieval:** code builds a ~40-book shortlist from the index in one query, and the model only chooses.
+- **Two views:** separate allow-list files with a "never" test; the model picks by number; the judge never sees our tags.
+- **Speed:** measured as readers feel it (first card, all three, slowest cases). The fixed 30-second goal is retired.
+- **Measuring:** free measures always, the paid judge only at decisions, $25 as a ceiling.
+- **Test readers:** grow to about 50, split into tuning and held-out.
+- **Build order:** 12 stages with four gates, plus a thin end-to-end run on the pilot.
+- **Code review:** every code PR now gets an independent review against our own rules, with scanners, a baseline review of existing code and an escaped-bug log.
+- **Backlog:** zero-question surprise, with "templates" the favourite option.
+
+**Next:**
+1. Part 7: which books go in the v0 starter set (including children's books in v0).
+2. Record Part 7, then start the build: stage 0b (review and safety tooling), then stage 1 (test readers v2).
+3. One engine trace from Grim's machine before stage 8 (speed targets and cost per eval reader).
+4. Decide on live monitoring in v0.

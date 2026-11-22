@@ -33,6 +33,7 @@ Bucket: **v0** (in [scope](./v0-scope.md)) · **Later** (real app, after v0) · 
 | Cover game (Yes / Seen it / Nope) | Later | Easier once a cover database exists |
 | First-line questions | Unsure | Only if genuinely intriguing; public-domain or original lines |
 | Question of the day | Later | Needs accounts |
+| Zero-question surprise: three books with no questions, beyond the v0 "Surprise me" doorway | Later | Options (Nov 22): ready-made taste profiles ("templates" such as "cozy mystery night" or "big ideas"), picked by the reader or at random, run through the normal engine (Grim's favourite; templates could also be starting points to tweak); a random draw at the shortlist step with guardrails (quality bar, three different moods, no recent repeats), faster and cheaper with no choosing step; random guided by saved tastes once accounts exist. Avoid feeding random answers to the model. Decide after the friend test |
 
 ### Recommendations
 | Idea | Bucket | Notes |

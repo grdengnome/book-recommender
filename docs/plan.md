@@ -34,7 +34,7 @@ Sign-in · shelf, collection and ranking · trained style model · advanced moti
 
 ## Budget and top risks
 - **Budget:** evals capped at $25 a month; a smoke test before every paid run.
-- **Risks:** engine speed (about 35s against a 30s goal) · the bake-off running long · scope creep.
+- **Risks:** engine speed (about 35s today; targets set from a trace and the index pilot, decision 6.27) · the bake-off running long · scope creep.
 
 ## Shipped
 - **Nov 10:** search cap and spend safeguards
