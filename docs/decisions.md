@@ -755,7 +755,7 @@ The full operating principles are in [question-flow-principles.md](./product/que
 - Anthropic's official code-review plugin: several specialist reviewers, with a confidence score per finding.
 - Claude Code's built-in `/security-review` command for security, run inside working sessions.
 
-The paid GitHub Action version of the security review waits until reviews need to run without a session open. Community review plugins are skipped (unknown quality). CodeRabbit is the first trial if the escaped-bug log shows misses.
+The paid GitHub Action version (the same analysis, run automatically on every PR) stays off until Grim turns it on: when code changes happen outside our sessions, when others contribute, or before public launch, with its own spend-capped key. Until then, running `/security-review` is a required step: every code PR's description includes a "Security review" line saying it was run and what it found, and a code PR without it isn't ready to merge. Community review plugins are skipped (unknown quality). CodeRabbit is the first trial if the escaped-bug log shows misses.
 
 Set up as one small PR at the start of the index build.
 **Why:** Grim isn't a developer and wants his blind spots covered without friction. A Claude reviewer checking Claude-written code can share blind spots, so the stack mixes deterministic tools, a cold reviewer, our own checklist and an occasional human. Strict triage and test-backed fixes keep changes to real, provable improvements that serve the app's direction. ([progress log, Nov 22](./progress-log.md))

@@ -42,7 +42,7 @@ Before proposing a plan, building a feature, or changing the engine or design, a
 - **Every change goes through a pull request,** docs included (decision 11.7). The owner reviews and merges every PR; Claude never merges into `main`.
 - **Work can happen from a claude.ai session or a Codespace** (decision 11.5). Either way, start from the latest `main`, and don't have two sessions editing the same branch.
 
-**PR description template:** what changed (plain language) · why · how it was checked · Pro check · **Review focus** (the 1–3 files or sections worth the owner's eyes, and what to look for) · anything left for a later PR.
+**PR description template:** what changed (plain language) · why · how it was checked · Pro check · **Review focus** (the 1–3 files or sections worth the owner's eyes, and what to look for) · **Security review** (code PRs only: `/security-review` was run, and what it found; decision 11.11) · anything left for a later PR.
 
 **Reviews (decisions 11.8, 11.11):** the owner checks intent and risk, not every line. Every code PR also gets an independent review from a separate reviewer agent that didn't build the change, working from our own rules: a light pass for low-stakes changes, and the full cold review for high-stakes PRs (the engine's prompt, hard-rule enforcement, the input guard, anything that reaches readers, safety or money). Post its findings in the PR. A finding blocks a merge only if it shows a concrete failure; every fix comes with a test that fails before and passes after. `main` is protected: PRs only, merge commits only, and the `checks` and `Vercel` status checks must pass.
 
