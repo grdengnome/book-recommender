@@ -13,7 +13,7 @@ Start here:
 - `docs/decisions.md`: every product and architecture decision and why. Check it before questioning something that looks odd; it's usually deliberate.
 - `docs/engineering/repo-guide.md`: how the repo is organized, its rules, and restructure progress.
 - `docs/engineering/contracts-and-adapters.md`: how every part stays swappable.
-- `docs/engineering/book-index-design.md`: the book index design (draft; Parts 1–5 agreed, 6–7 open). Read it before any index or data-store work.
+- `docs/engineering/book-index-design.md`: the book index design (draft; Parts 1–6 agreed, 7 open). Read it before any index or data-store work.
 
 ## Current priority
 
@@ -44,7 +44,7 @@ Before proposing a plan, building a feature, or changing the engine or design, a
 
 **PR description template:** what changed (plain language) · why · how it was checked · Pro check · **Review focus** (the 1–3 files or sections worth the owner's eyes, and what to look for) · anything left for a later PR.
 
-**Reviews (decision 11.8):** the owner checks intent and risk, not every line. High-stakes PRs (the engine's prompt, hard-rule enforcement, the input guard, anything that reaches readers, safety or money) also get an independent cold review from a separate reviewer agent that didn't build the change; post its findings in the PR. `main` is protected: PRs only, merge commits only, and the `checks` and `Vercel` status checks must pass.
+**Reviews (decisions 11.8, 11.11):** the owner checks intent and risk, not every line. Every code PR also gets an independent review from a separate reviewer agent that didn't build the change, working from our own rules: a light pass for low-stakes changes, and the full cold review for high-stakes PRs (the engine's prompt, hard-rule enforcement, the input guard, anything that reaches readers, safety or money). Post its findings in the PR. A finding blocks a merge only if it shows a concrete failure; every fix comes with a test that fails before and passes after. `main` is protected: PRs only, merge commits only, and the `checks` and `Vercel` status checks must pass.
 
 ## How the code is organized
 
