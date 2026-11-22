@@ -356,7 +356,7 @@ Each stage is one PR with its check. ⚖️ marks high-stakes stages (they chang
 | # | Stage | Check |
 |---|---|---|
 | 0 | Docs: Parts 6 and 7 recorded | Grim's review |
-| 0b | Review and safety tooling (decision 11.11): scanners, the reviewer checklist, review on every code PR, the escaped-bug log, a baseline review of existing code | Tools running; baseline findings triaged with Grim |
+| 0b | Review and safety tooling (decision 11.11): scanners; the reviewer as one versioned file (Anthropic's code-review plugin plus our checklist and output format); `/security-review`; review on every code PR; the escaped-bug log; a baseline review of existing code | Tools running; baseline findings triaged with Grim |
 | 1 | Test readers v2 (about 50, versioned, split) | Grim's review; every profile valid |
 | 2 | Tag vocabulary v1 and the tag-and-summary prompt, tried on sample books with no database | The 50–100 book tag test against Hardcover moods, plus Grim's blind read |
 | **Gate 1** | **Are tags worth it?** | Pass threshold set in the stage 2 PR; if it fails, fix the vocabulary or prompt before building infrastructure |

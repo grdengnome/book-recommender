@@ -751,6 +751,12 @@ The full operating principles are in [question-flow-principles.md](./product/que
 
 **Measuring the reviewer:** an escaped-bug log records any bug found after merge that review missed. Claude remains the reviewer unless that log shows a need for a second model or a dedicated tool. AI code review tools go on the Tool Radar.
 
+**The reviewer itself:** one versioned file in the repo (its instructions, our checklist, a fixed output format), used for every review so every part of the code gets the same lens; it can still flag anything else it spots. It is built on proven tools rather than from scratch:
+- Anthropic's official code-review plugin: several specialist reviewers, with a confidence score per finding.
+- Claude Code's built-in `/security-review` command for security, run inside working sessions.
+
+The paid GitHub Action version of the security review waits until reviews need to run without a session open. Community review plugins are skipped (unknown quality). CodeRabbit is the first trial if the escaped-bug log shows misses.
+
 Set up as one small PR at the start of the index build.
 **Why:** Grim isn't a developer and wants his blind spots covered without friction. A Claude reviewer checking Claude-written code can share blind spots, so the stack mixes deterministic tools, a cold reviewer, our own checklist and an occasional human. Strict triage and test-backed fixes keep changes to real, provable improvements that serve the app's direction. ([progress log, Nov 22](./progress-log.md))
 
