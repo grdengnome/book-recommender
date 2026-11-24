@@ -387,7 +387,11 @@ Each stage is one PR with its check. ⚖️ marks high-stakes stages (they chang
 
 ## Part 7: the v0 starter set (agreed Nov 23)
 
-**Size:** about 10,000 books. About 12,000 candidates are selected and tagged, then the 10,000 that best fill the coverage grid are kept (tags are needed to judge mood coverage). The set grows later only where the shortlist check shows thin spots.
+**Size:** about 10,000 books, as a **starting estimate, not a commitment**. The target is a setting.
+- **Gate 2 sets the real number** from the pilot's measured size and cost per book, against the database's 1 GB free limit and the tagging budget. It may go lower or higher.
+- **Coverage comes before count:** if space is tight, depth is trimmed first, never the coverage minimums.
+- **Later growth** happens only where the shortlist check shows thin spots.
+- **Selection method:** about 20% more candidates than the target are selected and tagged, then trimmed to the books that best fill the coverage grid (tags are needed to judge mood coverage).
 
 **Where the books come from:** selected from scratch from the Open Library download, with Hardcover adding moods and descriptions. Past candidate pools from evals are **not** used as a seed: they came from our own test readers, which risks an index that flatters the evals, and they inherit Open Library's lean toward famous books. The shortlist check at build stage 8 compares the index against today's engine directly instead.
 
