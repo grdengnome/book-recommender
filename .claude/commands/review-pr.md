@@ -88,7 +88,7 @@ Use exactly this format. Plain language: the owner is a product manager, not a d
 <one line: which checklist areas applied, and which agents ran>
 ```
 
-If `--comment` was given, post this with `gh pr comment`, once per review. Link code as `https://github.com/<owner>/<repo>/blob/<full commit sha>/<path>#L<start>-L<end>`, with a line of context either side.
+If `--comment` was given, post this with `gh pr comment`, once per review. (In claude.ai sessions, where that command can't reach GitHub, use `gh api repos/<owner>/<repo>/issues/<PR number>/comments -F body=@<file>`.) Link code as `https://github.com/<owner>/<repo>/blob/<full commit sha>/<path>#L<start>-L<end>`, with a line of context either side.
 
 ---
 
