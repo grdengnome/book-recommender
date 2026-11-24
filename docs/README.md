@@ -39,6 +39,7 @@ Each doc starts with a status line:
 |---|---|---|
 | [Architecture](./engineering/architecture.md) | The engine pipeline today and the target structure | Living |
 | [Contracts and adapters](./engineering/contracts-and-adapters.md) | How every part stays swappable, and when not to bother | Living |
+| [Code review](./engineering/code-review.md) | How code gets reviewed: the layers, the reviewer, triage, proving fixes | Living |
 | [Repo guide](./engineering/repo-guide.md) | How the repo is organized, its rules, and restructure progress | Living |
 | [Book index design](./engineering/book-index-design.md) | Our own book database: records, sources, tags, reader data, storage, covers, engine use and the starter set (all 7 parts agreed) | Draft |
 | [Legal and IP register](./legal/register.md) | Every legal and IP item: risks, current rules, fallbacks, lawyer questions (covers first) | Living |
@@ -49,6 +50,7 @@ Each doc starts with a status line:
 | [Eval set](./quality/eval-set.md) | The 6-dimension rubric and the test cases | Living |
 | [Readiness bar](./quality/readiness-bar.md) | The pass marks for a wider rollout, written before any results | Living |
 | [Eval strategy](./quality/eval-strategy.md) | How every part of the product gets measured and hill-climbed | Living |
+| [Escaped-bug log](./quality/escaped-bugs.md) | Bugs found after merge that review missed; how the reviewer is measured | Living |
 | [Eval log](./quality/eval-log.md) | Findings from each eval run | Living |
 | [Results history](./quality/results-history.md) | Raw outputs from early eval runs | Reference |
 

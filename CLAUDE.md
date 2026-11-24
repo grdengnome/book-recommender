@@ -44,7 +44,7 @@ Before proposing a plan, building a feature, or changing the engine or design, a
 
 **PR description template:** what changed (plain language) · why · how it was checked · Pro check · **Review focus** (the 1–3 files or sections worth the owner's eyes, and what to look for) · **Security review** (code PRs only: `/security-review` was run, and what it found; decision 11.11) · anything left for a later PR.
 
-**Reviews (decisions 11.8, 11.11):** the owner checks intent and risk, not every line. Every code PR also gets an independent review from a separate reviewer agent that didn't build the change, working from our own rules: a light pass for low-stakes changes, and the full cold review for high-stakes PRs (the engine's prompt, hard-rule enforcement, the input guard, anything that reaches readers, safety or money). Post its findings in the PR. A finding blocks a merge only if it shows a concrete failure; every fix comes with a test that fails before and passes after. `main` is protected: PRs only, merge commits only, and the `checks` and `Vercel` status checks must pass.
+**Reviews (decisions 11.8, 11.11):** the owner checks intent and risk, not every line. Every code PR also gets an independent review from a separate reviewer agent that didn't build the change, working from our own rules: a light pass for low-stakes changes, and the full cold review for high-stakes PRs (the engine's prompt, hard-rule enforcement, the input guard, anything that reaches readers, safety or money). The reviewer is one versioned file, `.claude/commands/review-pr.md` (process, checklist, output format); how review works, including triage and the escaped-bug log, is in `docs/engineering/code-review.md`. Post its findings in the PR. A finding blocks a merge only if it shows a concrete failure; every fix comes with a test that fails before and passes after. `main` is protected: PRs only, merge commits only, and the `checks` and `Vercel` status checks must pass.
 
 ## How the code is organized
 
@@ -101,7 +101,7 @@ Shared infrastructure the engine uses:
 
 ## Automatic checks
 
-`npm run check` runs the type check, the linter (app, lib, tests) and the tests; GitHub Actions runs the same on every pull request and push to `main` (`.github/workflows/checks.yml`). Every test runs offline with no API keys. **Checks must be green before a PR is merged**, and new engine rules get a test in `tests/`. Tests use Node's built-in test runner (`tests/README.md`). `tests/engine-golden.test.mts` compares every request the engine sends with a saved copy: a refactor must leave it unchanged, and a deliberate change (a prompt edit, a new model) refreshes it with `UPDATE_GOLDEN=1 npm test`, with the diff reviewed in the PR.
+`npm run check` runs the type check, the linter (app, lib, tests) and the tests; GitHub Actions runs the same on every pull request and push to `main` (`.github/workflows/checks.yml`). CodeQL code scanning (`.github/workflows/codeql.yml`), secret scanning with push protection, and Dependabot (`.github/dependabot.yml`) run alongside. Every test runs offline with no API keys. **Checks must be green before a PR is merged**, and new engine rules get a test in `tests/`. Tests use Node's built-in test runner (`tests/README.md`). `tests/engine-golden.test.mts` compares every request the engine sends with a saved copy: a refactor must leave it unchanged, and a deliberate change (a prompt edit, a new model) refreshes it with `UPDATE_GOLDEN=1 npm test`, with the diff reviewed in the PR.
 
 ## Security
 
