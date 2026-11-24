@@ -1,0 +1,42 @@
+# Code scanning with GitHub's CodeQL (decision 11.11): looks for common security bugs in the app's
+# TypeScript and JavaScript, and in these workflow files. Free for public repos. Runs on every pull
+# request, on pushes to main, and weekly, so newly discovered problem patterns are caught in code
+# that hasn't changed. Findings appear in the repo's Security tab and on the PR.
+name: CodeQL
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 6 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [javascript-typescript, actions]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-extended
+          # One-off experiments and design prototypes never run in the app, so scanning them is noise.
+          config: |
+            paths-ignore:
+              - experiments
+              - prototypes
+      - uses: github/codeql-action/analyze@v4
+        with:
+          category: /language:${{ matrix.language }}
