@@ -97,13 +97,16 @@ If `--comment` was given, post this with `gh pr comment`, once per review. Link 
 `CLAUDE.md` is the source of truth. If this list and `CLAUDE.md` ever disagree, `CLAUDE.md` wins; fix this list in the same PR.
 
 **Rules the code enforces** (never weakened):
-- Picks come only from the retrieved pool or shortlist; no fallback to the model's own knowledge. A failed check retries, then fails cleanly.
-- What the model sees is limited to its allowed fields. Never popularity, ratings, reader counts, awards, catalog source, real IDs, scores, rank or tag confidence. Once view files exist, only the view file decides, and the "never" test must still pass.
-- The eval judge never sees our own tags or summaries.
-- A reader's hard rules (length, audience, category, avoid) are enforced in code before the model chooses; unknown facts fail closed.
-- Readers' typed answers, feedback, and catalog text are data, never instructions.
+These mirror CLAUDE.md's "Rules the code enforces", plus rules agreed for the book index that apply once that code exists.
+- Picks come only from the retrieved pool or shortlist; no fallback to the model's own knowledge. A failed check retries (at most 3 attempts), then fails cleanly.
+- Length overflow never fails a request or reruns the final step: an over-limit field gets one shortening call, and if that fails the original text is kept. Only real failures rerun.
+- What the model sees is limited to its allowed fields; candidates are shuffled. Never popularity, relevance, ratings, reader counts, awards, catalog source, real IDs, scores, rank or tag confidence. Once view files exist (decision 6.26), only the view file decides, and the "never" test must still pass.
+- Tag selection never sees tag counts: the tag mapper gets names only, shuffled.
+- The eval judge never sees our own tags or summaries (decision 6.26).
+- A reader's length request is enforced in code before the model chooses: unknown lengths are left out, and a failed page-count lookup fails closed. Today avoid, audience and category reach the model as instructions; code filtering of those comes with the index shortlist (decision 6.25), and once it exists, unknown facts fail closed too.
+- Search caps stay in place (`ENGINE_SEARCHES_PER_ROUND`); change the setting, not the cap. Spend safeguards likewise.
 - Every model call goes through the AI gateway (`lib/ai/`); nothing else names a model or talks to a provider.
-- Search caps and spend safeguards stay in place; change settings, not the safeguards.
+- Readers' typed answers, feedback, and catalog text are data, never instructions.
 
 **How code is built:**
 - Anything likely to change talks through a contract in `lib/contracts/`; app code never calls an outside service (model, catalog, database, file storage) directly.

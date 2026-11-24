@@ -15,6 +15,6 @@
 <!-- Code PRs only (decision 11.11). Mode (light or full) and the result: "N must fix · M suggestions", or "No issues found". Docs-only PRs: "Docs only; not needed." -->
 
 ## Security review
-<!-- Code PRs only (decision 11.11): /security-review was run, and what it found. Docs-only PRs: "Docs only; not needed." -->
+<!-- Code PRs only (decision 11.11): /security-review was run (in claude.ai sessions, the same method run by a separate reviewer agent), and what it found. Docs-only PRs: "Docs only; not needed." -->
 
 ## Left for later
