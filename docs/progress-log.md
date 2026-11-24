@@ -1112,3 +1112,23 @@ Alongside: dependency checkup PR (npm reports 25 package vulnerabilities); claim
 2. Record Part 7, then start the build: stage 0b (review and safety tooling), then stage 1 (test readers v2).
 3. One engine trace from Grim's machine before stage 8 (speed targets and cost per eval reader).
 4. Decide on live monitoring in v0.
+
+## November 23, 2026 — Book index design complete (Part 7 agreed)
+
+**Conclusion:** Part 7 is agreed, so the book index design is complete (decisions 1.14 and 6.28).
+- **Size:** about 10,000 books, chosen coverage-first from an allow-list of forms (novels, novellas, short stories, narrative nonfiction, memoir, essays).
+- **Quality bar:** a real description, an English edition, a page count, a known author and a real publisher.
+- **Coverage grid:** category × audience × length × mood × published era.
+- **Caps:** 5 books per author; first book only for a series.
+- **Fame:** no percentages; measured first.
+- **Children's books:** out of v0, with the answer hidden.
+- **Seed:** past eval pools are not used.
+- **Order:** start small: a ~50-book dry run, then the 500-book pilot, then the full set.
+- Also removed a stray "live monitoring" line from the design doc (it lives in the plan).
+
+**Next:**
+1. Build stage 0b: review and safety tooling (decision 11.11).
+2. Build stage 1: test readers v2 (decision 3.17).
+3. One engine trace from Grim's machine before stage 8.
+4. Decide on live monitoring in v0.
+5. December checkpoint: raise the "Database and starter book index" appetite.

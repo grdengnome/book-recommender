@@ -1,8 +1,8 @@
 # Book index design
 
-> **Status:** Draft · Parts 1–3 agreed Nov 16, 2026; Part 4 agreed Nov 17; Part 5 agreed Nov 20; Part 6 agreed Nov 22. Part 7 is still open. Nothing here is built yet.
+> **Status:** Draft · Parts 1–3 agreed Nov 16, 2026; Part 4 agreed Nov 17; Part 5 agreed Nov 20; Part 6 agreed Nov 22; Part 7 agreed Nov 23. The design is complete; nothing is built yet.
 
-The book index is our own database of books: the engine's backbone (decision 6.14). It is designed for the whole product (collection, rankings, reading stats, year summaries, premium), but v0 builds only a starter slice. This doc is the agreed design so far. The reasons are in [decisions](../decisions.md) 6.17–6.27, 3.16–3.17, 9.14, 10.8–10.13, 11.11 and 14.7.
+The book index is our own database of books: the engine's backbone (decision 6.14). It is designed for the whole product (collection, rankings, reading stats, year summaries, premium), but v0 builds only a starter slice. This doc is the agreed design so far. The reasons are in [decisions](../decisions.md) 1.14, 3.16–3.17, 6.17–6.28, 9.14, 10.8–10.13, 11.11 and 14.7.
 
 ## Where the design stands
 
@@ -14,7 +14,7 @@ The book index is our own database of books: the engine's backbone (decision 6.1
 | 4. Reader data | Agreed |
 | 5. Storage, covers, contracts and backups | Agreed |
 | 6. How the engine and the judge use the index | Agreed |
-| 7. The v0 starter set (which books) | Not started |
+| 7. The v0 starter set (which books) | Agreed |
 
 ## Part 1: what a book record holds
 
@@ -361,7 +361,7 @@ Each stage is one PR with its check. ⚖️ marks high-stakes stages (they chang
 | 2 | Tag vocabulary v1 and the tag-and-summary prompt, tried on sample books with no database | The 50–100 book tag test against Hardcover moods, plus Grim's blind read |
 | **Gate 1** | **Are tags worth it?** | Pass threshold set in the stage 2 PR; if it fails, fix the vocabulary or prompt before building infrastructure |
 | 3 | Database foundation: Neon, the books and reader-data contracts with test stand-ins, setup scripts, read-only and no-delete logins | Offline contract tests; the "can't delete" test; wake-up and query times from Vercel |
-| 4 | Pipeline and 500-book pilot: import, tags, summaries, cover links with sources, fame numbers | Bytes and dollars per book; cover counts by source; a 20-cover spot-check |
+| 4 | Pipeline, a ~50-book dry run, then the 500-book pilot: import, tags, summaries, cover links with sources, fame numbers | Bytes and dollars per book; cover counts by source; a 20-cover spot-check |
 | 4b | Thin end-to-end run on pilot books, behind a setting, not judged for quality | It works end to end; real timings |
 | **Gate 2** | **Do the numbers hold?** | Size, cost and speed fit the design; enough real covers; if not, adjust before the full load |
 | 5 | The v0 starter set (Part 7) | Part 7's checks |
@@ -376,7 +376,7 @@ Each stage is one PR with its check. ⚖️ marks high-stakes stages (they chang
 | 12 | Switch over: the index engine becomes the default; the old search path removed; `CLAUDE.md` rules updated | Checks green; one final full eval |
 
 - **Alongside, not blocking:** the cover track (the storage bake-off, card-files and image-engine contracts, the enhancer, and the bulk cover download after stage 5).
-- **Needed from Grim:** one engine trace before stage 8 (to set speed targets and the real cost per eval reader); Part 7 before stage 5.
+- **Needed from Grim:** one engine trace before stage 8 (to set speed targets and the real cost per eval reader).
 - **Every stage:**
   - **Definition of done:** the check passes, docs are updated, and any change from the design has a decision entry.
   - **An undo:** each engine change ships behind a setting.
@@ -385,10 +385,54 @@ Each stage is one PR with its check. ⚖️ marks high-stakes stages (they chang
   - **A time box:** if a stage overruns, stop and re-plan.
   - **Gate results** are written up in the progress or eval log.
 
+## Part 7: the v0 starter set (agreed Nov 23)
+
+**Size:** about 10,000 books. About 12,000 candidates are selected and tagged, then the 10,000 that best fill the coverage grid are kept (tags are needed to judge mood coverage). The set grows later only where the shortlist check shows thin spots.
+
+**Where the books come from:** selected from scratch from the Open Library download, with Hardcover adding moods and descriptions. Past candidate pools from evals are **not** used as a seed: they came from our own test readers, which risks an index that flatters the evals, and they inherit Open Library's lean toward famous books. The shortlist check at build stage 8 compares the index against today's engine directly instead.
+
+**An allow-list of forms**, rather than a list of exclusions (an exclusion list never ends, and something odd always slips through):
+- **In:** novels, novellas, short-story collections; narrative nonfiction (history, science, true crime, travel, nature), memoir and biography, essays.
+- **Out of v0**, because the question flow doesn't ask about these formats: poetry, graphic novels, plays (backlog).
+- **Everything else is out** by default: reference works (encyclopedias, dictionaries, atlases, almanacs), textbooks, study guides, summaries, test prep, manuals, cookbooks, workbooks, planners, colouring and puzzle books, scripture editions, sheet music, screenplays, and explicit adult content.
+
+**Quality bar:** a real description, an English edition (translations welcome), a known page count, a known author, and a real publisher. Reprint mills and spam or AI-generated books are filtered out by the quality bar plus a list of known reprint publishers. No duplicates, box sets or summaries.
+
+**Coverage first:**
+- A grid of category × audience × length band × mood × published (recent, modern, classic), with at least about 30 books in every square.
+- Every square is filled to its minimum first; the remaining space adds depth where readers are likely to ask most. For v0 the test readers' profiles stand in for real demand; friend-test requests reweight it later.
+- A coverage report shows any gaps.
+
+**Caps:** at most 5 books per author; for a series, the first book only.
+
+**Fame:** no target percentages, because they would be arbitrary and could pigeonhole the set. Fame is measured in the pilot (a chart of the set's fame mix), consistent with Part 6 (measured, never used to rank). If the set leans heavily famous, we decide then how to correct it.
+
+**Audience:** adult and young adult. **Children's books are out of v0**, and the "written for children" answer is hidden in the v0 question flow (decision 1.14). The testers are adults, and children's books need extra content-safety checks.
+
+**Reproducible:** selection is a script with fixed rules and a fixed seed, versioned as "starter set v1", so the set can be rebuilt exactly and every change is traceable.
+
+**Start small, in three steps:**
+1. A dry run of about 50 books, costing cents, proves the pipeline works end to end.
+2. The 500-book pilot gives real cost, size, cover and speed numbers, for Gate 2.
+3. The full set.
+
+Nothing moves on until the previous step passes its check.
+
+**Outside checks:**
+- The coverage report and the fame chart.
+- Grim skims 100 random books, ideally with one well-read friend; the bar is under 5% "wouldn't want this recommended."
+- The audience spot-check.
+- Later, the shortlist check against today's engine at build stage 8.
+
+**Later (backlog):**
+- Range of voices: track how many countries, eras and translated books the set includes, without a quota, once the app expands.
+- Poetry, graphic novels, plays.
+- Children's books.
+- Where to get each book.
+
 ## Still open
 
-- Part 7: which books go in the v0 starter set, including whether children's books are in v0 (the taste profile already offers "written for children").
-- Live monitoring in v0 is proposed in the plan, not yet decided.
+Nothing in the design. Items outside it (such as live monitoring) live in [the plan](../plan.md).
 
 ## Pro check
 
@@ -398,4 +442,5 @@ Each stage is one PR with its check. ⚖️ marks high-stakes stages (they chang
 - **Added Nov 17:** least privilege for deletion (the app can't delete); a daily cap across all visitors; the flexible event field and capture-when-unsure rule; corrections as new events.
 - **Added Nov 20:** separating engine from host; a development branch so evals never touch real data; a test stand-in for every contract; one region; recorded sources and recipes for every cover and variant; files never overwritten; a kill switch; backup targets, encrypted reader exports and a written restore checklist.
 - **Added Nov 22:** measuring the shortlist separately from picks; saved shortlists for replay; fame tracking; view files with a "never" test; picking by number; repeatable eval randomness; versioned exams and ranges; a "never break" set; stage gates; a thin end-to-end run; undo settings, data checks and kept snapshots; a reviewer on every code PR.
+- **Added Nov 23:** an allow-list of forms instead of exclusions; coverage-first selection including publication era; no fame quotas (measured first); a reproducible, versioned selection script; a ~50-book dry run before the pilot; dropping past eval pools as a seed to keep evals clean.
 - **Outside checks planned:** audience-label spot-check; 20-book tag test against Hardcover moods; the eval with and without tags; a delete-command test (create a visitor, add events, delete, find zero rows); the not-enough-books rate in evals and the friend test.

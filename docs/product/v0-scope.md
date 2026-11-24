@@ -12,6 +12,7 @@
 - Adaptive question flow that fills a taste profile ([v2 design](./question-flow/v2-design.md)), with a lite set of formats; more formats after v0.
 - Several doorways (something I loved · a feeling · an ingredient or world · a moment · surprise me), all filling one taste profile ([decision 2.24](../decisions.md), [taste profile](./question-flow/taste-profile.md)). The favourites doorway is one search box using the existing Open Library title search, up to three, books only at first; it's optional, not required ([decision 2.23](../decisions.md)).
 - Gentle nudge for unclear typed answers (never blocks).
+- Audience answers: adult and young adult only; "written for children" is hidden in v0 ([decision 1.14](../decisions.md)).
 
 **Recommendations**
 - Three varied picks: variety, without predefined pick types that could bias the model.

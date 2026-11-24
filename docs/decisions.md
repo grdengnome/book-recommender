@@ -2,7 +2,7 @@
 
 > **Status:** Living · Every product and architecture decision, and the paths rejected.
 
-*Covers decisions through the v0 engine, v0 product planning, the v0 scope, the repo restructure, the book index design and legal (November 22, 2026). Further decisions are added as they're made.*
+*Covers decisions through the v0 engine, v0 product planning, the v0 scope, the repo restructure, the book index design and legal (November 23, 2026). Further decisions are added as they're made.*
 
 The product and architecture decisions behind this recommender, and the paths I rejected. The [progress log](./progress-log.md) is the session-by-session diary; this file is the story told by decision. Each entry gives the decision and why, with a link to the full detail.
 
@@ -95,6 +95,10 @@ Dates are 2026. "OL" is Open Library and "HC" is Hardcover, the two book catalog
 ### 1.13 A generic name until branding is final
 **Decision:** The app is called "the book recommender" in docs and conversation until its branding is final. "Squirmly" (13.77) is paused, not chosen. Existing mentions are updated as docs are next edited.
 **Why:** Grim's call (Nov 20): the name waits until the branding work is finished. ([progress log, Nov 20](./progress-log.md))
+
+### 1.14 No children's books in v0; the "written for children" answer is hidden
+**Decision:** The v0 starter set covers adult and young-adult books only, and the question flow hides the "written for children" audience answer in v0 (or shows it as "coming soon"). Children's books return with their own content-safety checks after v0. This is a deliberate change to the frozen v0 scope.
+**Why:** The friend testers are adults, and children's books need extra content-safety checks. Offering an answer the starter set can't serve would always end in "not enough books." ([progress log, Nov 23](./progress-log.md))
 
 ---
 
@@ -472,6 +476,10 @@ The full operating principles are in [question-flow-principles.md](./product/que
 ### 6.27 Speed is measured as readers feel it; no fixed 30-second goal
 **Decision:** The fixed 30-second goal is retired. Speed is measured as time to first card and time to all three, median and slowest 1 in 10, with targets set from one trace and the pilot. Provisional per-step budget: shortlist under 0.5s, card lookups under 0.2s. Card text is split: book-level text from the build-time summary, only the personal line written live. Prompt caching, a timeout per step, and waking the database at the start of the question flow only if the pilot shows it matters.
 **Why:** A total set before the index exists is arbitrary (Grim, Nov 22). Readers feel the first card and the worst cases, not an average. The book-level text doesn't depend on the reader, so writing it once is faster and keeps the honest-cards rule. ([book index design, Part 6](./engineering/book-index-design.md); [progress log, Nov 22](./progress-log.md))
+
+### 6.28 The v0 starter set: about 10,000 books, chosen for coverage from an allow-list of forms
+**Decision:** About 12,000 candidates are selected from the Open Library download, tagged, and trimmed to the 10,000 that best fill the coverage grid. The grid is category × audience × length × mood × published era, with at least about 30 books per square; every square is filled first, then depth is added where readers are likely to ask most. Forms are an allow-list: novels, novellas, short-story collections, narrative nonfiction, memoir and biography, essays. Poetry, graphic novels and plays are out of v0; everything else is out by default. Quality bar: a real description, an English edition (translations welcome), a known page count, a known author, a real publisher; reprint mills and spam filtered out. Caps: 5 books per author, first book only for a series. No fame percentages: fame is measured in the pilot and corrected only if the set leans heavily famous. Selection is a versioned script with a fixed seed ("starter set v1"). The order is a ~50-book dry run, then the 500-book pilot (Gate 2), then the full set. Past eval candidate pools are not used as a seed.
+**Why:** An allow-list keeps out the endless odd categories (reference works, textbooks, planners) that an exclusion list would miss. Coverage matters most: every answer a reader can give needs enough books behind it, and publication era is a question readers answer. Fame quotas would be arbitrary and could pigeonhole the set, and measuring first matches how fame is handled in the engine (6.25). Seeding from eval pools would make the index flatter our own tests. Starting small proves the process cheaply before spending on the full build (Grim, Nov 23). ([book index design, Part 7](./engineering/book-index-design.md); [progress log, Nov 23](./progress-log.md))
 
 ---
 

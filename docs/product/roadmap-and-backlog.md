@@ -39,6 +39,9 @@ Bucket: **v0** (in [scope](./v0-scope.md)) · **Later** (real app, after v0) · 
 | Idea | Bucket | Notes |
 |---|---|---|
 | Three varied picks | v0 | Variety without predefined pick types |
+| Range of voices in the book index: track how many countries, eras and translated books it includes (no quota) | Later | Not a v0 priority with a small local friend group; pick up when the app expands (Nov 23) |
+| More book forms in the index: poetry, graphic novels, plays | Later | Out of the v0 starter set because the question flow doesn't ask about format (decision 6.28) |
+| Children's books, with their own content-safety checks | Later | Out of v0, and the "written for children" answer hidden (decision 1.14) |
 | "Not quite? Try again" | v0 | The correction path after the reveal |
 | Faster recommendations | v0 | Swappable models make per-step model choice easy |
 | Engine performance track: running models more efficiently and creatively | Ongoing | Parallel calls, streaming, caching, routing small jobs to fast models, early table-setting; re-test model choices per job as new models ship (decision 14.3) |
