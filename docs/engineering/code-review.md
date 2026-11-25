@@ -11,7 +11,7 @@ Every code change is checked by several reviewers that think differently, so one
 | Automatic checks | Broken code, type errors, sloppy patterns, unintended engine changes (golden test) | Every PR and push to main | `.github/workflows/checks.yml` |
 | Code scanning (CodeQL) | Common security bugs in app code and workflows | Every PR, push to main, weekly | `.github/workflows/codeql.yml`; results in the repo's Security tab |
 | Secret scanning and push protection | Keys or passwords committed by mistake (blocked before they land) | Always on | Repo settings |
-| Dependabot | Vulnerable or outdated libraries and actions | Security alerts and fixes as published (once switched on in repo settings); routine updates weekly or monthly, grouped | `.github/dependabot.yml`, repo settings |
+| Dependabot | Vulnerable or outdated libraries and actions | Security fixes as published, grouped; routine updates weekly or monthly, grouped; major versions only deliberately ([dependencies](./dependencies.md)) | `.github/dependabot.yml`, repo settings |
 | The reviewer | Logic mistakes, missed edge cases, breaking our own rules | Every code PR | `.claude/commands/review-pr.md` |
 | Security review | Exploitable security problems in the change | Every code PR | Claude Code's built-in `/security-review`; in claude.ai sessions, where that command isn't available, a separate reviewer agent applies the same method |
 | A human expert | Blind spots shared by the AI builder and the AI reviewer | At a major gate, such as before public launch | Booked when needed |
