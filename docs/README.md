@@ -40,6 +40,7 @@ Each doc starts with a status line:
 | [Architecture](./engineering/architecture.md) | The engine pipeline today and the target structure | Living |
 | [Contracts and adapters](./engineering/contracts-and-adapters.md) | How every part stays swappable, and when not to bother | Living |
 | [Code review](./engineering/code-review.md) | How code gets reviewed: the layers, the reviewer, triage, proving fixes | Living |
+| [Dependencies](./engineering/dependencies.md) | How dependency updates arrive, and the upgrades we're deliberately holding back | Living |
 | [Repo guide](./engineering/repo-guide.md) | How the repo is organized, its rules, and restructure progress | Living |
 | [Book index design](./engineering/book-index-design.md) | Our own book database: records, sources, tags, reader data, storage, covers, engine use and the starter set (all 7 parts agreed) | Draft |
 | [Legal and IP register](./legal/register.md) | Every legal and IP item: risks, current rules, fallbacks, lawyer questions (covers first) | Living |

@@ -1,7 +1,9 @@
 # Dependabot keeps the app's libraries and GitHub Actions up to date (decision 11.11).
-# Security fixes arrive as soon as they're published (when Dependabot security updates are on in
-# the repo settings). Routine updates come weekly or monthly, grouped so they arrive as a few PRs
-# rather than many. Each update PR goes through the normal checks and review.
+# Security fixes arrive as soon as they're published, grouped into one PR per run. Routine updates
+# come weekly (libraries) or monthly (actions), also grouped, so they arrive as a few PRs rather
+# than many. Major-version jumps are never routine: we upgrade those deliberately, in their own PR,
+# and record anything we're holding back in docs/engineering/dependencies.md.
+# Each update PR goes through the normal checks and review.
 version: 2
 updates:
   - package-ecosystem: npm
@@ -11,8 +13,18 @@ updates:
       day: monday
     open-pull-requests-limit: 3
     groups:
+      # All security fixes found in one run arrive as a single PR.
+      security-fixes:
+        applies-to: security-updates
+        patterns: ["*"]
       minor-and-patch:
+        applies-to: version-updates
         update-types: [minor, patch]
+    ignore:
+      # Routine updates skip major versions (upgraded deliberately; see docs/engineering/dependencies.md).
+      # This never blocks security fixes: per GitHub's docs, update-types only affects version updates.
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
     commit-message:
       prefix: deps
 
