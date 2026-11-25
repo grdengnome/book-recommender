@@ -14,7 +14,7 @@ A private preview for a few friends that proves three things: **the engine works
 |---|---|---|
 | Book index build (design done Nov 23; starting with review tooling and test readers) | Starter index in the engine | Friend test, then fixes |
 | Eval cost fixes and a bigger reader set | Café screens in the new style | More themes (up to 5) |
-| Image bake-off (style, then tool) | Feedback, retry paths, coming-soon doorways · live monitoring (proposed, to decide) | |
+| Image bake-off (style, then tool) | Feedback, retry paths, coming-soon doorways · live monitoring and a smoke test on previews (proposed; build together, before the friend test) | |
 
 ## Milestones
 
