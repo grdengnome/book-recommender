@@ -10,8 +10,8 @@ Dependabot (`.github/dependabot.yml`, decision 11.11) opens PRs to update the ou
 |---|---|---|
 | **Security fixes** | As soon as a fix for a known vulnerability is published | Grouped: one PR per run. Never blocked by the rules below |
 | **Routine library updates** (minor and patch) | Weekly, Mondays | One grouped PR |
-| **GitHub Actions updates** | Monthly | One grouped PR |
-| **Major versions** | Never automatic | Upgraded deliberately, in our own PR, with a reason recorded below |
+| **GitHub Actions updates** | Monthly | One grouped PR, including major versions (low risk for actions) |
+| **Major versions of app libraries (npm)** | Never automatic | Upgraded deliberately, in our own PR, with a reason recorded below |
 
 Every update PR gets the normal checks and a light review before merging. Updates to Next.js get extra care: this project's Next.js version has breaking changes from older ones (see `AGENTS.md`), so read its upgrade notes first.
 
