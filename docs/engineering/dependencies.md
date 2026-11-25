@@ -13,7 +13,9 @@ Dependabot (`.github/dependabot.yml`, decision 11.11) opens PRs to update the ou
 | **GitHub Actions updates** | Monthly | One grouped PR, including major versions (low risk for actions) |
 | **Major versions of app libraries (npm)** | Never automatic | Upgraded deliberately, in our own PR, with a reason recorded below |
 
-Every update PR gets the normal checks and a light review before merging. Updates to Next.js get extra care: this project's Next.js version has breaking changes from older ones (see `AGENTS.md`), so read its upgrade notes first.
+Grouping of security fixes is set in `.github/dependabot.yml`, and the repo's **Grouped security updates** setting is also on (turned on Nov 24, 2026, so the first regrouping happened right away); the config file's rules decide how updates are grouped.
+
+Every update PR gets the normal checks and a light review before merging. Nothing yet sends a real request to a PR's preview before merge; a smoke test on previews is planned alongside live monitoring, before the friend test (see the plan). Updates to Next.js get extra care: this project's Next.js version has breaking changes from older ones (see `AGENTS.md`), so read its upgrade notes first.
 
 ## Held-back upgrades
 
